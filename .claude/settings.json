@@ -1,0 +1,56 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "case \"$CLAUDE_TOOL_INPUT\" in *\"git commit\"*) BRANCH=$(git branch --show-current 2>/dev/null); case \"$BRANCH\" in develop|master|main|release*|staging) echo \"[SECURITY-HOOK] ❌ 禁止在受保护分支 $BRANCH 上直接 commit 改动！新改动必须在临时分支提交，再经 merge 合入。\" >&2; exit 1;; esac;; *\"git merge\"*|*\"git push\"*) BRANCH=$(git branch --show-current 2>/dev/null); case \"$BRANCH\" in develop|master|main|release*|staging) echo \"[SECURITY-HOOK] ⚠️ 受保护分支 $BRANCH 上的 merge/push —— 必须经人类明确授权方可执行；未授权请停下确认。\" >&2;; esac;; esac"
+          },
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "case \"$CLAUDE_TOOL_INPUT\" in *\"git push\"*\"--force\"*|*\"git push\"*\"--force-with-lease\"*|*\"git push\"*\"-f\"*) echo \"[SECURITY-HOOK] ❌ force push / force-with-lease（历史改写）永久禁止！\" >&2; exit 1;; *\"git push\"*\"--delete\"*|*\"git push\"*\" :\"*) case \"$CLAUDE_TOOL_INPUT\" in *\" :develop\"*|*\" :master\"*|*\" :main\"*|*\" :release\"*|*\" :staging\"*|*\"--delete develop\"*|*\"--delete master\"*|*\"--delete main\"*|*\"--delete release\"*|*\"--delete staging\"*) echo \"[SECURITY-HOOK] ❌ 删除受保护远程分支（develop/master/main/release*/staging）永久禁止！\" >&2; exit 1;; *) echo \"[SECURITY-HOOK] ⚠️ 删除临时远程分支——必须经人类明确授权并确认已合并。\" >&2;; esac;; esac"
+          },
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "case \"$CLAUDE_TOOL_INPUT\" in *\"git rebase\"*) BRANCH=$(git branch --show-current 2>/dev/null); case \"$BRANCH\" in develop|master|main|release*|staging) echo \"[SECURITY-HOOK] ❌ 禁止在受保护分支 $BRANCH 上执行 rebase！请使用 merge。\" >&2; exit 1;; esac;; esac"
+          },
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "case \"$CLAUDE_TOOL_INPUT\" in *\"rm -rf\"*|*\"rm -r \"*|*\"rm -fr\"*) echo \"[SECURITY-HOOK] ⚠️ 检测到 rm -rf 递归删除，请确认目标路径非核心系统/项目源码目录！\" >&2;; esac"
+          },
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "case \"$CLAUDE_TOOL_INPUT\" in *\"git reset --hard\"*) echo \"[SECURITY-HOOK] ⚠️ git reset --hard 会永久丢弃工作区改动！未确认请勿执行。\" >&2;; esac"
+          },
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "case \"$CLAUDE_TOOL_INPUT\" in *\"git add -A\"*|*\"git add .\"*) echo \"[SECURITY-HOOK] ⚠️ 严禁 git add . 全量盲目暂存（防止误带入编译产物与临时文件），请改用 git add <明确路径>！\" >&2;; esac"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "case \"$CLAUDE_TOOL_INPUT\" in *\".pro\"*|*\"CMakeLists.txt\"*|*\"package.json\"*|*\"Cargo.toml\"*|*\"pom.xml\"*|*\"public_struct.h\"*|*\"protofile/\"*|*\"license\"*) echo \"[SECURITY-HOOK] 🔴 触碰高风险文件（构建配置/公共结构/协议定义/授权许可）——请先阅读 .agents/rules/security-boundary.md 并向人类确认影响面！\" >&2;; esac"
+          },
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "case \"$CLAUDE_TOOL_INPUT\" in *\".pem\"*|*\".key\"*|*\".token\"*|*\"credentials\"*|*\"id_rsa\"*|*\"secret\"*) echo \"[SECURITY-HOOK] 🔐 敏感凭证防护——严禁在代码与配置中明文硬编码密钥！\" >&2;; esac"
+          }
+        ]
+      }
+    ]
+  }
+}

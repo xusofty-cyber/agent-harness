@@ -1,0 +1,11 @@
+# Claude local runtime generated skills junction/symlink directory
+.claude/skills/
+
+# OS and system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temporary logs & scratch
+*.log
+scratch/
