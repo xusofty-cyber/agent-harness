@@ -28,15 +28,21 @@ $ErrorActionPreference = "Stop"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 # Template file paths
-$ResolvedGlobalTemplate = Join-Path $ScriptDir "全局 AGENTS.md"
+$ResolvedGlobalTemplate = Join-Path $ScriptDir "Global AGENTS.md"
 if (-not (Test-Path $ResolvedGlobalTemplate)) {
-    $found = Get-ChildItem -Path $ScriptDir -Filter "*全局*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    $found = Get-ChildItem -Path $ScriptDir -Filter "*Global*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $found) {
+        $found = Get-ChildItem -Path $ScriptDir -Filter "*全局*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    }
     if ($found) { $ResolvedGlobalTemplate = $found.FullName }
 }
 
-$ResolvedProjectTemplate = Join-Path $ScriptDir "项目级 AGENTS.md"
+$ResolvedProjectTemplate = Join-Path $ScriptDir "Project AGENTS.md"
 if (-not (Test-Path $ResolvedProjectTemplate)) {
-    $found = Get-ChildItem -Path $ScriptDir -Filter "*项目级*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    $found = Get-ChildItem -Path $ScriptDir -Filter "*Project*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $found) {
+        $found = Get-ChildItem -Path $ScriptDir -Filter "*项目级*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    }
     if ($found) { $ResolvedProjectTemplate = $found.FullName }
 }
 

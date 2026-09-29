@@ -2,7 +2,7 @@
 
 ## 继承与定位
 
-- 本文件是当前项目的根指令文件，补充 [全局 AGENTS.md]的通用底线，提供本项目专有的工程上下文。
+- 本文件是当前项目的根指令文件，补充 [Global AGENTS.md] 的通用底线，提供本项目专有的工程上下文。
 - 采用**渐进式披露（Progressive Disclosure）**架构，本项目的高频红线与命令在此维护，细粒度规则存放于 `.agents/rules/`，Agent 仅在需要时按需查阅。
 
 ## 项目概览
@@ -70,7 +70,7 @@
 | **功能实现 / 编码阶段** | `engineering-spec.md` + `ponytail` + `test-driven-development` | `用 ponytail 策略实现` / 先写测试 | 遵循 7 步懒人阶梯（改 1 行绝不重写 10 行，stdlib 优先）；红绿单测先行验证 |
 | **复杂 Bug / 偶现排障** | `engineering-spec.md` + `systematic-debugging` | 粘贴完整报错 Trace | 严禁创可贴盲修；必须先收集证据、建立假设、定位根因再写修复 |
 | **超长输出 / 测试跑批** | `token-discipline.md` + `rtk` | 默认追加精简过滤参数 | 严禁裸命令刷屏；带精简参数运行并将超长输出重定向至本地临时日志 |
-| **Token 告急 / 精简输出** | `全局 AGENTS.md` + `caveman` | `/caveman` 或 `进入 caveman 模式` | 切换电报体沟通，仅出结论、Diff 与待办项，去除一切寒暄客套与免责铺垫 |
+| **Token 告急 / 精简输出** | `Global AGENTS.md` + `caveman` | `/caveman` 或 `进入 caveman 模式` | 切换电报体沟通，仅出结论、Diff 与待办项，去除一切寒暄客套与免责铺垫 |
 
 ---
 

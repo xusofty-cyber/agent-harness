@@ -22,9 +22,9 @@
 ## 二、 当前已完成的核心成果与资产清单
 
 ### 1. 三级 AGENTS.md 规则体系（已优化落成）
-- [全局 AGENTS.md](file:///e:/Works/项目/2026/ai-agents/全局%20AGENTS.md)：通用安全与行为宪法。确立“去废话沟通”、“Ponytail 懒人代码阶梯”、“输入/拿取 Token 闸门”、“验证证据门”、**Git 授权与保护分支铁律**以及**会话三步仪式**。
-- [项目级 AGENTS.md](file:///e:/Works/项目/2026/ai-agents/项目级%20AGENTS.md)：高频工程骨架（<1000 Token）。规范开发命令、技术栈选型、架构 6 大红线、**八大高危操作防呆**与**子规则/技能联动调度矩阵**。
-- [目录级 AGENTS.md](file:///e:/Works/项目/2026/ai-agents/目录级%20AGENTS.md)：Monorepo / 独立子模块的微型补丁（40 行），控制 In/Out Scope、本地极速单测与**超大文件（>100KB）安全维护准则**。
+- [Global AGENTS.md](file:///e:/Works/项目/2026/ai-agents/Global%20AGENTS.md)：通用安全与行为宪法。确立“去废话沟通”、“Ponytail 懒人代码阶梯”、“输入/拿取 Token 闸门”、“验证证据门”、**Git 授权与保护分支铁律**以及**会话三步仪式**。
+- [Project AGENTS.md](file:///e:/Works/项目/2026/ai-agents/Project%20AGENTS.md)：高频工程骨架（<1000 Token）。规范开发命令、技术栈选型、架构 6 大红线、**八大高危操作防呆**与**子规则/技能联动调度矩阵**。
+- [Directory AGENTS.md](file:///e:/Works/项目/2026/ai-agents/Directory%20AGENTS.md)：Monorepo / 独立子模块的微型补丁（40 行），控制 In/Out Scope、本地极速单测与**超大文件（>100KB）安全维护准则**。
 - **渐进式子规则库**（`.agents/rules/`）：
   - [token-discipline.md](file:///e:/Works/项目/2026/ai-agents/.agents/rules/token-discipline.md)：控制读拿说、CodeGraph 检索替代 grep、日志截断。
   - [engineering-spec.md](file:///e:/Works/项目/2026/ai-agents/.agents/rules/engineering-spec.md)：OpenSpec 需求驱动（SDD）、Superpowers 测试驱动（TDD）。

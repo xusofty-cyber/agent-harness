@@ -70,8 +70,15 @@ fi
 
 # Script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-GLOBAL_TEMPLATE="${SCRIPT_DIR}/全局 AGENTS.md"
-PROJECT_TEMPLATE="${SCRIPT_DIR}/项目级 AGENTS.md"
+GLOBAL_TEMPLATE="${SCRIPT_DIR}/Global AGENTS.md"
+if [ ! -f "${GLOBAL_TEMPLATE}" ]; then
+    GLOBAL_TEMPLATE="${SCRIPT_DIR}/全局 AGENTS.md"
+fi
+
+PROJECT_TEMPLATE="${SCRIPT_DIR}/Project AGENTS.md"
+if [ ! -f "${PROJECT_TEMPLATE}" ]; then
+    PROJECT_TEMPLATE="${SCRIPT_DIR}/项目级 AGENTS.md"
+fi
 SOURCE_RULES_DIR="${SCRIPT_DIR}/.agents/rules"
 SOURCE_SKILLS_DIR="${SCRIPT_DIR}/.agents/skills"
 SOURCE_SKILLS_LOCK="${SCRIPT_DIR}/skills-lock.json"
