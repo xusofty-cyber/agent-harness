@@ -1,0 +1,21 @@
+# Prevent cross-platform line-ending issues
+* text=auto
+
+# Shell scripts must use LF (bash breaks on CRLF)
+*.sh text eol=lf
+
+# Markdown uses LF for consistent diffs
+*.md text eol=lf
+
+# PowerShell scripts use CRLF (Windows native)
+*.ps1 text eol=crlf
+
+# JSON uses LF
+*.json text eol=lf
+
+# JavaScript/Node files use LF
+*.js text eol=lf
+*.mjs text eol=lf
+
+# Lock files are binary-ish, treat as text with LF
+skills-lock.json text eol=lf

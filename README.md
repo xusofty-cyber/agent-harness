@@ -16,9 +16,10 @@ This repository provides an enterprise-ready engineering harness for multi-platf
    - **Directory Level ([`Directory AGENTS.md`](Directory%20AGENTS.md))**: Micro-boundary patch for Monorepo packages or isolated submodules (In/Out Scope, dependency boundaries, targeted fast tests, and large-file safety).
    - **Modular Sub-Rules ([`.agents/rules/`](.agents/rules/))**: On-demand progressive rules including `token-discipline.md`, `engineering-spec.md`, `security-boundary.md`, and `git-workflow.md`.
 
-2. **PreToolUse Hardware-Level Security Firewall ([`.claude/settings.json`](.claude/settings.json))**:
+2. **PreToolUse Security Firewall ([`.claude/settings.json`](.claude/settings.json) + [`.claude/hooks/`](.claude/hooks/))**:
    - Intercepts dangerous operations at the OS process level before Bash or Write/Edit tools are executed;
-   - Hard blocks (`exit 1`): direct commits on protected branches (`develop`/`master`/`main`/`release*`), `git push --force`, deleting protected remote branches, and rebasing protected branches;
+   - Uses Node.js guard scripts reading stdin JSON (official Claude Code hook protocol) with `exit 2` / `permissionDecision: deny` for reliable blocking;
+   - Hard blocks (`exit 2`): direct commits on protected branches (`develop`/`master`/`main`/`release*`), `git push --force`, deleting protected remote branches, and rebasing protected branches;
    - High-risk warnings: `rm -rf`, `git reset --hard`, blind `git add .`, touching build configurations, and modifying secret credentials.
 
 3. **40+ Integrated Official GitHub Native Skills ([`.agents/skills/`](.agents/skills/))**:
@@ -31,7 +32,8 @@ This repository provides an enterprise-ready engineering harness for multi-platf
 
 4. **One-Click Deployment & Delta Online Updates (`deploy-agents`)**:
    - PowerShell automation ([`deploy-agents.ps1`](deploy-agents.ps1)) with automatic Directory Junctions for non-admin permission penetration and Bash automation ([`deploy-agents.sh`](deploy-agents.sh));
-   - One-click bridging for Claude Code (`CLAUDE.md`), Antigravity IDE (`AGENTS.md`), GitHub Copilot (`.github/copilot-instructions.md`), and Zed IDE (`ZED.md`);
+   - One-click bridging for Claude Code (`CLAUDE.md`), Antigravity IDE (`AGENTS.md`), and GitHub Copilot (`.github/copilot-instructions.md`). Zed IDE reads `AGENTS.md` natively — no bridge needed;
+   - Automatic backup of existing global config before overwriting;
    - Delta online updates via `-Update`: Pulls upstream git changes, updates Comet CLI, runs `npx -y skills@latest update -y` against [`skills-lock.json`](skills-lock.json), and preserves custom project `AGENTS.md` while providing `AGENTS.template.md` for reference.
 
 ---
@@ -48,7 +50,10 @@ agents-living/
 │   │   └── token-discipline.md      # Read/fetch/speak gates, log truncation
 │   └── skills/                      # 40+ Native engineering skills (Comet, OpenSpec, Superpowers...)
 ├── .claude/
-│   └── settings.json                # Claude Code PreToolUse security interceptor
+│   ├── settings.json                # Claude Code PreToolUse security interceptor config
+│   └── hooks/                       # Security hook scripts (Node.js, reads stdin JSON)
+│       ├── guard.mjs                # Bash tool guard (exit 2 for hard blocks)
+│       └── guard-write.mjs          # Write/Edit tool guard (warnings)
 ├── Global AGENTS.md                 # Universal global constitution (system-wide resident)
 ├── Project AGENTS.md                # Project root template & central router
 ├── Directory AGENTS.md              # Monorepo / submodule micro-boundary patch

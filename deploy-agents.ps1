@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 # deploy-agents.ps1
 # Platforms: Windows (PowerShell 5.1 / PowerShell 7+)
 # Purpose: One-click deploy & online update AI Agents Harness spec, rules & skills
@@ -17,9 +17,7 @@ param (
     [switch]$Update,
 
     [Alias("c")]
-    [switch]$CometInit,
-
-    [string]$UpdateSource = ""
+    [switch]$CometInit
 )
 
 $ErrorActionPreference = "Stop"
@@ -140,14 +138,26 @@ if ($Global) {
         if (-not (Test-Path $ClaudeGlobalDir)) {
             New-Item -ItemType Directory -Path $ClaudeGlobalDir -Force | Out-Null
         }
+        # Backup existing file before overwrite
+        if (Test-Path $ClaudeGlobalFile) {
+            $backupName = "$ClaudeGlobalFile.bak.$(Get-Date -Format yyyyMMddHHmmss)"
+            Copy-Item -Path $ClaudeGlobalFile -Destination $backupName
+            Write-Host "  [INFO] Backed up existing CLAUDE.md to: $backupName" -ForegroundColor Gray
+        }
         Copy-Item -Path $ResolvedGlobalTemplate -Destination $ClaudeGlobalFile -Force
         Write-Host "  [OK] Claude Code global rule: $ClaudeGlobalFile" -ForegroundColor Green
 
-        # B. Antigravity IDE (~/.gemini/config/rules/global_agents.md)
-        $AntigravityGlobalDir = Join-Path $HOME ".gemini\config\rules"
-        $AntigravityGlobalFile = Join-Path $AntigravityGlobalDir "global_agents.md"
+        # B. Antigravity IDE (~/.gemini/AGENTS.md — standalone, always active, no frontmatter needed)
+        $AntigravityGlobalDir = Join-Path $HOME ".gemini"
+        $AntigravityGlobalFile = Join-Path $AntigravityGlobalDir "AGENTS.md"
         if (-not (Test-Path $AntigravityGlobalDir)) {
             New-Item -ItemType Directory -Path $AntigravityGlobalDir -Force | Out-Null
+        }
+        # Backup existing file before overwrite
+        if (Test-Path $AntigravityGlobalFile) {
+            $backupName = "$AntigravityGlobalFile.bak.$(Get-Date -Format yyyyMMddHHmmss)"
+            Copy-Item -Path $AntigravityGlobalFile -Destination $backupName
+            Write-Host "  [INFO] Backed up existing AGENTS.md to: $backupName" -ForegroundColor Gray
         }
         Copy-Item -Path $ResolvedGlobalTemplate -Destination $AntigravityGlobalFile -Force
         Write-Host "  [OK] Antigravity IDE global rule: $AntigravityGlobalFile" -ForegroundColor Green
@@ -222,25 +232,9 @@ if (-not (Test-Path $TargetCopilotFile)) {
     Write-Host "  [INFO] copilot-instructions.md already exists, keeping existing file." -ForegroundColor Gray
 }
 
-# Bridge for Zed IDE (ZED.md)
-$TargetZedFile = Join-Path $ResolvedProjectPath "ZED.md"
-if (-not (Test-Path $TargetZedFile)) {
-    try {
-        New-Item -ItemType SymbolicLink -Path $TargetZedFile -Target "AGENTS.md" -ErrorAction Stop | Out-Null
-        Write-Host "  [OK] Created symlink: ZED.md -> AGENTS.md" -ForegroundColor Green
-    } catch {
-        $zedBridge = @"
-# ZED.md
-See @AGENTS.md for project commands, architecture boundaries, conventions, and rules.
-"@
-        Set-Content -Path $TargetZedFile -Value $zedBridge -Encoding UTF8
-        Write-Host "  [OK] Created bridge file: ZED.md" -ForegroundColor Green
-    }
-} else {
-    Write-Host "  [INFO] ZED.md already exists, keeping existing file." -ForegroundColor Gray
-}
+# Note: Zed IDE natively reads AGENTS.md — no separate ZED.md bridge needed.
 
-# Deploy Claude Code PreToolUse Security Hooks (.claude/settings.json)
+# Deploy Claude Code PreToolUse Security Hooks (.claude/settings.json + .claude/hooks/)
 if (Test-Path $SourceClaudeSettings) {
     $TargetClaudeDir = Join-Path $ResolvedProjectPath ".claude"
     if (-not (Test-Path $TargetClaudeDir)) {
@@ -252,6 +246,18 @@ if (Test-Path $SourceClaudeSettings) {
         Write-Host "  [OK] Deployed Claude Code security hooks: .claude/settings.json" -ForegroundColor Green
     } else {
         Write-Host "  [INFO] .claude/settings.json already exists, keeping existing file." -ForegroundColor Gray
+    }
+    # Deploy hook scripts (.claude/hooks/)
+    $SourceHooksDir = Join-Path $ScriptDir ".claude\hooks"
+    if (Test-Path $SourceHooksDir) {
+        $TargetHooksDir = Join-Path $TargetClaudeDir "hooks"
+        if (-not (Test-Path $TargetHooksDir)) {
+            New-Item -ItemType Directory -Path $TargetHooksDir -Force | Out-Null
+        }
+        Get-ChildItem -Path $SourceHooksDir -File | ForEach-Object {
+            Copy-Item -Path $_.FullName -Destination (Join-Path $TargetHooksDir $_.Name) -Force
+        }
+        Write-Host "  [OK] Deployed hook scripts: .claude/hooks/" -ForegroundColor Green
     }
 }
 

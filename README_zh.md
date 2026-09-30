@@ -16,9 +16,10 @@
    - **目录级（[`Directory AGENTS.md`](Directory%20AGENTS.md)）**：Monorepo / 独立子模块的微型边界补丁（In/Out Scope、依赖隔离与极速测试）。
    - **细粒度子规则库（[`.agents/rules/`](.agents/rules/)）**：按需动态查阅，涵盖 `token-discipline.md`、`engineering-spec.md`、`security-boundary.md` 与 `git-workflow.md`。
 
-2. **PreToolUse 硬件安全防火墙（[`.claude/settings.json`](.claude/settings.json)）**：
+2. **PreToolUse 安全防火墙（[`.claude/settings.json`](.claude/settings.json) + [`.claude/hooks/`](.claude/hooks/)）**：
    - 在客户端发起 Bash 命令或写文件前由操作系统底层进行强拦截；
-   - 永久硬拦截（`exit 1`）：受保护分支（`develop`/`master`/`main`/`release*`）直改提交、`git push --force`、删除受保护远端分支、受保护分支 rebase；
+   - 使用 Node.js 守卫脚本通过 stdin JSON 读取工具输入（Claude Code 官方协议），以 `exit 2` / `permissionDecision: deny` 实现可靠阻断；
+   - 永久硬拦截（`exit 2`）：受保护分支（`develop`/`master`/`main`/`release*`）直改提交、`git push --force`、删除受保护远端分支、受保护分支 rebase；
    - 高危预警防呆：`rm -rf`、`git reset --hard`、`git add .`、触碰核心构建配置与敏感凭证。
 
 3. **40+ 官方 GitHub 原生技能全量集成（[`.agents/skills/`](.agents/skills/)）**：
@@ -31,7 +32,8 @@
 
 4. **一键自动化部署与差量在线更新（`deploy-agents`）**：
    - Windows PowerShell（[`deploy-agents.ps1`](deploy-agents.ps1)，内置 UTF-8 兼容与 Junction 权限免提权穿透）与 Linux/macOS Bash（[`deploy-agents.sh`](deploy-agents.sh)）；
-   - 一键桥接四大工具（`CLAUDE.md`、`AGENTS.md`、`.github/copilot-instructions.md`、`ZED.md`）；
+   - 一键桥接 Claude Code（`CLAUDE.md`）、Antigravity IDE（`AGENTS.md`）与 GitHub Copilot（`.github/copilot-instructions.md`）。Zed IDE 原生读取 `AGENTS.md`，无需额外桥接；
+   - 全局配置覆盖前自动备份既有文件；
    - 支持 `-Update` 在线模式：基于 [`skills-lock.json`](skills-lock.json) 版本锁，通过 `npx -y skills@latest update -y` 从官方 GitHub 差量更新，保护用户已有 `AGENTS.md` 不被覆盖。
 
 ---
@@ -48,7 +50,10 @@ agents-living/
 │   │   └── token-discipline.md      # 读拿说三道闸门、上下文防漏与日志截断
 │   └── skills/                      # 40+ 原生工程技能库（Comet, OpenSpec, Superpowers...）
 ├── .claude/
-│   └── settings.json                # Claude Code PreToolUse 硬件安全拦截钩子
+│   ├── settings.json                # Claude Code PreToolUse 安全拦截配置
+│   └── hooks/                       # 安全钩子脚本（Node.js，读取 stdin JSON）
+│       ├── guard.mjs                # Bash 工具守卫（exit 2 硬阻断）
+│       └── guard-write.mjs          # Write/Edit 工具守卫（高危预警）
 ├── Global AGENTS.md                 # 全局通用底线与安全宪法（常驻系统级）
 ├── Project AGENTS.md                # 项目根目录标准模板与中枢路由器
 ├── Directory AGENTS.md              # Monorepo / 子模块边界隔离微型补丁

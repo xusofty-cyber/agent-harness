@@ -131,13 +131,22 @@ if [ "$DEPLOY_GLOBAL" = true ]; then
     else
         # A. Claude Code (~/.claude/CLAUDE.md)
         mkdir -p "${HOME}/.claude"
+        # Backup existing file before overwrite
+        if [ -f "${HOME}/.claude/CLAUDE.md" ]; then
+            cp "${HOME}/.claude/CLAUDE.md" "${HOME}/.claude/CLAUDE.md.bak.$(date +%Y%m%d%H%M%S)"
+            echo -e "  ${NC}[i] Backed up existing ~/.claude/CLAUDE.md${NC}"
+        fi
         cp -f "${GLOBAL_TEMPLATE}" "${HOME}/.claude/CLAUDE.md"
         echo -e "  ${GREEN}[√] Claude Code 全局规则已部署: ${HOME}/.claude/CLAUDE.md${NC}"
 
-        # B. Antigravity IDE (~/.gemini/config/rules/global_agents.md)
-        mkdir -p "${HOME}/.gemini/config/rules"
-        cp -f "${GLOBAL_TEMPLATE}" "${HOME}/.gemini/config/rules/global_agents.md"
-        echo -e "  ${GREEN}[√] Antigravity IDE 全局规则已部署: ${HOME}/.gemini/config/rules/global_agents.md${NC}"
+        # B. Antigravity IDE (~/.gemini/AGENTS.md — standalone, always active, no frontmatter needed)
+        mkdir -p "${HOME}/.gemini"
+        if [ -f "${HOME}/.gemini/AGENTS.md" ]; then
+            cp "${HOME}/.gemini/AGENTS.md" "${HOME}/.gemini/AGENTS.md.bak.$(date +%Y%m%d%H%M%S)"
+            echo -e "  ${NC}[i] Backed up existing ~/.gemini/AGENTS.md${NC}"
+        fi
+        cp -f "${GLOBAL_TEMPLATE}" "${HOME}/.gemini/AGENTS.md"
+        echo -e "  ${GREEN}[√] Antigravity IDE 全局规则已部署: ${HOME}/.gemini/AGENTS.md${NC}"
     fi
 fi
 
@@ -197,16 +206,9 @@ else
     echo "  [i] 目标项目已存在 copilot-instructions.md，跳过。"
 fi
 
-# Zed IDE bridge (ZED.md -> AGENTS.md)
-TARGET_ZED="${TARGET_PROJECT_DIR}/ZED.md"
-if [ ! -e "${TARGET_ZED}" ]; then
-    ln -sf "AGENTS.md" "${TARGET_ZED}"
-    echo -e "  ${GREEN}[√] 已建立软链接: ZED.md -> AGENTS.md${NC}"
-else
-    echo "  [i] 目标项目已存在 ZED.md，跳过。"
-fi
+# Note: Zed IDE natively reads AGENTS.md — no separate ZED.md bridge needed.
 
-# Claude Code PreToolUse Security Hooks (.claude/settings.json)
+# Claude Code PreToolUse Security Hooks (.claude/settings.json + .claude/hooks/)
 if [ -f "${SOURCE_CLAUDE_SETTINGS}" ]; then
     mkdir -p "${TARGET_PROJECT_DIR}/.claude"
     TARGET_CLAUDE_SETTINGS="${TARGET_PROJECT_DIR}/.claude/settings.json"
@@ -215,6 +217,14 @@ if [ -f "${SOURCE_CLAUDE_SETTINGS}" ]; then
         echo -e "  ${GREEN}[√] 已部署 Claude Code 安全拦截钩子: .claude/settings.json${NC}"
     else
         echo "  [i] 目标项目已存在 .claude/settings.json，跳过。"
+    fi
+    # Deploy hook scripts (.claude/hooks/)
+    SOURCE_HOOKS_DIR="${SCRIPT_DIR}/.claude/hooks"
+    if [ -d "${SOURCE_HOOKS_DIR}" ]; then
+        TARGET_HOOKS_DIR="${TARGET_PROJECT_DIR}/.claude/hooks"
+        mkdir -p "${TARGET_HOOKS_DIR}"
+        cp -f "${SOURCE_HOOKS_DIR}"/*.mjs "${TARGET_HOOKS_DIR}/" 2>/dev/null || true
+        echo -e "  ${GREEN}[√] 已部署钩子脚本: .claude/hooks/${NC}"
     fi
 fi
 
