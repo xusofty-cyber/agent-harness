@@ -2,39 +2,53 @@
 
 > **Language / 语言**: [English](README.md) | **中文**
 
-> **跨工具（Claude Code / Antigravity IDE / Codex / Zed IDE）AI 研发工程规范、物理安全防火墙与原生技能套件**
+> **可复用的 AI 编程规范模板、Claude Code 安全钩子与多工具部署脚本**
 
-本项目为多平台 AI 辅助研发提供统一的**分层规范架构（三级 AGENTS.md）**、**操作系统级硬件安全拦截（PreToolUse Hooks）**、**40+ 原生工程技能（Skills）**以及**跨平台一键自动化部署与差量在线更新脚本**。
+本项目提供全局、项目和目录级规范模板、Claude Code PreToolUse 钩子、技能文件，以及 Windows/Linux/macOS 部署脚本。各工具的规则加载方式和钩子能力不同；请以支持矩阵和部署脚本实际行为为准。钩子属于客户端机制，不是操作系统或服务端安全边界。
+
+设计目标是把成熟、可复用的工程规则沉淀为新项目的起步基线，再由维护者补充项目技术栈、命令和模块边界。三层文件是可裁剪的模板，不要求每个项目使用相同流程。项目最初受以下文章启发：[文章一](https://mp.weixin.qq.com/s/ECw5lXpCw54iPdtn9PYaMw)、[文章二](https://mp.weixin.qq.com/s/OfGmlh8R6PHdvyjoz34Gsg)、[文章三](https://mp.weixin.qq.com/s/zpLbzq2VQuhfOlVWg6QBxg)、[文章四](https://mp.weixin.qq.com/s/IXWMmzH5llxFPlcr0FbqaQ)。
 
 ---
 
 ## 核心特性
 
 1. **三级 AGENTS.md 渐进式披露架构**：
-   - **全局级（[`Global AGENTS.md`](Global%20AGENTS.md)）**：跨项目通用工程宪法，涵盖去废话输出闸门、Ponytail 懒人阶梯、Git 保护分支铁律与会话三步仪式。
-   - **项目级（[`Project AGENTS.md`](Project%20AGENTS.md)）**：确定性工程中枢，规范项目 CLI 命令槽位、技术栈矩阵、架构核心红线与技能调度矩阵（<1000 Token）。
+   - **全局级（[`Global AGENTS.md`](Global%20AGENTS.md)）**：跨项目通用工程宪法，涵盖沟通、实现、上下文与 Git 授权边界。
+   - **项目级（[`Project AGENTS.md`](Project%20AGENTS.md)）**：可裁剪的项目工程模板，提供 CLI 命令、技术栈、架构边界和按需规则索引。
    - **目录级（[`Directory AGENTS.md`](Directory%20AGENTS.md)）**：Monorepo / 独立子模块的微型边界补丁（In/Out Scope、依赖隔离与极速测试）。
    - **细粒度子规则库（[`.agents/rules/`](.agents/rules/)）**：按需动态查阅，涵盖 `token-discipline.md`、`engineering-spec.md`、`security-boundary.md` 与 `git-workflow.md`。
 
-2. **PreToolUse 安全防火墙（[`.claude/settings.json`](.claude/settings.json) + [`.claude/hooks/`](.claude/hooks/)）**：
-   - 在客户端发起 Bash 命令或写文件前由操作系统底层进行强拦截；
+2. **Claude Code 客户端钩子（[`.claude/settings.json`](.claude/settings.json) + [`.claude/hooks/`](.claude/hooks/)）**：
+   - 仅针对 Claude Code 中匹配的工具调用运行，不是操作系统级防护；
    - 使用 Node.js 守卫脚本通过 stdin JSON 读取工具输入（Claude Code 官方协议），以 `exit 2` / `permissionDecision: deny` 实现可靠阻断；
    - 永久硬拦截（`exit 2`）：受保护分支（`develop`/`master`/`main`/`release*`）直改提交、`git push --force`、删除受保护远端分支、受保护分支 rebase；
-   - 高危预警防呆：`rm -rf`、`git reset --hard`、`git add .`、触碰核心构建配置与敏感凭证。
+   - 部分命令会硬拒绝，其他情况只是非阻断警告；正则检查不能覆盖所有命令形式，也不能替代 Git 服务端分支保护。
 
-3. **40+ 官方 GitHub 原生技能全量集成（[`.agents/skills/`](.agents/skills/)）**：
-   - **流程状态机**：`comet`（八阶段流程守卫，防目标漂移）。
+3. **40+ 可复用技能目录（[`.agents/skills/`](.agents/skills/)）**：
+   - **Comet 集成说明**：引导检查已安装版本和项目配置；此技能本身不实现 Comet 状态机或阶段守卫。
    - **规范驱动开发（SDD）**：`openspec` 全套 16 个技能（提案、变更应用、验证、主文档同步、归档）。
    - **测试驱动开发（TDD）**：`superpowers` 全套 15 个技能（TDD 红绿循环、系统性排障、完工验证证据门、工作区隔离）。
-   - **代码极简与图谱**：`ponytail`（7 步极简阶梯）、`codegraph`（AST 语法树调用链检索）。
-   - **终端截断与电报沟通**：`rtk`（输出过滤与日志本地留底）、`caveman`（电报体去废话）。
+   - **实现与检索指导**：`ponytail`（最小实现决策阶梯）与 `codegraph`（CodeGraph 可选集成指引；CLI/MCP 需单独安装配置）。
+   - **输出与表达指导**：`rtk`（Rust Token Killer 可选 CLI 指引；需配置命令重写 Hook）与 `caveman`（简明表达 Skill）。
    - **专业文档处理**：`docx`（Word 专业排版）、`pdf`（结构化抽取与分析）。
 
-4. **一键自动化部署与差量在线更新（`deploy-agents`）**：
+4. **一键部署与模板同步（`deploy-agents`）**：
    - Windows PowerShell（[`deploy-agents.ps1`](deploy-agents.ps1)，内置 UTF-8 兼容与 Junction 权限免提权穿透）与 Linux/macOS Bash（[`deploy-agents.sh`](deploy-agents.sh)）；
-   - 一键桥接 Claude Code（`CLAUDE.md`）、Antigravity IDE（`AGENTS.md`）与 GitHub Copilot（`.github/copilot-instructions.md`）。Zed IDE 原生读取 `AGENTS.md`，无需额外桥接；
-   - 全局配置覆盖前自动备份既有文件；
-   - 支持 `-Update` 在线模式：基于 [`skills-lock.json`](skills-lock.json) 版本锁，通过 `npx -y skills@latest update -y` 从官方 GitHub 差量更新，保护用户已有 `AGENTS.md` 不被覆盖。
+   - 项目脚本创建 `AGENTS.md`（若不存在）、Claude Code 与 Copilot 桥接，并部署 Claude Code Hook；其他工具的具体加载行为以支持矩阵为准；
+   - `--global` 配置 Claude Code 与 Antigravity 全局规则，覆盖前备份；
+   - `--update` 通过 fast-forward 更新本模板仓库并同步文件。覆盖工具管理的目标规则/技能前会创建备份；`skills-lock.json` 是来源/完整性元数据，不代表脚本按锁定哈希下载技能。Ponytail/Caveman 以 Skill 文件随项目复制；CodeGraph/RTK 的 CLI、Agent 接线与项目初始化是可选步骤；部署脚本会在交互模式下征询是否执行。
+   - 项目部署后会检测可选的 CodeGraph/RTK CLI，并逐项询问是否安装、是否配置 Agent/项目；默认拒绝。非交互执行会跳过安装并输出后续命令。
+
+### 支持范围
+
+| 工具 | 本仓库提供的配置/接线 | 状态 |
+|---|---|---|
+| Claude Code | `CLAUDE.md` 桥接、`.claude/skills/` 链接、`.claude/settings.json` Hook | 脚本配置；Hook 仅在 Claude Code 客户端运行 |
+| Antigravity | 项目规则/技能目录；`--global` 写入 `~/.gemini/AGENTS.md` | 文件部署；具体加载依版本和界面配置 |
+| Codex | 项目 `AGENTS.md` 与 `.agents/skills/` | 提供文件；脚本不配置 Codex 全局规则或 Hook |
+| GitHub Copilot | `.github/copilot-instructions.md` 桥接 | 脚本配置；具体行为依 Copilot 版本/模式 |
+| Zed | `AGENTS.md` 文件 | 提供可复用文件；脚本不创建 Zed 专属配置 |
+| Pi / OpenCode | 未提供专用入口或脚本验证 | 未适配；不能据此推断自动加载 |
 
 ---
 
@@ -54,7 +68,7 @@ agents-living/
 │   └── hooks/                       # 安全钩子脚本（Node.js，读取 stdin JSON）
 │       ├── guard.mjs                # Bash 工具守卫（exit 2 硬阻断）
 │       └── guard-write.mjs          # Write/Edit 工具守卫（高危预警）
-├── Global AGENTS.md                 # 全局通用底线与安全宪法（常驻系统级）
+├── Global AGENTS.md                 # 全局规则模板（需部署到各工具的全局入口）
 ├── Project AGENTS.md                # 项目根目录标准模板与中枢路由器
 ├── Directory AGENTS.md              # Monorepo / 子模块边界隔离微型补丁
 ├── 多工具部署配置指南.md              # 跨工具适配原理、安全钩子与部署更新专著（中文）
@@ -63,10 +77,12 @@ agents-living/
 ├── Tools Practical Usage and Skills Panorama Guide.md # 英文版技能实战指南
 ├── deploy-agents.ps1                # Windows 一键部署与在线更新自动化脚本
 ├── deploy-agents.sh                 # Linux / macOS 一键部署与在线更新自动化脚本
-├── skills-lock.json                 # 全套技能上游 Git 版本锁定清单
+├── skills-lock.json                 # 技能来源及部分文件完整性元数据
 ├── README.md                        # 项目总览（English）
 └── README_zh.md                     # 项目总览（中文）
 ```
+
+`Directory AGENTS.md` 是模板，不会由部署脚本自动写入未知的子目录。需要模块规则时，复制该模板到目标模块并命名为 `AGENTS.md`，填写模块职责、边界和验证命令；只在确有边界差异的目录添加，避免重复根规则。
 
 ---
 

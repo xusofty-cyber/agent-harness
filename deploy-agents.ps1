@@ -49,6 +49,94 @@ $SourceSkillsDir = Join-Path $ScriptDir ".agents\skills"
 $SourceSkillsLock = Join-Path $ScriptDir "skills-lock.json"
 $SourceClaudeSettings = Join-Path $ScriptDir ".claude\settings.json"
 
+function Backup-ManagedPath([string]$Path) {
+    if (Test-Path $Path) {
+        $backupPath = "$Path.bak.$(Get-Date -Format yyyyMMddHHmmss)"
+        Copy-Item -Path $Path -Destination $backupPath -Recurse -Force
+    }
+}
+
+function Confirm-OptionalStep([string]$Prompt) {
+    if ([Console]::IsInputRedirected) {
+        Write-Host "  [INFO] Non-interactive session; skipped: $Prompt"
+        return $false
+    }
+    $answer = Read-Host "$Prompt [y/N]"
+    return $answer -match '^(?i:y|yes)$'
+}
+
+function Guide-OptionalCliTools([string]$TargetPath) {
+    $codegraphInstall = 'irm https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.ps1 | iex'
+    $rtkInstall = 'winget install rtk-ai.rtk'
+
+    Write-Host "`n>>> Optional CLI tools (Ponytail and Caveman Skills are already copied with the project)" -ForegroundColor Cyan
+
+    if (Get-Command codegraph -ErrorAction SilentlyContinue) {
+        Write-Host "  [OK] CodeGraph CLI detected." -ForegroundColor Green
+    } else {
+        Write-Host "  CodeGraph CLI is optional. It connects agents and builds a local project index."
+        if (Confirm-OptionalStep "Install CodeGraph CLI now? Agent wiring and project indexing will be asked separately") {
+            try {
+                Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.ps1')
+                Write-Host "  [INFO] Reopen PowerShell if codegraph is not yet on PATH. Then run codegraph install and codegraph init from the project directory." -ForegroundColor Yellow
+            } catch {
+                Write-Warning "CodeGraph installation failed. Official command: $codegraphInstall"
+            }
+        } else {
+            Write-Host "  Install command: $codegraphInstall"
+            Write-Host "  After installation: run codegraph install, then codegraph init from the project directory."
+        }
+    }
+
+    if (Get-Command codegraph -ErrorAction SilentlyContinue) {
+        if (Confirm-OptionalStep "Run codegraph install to configure agents, then codegraph init in this project") {
+            try { & codegraph install; if ($LASTEXITCODE -ne 0) { Write-Warning "CodeGraph agent setup exited with $LASTEXITCODE." } } catch { Write-Warning "Agent setup did not complete: $_" }
+            Push-Location $TargetPath
+            try { & codegraph init; if ($LASTEXITCODE -ne 0) { Write-Warning "CodeGraph project indexing exited with $LASTEXITCODE." } } catch {
+                Write-Warning "Project indexing did not complete. Run 'codegraph init' in the project later."
+            } finally { Pop-Location }
+        } else {
+            Write-Host "  Later: codegraph install; then run 'codegraph init' from the project directory."
+        }
+    }
+
+    $rtkReady = $false
+    if (Get-Command rtk -ErrorAction SilentlyContinue) {
+        try { & rtk gain *> $null; $rtkReady = ($LASTEXITCODE -eq 0) } catch { $rtkReady = $false }
+    }
+    if ($rtkReady) {
+        Write-Host "  [OK] Rust Token Killer (RTK) CLI detected." -ForegroundColor Green
+    } else {
+        Write-Host "  RTK CLI is optional. The 'rtk' name is shared by unrelated tools; verify with 'rtk gain'."
+        if (Confirm-OptionalStep "Install Rust Token Killer (RTK) CLI now?") {
+            if (Get-Command winget -ErrorAction SilentlyContinue) {
+                & winget install rtk-ai.rtk
+                if ($LASTEXITCODE -ne 0) { Write-Warning "RTK installation failed. Official command: $rtkInstall" }
+                Write-Host "  [INFO] Reopen PowerShell, run rtk gain to verify, then run rtk init in the project if you want the hook." -ForegroundColor Yellow
+            } else {
+                Write-Warning "winget is unavailable. Install from https://github.com/rtk-ai/rtk/releases and place rtk.exe on PATH. Then verify with rtk gain and run rtk init in the project if you want the hook."
+            }
+        } else {
+            Write-Host "  Install command: $rtkInstall; verify with rtk gain, then run rtk init in the project to configure a supported hook."
+        }
+    }
+
+    $rtkReady = $false
+    if (Get-Command rtk -ErrorAction SilentlyContinue) {
+        try { & rtk gain *> $null; $rtkReady = ($LASTEXITCODE -eq 0) } catch { $rtkReady = $false }
+    }
+    if ($rtkReady) {
+        if (Confirm-OptionalStep "Run 'rtk init' in this project to configure the RTK hook") {
+            Push-Location $TargetPath
+            try { & rtk init; if ($LASTEXITCODE -ne 0) { Write-Warning "RTK project setup exited with $LASTEXITCODE." } } catch {
+                Write-Warning "RTK project setup did not complete; run 'rtk init' in the project later."
+            } finally { Pop-Location }
+        } else {
+            Write-Host "  Later: run 'rtk init' from the project directory."
+        }
+    }
+}
+
 # ==============================================================================
 # 1. Online Update Phase (-Update)
 # ==============================================================================
@@ -69,8 +157,12 @@ if ($Update) {
     if ($IsGitRepo) {
         Write-Host ">>> Pulling latest templates, rules, and skills from Git upstream..." -ForegroundColor Yellow
         try {
-            & git -C "$ScriptDir" pull --rebase 2>&1 | Write-Host
-            Write-Host "  [OK] Git repository up to date." -ForegroundColor Green
+            & git -C "$ScriptDir" pull --ff-only 2>&1 | Write-Host
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "  [OK] Git repository up to date." -ForegroundColor Green
+            } else {
+                Write-Warning "git pull --ff-only failed (exit $LASTEXITCODE); continuing with current templates."
+            }
         } catch {
             Write-Warning "Failed to git pull: $_"
         }
@@ -78,36 +170,7 @@ if ($Update) {
         Write-Host "  [INFO] Template directory is not a Git repo; skipping git pull." -ForegroundColor Gray
     }
 
-    # B. Check Harness ecosystem CLI tools
-    Write-Host "`n>>> Checking Harness ecosystem tools updates..." -ForegroundColor Yellow
-    $cometInstalled = Get-Command "comet" -ErrorAction SilentlyContinue
-    if ($cometInstalled) {
-        Write-Host "  [INFO] Found Comet CLI. Executing 'comet update'..." -ForegroundColor Gray
-        try {
-            & comet update
-        } catch {
-            Write-Warning "comet update execution: $_"
-        }
-    } else {
-        $npmInstalled = Get-Command "npm" -ErrorAction SilentlyContinue
-        if ($npmInstalled) {
-            Write-Host "  [INFO] Comet CLI not installed. To install: npm install -g @rpamis/comet" -ForegroundColor Gray
-        }
-    }
-
-    # C. Update Skills via npx skills from online upstream
-    $npxInstalled = Get-Command "npx" -ErrorAction SilentlyContinue
-    if ($npxInstalled) {
-        Write-Host "`n>>> Updating Skills via 'npx skills@latest update' from online upstream..." -ForegroundColor Yellow
-        try {
-            & npx -y skills@latest update -y 2>&1 | Write-Host
-            Write-Host "  [OK] Online skills refreshed via npx skills." -ForegroundColor Green
-        } catch {
-            Write-Warning "npx skills update encountered warning: $_"
-        }
-    } else {
-        Write-Host "  [INFO] Node/npx not found; skipping npx skills update." -ForegroundColor Gray
-    }
+    Write-Host "  [INFO] Updating this template repository only; global CLIs and the caller's current directory are not modified." -ForegroundColor Gray
 }
 
 # If no ProjectPath is specified and not -Global, show usage
@@ -119,7 +182,7 @@ if (-not $ProjectPath -and -not $Global) {
     Write-Host "[参数说明] Parameters:" -ForegroundColor Cyan
     Write-Host "  -ProjectPath   目标项目根目录路径。"
     Write-Host "  -Global (-g)   同时部署/更新当前用户的全局规则 (~/.claude/ 与 ~/.gemini/)。"
-    Write-Host "  -Update (-u)   执行在线检测与更新（拉取最新规则、更新技能库与配套脚手架）。"
+    Write-Host "  -Update (-u)   fast-forward 更新模板仓库，并将受管理文件同步到目标项目（覆盖前备份）。"
     exit 0
 }
 
@@ -232,7 +295,7 @@ if (-not (Test-Path $TargetCopilotFile)) {
     Write-Host "  [INFO] copilot-instructions.md already exists, keeping existing file." -ForegroundColor Gray
 }
 
-# Note: Zed IDE natively reads AGENTS.md — no separate ZED.md bridge needed.
+# Note: no Zed-specific configuration is created.
 
 # Deploy Claude Code PreToolUse Security Hooks (.claude/settings.json + .claude/hooks/)
 if (Test-Path $SourceClaudeSettings) {
@@ -242,6 +305,7 @@ if (Test-Path $SourceClaudeSettings) {
     }
     $TargetClaudeSettings = Join-Path $TargetClaudeDir "settings.json"
     if ($Update -or (-not (Test-Path $TargetClaudeSettings))) {
+        if ($Update) { Backup-ManagedPath $TargetClaudeSettings }
         Copy-Item -Path $SourceClaudeSettings -Destination $TargetClaudeSettings -Force
         Write-Host "  [OK] Deployed Claude Code security hooks: .claude/settings.json" -ForegroundColor Green
     } else {
@@ -255,7 +319,11 @@ if (Test-Path $SourceClaudeSettings) {
             New-Item -ItemType Directory -Path $TargetHooksDir -Force | Out-Null
         }
         Get-ChildItem -Path $SourceHooksDir -File | ForEach-Object {
-            Copy-Item -Path $_.FullName -Destination (Join-Path $TargetHooksDir $_.Name) -Force
+            $targetHook = Join-Path $TargetHooksDir $_.Name
+            if ($Update -or (-not (Test-Path $targetHook))) {
+                if ($Update) { Backup-ManagedPath $targetHook }
+                Copy-Item -Path $_.FullName -Destination $targetHook -Force
+            }
         }
         Write-Host "  [OK] Deployed hook scripts: .claude/hooks/" -ForegroundColor Green
     }
@@ -272,6 +340,7 @@ if (Test-Path $SourceRulesDir) {
     Get-ChildItem -Path $SourceRulesDir -Filter "*.md" | ForEach-Object {
         $dest = Join-Path $TargetRulesDir $_.Name
         if ($Update -or (-not (Test-Path $dest))) {
+            if ($Update) { Backup-ManagedPath $dest }
             Copy-Item -Path $_.FullName -Destination $dest -Force
             Write-Host "  [OK] Synced rule: .agents/rules/$($_.Name)" -ForegroundColor Green
         }
@@ -300,6 +369,10 @@ if (Test-Path $SourceSkillsDir) {
         
         # Copy / Update skill files
         if ($Update -or (-not (Test-Path $targetSkillPath))) {
+            if ($Update) {
+                Backup-ManagedPath $targetSkillPath
+                Remove-Item -Path $targetSkillPath -Recurse -Force
+            }
             Copy-Item -Path $_.FullName -Destination $targetSkillPath -Recurse -Force
             Write-Host "  [OK] Deployed skill: .agents/skills/$skillName" -ForegroundColor Green
         } else {
@@ -325,6 +398,7 @@ if (Test-Path $SourceSkillsDir) {
 if (Test-Path $SourceSkillsLock) {
     $targetSkillsLock = Join-Path $ResolvedProjectPath "skills-lock.json"
     if ($Update -or (-not (Test-Path $targetSkillsLock))) {
+        if ($Update) { Backup-ManagedPath $targetSkillsLock }
         Copy-Item -Path $SourceSkillsLock -Destination $targetSkillsLock -Force
         Write-Host "  [OK] Synced skills-lock.json" -ForegroundColor Green
     }
@@ -395,16 +469,16 @@ if ($CometInit) {
     }
 }
 
+Guide-OptionalCliTools $ResolvedProjectPath
+
 Write-Host "`n==================================================" -ForegroundColor Green
 Write-Host " Deployment completed successfully!" -ForegroundColor Green
 Write-Host " Target Project: $ResolvedProjectPath" -ForegroundColor Cyan
 Write-Host " Rules Directory: $TargetRulesDir" -ForegroundColor Cyan
 Write-Host " Skills Directory: $TargetSkillsDir" -ForegroundColor Cyan
 if ($cometCli) {
-    Write-Host "`n[TIP] Detected Comet CLI in system. To enable native terminal state machine & hooks, you can run:`n      cd `"$ResolvedProjectPath`"; comet init" -ForegroundColor Yellow
+    Write-Host "`n[TIP] Comet CLI is installed. Use its current documentation to configure a workflow for this project." -ForegroundColor Yellow
 } else {
-    Write-Host "`n[INFO] Skills & rules are fully ready in conversation." -ForegroundColor Gray
-    Write-Host "       For terminal CLI (comet doctor/status), install: npm install -g @rpamis/comet" -ForegroundColor Gray
+    Write-Host "`n[INFO] Rule and skill files were deployed. Whether they load automatically depends on the host tool." -ForegroundColor Gray
 }
 Write-Host "==================================================" -ForegroundColor Green
-

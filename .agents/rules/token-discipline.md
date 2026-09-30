@@ -1,15 +1,15 @@
 # Context & Token Discipline (上下文防漏与 Token 节流硬准则)
 
-> 本规则约束 Agent 的上下文输入与输出行为。在长会话中，上下文成本以 $O(N^2)$ 二次方累积，必须严格执行防漏截断。
+> 本规则约束 Agent 的上下文输入与输出行为。通过按需读取和筛选命令输出，减少与当前任务无关的上下文。
 
 ## 1. 检索与读取闸门（管“读”）
 - **禁止无边界扫描**：严禁在未指定文件后缀或未排除依赖目录（`node_modules/`, `target/`, `venv/`, `dist/` 等）的情况下执行全局递归 `grep`。
-- **符号索引优先**：若项目已配置 AST 代码知识图谱（如 CodeGraph），优先使用符号级查询（`codegraph explore "<symbol_or_query>"`），替代将几十个全文件逐一读入上下文。
+- **符号索引优先**：若 CodeGraph MCP 已安装、接线且项目索引可用，可用其辅助跨文件语义探索；否则使用限定范围的 `rg` 等常规工具。不要假设 `codegraph explore` CLI 命令存在。
 - **精准截取**：阅读长代码或大日志时，禁止一次性倒出数千行；必须使用行号范围（如查看前 50 行或关键词周边 30 行），保留上下文纯净度。
 
 ## 2. 工具与命令执行闸门（管“拿”）
 - **输出截断与重定向**：
-  - 测试命令必须携带精简参数（例：`pytest -q --tb=short`，`npm test -- --reporter=dot`，`ctest --output-on-failure`）；
+  - 适用时为测试命令携带精简参数（例：`pytest -q --tb=short`，`npm test -- --reporter=dot`，`ctest --output-on-failure`）；
   - 预期输出超过 50 行的命令，优先将标准输出重定向到临时文件（例：`npm run build > build.log 2>&1`），然后使用 `grep -E "Error|FAIL|Warn"` 抓取关键错误信息。
 - **禁止反复读取未变信息**：不要在没有代码变更的情况下重复运行全量测试或全量编译。
 

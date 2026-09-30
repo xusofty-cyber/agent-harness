@@ -2,39 +2,54 @@
 
 > **Language / 语言**: **English** | [中文](README_zh.md)
 
-> **Cross-Tool (Claude Code / Antigravity IDE / Codex / Zed IDE) AI Engineering Specifications, Hardware Security Firewall & Native Skills Suite**
+> **Reusable AI coding-rule templates, Claude Code hooks, and multi-tool deployment scripts**
 
-This repository provides an enterprise-ready engineering harness for multi-platform AI coding assistants. It combines a **Three-Tier AGENTS.md Progressive Disclosure Architecture**, **OS-level Hardware Security Interceptors (PreToolUse Hooks)**, **40+ Native Engineering Skills**, and **Cross-Platform One-Click Deployment & Delta Online Update Scripts**.
+This repository provides global, project, and directory rule templates, Claude Code PreToolUse hooks, skill files, and Windows/Linux/macOS deployment scripts. Rule loading and hook behavior vary by tool. Hooks are client-side mechanisms, not operating-system or server-side security boundaries.
+
+The goal is to package mature, reusable engineering practices as a baseline for new projects, then let maintainers add the project's stack, commands, and module boundaries. The three rule levels are adaptable templates, not a requirement that every project use the same workflow. The original project was inspired by these articles: [article 1](https://mp.weixin.qq.com/s/ECw5lXpCw54iPdtn9PYaMw), [article 2](https://mp.weixin.qq.com/s/OfGmlh8R6PHdvyjoz34Gsg), [article 3](https://mp.weixin.qq.com/s/zpLbzq2VQuhfOlVWg6QBxg), and [article 4](https://mp.weixin.qq.com/s/IXWMmzH5llxFPlcr0FbqaQ).
 
 ---
 
 ## Key Features
 
 1. **Three-Tier AGENTS.md Progressive Disclosure Architecture**:
-   - **Global Level ([`Global AGENTS.md`](Global%20AGENTS.md))**: Cross-project engineering constitution covering the no-nonsense communication gate, Ponytail minimal code ladder, Git protected branch iron laws, and the 3-step session ceremony.
-   - **Project Level ([`Project AGENTS.md`](Project%20AGENTS.md))**: Deterministic engineering hub defining project CLI command slots, tech stack matrix, architecture red lines, and skill dispatching router (<1000 Tokens).
+   - **Global Level ([`Global AGENTS.md`](Global%20AGENTS.md))**: Cross-project engineering constitution covering the no-nonsense communication gate, minimal-implementation guidance, Git authorization rules, and contextual workflow guidance.
+   - **Project Level ([`Project AGENTS.md`](Project%20AGENTS.md))**: Adaptable project template for CLI commands, tech stack, architecture boundaries, and on-demand rule references.
    - **Directory Level ([`Directory AGENTS.md`](Directory%20AGENTS.md))**: Micro-boundary patch for Monorepo packages or isolated submodules (In/Out Scope, dependency boundaries, targeted fast tests, and large-file safety).
    - **Modular Sub-Rules ([`.agents/rules/`](.agents/rules/))**: On-demand progressive rules including `token-discipline.md`, `engineering-spec.md`, `security-boundary.md`, and `git-workflow.md`.
 
-2. **PreToolUse Security Firewall ([`.claude/settings.json`](.claude/settings.json) + [`.claude/hooks/`](.claude/hooks/))**:
-   - Intercepts dangerous operations at the OS process level before Bash or Write/Edit tools are executed;
-   - Uses Node.js guard scripts reading stdin JSON (official Claude Code hook protocol) with `exit 2` / `permissionDecision: deny` for reliable blocking;
-   - Hard blocks (`exit 2`): direct commits on protected branches (`develop`/`master`/`main`/`release*`), `git push --force`, deleting protected remote branches, and rebasing protected branches;
-   - High-risk warnings: `rm -rf`, `git reset --hard`, blind `git add .`, touching build configurations, and modifying secret credentials.
+2. **Claude Code client hooks ([`.claude/settings.json`](.claude/settings.json) + [`.claude/hooks/`](.claude/hooks/))**:
+   - Run only for matching tool calls in Claude Code; they are not OS-level protections;
+   - Some command patterns are hard-blocked while other cases emit non-blocking warnings;
+   - Regex inspection cannot cover every command form and does not replace server-side branch protection.
 
-3. **40+ Integrated Official GitHub Native Skills ([`.agents/skills/`](.agents/skills/))**:
-   - **Process & State Machine**: `comet` (8-phase anti-drift guard enforcing Open $\rightarrow$ Proposal $\rightarrow$ Specs $\rightarrow$ Design $\rightarrow$ Tasks $\rightarrow$ Build $\rightarrow$ Verify $\rightarrow$ Archive);
+3. **40+ Reusable Skill Directories ([`.agents/skills/`](.agents/skills/))**:
+   - **Comet integration guide**: checks the installed version and project configuration; this skill does not implement Comet's state machine or phase guards;
    - **Spec-Driven Development (SDD)**: Full 16-skill `openspec` suite (proposal, apply changes, verify, sync specs, archive, explore);
    - **Test-Driven Development (TDD)**: Full 15-skill `superpowers` suite (red-green cycle, systematic root-cause debugging, physical verification evidence gate, git worktrees);
-   - **Code Entropy Reduction & AST Graph**: `ponytail` (7-step lazy ladder, standard library first) and `codegraph` (Tree-sitter AST syntax symbol discovery replacing blind grep);
-   - **Execution Shield & Concise Output**: `rtk` (log truncation & local tee preservation) and `caveman` (ultra-compressed telegraphic output);
+   - **Implementation and retrieval guidance**: `ponytail` (minimal-solution ladder) and `codegraph` (optional CodeGraph integration guide; CLI/MCP setup is separate);
+   - **Output and communication guidance**: `rtk` (optional Rust Token Killer CLI guide; command-rewrite hooks require setup) and `caveman` (concise-response Skill);
    - **Professional Document Processing**: `docx` (Word formatting & manipulation) and `pdf` (structured extraction & analysis).
 
-4. **One-Click Deployment & Delta Online Updates (`deploy-agents`)**:
+4. **One-Click Deployment & Template Sync (`deploy-agents`)**:
    - PowerShell automation ([`deploy-agents.ps1`](deploy-agents.ps1)) with automatic Directory Junctions for non-admin permission penetration and Bash automation ([`deploy-agents.sh`](deploy-agents.sh));
-   - One-click bridging for Claude Code (`CLAUDE.md`), Antigravity IDE (`AGENTS.md`), and GitHub Copilot (`.github/copilot-instructions.md`). Zed IDE reads `AGENTS.md` natively — no bridge needed;
-   - Automatic backup of existing global config before overwriting;
-   - Delta online updates via `-Update`: Pulls upstream git changes, updates Comet CLI, runs `npx -y skills@latest update -y` against [`skills-lock.json`](skills-lock.json), and preserves custom project `AGENTS.md` while providing `AGENTS.template.md` for reference.
+   - The project script creates `AGENTS.md` when absent, Claude Code and Copilot bridges, and Claude Code hooks; see the support matrix for the actual scope;
+   - `--global` configures Claude Code and Antigravity global rule files and backs up replaced files;
+   - `--update` fast-forwards this template repository and syncs files. It backs up managed target rules/skills before replacement. `skills-lock.json` is source/integrity metadata; the script does not download skills by locked hashes. Ponytail and Caveman are copied as Skill files. CodeGraph and RTK setup is optional; the deployment scripts offer interactive prompts for installation, agent wiring, and project initialization.
+   - After project deployment, the scripts detect optional CodeGraph/RTK CLIs and ask separately before installation and agent/project configuration. The default is No. Non-interactive runs skip installation and print follow-up commands.
+
+### Support scope
+
+| Tool | Configuration provided here | Status |
+|---|---|---|
+| Claude Code | `CLAUDE.md` bridge, `.claude/skills/` links, `.claude/settings.json` hooks | Configured by script; hooks run only in the Claude Code client |
+| Antigravity | Project rules/skills; `--global` writes `~/.gemini/AGENTS.md` | File deployment; loading depends on version and settings |
+| Codex | Project `AGENTS.md` and `.agents/skills/` | Files provided; script does not configure Codex global rules or hooks |
+| GitHub Copilot | `.github/copilot-instructions.md` bridge | Configured by script; behavior depends on Copilot version/mode |
+| Zed | `AGENTS.md` | Reusable files only; no Zed-specific setup by script |
+| Pi / OpenCode | No dedicated entry point or script validation | Not adapted; automatic loading is not implied |
+
+`Directory AGENTS.md` is a template and is not copied into an unknown module path by the installer. For a module that needs distinct rules, copy it into that module as `AGENTS.md`, then fill in its ownership, boundaries, and validation commands. Add nested files only where they add constraints beyond the root rules.
 
 ---
 
@@ -54,7 +69,7 @@ agents-living/
 │   └── hooks/                       # Security hook scripts (Node.js, reads stdin JSON)
 │       ├── guard.mjs                # Bash tool guard (exit 2 for hard blocks)
 │       └── guard-write.mjs          # Write/Edit tool guard (warnings)
-├── Global AGENTS.md                 # Universal global constitution (system-wide resident)
+├── Global AGENTS.md                 # Global rule template (deploy to each tool's global entry point)
 ├── Project AGENTS.md                # Project root template & central router
 ├── Directory AGENTS.md              # Monorepo / submodule micro-boundary patch
 ├── Multi-Tool Deployment and Configuration Guide.md # Comprehensive deployment & configuration guide (English)
@@ -63,7 +78,7 @@ agents-living/
 ├── 各工具实战使用与技能全景指南.md     # 各工具实战使用与技能全景指南（中文）
 ├── deploy-agents.ps1                # Windows PowerShell one-click deploy & update script
 ├── deploy-agents.sh                 # Linux / macOS Bash one-click deploy & update script
-├── skills-lock.json                 # Upstream Git version lock for skills
+├── skills-lock.json                 # Skill source and partial integrity metadata
 ├── README.md                        # Repository overview (English default)
 └── README_zh.md                     # 项目中文概览
 ```

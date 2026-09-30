@@ -16,7 +16,9 @@
     "codegraph": {
       "source": "colbymchenry/codegraph",
       "sourceType": "github",
-      "repository": "https://github.com/colbymchenry/codegraph"
+      "repository": "https://github.com/colbymchenry/codegraph",
+      "skillPath": ".agents/skills/codegraph/SKILL.md",
+      "computedHash": "07dc34eccecd3d7dc7eb4e806b9a74da7a4dcd4bbd7553a2ccbae08a7b877df9"
     },
     "comet": {
       "source": "rpamis/comet",
@@ -171,7 +173,9 @@
     "rtk": {
       "source": "rtk-ai/rtk",
       "sourceType": "github",
-      "repository": "https://github.com/rtk-ai/rtk"
+      "repository": "https://github.com/rtk-ai/rtk",
+      "skillPath": ".agents/skills/rtk/SKILL.md",
+      "computedHash": "1bf7772274c3ad42ef5172d294a6115e26f0acc639037a4c5fa283d8d67f4900"
     },
     "subagent-driven-development": {
       "source": "obra/superpowers",

@@ -11,15 +11,15 @@ This guide provides a comprehensive handbook for software engineering and techni
 1. [Core Architecture & Tool Matrix (Who Manages What)](#1-core-architecture--tool-matrix-who-manages-what)
 2. [Skills & Ecosystem Tools Inventory](#2-skills--ecosystem-tools-inventory)
    - 2.1 40+ Integrated Native Skills Categorized
-   - 2.2 Version Locking & Online Updates (`skills-lock.json` + `deploy-agents`)
+   - 2.2 Skill Source Metadata & Template Sync (`skills-lock.json` + `deploy-agents`)
    - 2.3 Optional Harness CLI Tools
    - 2.4 Token Economics of Skills (Why 40+ Skills Do NOT Blow Up Context)
    - 2.5 Engineering Skills & Rules Dispatching Matrix
 3. [Deep Dive into Core Harness Tools & Slash Commands](#3-deep-dive-into-core-harness-tools--slash-commands)
-   - 3.1 Comet: Process Orchestration & Phase Guards (`/comet`)
+   - 3.1 Comet: Versioned Workflow Entry Point
    - 3.2 OpenSpec: Spec-Driven Development (`/opsx:propose`, `/opsx:apply`, etc.)
    - 3.3 Superpowers: TDD, Systematic Debugging & Verification Gate
-   - 3.4 CodeGraph: AST-Level Symbol Discovery (`codegraph explore`)
+   - 3.4 CodeGraph: Optional MCP Code-Graph Integration
    - 3.5 Ponytail: Minimal Implementation Ladder (Generation Gate)
    - 3.6 Caveman: Ultra-Compressed Output (Communication Gate)
    - 3.7 RTK: Output Truncation & Log Shielding (Execution Gate)
@@ -48,7 +48,7 @@ Without physical boundaries, AI-assisted development frequently drifts, over-eng
        └──────┬─────────────────────────────────────────────────┘
               │ Scope locked; begin exploration & discovery
        ┌──────▼─────────────────────────────────────────────────┐
-       │ 2. Retrieval Gate: CodeGraph (AST graph; no blind grep)│
+       │ 2. Optional semantic retrieval: CodeGraph MCP, if configured │
        └──────┬─────────────────────────────────────────────────┘
               │ Symbol dependencies clear; design & code
        ┌──────▼─────────────────────────────────────────────────┐
@@ -56,11 +56,11 @@ Without physical boundaries, AI-assisted development frequently drifts, over-eng
        └──────┬─────────────────────────────────────────────────┘
               │ Run tests & build commands
        ┌──────▼─────────────────────────────────────────────────┐
-       │ 4. Execution Gate: RTK (truncate long output, tee log) │
+       │ 4. Optional command filtering: RTK CLI + agent hook          │
        └──────┬─────────────────────────────────────────────────┘
               │ Deliver & commit
        ┌──────▼─────────────────────────────────────────────────┐
-       │ 5. Communication & Git Gate: Caveman + Protected Branch│
+       │ 5. Communication & Git: Caveman guidance (if loaded) + Git  │
        └────────────────────────────────────────────────────────┘
 ```
 
@@ -68,14 +68,14 @@ Without physical boundaries, AI-assisted development frequently drifts, over-eng
 
 | Component | Core Responsibility | Pain Point Solved | Interface |
 |---|---|---|---|
-| **Comet** | State machine & phase guard | Goal drift, jumping ahead to code before design is agreed | `/comet <task>`, CLI `comet doctor` |
+| **Comet** | Versioned Native/Classic workflows | Resumable, verifiable task workflows | Follow installed version and `.comet/config.yaml` |
 | **OpenSpec** | Spec-Driven Development (SDD) | Requirement amnesia, untracked delta changes | `/opsx:propose`, `docs/openspec/` live docs |
 | **Superpowers** | TDD & Verification evidence gate | Hallucinated task completion, missing physical proof | Red test $\rightarrow$ Green test $\rightarrow$ Verification report |
-| **CodeGraph** | AST syntax code knowledge graph | Grep pollution with thousands of irrelevant tokens | `codegraph explore "query"` / MCP |
-| **Ponytail** | Lazy ladder (entropy reduction) | Unnecessary third-party packages, premature abstractions | Standard library first, 1 line over 10 |
-| **Caveman** | Ultra-compressed output | Chatty greetings, disclaimers, and token waste | Direct Diff and evidence |
-| **RTK** | Command output truncation | Thousands of compiler/test lines flooding context | CLI / PreToolUse hook |
-| **Git Auth** | Protected branch isolation | AI corrupting master/develop branches directly | `.claude/settings.json` hardware exit 1 |
+| **CodeGraph** | Optional semantic code-search integration | Requires CLI, agent MCP wiring, and a project index | Query through configured CodeGraph MCP tools |
+| **Ponytail** | Minimal-implementation guidance Skill | Unneeded dependencies and abstractions | Guidance only when the host loads the Skill |
+| **Caveman** | Concise-communication guidance Skill | Overlong responses | Style guidance when loaded; preserve clarity and safety details |
+| **RTK** | Optional Rust Token Killer CLI | Verbose terminal output | Requires CLI installation and a supported agent hook |
+| **Git Auth** | Protected branch guidance plus limited client hook checks | Preventing accidental shared-branch operations | Rules, Claude Code client hook, and server-side branch protection |
 
 ---
 
@@ -83,10 +83,10 @@ Without physical boundaries, AI-assisted development frequently drifts, over-eng
 
 ### 2.1 40+ Integrated Native Skills Categorized
 
-The automated installer ([`deploy-agents.ps1`](deploy-agents.ps1) / [`deploy-agents.sh`](deploy-agents.sh)) deploys 40 modular engineering skills into `.agents/skills/`:
+The installer copies the repository's skill directories into `.agents/skills/`; actual discovery depends on the host tool and its configuration.
 
-#### 1. Workflow & State Machine
-- **`comet`**: Enforces strict phases: Open $\rightarrow$ Proposal $\rightarrow$ Specs $\rightarrow$ Design $\rightarrow$ Tasks $\rightarrow$ Build $\rightarrow$ Verify $\rightarrow$ Archive.
+#### 1. Versioned Workflow Entry Point
+- **`comet`**: The Comet CLI provides versioned Native and Classic workflows. This repository ships an entry-point guide only; it does not implement Comet phase guards.
 
 #### 2. OpenSpec Specification-Driven Suite (16 skills)
 - **`openspec`**: Core architecture.
@@ -126,10 +126,10 @@ The automated installer ([`deploy-agents.ps1`](deploy-agents.ps1) / [`deploy-age
 
 #### 4. Minimal Code & Syntax Graph
 - **`ponytail`**: Minimal implementation ladder (stdlib first, YAGNI).
-- **`codegraph`**: AST Tree-sitter code graph exploration.
+- **`codegraph`**: optional CodeGraph CLI/MCP setup guidance; installation and agent wiring are separate.
 
 #### 5. Output Filtering & Concise Delivery
-- **`rtk`**: Command log truncation and local tee preservation.
+- **`rtk`**: optional Rust Token Killer CLI guidance; command rewriting requires a configured agent hook.
 - **`caveman`**: Ultra-compressed telegraphic output.
 
 #### 6. Professional Document Processing
@@ -141,7 +141,7 @@ The automated installer ([`deploy-agents.ps1`](deploy-agents.ps1) / [`deploy-age
 ### 2.2 Version Locking & Online Updates (`skills-lock.json` + `deploy-agents`)
 
 1. **`skills-lock.json`**:
-   - Locks the exact Git commit SHA and upstream URL for every installed skill.
+   - Records upstream sources and integrity hashes for some files; this is not a complete commit lock for every skill.
 2. **One-Click Online Update**:
    ```powershell
    # Windows
@@ -150,44 +150,25 @@ The automated installer ([`deploy-agents.ps1`](deploy-agents.ps1) / [`deploy-age
    # Linux / macOS
    ./deploy-agents.sh . --update
    ```
-   - Automatically executes `npx -y skills@latest update -y`;
-   - Preserves custom project configurations in `AGENTS.md` and generates [`AGENTS.template.md`](AGENTS.template.md) for comparison.
+   - The deployment scripts fast-forward the template repository, then copy its managed files; overwritten managed targets receive `.bak.<timestamp>` backups;
+   - The lock file is copied as metadata. The script does not resolve or download every skill by its locked hash.
 
 ---
 
 ### 2.3 Optional Harness CLI Tools
 
-All skills are **100% active in conversation**. Terminal-level CLI tools are optional:
-- **Comet CLI**: `npm install -g @rpamis/comet` (provides `comet doctor` and `comet status`);
-- **CodeGraph CLI**: `npm install -g @codegraph/cli` (provides terminal `codegraph explore`);
-- **RTK Binary**: `brew install rtk` or download release binary.
+Skill availability depends on the host tool and its configuration. Terminal-level CLI tools are optional:
+- **Comet CLI**: install only if the project needs Comet; use the current version documentation for supported commands and configuration;
+- **CodeGraph CLI**: macOS/Linux: `curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.sh | sh`; Windows PowerShell: `irm https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.ps1 | iex`. Then run `codegraph install` to wire supported agents and `codegraph init` in the project. Queries use configured MCP tools; do not assume a `codegraph explore` CLI command.
+- **RTK (Rust Token Killer) CLI**: macOS/Linux: `curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh`; Windows: `winget install rtk-ai.rtk`. Verify with `rtk gain` because the `rtk` command name is shared by unrelated tools. Run `rtk init` in the project to configure a supported agent hook.
+
+The project deployment scripts detect CodeGraph/RTK and ask before installing or applying project/agent setup. Default answer is No; non-interactive runs print follow-up commands.
 
 ---
 
-### 2.4 Token Economics of Skills (Why 40+ Skills Do NOT Blow Up Context)
+### 2.4 Skill Loading and Optional CLI Setup
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│ 1. Static Prefix (~750 Tokens)                                         │
-│    - Only YAML Frontmatter (name + description, ~20 Tokens each)       │
-│    - Hits Prompt Cache (KV Cache): 90%–99% cache rate, 10% base cost    │
-└───────────────────────────────────┬────────────────────────────────────┘
-                                    │ Only read when triggered
-┌───────────────────────────────────▼────────────────────────────────────┐
-│ 2. Progressive On-Demand Disclosure                                    │
-│    - Agent reads full SKILL.md instructions only when relevant         │
-│    - Context is archived when task finishes                             │
-└────────────────────────────────────────────────────────────────────────┘
-```
-
-#### Token Return on Investment (ROI):
-| Component | Cost Mechanism | Savings | Net Benefit |
-|---|---|---|---|
-| **Skill Prefix** | ~750 Tokens (cached) | Provides accurate routing anchors | Negligible cost |
-| **`Caveman`** | Triggered on demand | Cuts response Tokens by **40%–75%** | Highest savings |
-| **`Ponytail`** | Active during coding | Reduces code length by **30%–50%** | Large code reduction |
-| **`CodeGraph`** | Runs AST queries | Replaces full-repo grep (tens of thousands of tokens) | Saves **90%+** retrieval tokens |
-| **`RTK`** | Output truncation | Truncates multi-thousand line logs to key 20 lines | Saves **80%+** environment noise |
+Skill discovery and context costs depend on the host agent and its configuration. File presence alone does not guarantee that a Skill is loaded. Ponytail and Caveman are guidance Skills copied with the project; CodeGraph and RTK also need their separate CLI and agent integration steps. Their effectiveness depends on the project, host, and setup, so this guide makes no fixed token-savings claims.
 
 ---
 
@@ -198,11 +179,11 @@ All skills are **100% active in conversation**. Terminal-level CLI tools are opt
 | **Branching / Commit / Push** | [`git-workflow.md`](.agents/rules/git-workflow.md) | `git commit` / `git push` | Commit only on temp branches; no `git add .`; human authorization required for remote push |
 | **High-Risk Operations** | [`security-boundary.md`](.agents/rules/security-boundary.md) | Modifying build configs, protocols, public structs | Pause and confirm impact with human |
 | **Complex Requirements** | [`engineering-spec.md`](.agents/rules/engineering-spec.md) + `comet` / `openspec` | `/comet` or "use openspec" | Propose change under `docs/openspec/changes/`; wait for confirmation |
-| **Symbol Discovery** | [`token-discipline.md`](.agents/rules/token-discipline.md) + `codegraph` | `codegraph explore "query"` | Use AST symbol graph; no blind recursive grep |
-| **Feature Implementation** | `ponytail` + `test-driven-development` | "use ponytail" / "TDD" | 7-step minimal code ladder; write failing test first |
+| **Symbol Discovery** | [`token-discipline.md`](.agents/rules/token-discipline.md) + optional `codegraph` | CodeGraph MCP when configured; otherwise scoped `rg` | Do not assume CodeGraph is installed or available |
+| **Feature Implementation** | `ponytail` + `test-driven-development` | Consult loaded Skills as appropriate | Understand current code, then choose the smallest correct implementation and suitable validation |
 | **Bug Investigation** | `systematic-debugging` | Error trace pasted | Gather evidence $\rightarrow$ form hypothesis $\rightarrow$ minimal repro $\rightarrow$ fix |
-| **Long Terminal Output** | `rtk` | Test / build commands | Append filtering flags (`-q`, `--output-on-failure`); redirect long logs |
-| **Token Conservation** | `caveman` | `/caveman` | Telegraphic format; conclusions, Diff, and proof only |
+| **Long Terminal Output** | optional `rtk` | Only when installed and its agent hook is configured | Otherwise use native concise flags; keep required validation and preserve relevant logs |
+| **Token Conservation** | `caveman` | Only when the host loads the Skill or plugin | Be concise while preserving necessary context, technical accuracy, and safety details |
 | **Document Processing** | `docx` / `pdf` | Mentions `.docx` or `.pdf` | Professional formatting without running code test suites |
 | **Task Completion** | `verification-before-completion` | End of task | Present physical command execution evidence |
 
@@ -210,19 +191,18 @@ All skills are **100% active in conversation**. Terminal-level CLI tools are opt
 
 ## 3. Deep Dive into Core Harness Tools & Slash Commands
 
-### 3.1 Comet: Process Orchestration & Phase Guards (`/comet`)
+### 3.1 Comet: Versioned workflow entry point
 
-- **When to use**: New features, multi-file bug fixes, structural refactoring, audited enterprise changes.
-- **When to bypass**: Quick questions, single-file doc fixes, syntax typos.
-- **Invocation**:
-  ```text
-  /comet Add date-range filtered CSV export for order service
-  ```
-- **8-Phase Guard**:
-  1. Open $\rightarrow$ 2. Proposal $\rightarrow$ 3. Specs $\rightarrow$ 4. Design $\rightarrow$ 5. Tasks $\rightarrow$ 6. Build $\rightarrow$ 7. Verify $\rightarrow$ 8. Archive.
-  If the Design phase has not been approved, the guard blocks code implementation!
+Comet is an independently versioned workflow tool. Check the project's `.comet/config.yaml` and installed CLI version, then follow the Native or Classic workflow supported by that version. This repository's Comet skill is an entry-point guide; it does not create Comet state files or enforce phase guards. If Comet is not installed or configured, use the project's existing process or make a task-appropriate plan.
+
+```text
+/comet Add date-range filtered CSV export for the order service
+```
+
+Use Comet's current upstream documentation for version-specific entry points, configuration, artifact paths, and archive behavior.
 
 ---
+
 
 ### 3.2 OpenSpec: Spec-Driven Development
 
@@ -251,14 +231,14 @@ All skills are **100% active in conversation**. Terminal-level CLI tools are opt
 
 ---
 
-### 3.4 CodeGraph: AST-Level Symbol Discovery (`codegraph explore`)
+### 3.4 CodeGraph: Optional MCP Code-Graph Integration
 
 ```bash
 # Explore call chains and architecture
-codegraph explore "User authentication and JWT token flow"
+Query the CodeGraph MCP tool configured for the current agent: “User authentication and JWT token flow”.
 
 # Find definitions and all call references
-codegraph explore "OrderService::calculateDiscount"
+Query the configured CodeGraph MCP tool for `OrderService::calculateDiscount`.
 ```
 
 ---
@@ -280,7 +260,11 @@ codegraph explore "OrderService::calculateDiscount"
 
 ---
 
-### 3.7 RTK: Output Truncation & Log Shielding
+### 3.7 RTK: Optional Rust Token Killer CLI
+
+- RTK rewrites supported commands only when installed and integrated with the active agent. The repository Skill alone does not filter terminal output.
+- Verify the correct product with `rtk gain`; initialize supported project hooks with `rtk init`.
+- If RTK is not configured, use native concise flags and bounded log handling.
 
 - Never run bare verbose commands;
 - Always use `git status -s`, `pytest -q`, `ctest --output-on-failure`;
@@ -348,7 +332,7 @@ Human confirmation is mandatory before:
 - `@workspace`: Scans workspace context in VS Code.
 
 ### 4.4 Zed IDE
-- `ZED.md` auto-discovery (symlinked to `AGENTS.md`);
+- Reuse the project `AGENTS.md`; this installer does not create a Zed-specific file;
 - `Ctrl+Enter` (Inline Assist) with `follow ponytail principles`;
 - Assistant Panel (`Ctrl+?`) for multi-turn architectural planning.
 
@@ -368,9 +352,9 @@ Step 2: Scoping & Change Creation (Comet + OpenSpec SDD)
   ├─ Generated: docs/openspec/changes/add-csv-export/
   └─ Confirm Proposal with human
 
-Step 3: AST Retrieval (CodeGraph)
+Step 3: Optional semantic retrieval (CodeGraph, if configured)
   ├─ Prohibited: grep -rn "export" .
-  └─ codegraph explore "OrderExportHandler"
+  └─ Query configured CodeGraph MCP; otherwise use scoped code search
       └─ Located: router.py, order_repo.py, types.ts
 
 Step 4: Red Test (Superpowers TDD)
@@ -400,9 +384,8 @@ Step 7: Delivery & Safe Commit (Caveman + Git Workflow)
 
 ### Daily Health Check:
 ```bash
-comet doctor        # Check wiring of tools, hooks, and index
-comet status        # Check status of in-progress changes
-cat tasks/lessons.md # Review latest learned lessons
+Check the installed Comet version and project configuration before using Comet-specific commands.
+Read `tasks/lessons.md` when it is relevant to the task.
 ```
 
 ### Reference Documentation:

@@ -1,27 +1,21 @@
 ---
 name: rtk
-description: "Runtime Toolkit (Run-to-Kill) command execution filter. Truncates long terminal outputs, filters noisy test/build logs, captures failures to local tee log files, and prevents context blowout during command execution."
+description: "Optional Rust Token Killer CLI integration that rewrites supported terminal commands to concise output. Use when RTK is installed and its hook is configured for the current agent."
 license: MIT
 ---
 
-# RTK: Runtime Toolkit & Output Defense
+# RTK (Rust Token Killer)
 
-Execution outputs (verbose compiler logs, long stack traces, unformatted git statuses) constitute the largest dynamic input token source (83%-95% of API costs). RTK intercepts and shapes command execution.
+This repository ships guidance only. It does not install RTK or enable its command-rewrite hook. The unrelated Rust Type Kit project also uses the `rtk` command name; verify this tool with `rtk gain`.
 
-## Execution Rules
+## Check availability
 
-1. **Filtered CLI Commands**:
-   - Never run raw, unfiltered test/build commands.
-   - Use quiet or terse flags:
-     - Python: `pytest -q --tb=short`
-     - Node: `npm test -- --reporter=dot`
-     - C/C++: `ctest --output-on-failure`
-     - Git: `git status -s` instead of full status.
-2. **Output Redirection & Teeing**:
-   - When a command generates extensive output, redirect to a local scratch file:
-     ```bash
-     npm run build > scratch/build.log 2>&1 || tail -n 25 scratch/build.log
-     ```
-   - Feed only the critical error slice back into the conversation context.
-3. **Hang Prevention**:
-   - Long-running commands must be bounded by timeouts or managed as background tasks rather than blocking indefinitely.
+- Use RTK rewriting only when the CLI and the current agent integration are configured. RTK setup is performed with `rtk init` for a project or `rtk init --global` for supported global integrations.
+- If RTK is unavailable or not active for the current agent, use the normal CLI with quiet flags and bounded output. Do not assume an ordinary shell command is automatically rewritten.
+- Never skip required validation merely to reduce output. Keep concise summaries and preserve detailed logs locally when useful.
+
+## Safe output handling
+
+- Prefer tool-native concise options such as `pytest -q` or `ctest --output-on-failure` where suitable.
+- For verbose commands, redirect output to a local temporary log and report relevant errors; do not expose secrets from logs.
+- Treat filtered output as a presentation aid, not proof that omitted checks passed.

@@ -10,7 +10,7 @@ This guide provides an end-to-end specification on how to deploy, configure, and
 
 1. [Architecture & Layered Positioning (Harness + Progressive Disclosure)](#1-architecture--layered-positioning-harness--progressive-disclosure)
 2. [Four Mainstream Tools: Loading Mechanisms & Adaptation Strategies](#2-four-mainstream-tools-loading-mechanisms--adaptation-strategies)
-3. [Physical Security Firewall: PreToolUse Hardware Interception Hooks (.claude/settings.json)](#3-physical-security-firewall-pretooluse-hardware-interception-hooks-claudesettingsjson)
+3. [Claude Code Client Hooks: PreToolUse (.claude/settings.json)](#3-claude-code-client-hooks-pretooluse-claudesettingsjson)
 4. [Cross-Tool Automated Deployment & Online Update Pipeline (deploy-agents)](#4-cross-tool-automated-deployment--online-update-pipeline-deploy-agents)
    - 4.1 Script Core Architecture & Pipeline
    - 4.2 Windows Deployment (`deploy-agents.ps1`)
@@ -29,7 +29,7 @@ This guide provides an end-to-end specification on how to deploy, configure, and
 
 ## 1. Architecture & Layered Positioning (Harness + Progressive Disclosure)
 
-To maintain high AI compliance across diverse tools without context dilution or $O(N^2)$ quadratic Token inflation, this specification implements a **"High-Frequency Resident Skeleton + Progressive On-Demand Reading"** design:
+This repository organizes reusable rules as a **project entry point plus on-demand sub-rules** so teams can adapt the baseline and avoid loading unrelated guidance. Actual discovery and context cost depend on the host tool:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -43,8 +43,8 @@ To maintain high AI compliance across diverse tools without context dilution or 
 │ 2. Project Root Level (Project AGENTS.md)                              │
 │    - Role: Deterministic engineering context & sub-rule/skill router   │
 │    - Content: Concrete CLI command slots, tech stack, red lines       │
-│    - Scope: Repository-wide resident (<1000 Tokens)                    │
-│    - Bridges: CLAUDE.md / .github/copilot-instructions.md / ZED.md     │
+│    - Scope: Repository-wide; loading depends on the host tool          │
+│    - Bridges: CLAUDE.md / .github/copilot-instructions.md              │
 └──────────────────┬─────────────────────────────────┬───────────────────┘
                    │ Progressive On-Demand Reading   │ Only as needed in submodules
 ┌──────────────────▼───────────────┐ ┌───────────────▼───────────────────┐
@@ -60,97 +60,41 @@ To maintain high AI compliance across diverse tools without context dilution or 
 1. **Single Source of Truth**: The root `AGENTS.md` serves as the core. All tools point to it via lightweight symlinks or bridge files, eliminating configuration drift.
 2. **Progressive Disclosure**:
    - Rules are loaded dynamically when specific scenarios are triggered.
-   - Skills use a two-phase discovery mechanism: a ~750 Token static directory prefix is injected into system prompts (leveraging Prompt Cache at a 90% discount), and full skill instructions are only fetched when activated.
-3. **Physical Security Firewall**: Operating-system-level pre-tool execution hooks prevent hallucinations from corrupting production branches or leaking credentials.
+   - Skill discovery, loading, and prompt-cache behavior depend on the host tool and its configuration; deploying files does not guarantee automatic loading.
+3. **Client-Side Risk Guardrails**: Claude Code hooks can reject selected matching tool calls or emit warnings. They are client-side checks, not operating-system or server-side security controls.
 
 ---
 
-## 2. Four Mainstream Tools: Loading Mechanisms & Adaptation Strategies
+## 2. Configuration Scope by Tool
 
-| Dimension | Claude Code | Antigravity IDE | Codex / GitHub Copilot | Zed IDE |
-| :--- | :--- | :--- | :--- | :--- |
-| **Project Entry** | Looks for root `CLAUDE.md` | Loads root `AGENTS.md` or `GEMINI.md` | Reads root `AGENTS.md` or `.github/copilot-instructions.md` | Natively reads root `ZED.md` |
-| **Global Entry** | `~/.claude/CLAUDE.md` | `~/.gemini/config/rules/` or `GEMINI.md` | User global prompt or Copilot instructions | `~/.config/zed/settings.json` |
-| **Directory Rules** | Recursively supports nested `CLAUDE.md` | Supports `.agents/` cascade | Contextually linked or file-referenced | Inherits workspace folder context |
-| **Execution Style** | Native Bash, high execution velocity | Planning Mode, Task scheduling, browser/terminal | Code completion & inline prompt-driven | Rust core, ultra-fast streaming |
-| **Physical Defense**| Supports `.claude/settings.json` PreToolUse | Built-in approvals and workspace sandbox | Copilot policies and scanning | Shell permission controls |
-| **Bridge Strategy** | Symlink `CLAUDE.md -> AGENTS.md` | Reads project `AGENTS.md` directly | Symlink `.github/copilot-instructions.md -> ../AGENTS.md` | Symlink `ZED.md -> AGENTS.md` |
+Rule discovery, inheritance, global settings, and skill loading are tool- and version-specific. This table lists files and deployment actions provided by this repository; file presence does not guarantee automatic discovery.
+
+| Tool | Provided here | Not provided by the deployment script |
+| :--- | :--- | :--- |
+| Claude Code | `CLAUDE.md` bridge, `.claude/skills/`, project PreToolUse hooks, `~/.claude/CLAUDE.md` | Server-side Git protection; cross-client hooks |
+| Antigravity | Project `.agents/` files; `--global` writes `~/.gemini/AGENTS.md` | Loading verification for every version/settings combination |
+| Codex | Project `AGENTS.md` and `.agents/skills/` | Codex global rules or hook configuration |
+| GitHub Copilot | `.github/copilot-instructions.md` bridge | Copilot policy configuration |
+| Zed | Reusable `AGENTS.md` file | Zed-specific configuration/bridge |
+| Pi / OpenCode | No dedicated entry point | Auto-discovery, global install, or hook wiring |
+
+Verify current loading paths against each target tool's official documentation before deployment.
+---
+
+## 3. Claude Code Client Hooks: PreToolUse (.claude/settings.json)
+
+### Capability boundaries
+The hooks in `.claude/settings.json` run only before matching tool calls in the Claude Code client. `guard.mjs` rejects selected command patterns; many other cases only emit a warning and allow the command. Regex matching cannot reliably identify every shell wrapper, alias, or command form. Use server-side branch protection and least-privilege credentials for shared repositories.
+
+### Configuration and implementation
+
+The installer copies [`.claude/settings.json`](.claude/settings.json) and deploys [`.claude/hooks/guard.mjs`](.claude/hooks/guard.mjs) plus [`guard-write.mjs`](.claude/hooks/guard-write.mjs). Inspect those source files directly; do not copy hook examples from older guide versions because the protocol and implementation can change.
 
 ---
 
-## 3. Physical Security Firewall: PreToolUse Hardware Interception Hooks (.claude/settings.json)
+## 4. Cross-Tool Deployment & Template Updates (deploy-agents)
 
-### Why Software Rules Alone Are Not Enough
-Even advanced models carry a 1%–5% probability of hallucination or misunderstanding (e.g., executing a direct `git commit` on `develop` or running `git push --force`).
-
-The PreToolUse security hooks in `.claude/settings.json` intercept commands at the OS process level before execution. When a prohibited command pattern is detected, the hook prints an alert and returns `exit 1`, physically blocking execution.
-
-### Interceptor Configuration (`.claude/settings.json`)
-
-```json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "shell": "bash",
-            "command": "case \"$CLAUDE_TOOL_INPUT\" in *\"git commit\"*) BRANCH=$(git branch --show-current 2>/dev/null); case \"$BRANCH\" in develop|master|main|release*|staging) echo \"[SECURITY-HOOK] ❌ Direct commits on protected branch $BRANCH are forbidden! Work in a temporary branch.\" >&2; exit 1;; esac;; *\"git merge\"*|*\"git push\"*) BRANCH=$(git branch --show-current 2>/dev/null); case \"$BRANCH\" in develop|master|main|release*|staging) echo \"[SECURITY-HOOK] ⚠️ merge/push on protected branch $BRANCH requires explicit human authorization.\" >&2;; esac;; esac"
-          },
-          {
-            "type": "command",
-            "shell": "bash",
-            "command": "case \"$CLAUDE_TOOL_INPUT\" in *\"git push\"*\"--force\"*|*\"git push\"*\"--force-with-lease\"*|*\"git push\"*\"-f\"*) echo \"[SECURITY-HOOK] ❌ force push / history rewrite is PERMANENTLY FORBIDDEN!\" >&2; exit 1;; *\"git push\"*\"--delete\"*|*\"git push\"*\" :\"*) case \"$CLAUDE_TOOL_INPUT\" in *\" :develop\"*|*\" :master\"*|*\" :main\"*|*\" :release\"*|*\" :staging\"*|*\"--delete develop\"*|*\"--delete master\"*|*\"--delete main\"*|*\"--delete release\"*|*\"--delete staging\"*) echo \"[SECURITY-HOOK] ❌ Deleting protected remote branch is PERMANENTLY FORBIDDEN!\" >&2; exit 1;; *) echo \"[SECURITY-HOOK] ⚠️ Deleting temporary remote branch requires explicit human authorization.\" >&2;; esac;; esac"
-          },
-          {
-            "type": "command",
-            "shell": "bash",
-            "command": "case \"$CLAUDE_TOOL_INPUT\" in *\"git rebase\"*) BRANCH=$(git branch --show-current 2>/dev/null); case \"$BRANCH\" in develop|master|main|release*|staging) echo \"[SECURITY-HOOK] ❌ Rebase on protected branch $BRANCH is forbidden! Use merge.\" >&2; exit 1;; esac;; esac"
-          },
-          {
-            "type": "command",
-            "shell": "bash",
-            "command": "case \"$CLAUDE_TOOL_INPUT\" in *\"rm -rf\"*|*\"rm -r \"*|*\"rm -fr\"*) echo \"[SECURITY-HOOK] ⚠️ rm -rf detected. Verify target path is not a critical source folder!\" >&2;; esac"
-          },
-          {
-            "type": "command",
-            "shell": "bash",
-            "command": "case \"$CLAUDE_TOOL_INPUT\" in *\"git reset --hard\"*) echo \"[SECURITY-HOOK] ⚠️ git reset --hard discards workspace changes permanently!\" >&2;; esac"
-          },
-          {
-            "type": "command",
-            "shell": "bash",
-            "command": "case \"$CLAUDE_TOOL_INPUT\" in *\"git add -A\"*|*\"git add .\"*) echo \"[SECURITY-HOOK] ⚠️ Blind staging via git add . is forbidden! Use git add <explicit-path>.\" >&2;; esac"
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "shell": "bash",
-            "command": "case \"$CLAUDE_TOOL_INPUT\" in *\".pro\"*|*\"CMakeLists.txt\"*|*\"package.json\"*|*\"Cargo.toml\"*|*\"pom.xml\"*|*\"public_struct.h\"*|*\"protofile/\"*|*\"license\"*) echo \"[SECURITY-HOOK] 🔴 Modifying high-risk file (build config/core struct/protocol/license) requires consulting .agents/rules/security-boundary.md and confirming impact with human!\" >&2;; esac"
-          },
-          {
-            "type": "command",
-            "shell": "bash",
-            "command": "case \"$CLAUDE_TOOL_INPUT\" in *\".pem\"*|*\".key\"*|*\".token\"*|*\"credentials\"*|*\"id_rsa\"*|*\"secret\"*) echo \"[SECURITY-HOOK] 🔐 Credential protection: Hardcoding secrets is strictly prohibited!\" >&2;; esac"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
----
-
-## 4. Cross-Tool Automated Deployment & Online Update Pipeline (deploy-agents)
-
-Automated scripts streamline deployment and non-destructive updating:
+The scripts deploy files to configured paths. Tool-specific loading behavior is not guaranteed by file deployment; `-Update` backs up replaced managed paths but still replaces them:
 - **Windows PowerShell**: [`deploy-agents.ps1`](deploy-agents.ps1)
 - **Linux / macOS Bash**: [`deploy-agents.sh`](deploy-agents.sh)
 
@@ -160,23 +104,21 @@ Automated scripts streamline deployment and non-destructive updating:
 [ Execute Deployment Script ]
        │
        ▼
- Phase 1: Online Update (-Update)
-   ├─ Git upstream sync (git pull --rebase)
-   ├─ Tool updates (comet update)
-   └─ Skills refresh (npx -y skills@latest update -y) & skills-lock.json sync
+ Phase 1: Template Repository Update (-Update)
+   └─ Fast-forward update of this template repository (`git pull --ff-only`); no global CLI upgrade or third-party updater in the caller directory
        │
        ▼
  Phase 2: User Global Rules (-Global)
    ├─ Claude Code global: ~/.claude/CLAUDE.md
-   └─ Antigravity IDE global: ~/.gemini/config/rules/global_agents.md
+   └─ Antigravity IDE global: ~/.gemini/AGENTS.md
        │
        ▼
  Phase 3: Project Rules & Cross-Tool Bridges
    ├─ Root AGENTS.md (generates AGENTS.template.md if already exists)
    ├─ CLAUDE.md -> AGENTS.md (symlink/reference)
    ├─ .github/copilot-instructions.md -> ../AGENTS.md
-   ├─ ZED.md -> AGENTS.md
-   └─ PreToolUse security hooks: .claude/settings.json
+   ├─ Zed uses the provided AGENTS.md; no Zed-specific configuration is created
+   └─ Claude Code PreToolUse client hooks: .claude/settings.json
        │
        ▼
  Phase 4: Sub-Rules (.agents/rules/*.md)
@@ -185,7 +127,7 @@ Automated scripts streamline deployment and non-destructive updating:
  Phase 5: Skills Library (.agents/skills/ & .claude/skills/)
    ├─ Copy skills to .agents/skills/
    ├─ Link to .claude/skills/ (Windows: Junction, Linux/macOS: Symlink)
-   └─ Synchronize skills-lock.json
+   └─ Copy skills-lock.json metadata
        │
        ▼
  Phase 6: Dynamic Task Tracking Scaffold
@@ -197,6 +139,7 @@ Automated scripts streamline deployment and non-destructive updating:
        │
        ▼
  Phase 8: Optional Comet CLI Init (-CometInit)
+   └─ Runs `comet init` only when explicitly requested
 ```
 
 ---
@@ -210,8 +153,8 @@ Automated scripts streamline deployment and non-destructive updating:
 
 **Parameters**:
 - `-ProjectPath` (Positional 0): Path to target project. If omitted with `-Global`, only updates user global rules.
-- `-Global` (`-g`): Deploys `Global AGENTS.md` to `~/.claude/CLAUDE.md` and `~/.gemini/config/rules/global_agents.md`.
-- `-Update` (`-u`): Online update mode. Refreshes upstream templates, checks `comet`, updates skills via `npx skills`, preserves existing `AGENTS.md`, and generates `AGENTS.template.md`.
+- `-Global` (`-g`): Deploys `Global AGENTS.md` to `~/.claude/CLAUDE.md` and `~/.gemini/AGENTS.md`.
+- `-Update` (`-u`): Fast-forwards the template repository and syncs files to the target. Existing managed rules, hooks, skills, and lock metadata are backed up as `.bak.<timestamp>` before replacement. It does not upgrade global CLIs.
 - `-CometInit` (`-c`): Automatically executes `comet init` in the target project if Comet CLI is installed.
 
 **Examples**:
@@ -280,7 +223,7 @@ To enable Claude Code to discover skills located in `.agents/skills/`:
 ---
 
 ### 5.2 Project Router: `Project AGENTS.md`
-- Repository-wide hub (<1000 Tokens).
+- Adaptable repository-level template.
 - Enforces standard CLI command slots (install, dev, build, targeted test, lint, format, migration), architecture red lines, and the **Rule & Skill Dispatching Matrix**.
 
 ---
@@ -321,7 +264,7 @@ Loaded progressively on-demand:
 > **Answer**: If `AGENTS.md` already exists, the script **never overwrites it**. Instead, it generates [`AGENTS.template.md`](AGENTS.template.md) for diff reference, while safely updating sub-rules, skills, and version locks.
 
 ### Q3: How do 40+ skills avoid blowing up the context window?
-> **Answer**: Two-stage progressive disclosure. The agent only loads a static index (~750 Tokens) into the prefix, which benefits from Prompt Cache discounts (90% lower cost). Full skill markdown is only read when explicitly triggered.
+> **Answer**: It depends on how the host discovers and loads Skills. Do not assume fixed metadata costs or cache discounts; keep only useful Skills enabled and verify behavior in the target host.
 
 ### Q4: What is the 8 High-Risk Operations Protection Matrix?
 > **Answer**: Defined in `security-boundary.md`, requiring human confirmation before:

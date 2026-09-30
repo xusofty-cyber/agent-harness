@@ -84,6 +84,88 @@ SOURCE_SKILLS_DIR="${SCRIPT_DIR}/.agents/skills"
 SOURCE_SKILLS_LOCK="${SCRIPT_DIR}/skills-lock.json"
 SOURCE_CLAUDE_SETTINGS="${SCRIPT_DIR}/.claude/settings.json"
 
+# Back up managed target paths before an explicit update replaces them.
+backup_path() {
+    local path="$1"
+    if [ -e "$path" ] || [ -L "$path" ]; then
+        cp -a "$path" "${path}.bak.$(date +%Y%m%d%H%M%S)"
+    fi
+}
+
+prompt_yes_no() {
+    local prompt="$1"
+    local answer
+    if [ ! -t 0 ]; then
+        echo "  [i] 非交互终端，跳过：${prompt}"
+        return 1
+    fi
+    read -r -p "${prompt} [y/N] " answer
+    [[ "$answer" =~ ^[Yy]$ ]]
+}
+
+guide_optional_cli_tools() {
+    local target="$1"
+    local install_codegraph='curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.sh | sh'
+    local install_rtk='curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh'
+
+    echo -e "\n${CYAN}>>> 可选 CLI 工具（Ponytail / Caveman 已作为 Skill 随项目部署）${NC}"
+
+    if command -v codegraph >/dev/null 2>&1; then
+        echo -e "  ${GREEN}[√] 已检测到 CodeGraph CLI: $(command -v codegraph)${NC}"
+    else
+        echo "  CodeGraph CLI 未安装。它会连接 Agent，并在项目中生成本地索引。"
+        if prompt_yes_no "现在安装 CodeGraph CLI？安装后还会单独询问是否配置 Agent 与项目索引。"; then
+            if ! command -v curl >/dev/null 2>&1; then
+                echo "  [!] 缺少 curl。请按官方说明安装：${install_codegraph}"
+                echo "  安装后：codegraph install；进入目标项目运行 codegraph init。"
+            elif sh -c "$install_codegraph"; then
+                echo -e "  ${GREEN}[√] CodeGraph CLI 安装器已执行。请重开终端，确认 codegraph 在 PATH 中。${NC}"
+            else
+                echo "  [!] CodeGraph 安装失败。官方命令：${install_codegraph}"
+            fi
+        else
+            echo "  安装命令：${install_codegraph}"
+            echo "  安装后：codegraph install；进入目标项目运行 codegraph init。"
+        fi
+    fi
+
+    if command -v codegraph >/dev/null 2>&1; then
+        if prompt_yes_no "现在运行 codegraph install 配置 Agent，并在目标项目运行 codegraph init 建索引？"; then
+            codegraph install || echo "  [!] Agent 配置未完成，请按提示检查后重试。"
+            (cd "$target" && codegraph init) || echo "  [!] 项目索引初始化未完成，可稍后在项目目录运行 codegraph init。"
+        else
+            echo "  后续配置命令：codegraph install；然后在项目目录运行：codegraph init"
+        fi
+    fi
+
+    if command -v rtk >/dev/null 2>&1 && rtk gain >/dev/null 2>&1; then
+        echo -e "  ${GREEN}[√] 已检测到 Rust Token Killer (RTK) CLI。${NC}"
+    else
+        echo "  RTK CLI 未安装或检测到的 rtk 不是 Rust Token Killer。"
+        if prompt_yes_no "现在安装 Rust Token Killer (RTK) CLI？"; then
+            if ! command -v curl >/dev/null 2>&1; then
+                echo "  [!] 缺少 curl。请按官方说明安装：${install_rtk}"
+                echo "  安装后：运行 rtk gain 验证，再进入目标项目运行 rtk init。"
+            elif sh -c "$install_rtk"; then
+                echo -e "  ${GREEN}[√] RTK 安装器已执行。请重开终端并运行 rtk gain 验证。${NC}"
+            else
+                echo "  [!] RTK 安装失败。官方命令：${install_rtk}"
+            fi
+        else
+            echo "  安装命令：${install_rtk}（安装后用 rtk gain 验证，避免同名工具混淆）"
+            echo "  验证后：进入目标项目运行 rtk init 配置支持的 Agent Hook。"
+        fi
+    fi
+
+    if command -v rtk >/dev/null 2>&1 && rtk gain >/dev/null 2>&1; then
+        if prompt_yes_no "现在在目标项目运行 rtk init 配置 RTK Hook？"; then
+            (cd "$target" && rtk init) || echo "  [!] RTK 项目初始化未完成，请按当前版本提示处理。"
+        else
+            echo "  后续项目配置命令：cd \"${target}\" && rtk init"
+        fi
+    fi
+}
+
 # ==============================================================================
 # 1. Online Update Phase (--update)
 # ==============================================================================
@@ -95,7 +177,7 @@ if [ "$DO_UPDATE" = true ]; then
     # A. Check Git upstream
     if git -C "${SCRIPT_DIR}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
         echo -e "${YELLOW}>>> 从 Git 远程上游拉取最新规则与技能模板...${NC}"
-        if git -C "${SCRIPT_DIR}" pull --rebase; then
+        if git -C "${SCRIPT_DIR}" pull --ff-only; then
             echo -e "  ${GREEN}[√] 本地模板已与远程上游同步。${NC}"
         else
             echo -e "  ${YELLOW}[!] Git pull 出现告警，将继续使用当前模板。${NC}"
@@ -104,20 +186,7 @@ if [ "$DO_UPDATE" = true ]; then
         echo -e "  ${NC}[i] 当前模板目录非 Git 仓库，跳过 git pull。${NC}"
     fi
 
-    # B. Check Harness CLI updates
-    echo -e "\n${YELLOW}>>> 检查 Harness 生态工具更新...${NC}"
-    if command -v comet >/dev/null 2>&1; then
-        echo -e "  ${NC}[i] 发现 Comet CLI，执行 comet update...${NC}"
-        comet update || true
-    elif command -v npm >/dev/null 2>&1; then
-        echo -e "  ${NC}[i] Comet CLI 未安装。如需安装: npm install -g @rpamis/comet${NC}"
-    fi
-
-    # C. Update Skills via npx skills
-    if command -v npx >/dev/null 2>&1; then
-        echo -e "\n${YELLOW}>>> 从网络上游通过 'npx skills@latest update' 更新全套技能库...${NC}"
-        npx -y skills@latest update -y || echo -e "  ${YELLOW}[!] npx skills update 出现告警，继续使用本地技能。${NC}"
-    fi
+    echo -e "  ${NC}[i] 仅更新本模板仓库；不会升级全局 CLI，也不会在当前目录运行第三方技能更新器。${NC}"
 fi
 
 # ==============================================================================
@@ -206,13 +275,14 @@ else
     echo "  [i] 目标项目已存在 copilot-instructions.md，跳过。"
 fi
 
-# Note: Zed IDE natively reads AGENTS.md — no separate ZED.md bridge needed.
+# Note: no Zed-specific configuration is created.
 
 # Claude Code PreToolUse Security Hooks (.claude/settings.json + .claude/hooks/)
 if [ -f "${SOURCE_CLAUDE_SETTINGS}" ]; then
     mkdir -p "${TARGET_PROJECT_DIR}/.claude"
     TARGET_CLAUDE_SETTINGS="${TARGET_PROJECT_DIR}/.claude/settings.json"
     if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_CLAUDE_SETTINGS}" ]; then
+        if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_CLAUDE_SETTINGS}"; fi
         cp -f "${SOURCE_CLAUDE_SETTINGS}" "${TARGET_CLAUDE_SETTINGS}"
         echo -e "  ${GREEN}[√] 已部署 Claude Code 安全拦截钩子: .claude/settings.json${NC}"
     else
@@ -223,7 +293,15 @@ if [ -f "${SOURCE_CLAUDE_SETTINGS}" ]; then
     if [ -d "${SOURCE_HOOKS_DIR}" ]; then
         TARGET_HOOKS_DIR="${TARGET_PROJECT_DIR}/.claude/hooks"
         mkdir -p "${TARGET_HOOKS_DIR}"
-        cp -f "${SOURCE_HOOKS_DIR}"/*.mjs "${TARGET_HOOKS_DIR}/" 2>/dev/null || true
+        for hook in "${SOURCE_HOOKS_DIR}"/*.mjs; do
+            [ -f "$hook" ] || continue
+            hook_name=$(basename "$hook")
+            target_hook="${TARGET_HOOKS_DIR}/${hook_name}"
+            if [ "$DO_UPDATE" = true ] || [ ! -f "$target_hook" ]; then
+                if [ "$DO_UPDATE" = true ]; then backup_path "$target_hook"; fi
+                cp -f "$hook" "$target_hook"
+            fi
+        done
         echo -e "  ${GREEN}[√] 已部署钩子脚本: .claude/hooks/${NC}"
     fi
 fi
@@ -236,6 +314,7 @@ if [ -d "${SOURCE_RULES_DIR}" ]; then
         if [ -f "$rule" ]; then
             rule_name=$(basename "$rule")
             if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_RULES_DIR}/${rule_name}" ]; then
+                if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_RULES_DIR}/${rule_name}"; fi
                 cp -f "$rule" "${TARGET_RULES_DIR}/${rule_name}"
                 echo -e "  ${GREEN}[√] 已同步子规则: .agents/rules/${rule_name}${NC}"
             fi
@@ -261,6 +340,7 @@ if [ -d "${SOURCE_SKILLS_DIR}" ]; then
             dest_skill="${TARGET_SKILLS_DIR}/${skill_name}"
 
             if [ "$DO_UPDATE" = true ] || [ ! -d "${dest_skill}" ]; then
+                if [ "$DO_UPDATE" = true ]; then backup_path "${dest_skill}"; fi
                 rm -rf "${dest_skill}"
                 cp -r "${skill_path}" "${dest_skill}"
                 echo -e "  ${GREEN}[√] 已部署技能: .agents/skills/${skill_name}${NC}"
@@ -281,6 +361,7 @@ fi
 # Sync skills-lock.json
 if [ -f "${SOURCE_SKILLS_LOCK}" ]; then
     if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_PROJECT_DIR}/skills-lock.json" ]; then
+        if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_PROJECT_DIR}/skills-lock.json"; fi
         cp -f "${SOURCE_SKILLS_LOCK}" "${TARGET_PROJECT_DIR}/skills-lock.json"
         echo -e "  ${GREEN}[√] 已同步 skills-lock.json${NC}"
     fi
@@ -337,16 +418,16 @@ if [ "$DO_COMET_INIT" = true ]; then
     fi
 fi
 
+guide_optional_cli_tools "$TARGET_PROJECT_DIR"
+
 echo -e "\n${GREEN}==================================================${NC}"
 echo -e "${GREEN} 部署完成！${NC}"
 echo -e "${CYAN} 目标项目: ${TARGET_PROJECT_DIR}${NC}"
 echo -e "${CYAN} 规则目录: ${TARGET_RULES_DIR}${NC}"
 echo -e "${CYAN} 技能目录: ${TARGET_SKILLS_DIR}${NC}"
 if command -v comet >/dev/null 2>&1; then
-    echo -e "\n${YELLOW}[TIP] 检测到当前系统已安装 Comet CLI。若需启用终端原生状态机与 Hooks，可运行:${NC}"
-    echo -e "      cd \"${TARGET_PROJECT_DIR}\" && comet init"
+    echo -e "\n${YELLOW}[TIP] 检测到 Comet CLI。请按当前版本文档为该项目选择并配置工作流。${NC}"
 else
-    echo -e "\n${NC}[i] 会话级三级规则与 30+ 原生技能已全部就绪。${NC}"
-    echo -e "    若需使用终端原生 comet doctor / comet status 等 CLI 工具，可安装: npm install -g @rpamis/comet"
+    echo -e "\n${NC}[i] 规则与技能文件已部署；是否自动加载取决于宿主工具。${NC}"
 fi
 echo -e "${GREEN}==================================================${NC}"

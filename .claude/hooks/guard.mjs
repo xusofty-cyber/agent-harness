@@ -70,6 +70,8 @@ const PROTECTED_BRANCHES = [
   "staging",
 ];
 
+const PROTECTED_BRANCH_PATTERN = "(?:develop|master|main|staging|release[^\\s:]*)";
+
 function isProtectedBranch(branch) {
   if (!branch) return false;
   if (PROTECTED_BRANCHES.includes(branch)) return true;
@@ -105,29 +107,18 @@ if (
 }
 
 // 3. Delete protected remote branches
-if (/\bgit\s+push\b/.test(command) && /--delete\b/.test(command)) {
-  for (const pb of PROTECTED_BRANCHES) {
-    if (command.includes(`--delete ${pb}`) || command.includes(`--delete ${pb} `)) {
-      deny(
-        `[SECURITY-HOOK] ❌ 删除受保护远程分支（${pb}）永久禁止！`
-      );
-    }
+if (/\bgit\s+push\b/.test(command)) {
+  const deletedBranch = new RegExp(
+    `--delete(?:=|\\s+)(${PROTECTED_BRANCH_PATTERN})(?=\\s|$)`
+  ).exec(command);
+  const deletedRef = new RegExp(
+    `(?:^|\\s):(?:refs/heads/)?(${PROTECTED_BRANCH_PATTERN})(?=\\s|$)`
+  ).exec(command);
+  if (deletedBranch || deletedRef) {
+    deny(
+      `[SECURITY-HOOK] ❌ 删除受保护远程分支（${(deletedBranch || deletedRef)[1]}）永久禁止！`
+    );
   }
-  // Also check : syntax for branch deletion
-  for (const pb of PROTECTED_BRANCHES) {
-    if (new RegExp(`\\s:${pb}\\b`).test(command)) {
-      deny(
-        `[SECURITY-HOOK] ❌ 删除受保护远程分支（${pb}）永久禁止！`
-      );
-    }
-  }
-}
-
-// Also check release* with : syntax
-if (/\bgit\s+push\b/.test(command) && /\s:release/.test(command)) {
-  deny(
-    `[SECURITY-HOOK] ❌ 删除受保护远程分支（release*）永久禁止！`
-  );
 }
 
 // 4. Rebase on protected branches
@@ -152,6 +143,16 @@ if (/\bgit\s+(merge|push)\b/.test(command)) {
       `受保护分支 ${branch} 上的 merge/push —— 必须经人类明确授权方可执行；未授权请停下确认。`
     );
   }
+}
+
+// Push arguments can target a protected branch even when the current branch is not protected.
+const pushArguments = /\bgit\s+push\b([\s\S]*)/.exec(command)?.[1] || "";
+if (
+  new RegExp(
+    `(?:^|\\s)(?:[^\\s:]+:)?(?:refs/heads/)?${PROTECTED_BRANCH_PATTERN}(?=\\s|$)`
+  ).test(pushArguments)
+) {
+  warn("push refspec 目标可能是受保护分支——请先确认目标并取得明确授权。");
 }
 
 // 6. Recursive delete
