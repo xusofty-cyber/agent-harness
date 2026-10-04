@@ -35,14 +35,14 @@ This repository organizes reusable rules as a **project entry point plus on-dema
 ┌────────────────────────────────────────────────────────────────────────┐
 │ 1. Global Level (Global AGENTS.md)                                     │
 │    - Role: Cross-project engineering constitution & security baseline │
-│    - Content: Concise communication, read/fetch/speak gates, Git rules │
+│    - Content: No-nonsense gates, Git rules, Dual-Track State Memory    │
 │    - Scope: System-wide resident across all user projects (~1000 Tok) │
 └───────────────────────────────────┬────────────────────────────────────┘
                                     │ Inherited (non-redundant)
 ┌───────────────────────────────────▼────────────────────────────────────┐
 │ 2. Project Root Level (Project AGENTS.md)                              │
 │    - Role: Deterministic engineering context & sub-rule/skill router   │
-│    - Content: Concrete CLI command slots, tech stack, red lines       │
+│    - Content: Concrete CLI slots, tech stack, red lines, state memory  │
 │    - Scope: Repository-wide; loading depends on the host tool          │
 │    - Bridges: CLAUDE.md / .github/copilot-instructions.md              │
 └──────────────────┬─────────────────────────────────┬───────────────────┘
@@ -218,13 +218,18 @@ To enable Claude Code to discover skills located in `.agents/skills/`:
   1. **No-Nonsense Communication**: Direct answers, conclusions first, Diff and evidence before explanations;
   2. **Ponytail Minimal Code**: Standard library first, 1 line over 10 lines, no speculative abstractions;
   3. **Token Discipline**: Controlled reading, filtered test commands, log redirection, single-agent default;
-  4. **3-Step Session Ceremony**: Read lessons and todo at start $\rightarrow$ check off items in progress $\rightarrow$ record lesson learned upon correction.
+  4. **Session Ritual & Dual-Track State Memory (Iron Law)**:
+     - **Session Start**: Prioritize reading root `PROJECT_CONTEXT.md` (long-term architectural memory) and `SESSION_STATE.md` (short-term workbench breakpoint) to achieve instant contextual awareness without re-explaining history;
+     - **In-Progress**: Multi-step plan tracking, autonomous stack-trace diagnosis, and strict verification evidence gate;
+     - **Session Finish (State Solidification)**: Whenever completing a coding session, new feature development, or bug fix, **MUST update/sync two files in the project root**:
+       - **`PROJECT_CONTEXT.md` (Project Panorama & Evolution Chronicle / Long-Term Memory)**: Serves as the **Single Source of Truth** and global architecture manual. Records: ① System architecture & topology (e.g. OpenClaw 3-tier architecture: Go bootloader, Node.js scheduler core, Web/Electron shell); ② Core engineering hard rules (AST deep obfuscation pipeline, Nuitka C++ native compilation, physical USB hardware seals); ③ Branch matrix & role division (main, lite-edition, standalone-app); ④ Version evolution chronicle (v1.0 to latest technical decisions). Value: Anyone or any AI can grasp the full system in seconds on any machine at any time without breaking conventions.
+       - **`SESSION_STATE.md` (Session State & Real-Time Breakpoint / Short-Term Workbench)**: Serves as the task status board and breakpoint resumption engine. Records: ① Current dev context (branch, latest commit hash, remote sync status); ② Latest fix/feature list (problems solved, key files touched); ③ Next Steps (unverified items, edge cases, pending build commands); ④ Known risks memo (file locks, old binaries). Value: Enables subsequent AI sessions to resume precisely from the breakpoint without re-explaining history.
 
 ---
 
 ### 5.2 Project Router: `Project AGENTS.md`
 - Adaptable repository-level template.
-- Enforces standard CLI command slots (install, dev, build, targeted test, lint, format, migration), architecture red lines, and the **Rule & Skill Dispatching Matrix**.
+- Enforces standard CLI command slots (install, dev, build, targeted test, lint, format, migration), architecture red lines, the **Rule & Skill Dispatching Matrix**, and **Mandatory Panorama & Breakpoint Memory** (`PROJECT_CONTEXT.md` & `SESSION_STATE.md`).
 
 ---
 
@@ -247,7 +252,12 @@ Loaded progressively on-demand:
 
 ### 1. Software Engineering Track (Strict Gate)
 - Scope: APIs, features, bug fixes, refactoring.
-- Rules: Always work on temporary branches (`feature/*`, `fix/*`), TDD red-green cycle, verify with actual test runs, follow Git authorization model.
+- Rules:
+  - Prioritize reading `PROJECT_CONTEXT.md` and `SESSION_STATE.md` at session start;
+  - Always work on temporary branches (`feature/*`, `fix/*`);
+  - TDD red-green cycle, verify with actual test runs;
+  - Follow Git authorization model;
+  - **Dual-Track State Synchronization**: Enforce updating `PROJECT_CONTEXT.md` and `SESSION_STATE.md` in the project root upon completing any session, feature, or fix.
 
 ### 2. Technical Documentation Track (Lightweight Bypass)
 - Scope: Markdown documentation, READMEs, API specifications, Word/PDF reports.
@@ -276,6 +286,11 @@ Loaded progressively on-demand:
 > 6. Altering license, cryptography, or auth code;
 > 7. Modifying `.gitignore` or CI/CD pipelines;
 > 8. Making large cross-module changes spanning 3+ files.
+
+### Q5: Why mandate updating `PROJECT_CONTEXT.md` and `SESSION_STATE.md` on session completion?
+> **Answer**: Long agent conversations suffer from context compression, truncation, or unexpected disconnects.
+> - `PROJECT_CONTEXT.md` (Long-Term Memory) stores unchanging architectural truths, branch topologies, hard constraints, and technical evolution milestones, guaranteeing zero architectural drift across developers or machines.
+> - `SESSION_STATE.md` (Short-Term Workbench) pins exact commit hashes, touched files, uncompleted Next Steps, and environment quirks, eliminating the overhead of re-explaining context and ensuring seamless breakpoint continuation.
 
 ---
 

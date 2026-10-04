@@ -288,11 +288,35 @@ Query the configured CodeGraph MCP tool for `OrderService::calculateDiscount`.
 
 ---
 
-### 3.9 3-Step Session Ceremony & Dynamic Memory Loop
+### 3.9 Session Ceremony & Dual-Track State Memory Loop (`PROJECT_CONTEXT.md` & `SESSION_STATE.md`)
 
-1. **Session Start**: Read [`tasks/lessons.md`](tasks/lessons.md) and [`tasks/todo.md`](tasks/todo.md);
-2. **In-Progress**: Maintain checklist for $\ge 3$-step tasks; stop and re-plan if assumptions fail;
-3. **Session Finish**: Update todo status; record mistakes and corrections into `tasks/lessons.md`. **Never repeat the same mistake twice.**
+Strictly enforce session lifecycle closure and dual-track state memory to ensure seamless breakpoint continuation and long-term architectural asset accumulation:
+1. **Session Start**:
+   - Prioritize reading `PROJECT_CONTEXT.md` (long-term architectural memory) and `SESSION_STATE.md` (short-term workbench breakpoint) in the project root to restore context and architecture instantly without re-explaining history;
+   - If present and relevant, inspect `tasks/todo.md`, `tasks/lessons.md`, and current branch status.
+2. **In-Progress**:
+   - Maintain checklists for multi-step tasks; re-plan immediately if assumptions fail;
+   - **Autonomous Troubleshooting**: Read trace/stacks, isolate root causes, craft fixes, and verify independently;
+   - **Strict Verification Gate**: No task is complete without physical terminal output evidence (passing tests, runs, or diffs).
+3. **Session Finish & State Solidification**:
+   - **Dual-Track State Synchronization Law**: Whenever completing a coding session, new feature development, or bug fix, **MUST update/sync two files in the project root**:
+     - **`PROJECT_CONTEXT.md` (Project Panorama & Evolution Chronicle / Long-Term Memory)**:
+       - **Role**: **Single Source of Truth** and global architectural manual.
+       - **Core Content**:
+         1. **System Architecture & Topology**: Layered architecture (e.g. OpenClaw 3-tier: Go bootloader, Node.js scheduler core, Web/Electron shell);
+         2. **Core Engineering Hard Rules**: Mandatory AST obfuscation pipeline, Nuitka C++ native compilation, physical USB hardware seals, etc.;
+         3. **Branch Matrix & Role Division**: Clear definition of main, lite-edition, standalone-app branches and their technical positioning;
+         4. **Version Evolution Chronicle**: Evolution milestones and major architectural decisions from v1.0 to current (cloud auth self-healing, dst_node dynamic discovery, cross-branch model sync, etc.).
+       - **Core Value**: Ensures that regardless of time elapsed, machine switched, or developer/AI turnover, reading this file provides a comprehensive view in seconds, preventing reinventing the wheel or violating underlying conventions.
+     - **`SESSION_STATE.md` (Session State & Real-Time Breakpoint / Short-Term Workbench)**:
+       - **Role**: Current task status board and breakpoint resumption engine.
+       - **Core Content**:
+         1. **Current Development Context**: Active branch (e.g. lite-edition), latest commit hash, and remote sync status;
+         2. **Latest Fixes/Features List**: Problems solved and critical files touched in the current session;
+         3. **Next Steps**: Unverified items, pending edge cases, or upcoming build commands;
+         4. **Known Risks Memo**: Environment quirks such as file locks or uncleaned binaries.
+       - **Core Value**: Counteracts context window truncation or restarts; enables subsequent AI sessions to resume work directly from the breakpoint without re-explaining history.
+   - Synchronize `tasks/todo.md` and `tasks/lessons.md` when checklists or reusable takeaways are produced.
 
 ---
 
@@ -343,8 +367,9 @@ Human confirmation is mandatory before:
 **Requirement**: "Add a CSV export endpoint with date range filtering to the order service."
 
 ```
-Step 1: Session Ceremony
-  ├─ Check tasks/lessons.md and tasks/todo.md
+Step 1: Session Ceremony & Breakpoint Awareness (Session Start)
+  ├─ Prioritize reading PROJECT_CONTEXT.md & SESSION_STATE.md to restore architecture & resume from breakpoint
+  ├─ Check tasks/lessons.md and tasks/todo.md (if present)
   └─ git checkout -b feature/order-csv-export
 
 Step 2: Scoping & Change Creation (Comet + OpenSpec SDD)
@@ -369,11 +394,14 @@ Step 6: Green Verification (RTK)
   ├─ pytest tests/test_export.py -q -> PASSED (Green, 2 passed in 0.3s)
   └─ npm test -- packages/order --reporter=dot
 
-Step 7: Delivery & Safe Commit (Caveman + Git Workflow)
+Step 7: Delivery, Safe Commit & Dual-Track Solidification (Session Finish)
   ├─ Output: Concise diff and passing test evidence
   ├─ git add tests/test_export.py api/router.py repo/order_repo.py
   ├─ git commit -m "feat: add date-range CSV export endpoint"
   ├─ Ask human before git push
+  ├─ Dual-Track State Solidification (Iron Law):
+  │   ├─ Update PROJECT_CONTEXT.md with new export capabilities and architectural decisions
+  │   └─ Update SESSION_STATE.md with latest commit hash, finished items, and Next Steps
   ├─ Update tasks/todo.md
   └─ Archive OpenSpec change
 ```
