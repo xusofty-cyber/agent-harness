@@ -1,15 +1,15 @@
 # SESSION_STATE.md —— 会话状态与实时断点
 
-> **最后更新**：2026-10-04 22:24:00  
-> **更新触发**：完成 feature 分支向 main 的合入，记录远端推送权限现场
+> **最后更新**：2026-10-04 22:27:00  
+> **更新触发**：通过 SSH 443 端口成功将 main 分支推送到远端 GitHub 仓库
 
 ---
 
 ## 一、 当前开发上下文
 
 - **当前分支**：`main`
-- **最新提交 Hash**：`d704636` (`docs: initialize PROJECT_CONTEXT.md and SESSION_STATE.md dual-track memory`)
-- **远端同步状态**：本地 `main` 领先 `origin/main` 2 笔提交，推送时报 HTTP 403 权限错误（当前 Windows 凭据管理器账号为 `Ao-oI`，无写入 `xusofty-cyber/agents-living` 权限）。
+- **最新提交 Hash**：`78e64a6` (`docs: update SESSION_STATE.md with merge status and push memo`)
+- **远端同步状态**：已与 `origin/main` 保持最新（Up to date，远程地址为 `git@github-xusofty:xusofty-cyber/agents-living.git`）。
 
 ---
 
@@ -20,14 +20,14 @@
 3. **四份指南全量同步**：更新中英两版《多工具部署配置指南》与《各工具实战使用与技能全景指南》；
 4. **deploy-agents.ps1 编码修复**：为脚本头部写入标准 UTF-8 BOM，解决 Windows PowerShell 5.1 解析报错；
 5. **本地全局部署验证**：已成功执行 `.\deploy-agents.ps1 -Global` 并完成向全局环境的同步；
-6. **特性分支合入**：`feature/dual-track-state-memory` 已成功 Fast-Forward 合入 `main`，并清理了临时分支。
+6. **特性分支合入**：`feature/dual-track-state-memory` 已成功 Fast-Forward 合入 `main`，并清理了临时分支；
+7. **SSH 远端链路打通与推送**：解决代理环境屏蔽 22 端口问题，通过 `~/.ssh/config` 中预设的 `github-xusofty`（`ssh.github.com:443`）完成向 `origin/main` 的安全推送。
 
 ---
 
 ## 三、 下一步执行计划（Next Steps）
 
-- [ ] **更新 Git 凭据并推送到远端**：在 Windows 凭据管理器中更新 `github.com` 的凭据（切换为拥有 `xusofty-cyber` 仓库写权限的 Token 或账号），然后执行 `git push origin main`；
-- [ ] **验证远端状态**：推送完成后确认 GitHub 仓库页面最新提交与工作区一致。
+- [x] **所有计划项均已完成**：所有规约、文档、脚本修复与状态记忆均已落盘、验证并推送到远端主分支。
 
 ---
 
