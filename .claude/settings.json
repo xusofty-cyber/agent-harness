@@ -19,6 +19,16 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "codegraph.cmd prompt-hook"
+          }
+        ]
+      }
     ]
   },
   "permissions": {
@@ -30,7 +40,8 @@
       "mcp__codegraph__codegraph_callees",
       "mcp__codegraph__codegraph_impact",
       "mcp__codegraph__codegraph_files",
-      "mcp__codegraph__codegraph_status"
+      "mcp__codegraph__codegraph_status",
+      "mcp__codegraph__*"
     ]
   }
 }
