@@ -17,6 +17,7 @@
 ## 规则与记忆治理
 
 - 共享全局模板只放跨项目稳定规则，不放个人偏好、项目专属事实或秘密。
+- Ponytail 作为可选编码 Skill 只指导实现、代码审查与技术方案中的简化选择；不得把它扩展为全局回答风格或用来缩减用户明确要求。规则以 `.agents/skills/ponytail/SKILL.md` 为详版、`.agents/rules/engineering-spec.md` 与全局模板为规范入口。
 - 项目记忆应精简、可核验并及时清理过期状态；当前用户指令、代码与可复现证据优先于摘要。
 - 有意义的任务收尾更新 `SESSION_STATE.md`；只有确认的长期架构、约束或决策变化时才更新本文件。无实质变化时无需写空记录。
 - 本仓库只选择 ai-memory 作为可选跨工具长期记忆后端；它不属于普通部署依赖，默认本地工作流不需要 LLM、embedding provider 或 API Key。显式加入通过被 Git 忽略的项目 `.ai-memory.toml` 和上游合并式 CLI 完成。能力边界与启用方式见双语部署/实战指南及 `.agents/skills/cross-tool-memory/SKILL.md`。
