@@ -1,13 +1,13 @@
 # SESSION_STATE.md — 会话断点
 
 > **最后更新**：2026-10-07
-> **任务**：跨工具记忆治理与模板/部署缺陷修复 + ai-memory 集成
+> **任务**：跨工具记忆治理、ai-memory 集成与全局规则更新行为修复
 
 ## 当前状态
 
 - **分支**：`long-term-memory-governance`，跟踪 `origin/long-term-memory-governance`。
-- **功能提交**：`97338a3032e4c5b68b7c1c8ee00bf2f8a25ec6fd`，已推送且推送前后远端 hash 与本地一致。本状态更新作为后续小提交同步。
-- **范围**：完成已确认的设计、实现与复核；保留工作区原有用户改动和未跟踪文件。
+- **本轮功能提交**：`c476978218f042155b6f89f5d129564c39e525fc`，已推送；`git ls-remote origin refs/heads/long-term-memory-governance` 返回相同 hash。
+- **范围**：已完成 Antigravity 跨版本规则入口与 ai-memory 设置边界更新；保留工作区原有用户改动和未跟踪文件。
 - **设计与计划**：`docs/superpowers/specs/2026-10-07-cross-tool-memory-governance-design.md`、`docs/superpowers/plans/2026-10-07-cross-tool-memory-governance.md`、`docs/superpowers/plans/2026-10-07-ai-memory-integration.md`。
 
 ## 本轮变更
@@ -19,13 +19,18 @@
 - 选定 ai-memory 作为唯一可选长期记忆后端；新增共享跨工具记忆 Skill、marker 示例和忽略规则、显式 PowerShell/Bash 安装辅助脚本，更新规范模板及中英文指南。
 - 根据当前上游文档修正 Windows 支持边界：WSL2 与原生 Windows 均有文档化安装方式，必须在 Agent 实际运行的同一环境配置；Antigravity IDE 只写明 MCP，不宣称自动 hooks。
 - 复核发现安装脚本此前会在提醒 fallback 风险前先安装 hooks；现已增加原生可执行文件格式与平台覆盖预检，不支持时在改动任何工具配置前退出，并同步中英文指南和实现计划。
+- 按后续要求改为 `-g -u` 备份后覆盖已有全局规则，并增加 Codex home / `CODEX_HOME` 的 Codex 全局 AGENTS 部署；Codex 有非空 `AGENTS.override.md` 时更新当前生效文件。
+- 核对 Antigravity 官方规则文档：Antigravity 2.0、CLI、IDE/Extensions 共用 `~/.gemini/AGENTS.md` 入口；CLI 专用 rules 目录另有说明。部署脚本与中英文文档统一为覆盖全部三类表面。
+- 复核官方规则文档发现旧版 Antigravity IDE 仅列出 `~/.gemini/GEMINI.md`；部署脚本现在同时写入规范 `AGENTS.md` 与轻量兼容指针 `GEMINI.md`，避免重复复制整份规则。
+- 扩展 `setup-ai-memory.ps1` / `.sh`：Antigravity 2.0 与 IDE 可选择 MCP-only 安装并同步项目指令；CLI 保持 MCP + allowlist hooks。上游没有 2.0/IDE 的第一方 ai-memory lifecycle-hook target，文档已明确此边界。
 
 ## 验证与后续
 
-- PowerShell AST 语法解析通过；暂存差异 `git diff --cached --check` 通过。当前环境无法启动可用的 Git Bash，因此修改后的 Bash 脚本未完成语法解析；未运行测试（按既有约束）。
+- 本轮 PowerShell AST 语法解析与 UTF-8 BOM 核验通过；`git diff --check` 通过（仅 CRLF/LF 提示）。Git Bash 不可用；此前 WSL 发行版也没有 `bash`，故 Bash 语法尚未验证；未运行测试（按既有约束）。
 - `.ai-memory.toml` 不存在且已被 Git 忽略；本轮没有安装/启动 ai-memory 或激活采集。安装脚本的原生二进制与平台预检已纳入复核修复。
 - 主实现提交仅含 21 个项目文件；`.claude/settings.json` 与其他本地工具配置保持未提交。
-- 收尾后仅保留仍相关的验证结果和待办，不复制完整日志或对话。
+- Antigravity 全局规则部署与 ai-memory 设置脚本/中英文文档已同步；功能提交已推送并核对远端 hash。
+- Bash 语法仍待有 Bash 的环境复核；本轮未执行部署到用户全局配置，也未运行测试或安装 ai-memory。
 
 ## 已知现场约束
 
