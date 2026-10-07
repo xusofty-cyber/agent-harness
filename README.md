@@ -120,7 +120,15 @@ This repository supports seamless sharing of architectural decisions and session
   cargo install ai-memory
   ```
 - **Or via GitHub Releases (pre-built binary)**:
-  Download the release archive from [Releases](https://github.com/akitaonrails/ai-memory/releases) (for Windows: `ai-memory-windows-x86_64.zip`), extract it, and add its directory to your system `PATH`.
+  - **Linux / macOS**:
+    ```bash
+    mkdir -p ~/.local/bin
+    curl -fsSL https://github.com/akitaonrails/ai-memory/releases/latest/download/ai-memory-linux-x86_64.tar.gz | tar -xz -C ~/.local/bin/
+    chmod +x ~/.local/bin/ai-memory
+    export PATH="$HOME/.local/bin:$PATH"
+    ```
+  - **Windows**:
+    Download the release archive from [Releases](https://github.com/akitaonrails/ai-memory/releases) (`ai-memory-windows-x86_64.zip`), extract it, and add its directory to your system `PATH`.
 - 💡 **Troubleshooting: Windows Terminal PATH Refresh**
   If you modified `PATH` while Antigravity IDE / VS Code was running, active terminal sessions will not inherit the change. In PowerShell, refresh PATH directly from the registry without restarting the IDE:
   ```powershell
@@ -151,6 +159,7 @@ Execute the setup script to register the MCP endpoint and managed skill instruct
   ```
 - **Linux / macOS**:
   ```bash
+  chmod +x ./setup-ai-memory.sh
   ./setup-ai-memory.sh antigravity-ide
   ```
 - 🔍 **Output Guide**:
@@ -160,12 +169,16 @@ Execute the setup script to register the MCP endpoint and managed skill instruct
 #### Step 4: Start the local memory engine
 - **For Antigravity IDE (via HTTP MCP)**:
   > ⚠️ `ai-memory serve` defaults to `stdio` transport mode, which does not bind a network port. To serve Antigravity IDE, **you must start it with `--transport http`**:
-  ```powershell
-  ai-memory serve --transport http
-  ```
-  Once the terminal prints `bind=127.0.0.1:49374`, the server is ready and the IDE can query and store project memory over MCP.
+  - **Terminal foreground**:
+    ```bash
+    ai-memory serve --transport http
+    ```
+    Once the terminal prints `bind=127.0.0.1:49374`, the server is ready and the IDE can query and store project memory over MCP.
+  - **Linux background daemon (nohup / systemd)**:
+    Use `nohup ai-memory serve --transport http > ~/.local/share/ai-memory/serve.log 2>&1 &` or create a user-level service with `systemd --user`.
 - **For Claude Code / Codex CLI**:
   Native lifecycle hooks capture sessions automatically, or use `ai-memory run <harness>` for a managed workstream launch.
+
 
 
 ### 3. Perform Online Updates

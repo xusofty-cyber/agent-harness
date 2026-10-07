@@ -121,7 +121,15 @@ agents-living/
   cargo install ai-memory
   ```
 - **或通过 GitHub Releases 下载原生二进制**：
-  访问 [Releases](https://github.com/akitaonrails/ai-memory/releases) 下载对应系统的二进制包（Windows 下载 `ai-memory-windows-x86_64.zip`），解压后将其所在目录加入系统环境变量 `PATH`。
+  - **Linux / macOS**:
+    ```bash
+    mkdir -p ~/.local/bin
+    curl -fsSL https://github.com/akitaonrails/ai-memory/releases/latest/download/ai-memory-linux-x86_64.tar.gz | tar -xz -C ~/.local/bin/
+    chmod +x ~/.local/bin/ai-memory
+    export PATH="$HOME/.local/bin:$PATH"
+    ```
+  - **Windows**:
+    访问 [Releases](https://github.com/akitaonrails/ai-memory/releases) 下载 `ai-memory-windows-x86_64.zip`，解压后将其所在目录加入系统环境变量 `PATH`。
 - 💡 **避坑提醒（Windows IDE 内置终端 PATH 刷新）**：
   若在运行中的 Antigravity IDE / VS Code 中修改了 PATH，已开终端无法感知新变量。在 PowerShell 窗口执行以下命令可直接从注册表刷新 PATH，无需重启 IDE：
   ```powershell
@@ -152,6 +160,7 @@ ai-memory 采用安全优先的 Fail-closed 门禁，必须显式声明才激活
   ```
 - **Linux / macOS**:
   ```bash
+  chmod +x ./setup-ai-memory.sh
   ./setup-ai-memory.sh antigravity-ide
   ```
 - 🔍 **控制台输出解读**：
@@ -161,10 +170,13 @@ ai-memory 采用安全优先的 Fail-closed 门禁，必须显式声明才激活
 #### Step 4: 启动本地记忆引擎服务
 - **面向 Antigravity IDE（通过 HTTP MCP 接入）**：
   > ⚠️ `ai-memory serve` 默认采用 `stdio` 管道模式，不会开启网络端口。要为 IDE 提供服务，**必须使用 `--transport http` 启动**：
-  ```powershell
-  ai-memory serve --transport http
-  ```
-  终端输出 `bind=127.0.0.1:49374` 即代表服务就绪，IDE 的 MCP 即可正常检索与存储记忆。
+  - **终端直接运行**：
+    ```bash
+    ai-memory serve --transport http
+    ```
+    终端输出 `bind=127.0.0.1:49374` 即代表服务就绪，IDE 的 MCP 即可正常检索与存储记忆。
+  - **Linux 后台常驻 / 开机自启**：
+    可使用 `nohup ai-memory serve --transport http > ~/.local/share/ai-memory/serve.log 2>&1 &` 或配置为 `systemd --user` 服务。
 - **面向 Claude Code / Codex CLI**：
   可通过原生 hooks 自动捕获，或使用 `ai-memory run <harness>` 进行受管托管启动。
 

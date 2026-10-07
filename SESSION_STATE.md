@@ -23,12 +23,12 @@
 - 核对 Antigravity 官方规则文档：Antigravity 2.0、CLI、IDE/Extensions 共用 `~/.gemini/AGENTS.md` 入口；CLI 专用 rules 目录另有说明。部署脚本与中英文文档统一为覆盖全部三类表面。
 - 复核官方规则文档发现旧版 Antigravity IDE 仅列出 `~/.gemini/GEMINI.md`；部署脚本现在同时写入规范 `AGENTS.md` 与轻量兼容指针 `GEMINI.md`，避免重复复制整份规则。
 - 扩展 `setup-ai-memory.ps1` / `.sh`：Antigravity 2.0 与 IDE 可选择 MCP-only 安装并同步项目指令；CLI 保持 MCP + allowlist hooks。上游没有 2.0/IDE 的第一方 ai-memory lifecycle-hook target，文档已明确此边界。
-- 完善实战部署全流程：在 `README_zh.md`、`README.md`、《多工具部署配置指南.md》与《各工具实战使用与技能全景指南.md》中同步补充了从前置安装、Windows 终端环境变量强制刷新命令、`.ai-memory.toml` 标记初始化、脚本输出（`no-op` 幂等性与安全免责提示）解读，到 Antigravity IDE 必须使用 `ai-memory serve --transport http` 启动的全流程细化指南。
+- 完善实战部署全流程：在 `README_zh.md`、`README.md`、《多工具部署配置指南.md》与《各工具实战使用与技能全景指南.md》中同步补充了从前置安装（含 Linux 一键 curl 原生下载）、Windows 终端环境变量强制刷新命令、`.ai-memory.toml` 标记初始化、脚本输出（`no-op` 幂等性与安全免责提示）解读，到 Linux/Windows 服务端启动命令（含 `ai-memory serve --transport http`、Linux nohup 与 systemd 用户级守护服务单元）以及验证指令的全量实操指南。
 
 ## 验证与后续
 
 - 4 份核心文档修改已通过 `git diff --stat` 校验，内容结构中英对齐无遗漏。
-- 本地 `ai-memory` 实测通过：成功生成 `.ai-memory.toml`、完成 `setup-ai-memory.ps1 antigravity-ide` 挂载，并验证了 HTTP MCP 服务端监听启动流程。
+- 本地 `ai-memory` 实测通过：成功生成 `.ai-memory.toml`、完成 `setup-ai-memory.ps1 antigravity-ide` 挂载，并验证了 HTTP MCP 服务端监听启动与记忆读写查询完整闭环。
 
 ## 已知现场约束
 
