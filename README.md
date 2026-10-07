@@ -110,19 +110,63 @@ agents-living/
   ./deploy-agents.sh /path/to/my-project --global
   ```
 
-### 2. Optional: enable local cross-tool memory
+### 2. Optional: Enable Local Cross-Tool Memory (ai-memory)
 
-Install and start [ai-memory](https://github.com/akitaonrails/ai-memory) separately. For the no-key local mode, leave LLM and embedding providers unconfigured. Review `.ai-memory.toml.example`, copy it to `.ai-memory.toml`, and replace the workspace/project names. Then run one helper for each client you explicitly want to configure:
+This repository supports seamless sharing of architectural decisions and session context across multiple agents using [ai-memory](https://github.com/akitaonrails/ai-memory) (local-first, zero API keys, zero embedding cost). Detailed deployment workflow:
 
-```powershell
-.\setup-ai-memory.ps1 -Agent codex
-```
+#### Step 1: Install prerequisite CLI and prepare environment
+- **Via Rust Cargo**:
+  ```bash
+  cargo install ai-memory
+  ```
+- **Or via GitHub Releases (pre-built binary)**:
+  Download the release archive from [Releases](https://github.com/akitaonrails/ai-memory/releases) (for Windows: `ai-memory-windows-x86_64.zip`), extract it, and add its directory to your system `PATH`.
+- 💡 **Troubleshooting: Windows Terminal PATH Refresh**
+  If you modified `PATH` while Antigravity IDE / VS Code was running, active terminal sessions will not inherit the change. In PowerShell, refresh PATH directly from the registry without restarting the IDE:
+  ```powershell
+  $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+  ```
 
-```bash
-./setup-ai-memory.sh codex
-```
+#### Step 2: Initialize local project opt-in marker (.ai-memory.toml)
+ai-memory enforces a safe, fail-closed policy requiring an explicit opt-in marker before capturing any repository (this file is ignored by `.gitignore` so it will never be accidentally committed):
+- **Windows PowerShell**:
+  ```powershell
+  Copy-Item .ai-memory.toml.example .ai-memory.toml
+  (Get-Content .ai-memory.toml) `
+      -replace 'replace-with-workspace-name', 'default' `
+      -replace 'replace-with-project-name', 'agents-living' |
+      Set-Content .ai-memory.toml
+  ```
+- **Linux / macOS (Bash)**:
+  ```bash
+  cp .ai-memory.toml.example .ai-memory.toml
+  sed -i 's/replace-with-workspace-name/default/g; s/replace-with-project-name/agents-living/g' .ai-memory.toml
+  ```
 
-The helper requires the local opt-in marker and an existing `ai-memory` command; it does not install software or start the service. Review installer output to confirm the selected hook enforces allowlist mode. See the deployment guide for each host's limits and uninstall/data-retention details.
+#### Step 3: Run the client setup helper
+Execute the setup script to register the MCP endpoint and managed skill instructions (supports `antigravity-ide`, `antigravity-cli`, `claude-code`, `codex`):
+- **Windows**:
+  ```powershell
+  .\setup-ai-memory.ps1 -Agent antigravity-ide
+  ```
+- **Linux / macOS**:
+  ```bash
+  ./setup-ai-memory.sh antigravity-ide
+  ```
+- 🔍 **Output Guide**:
+  - `✓ no-op ... (already up to date)`: Indicates **idempotency protection**; existing target files are already up-to-date and require no re-writing.
+  - `Configured <agent>. No server, container, API key, or LLM provider was installed or started.`: Declarative confirmation that client configuration is complete, honoring the zero-daemon / zero-billing guarantee.
+
+#### Step 4: Start the local memory engine
+- **For Antigravity IDE (via HTTP MCP)**:
+  > ⚠️ `ai-memory serve` defaults to `stdio` transport mode, which does not bind a network port. To serve Antigravity IDE, **you must start it with `--transport http`**:
+  ```powershell
+  ai-memory serve --transport http
+  ```
+  Once the terminal prints `bind=127.0.0.1:49374`, the server is ready and the IDE can query and store project memory over MCP.
+- **For Claude Code / Codex CLI**:
+  Native lifecycle hooks capture sessions automatically, or use `ai-memory run <harness>` for a managed workstream launch.
+
 
 ### 3. Perform Online Updates
 

@@ -111,19 +111,63 @@ agents-living/
   ./deploy-agents.sh /path/to/my-project --global
   ```
 
-### 2. 可选：启用本地跨工具记忆
+### 2. 可选：启用本地跨工具记忆（ai-memory）
 
-先按 [ai-memory 上游指南](https://github.com/akitaonrails/ai-memory) 单独安装并启动服务。无 Key 本地模式不要配置 LLM 或 embedding provider。检查 `.ai-memory.toml.example`，复制为 `.ai-memory.toml` 并替换 workspace/project 名称；然后按需为每种客户端运行辅助脚本：
+本仓库支持通过 [ai-memory](https://github.com/akitaonrails/ai-memory) 实现多 Agent 间无缝共享架构事实与会话断点（本地优先，零 API Key，零 Embedding 成本）。详细部署流程如下：
 
-```powershell
-.\setup-ai-memory.ps1 -Agent codex
-```
+#### Step 1: 安装前置 CLI 并就绪环境
+- **通过 Rust Cargo 安装**：
+  ```bash
+  cargo install ai-memory
+  ```
+- **或通过 GitHub Releases 下载原生二进制**：
+  访问 [Releases](https://github.com/akitaonrails/ai-memory/releases) 下载对应系统的二进制包（Windows 下载 `ai-memory-windows-x86_64.zip`），解压后将其所在目录加入系统环境变量 `PATH`。
+- 💡 **避坑提醒（Windows IDE 内置终端 PATH 刷新）**：
+  若在运行中的 Antigravity IDE / VS Code 中修改了 PATH，已开终端无法感知新变量。在 PowerShell 窗口执行以下命令可直接从注册表刷新 PATH，无需重启 IDE：
+  ```powershell
+  $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+  ```
 
-```bash
-./setup-ai-memory.sh codex
-```
+#### Step 2: 初始化项目本地声明标记（.ai-memory.toml）
+ai-memory 采用安全优先的 Fail-closed 门禁，必须显式声明才激活项目采集（该文件已被 `.gitignore` 忽略，安全不会被误提交）：
+- **Windows PowerShell**:
+  ```powershell
+  Copy-Item .ai-memory.toml.example .ai-memory.toml
+  (Get-Content .ai-memory.toml) `
+      -replace 'replace-with-workspace-name', 'default' `
+      -replace 'replace-with-project-name', 'agents-living' |
+      Set-Content .ai-memory.toml
+  ```
+- **Linux / macOS (Bash)**:
+  ```bash
+  cp .ai-memory.toml.example .ai-memory.toml
+  sed -i 's/replace-with-workspace-name/default/g; s/replace-with-project-name/agents-living/g' .ai-memory.toml
+  ```
 
-脚本要求本机已安装 `ai-memory` 且项目标记存在；不会安装软件或启动服务。确认安装器选用了能执行 allowlist 门控的原生 hook。各工具边界、卸载和数据保留说明见部署指南。
+#### Step 3: 执行单客户端配置脚本
+运行辅助脚本自动向客户端挂载 MCP 节点与专属技能指令（支持 `antigravity-ide`, `antigravity-cli`, `claude-code`, `codex`）：
+- **Windows**:
+  ```powershell
+  .\setup-ai-memory.ps1 -Agent antigravity-ide
+  ```
+- **Linux / macOS**:
+  ```bash
+  ./setup-ai-memory.sh antigravity-ide
+  ```
+- 🔍 **控制台输出解读**：
+  - `✓ no-op ... (already up to date)`：代表**幂等性保护**生效，目标配置已经是最新版本，自动跳过重复写入；
+  - `Configured <agent>. No server, container, API key, or LLM provider was installed or started.`：声明性成功结语，表明配置已完成，且坚守零常驻、零容器、零 API 扣费的安全底线。
+
+#### Step 4: 启动本地记忆引擎服务
+- **面向 Antigravity IDE（通过 HTTP MCP 接入）**：
+  > ⚠️ `ai-memory serve` 默认采用 `stdio` 管道模式，不会开启网络端口。要为 IDE 提供服务，**必须使用 `--transport http` 启动**：
+  ```powershell
+  ai-memory serve --transport http
+  ```
+  终端输出 `bind=127.0.0.1:49374` 即代表服务就绪，IDE 的 MCP 即可正常检索与存储记忆。
+- **面向 Claude Code / Codex CLI**：
+  可通过原生 hooks 自动捕获，或使用 `ai-memory run <harness>` 进行受管托管启动。
+
 
 ### 3. 在线更新规范与技能库
 

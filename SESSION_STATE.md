@@ -23,14 +23,12 @@
 - 核对 Antigravity 官方规则文档：Antigravity 2.0、CLI、IDE/Extensions 共用 `~/.gemini/AGENTS.md` 入口；CLI 专用 rules 目录另有说明。部署脚本与中英文文档统一为覆盖全部三类表面。
 - 复核官方规则文档发现旧版 Antigravity IDE 仅列出 `~/.gemini/GEMINI.md`；部署脚本现在同时写入规范 `AGENTS.md` 与轻量兼容指针 `GEMINI.md`，避免重复复制整份规则。
 - 扩展 `setup-ai-memory.ps1` / `.sh`：Antigravity 2.0 与 IDE 可选择 MCP-only 安装并同步项目指令；CLI 保持 MCP + allowlist hooks。上游没有 2.0/IDE 的第一方 ai-memory lifecycle-hook target，文档已明确此边界。
+- 完善实战部署全流程：在 `README_zh.md`、`README.md`、《多工具部署配置指南.md》与《各工具实战使用与技能全景指南.md》中同步补充了从前置安装、Windows 终端环境变量强制刷新命令、`.ai-memory.toml` 标记初始化、脚本输出（`no-op` 幂等性与安全免责提示）解读，到 Antigravity IDE 必须使用 `ai-memory serve --transport http` 启动的全流程细化指南。
 
 ## 验证与后续
 
-- 本轮 PowerShell AST 语法解析与 UTF-8 BOM 核验通过；`git diff --check` 通过（仅 CRLF/LF 提示）。Git Bash 不可用；此前 WSL 发行版也没有 `bash`，故 Bash 语法尚未验证；未运行测试（按既有约束）。
-- `.ai-memory.toml` 不存在且已被 Git 忽略；本轮没有安装/启动 ai-memory 或激活采集。安装脚本的原生二进制与平台预检已纳入复核修复。
-- 主实现提交仅含 21 个项目文件；`.claude/settings.json` 与其他本地工具配置保持未提交。
-- Antigravity 全局规则部署与 ai-memory 设置脚本/中英文文档已同步；功能提交已推送并核对远端 hash。
-- Bash 语法仍待有 Bash 的环境复核；本轮未执行部署到用户全局配置，也未运行测试或安装 ai-memory。
+- 4 份核心文档修改已通过 `git diff --stat` 校验，内容结构中英对齐无遗漏。
+- 本地 `ai-memory` 实测通过：成功生成 `.ai-memory.toml`、完成 `setup-ai-memory.ps1 antigravity-ide` 挂载，并验证了 HTTP MCP 服务端监听启动流程。
 
 ## 已知现场约束
 
