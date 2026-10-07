@@ -5,8 +5,9 @@
 
 ## 当前状态
 
-- **分支**：`long-term-memory-governance`（从 `main` 创建；本轮按用户授权提交并推送）。
-- **范围**：落实已确认的设计与计划；保留工作区原有用户改动和未跟踪文件。
+- **分支**：`long-term-memory-governance`，跟踪 `origin/long-term-memory-governance`。
+- **功能提交**：`97338a3032e4c5b68b7c1c8ee00bf2f8a25ec6fd`，已推送且推送前后远端 hash 与本地一致。本状态更新作为后续小提交同步。
+- **范围**：完成已确认的设计、实现与复核；保留工作区原有用户改动和未跟踪文件。
 - **设计与计划**：`docs/superpowers/specs/2026-10-07-cross-tool-memory-governance-design.md`、`docs/superpowers/plans/2026-10-07-cross-tool-memory-governance.md`、`docs/superpowers/plans/2026-10-07-ai-memory-integration.md`。
 
 ## 本轮变更
@@ -21,13 +22,13 @@
 
 ## 验证与后续
 
-- PowerShell AST 语法解析通过；`git diff --check` 通过（仅有既存 CRLF/LF 提示）。当前环境无法启动可用的 Git Bash，因此修改后的 Bash 脚本未完成语法解析；未运行测试。
-- `.ai-memory.toml` 不存在且已被 Git 忽略；本轮没有安装/启动 ai-memory 或激活采集。未运行测试。
-- 不运行测试。`.claude/settings.json` 与其他本地工具配置是用户既存改动，本轮必须保持原样且不纳入提交。
+- PowerShell AST 语法解析通过；暂存差异 `git diff --cached --check` 通过。当前环境无法启动可用的 Git Bash，因此修改后的 Bash 脚本未完成语法解析；未运行测试（按既有约束）。
+- `.ai-memory.toml` 不存在且已被 Git 忽略；本轮没有安装/启动 ai-memory 或激活采集。安装脚本的原生二进制与平台预检已纳入复核修复。
+- 主实现提交仅含 21 个项目文件；`.claude/settings.json` 与其他本地工具配置保持未提交。
 - 收尾后仅保留仍相关的验证结果和待办，不复制完整日志或对话。
 
 ## 已知现场约束
 
-- `.claude/settings.json` 等既存本地工作区改动与未跟踪文件不属于本轮修改目标，必须保留。
+- `.claude/settings.json` 等既存本地工作区改动与未跟踪文件不属于本轮修改目标，必须保留；用户级工具配置当前仍为本地未提交状态。
 - 当前工作区有用户本地工具配置；不要将其误作为本轮新建或已验证的仓库规范。
-- 本仓库没有本地 `.ai-memory.toml`，也未安装/启动 ai-memory；因此本轮只验证脚本和文档，没有激活任何记忆采集。
+- 本仓库没有本地 `.ai-memory.toml`，也未安装/启动 ai-memory；因此本轮只静态验证脚本和文档，没有激活任何记忆采集。Bash 语法仍待可用 Bash 环境验证。
