@@ -4,7 +4,7 @@
 
 **Goal:** Make cross-tool project memory selective, private, source-aware, and consistent while preserving existing user configuration during deployment.
 
-**Architecture:** Keep Markdown files as the default, human-readable memory layer. Clarify global, project, session, and directory responsibilities in the three templates; update deployment scripts so pre-existing global instructions are preserved and updated templates are emitted beside them; align hooks and bilingual docs with the safety-only, opt-in boundary.
+**Architecture:** Keep Markdown files as the default, human-readable memory layer. Clarify global, project, session, and directory responsibilities in the three templates; keep `-Global` non-destructive by default, while making explicit `-Global -Update` back up and replace active global instructions across supported tools; align hooks and bilingual docs with the safety-only, opt-in boundary.
 
 **Tech Stack:** Markdown, PowerShell 5.1+/7+, Bash, Node.js Claude Code hook configuration (JSON/MJS); no new dependency or memory service.
 
@@ -28,7 +28,7 @@
 1. Existing global Claude and Antigravity instructions may contain private content; deployment must leave their bytes unchanged and write a separate review template.
 2. Global template examples may encode facts from an unrelated sample project; remove them and keep the template project-neutral.
 3. Memory may conflict with current code or session status; instructions must require verification and correction rather than blindly trusting it.
-4. Deploy `-Update` / `--update` may overwrite global files without a meaningful distinction between managed and user-owned content; make the preserve-and-template behavior identical on Windows and Unix.
+4. Deploy update behavior must distinguish project rules from explicit global updates: project rules retain their review-template flow, while `-Global -Update` backs up then replaces global instructions on both Windows and Unix.
 5. Codex and Antigravity host loading support may vary by product/version; documentation must distinguish files the script writes from behavior that has been verified.
 
 ---
@@ -60,7 +60,7 @@ Specify that nested `AGENTS.md` files contain only local boundaries, commands, a
 
 Compare scope names, precedence, privacy language, and update triggers across all three templates. Correct any contradiction inline; do not copy long global prose into the project or directory templates.
 
-### Task 2: Preserve Existing Global Instructions in Both Deployers
+### Task 2: Support Explicit Global Rule Replacement and Codex
 
 **Files:**
 - Modify: `deploy-agents.ps1`
@@ -70,27 +70,27 @@ Compare scope names, precedence, privacy language, and update triggers across al
 
 **Interfaces:**
 - Consumes: source global template and current deployment mode (`-Global`/`--global`, optional update flag).
-- Produces: missing global target receives the template; an existing target remains untouched and gets an adjacent review copy on explicit update.
+- Produces: `-Global` initializes missing global targets and preserves existing ones; `-Global -Update` makes a timestamped backup and replaces each active global rule with the shared template. Codex uses `$CODEX_HOME` (default `~/.codex`) and its active non-empty `AGENTS.override.md` when present.
 
-- [x] **Step 1: Define destination-specific review template names**
+- [x] **Step 1: Define shared global targets and Codex override precedence**
 
-Use `~/.claude/CLAUDE.template.md` beside `~/.claude/CLAUDE.md` and `~/.gemini/AGENTS.template.md` beside `~/.gemini/AGENTS.md`. A missing target is initialized from the shared template. An existing target is preserved; only explicit update mode writes/replaces the adjacent `.template.md`, with a timestamped backup of an older generated template if the script's existing backup helper is appropriate.
+Use shared-template destinations: `~/.claude/CLAUDE.md`, `~/.gemini/AGENTS.md` plus a lightweight `~/.gemini/GEMINI.md` compatibility pointer, and Codex `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`). Current Antigravity 2.0, CLI, and IDE/extensions support both global file names; the pointer also covers older IDE releases without loading a second full rule copy. For Codex, update the non-empty `$CODEX_HOME/AGENTS.override.md` instead when it is the active global file.
 
 - [x] **Step 2: Apply identical behavior in PowerShell**
 
-Change the global deployment block so `Copy-Item` to the live global file occurs only when the target does not exist. On update with an existing target, write the destination-specific review template and print the exact path. Preserve UTF-8 BOM in `deploy-agents.ps1` for Windows PowerShell 5.1.
+Change the global deployment block so existing targets are preserved without `-Update`; with `-Update`, back them up with a unique timestamp and copy the shared template over the active path. Print the backup path. Preserve UTF-8 BOM in `deploy-agents.ps1` for Windows PowerShell 5.1.
 
 - [x] **Step 3: Apply identical behavior in Bash**
 
-Change the global deployment block with the same absent-target and explicit-update branches and exact output paths. Preserve existing shell quoting and backup conventions.
+Change the global deployment block with the same initialize/preserve/update behavior. Back up existing files before replacement and account for symlinks. Preserve existing shell quoting and backup conventions.
 
 - [x] **Step 4: Align both deployment guides**
 
-Document that global deployment never replaces an existing global rules file; update mode produces a review template next to it. Explain that users manually merge desired changes. Keep claims about host discovery separate from paths the scripts write.
+Document the explicit overwrite contract and backup behavior. List Codex's default/CODEX_HOME path and override precedence. State that Antigravity gets a canonical AGENTS.md and legacy GEMINI.md pointer, with CLI-only rules identified separately. Keep host discovery claims separate from script output paths.
 
 - [x] **Step 5: Inspect script syntax and focused diffs**
 
-Run the PowerShell parser without executing the deployer, run `bash -n deploy-agents.sh`, confirm the PowerShell source still begins with UTF-8 BOM, and inspect only the changed script/document diff for accidental overwrite behavior or unrelated edits. Completed: parser and BOM checks passed; Git for Windows shell syntax check passed; `git diff --check` is clean.
+Run the PowerShell parser without executing the deployer, run `bash -n deploy-agents.sh` when a Bash runtime is available, confirm the PowerShell source still begins with UTF-8 BOM, and inspect the focused diff. Do not run the deployer against the user's live global files during validation.
 
 ### Task 3: Align Hooks and Tool Support Documentation
 

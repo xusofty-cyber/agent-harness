@@ -10,7 +10,7 @@
 
 - `Global AGENTS.md`、`Project AGENTS.md`、`Directory AGENTS.md`：全局、项目与目录层级的规则模板。
 - `.agents/rules/`、`.agents/skills/`：按需加载的规则与技能资料。
-- `deploy-agents.ps1`、`deploy-agents.sh`：将模板部署到项目或受支持的用户级入口；部署文件不等于宿主已加载文件。
+- `deploy-agents.ps1`、`deploy-agents.sh`：将模板部署到项目或受支持的用户级入口；`-g` 初始化 Claude、Antigravity `~/.gemini/AGENTS.md` 规则和旧版 `GEMINI.md` 兼容指针，以及 Codex 全局规则，`-g -u` 先备份再覆盖；部署文件不等于宿主已加载文件。
 - `.claude/settings.json` 等工具配置及中英文指南：说明当前适配方式、边界和部署流程。Claude Code PreToolUse 钩子属于客户端工具调用控制，不是操作系统级拦截器或长期记忆系统。
 - `PROJECT_CONTEXT.md`、`SESSION_STATE.md`、可选 `tasks/lessons.md`：按需读取的项目摘要、短期断点与经验记录。
 
@@ -23,7 +23,7 @@
 
 ## 工具适配边界
 
-Codex CLI、Codex 桌面产品、Claude Code、Antigravity CLI 与 IDE 对规则文件和记忆的加载方式各不相同。ai-memory 上游支持 Claude Code、Codex、Antigravity CLI 的 MCP/hooks；Antigravity IDE 采用 MCP 手动配置；Codex 桌面端需核实当前版本能力；ChatGPT 网页在免费本地方案下使用人工 Markdown 交接。Windows 上游支持 WSL2 与原生两种模式，但必须在与 Agent 相同的运行环境安装/配置。指南应注明适用的具体表面，并链接官方文档；不得仅凭脚本写入文件就声称宿主会自动加载。Claude Code Auto memory 是独立的 Claude 专属机器本地功能，不等同于仓库共享记忆。
+Codex CLI、Codex 桌面产品、Claude Code、Antigravity 2.0、CLI 与 IDE 对规则文件和记忆的加载方式各不相同。ai-memory 上游支持 Claude Code、Codex、Antigravity CLI 的 MCP/hooks；本仓库设置脚本为 Antigravity 2.0 与 IDE 提供 MCP-only 配置，因为上游没有其独立生命周期 hook target；Codex 桌面端需核实当前版本能力；ChatGPT 网页在免费本地方案下使用人工 Markdown 交接。Windows 上游支持 WSL2 与原生两种模式，但必须在与 Agent 相同的运行环境安装/配置。指南应注明适用的具体表面，并链接官方文档；不得仅凭脚本写入文件就声称宿主会自动加载。Claude Code Auto memory 是独立的 Claude 专属机器本地功能，不等同于仓库共享记忆。
 
 ## 已确认的仓库约定
 

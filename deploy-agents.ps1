@@ -2,7 +2,7 @@
 # deploy-agents.ps1
 # Platforms: Windows (PowerShell 5.1 / PowerShell 7+)
 # Purpose: One-click deploy & online update AI Agents Harness spec, rules & skills
-#          (Supports Codex / Claude Code / Antigravity IDE)
+#          (Supports Codex / Claude Code / Antigravity 2.0 / CLI / IDE)
 # ==============================================================================
 
 [CmdletBinding()]
@@ -54,6 +54,41 @@ function Backup-ManagedPath([string]$Path) {
         $backupPath = "$Path.bak.$(Get-Date -Format yyyyMMddHHmmss)"
         Copy-Item -Path $Path -Destination $backupPath -Recurse -Force
     }
+}
+
+function Backup-GlobalRule([string]$Path) {
+    $backupBase = "$Path.bak.$(Get-Date -Format yyyyMMddHHmmssfff)"
+    $backupPath = $backupBase
+    $suffix = 1
+    while (Test-Path -LiteralPath $backupPath) {
+        $backupPath = "$backupBase.$suffix"
+        $suffix++
+    }
+    Copy-Item -LiteralPath $Path -Destination $backupPath -Force
+    return $backupPath
+}
+
+function Sync-GlobalRule([string]$TemplatePath, [string]$TargetPath, [string]$ToolName, [bool]$UpdateExisting) {
+    $targetDirectory = Split-Path -Parent $TargetPath
+    New-Item -ItemType Directory -Path $targetDirectory -Force | Out-Null
+
+    if (Test-Path -LiteralPath $TargetPath) {
+        if (-not (Test-Path -LiteralPath $TargetPath -PathType Leaf)) {
+            throw "Global rule target exists but is not a file: $TargetPath"
+        }
+        if (-not $UpdateExisting) {
+            Write-Host "  [INFO] Preserved existing $ToolName global rule: $TargetPath (use -Update to back up and replace it)." -ForegroundColor Gray
+            return
+        }
+
+        $backupPath = Backup-GlobalRule $TargetPath
+        Copy-Item -LiteralPath $TemplatePath -Destination $TargetPath -Force
+        Write-Host "  [OK] Updated $ToolName global rule: $TargetPath (backup: $backupPath)" -ForegroundColor Green
+        return
+    }
+
+    Copy-Item -LiteralPath $TemplatePath -Destination $TargetPath
+    Write-Host "  [OK] Initialized $ToolName global rule: $TargetPath" -ForegroundColor Green
 }
 
 function Confirm-OptionalStep([string]$Prompt) {
@@ -177,12 +212,12 @@ if ($Update) {
 if (-not $ProjectPath -and -not $Global) {
     Write-Host "`n[用法说明] Usage:" -ForegroundColor Cyan
     Write-Host "  .\deploy-agents.ps1 -ProjectPath <目标项目路径> [-Global] [-Update]"
-    Write-Host "  .\deploy-agents.ps1 -Global [-Update]   # 初始化全局配置；已有配置保留，-Update 生成审阅模板"
+    Write-Host "  .\deploy-agents.ps1 -Global [-Update]   # 初始化全局配置；-Update 先备份再覆盖已有规则"
     Write-Host ""
     Write-Host "[参数说明] Parameters:" -ForegroundColor Cyan
     Write-Host "  -ProjectPath   目标项目根目录路径。"
-    Write-Host "  -Global (-g)   初始化不存在的用户全局规则；已有文件保留，-Update 生成旁置审阅模板。"
-    Write-Host "  -Update (-u)   fast-forward 更新模板仓库，并将受管理文件同步到目标项目（覆盖前备份）。"
+    Write-Host "  -Global (-g)   初始化 Claude、Antigravity 2.0/CLI/IDE、Codex 用户全局规则。"
+    Write-Host "  -Update (-u)   更新模板仓库；与 -Global 一起使用时，先备份再覆盖全局规则。"
     exit 0
 }
 
@@ -192,44 +227,35 @@ if (-not $ProjectPath -and -not $Global) {
 if ($Global) {
     Write-Host "`n>>> [1/3] Deploying/Updating global rules..." -ForegroundColor Yellow
 
+    $AntigravityGeminiTemplate = Join-Path $ScriptDir "templates\antigravity-GEMINI.md"
     if (-not (Test-Path $ResolvedGlobalTemplate)) {
         Write-Warning "Global template not found, skipping global setup."
     } else {
         # A. Claude Code (~/.claude/CLAUDE.md)
         $ClaudeGlobalDir = Join-Path $HOME ".claude"
         $ClaudeGlobalFile = Join-Path $ClaudeGlobalDir "CLAUDE.md"
-        if (-not (Test-Path $ClaudeGlobalDir)) {
-            New-Item -ItemType Directory -Path $ClaudeGlobalDir -Force | Out-Null
-        }
-        if (-not (Test-Path $ClaudeGlobalFile)) {
-            Copy-Item -Path $ResolvedGlobalTemplate -Destination $ClaudeGlobalFile
-            Write-Host "  [OK] Initialized Claude Code global rule: $ClaudeGlobalFile" -ForegroundColor Green
-        } elseif ($Update) {
-            $ClaudeGlobalTemplate = Join-Path $ClaudeGlobalDir "CLAUDE.template.md"
-            Backup-ManagedPath $ClaudeGlobalTemplate
-            Copy-Item -Path $ResolvedGlobalTemplate -Destination $ClaudeGlobalTemplate -Force
-            Write-Host "  [INFO] Preserved existing CLAUDE.md; review template: $ClaudeGlobalTemplate" -ForegroundColor Gray
-        } else {
-            Write-Host "  [INFO] Preserved existing Claude Code global rule: $ClaudeGlobalFile (use -Update to generate a review template)." -ForegroundColor Gray
-        }
+        Sync-GlobalRule $ResolvedGlobalTemplate $ClaudeGlobalFile "Claude Code" $Update
 
-        # B. Antigravity IDE (~/.gemini/AGENTS.md — standalone, always active, no frontmatter needed)
+        # B. Current Antigravity releases load AGENTS.md; GEMINI.md is a compatibility entry for older surfaces.
         $AntigravityGlobalDir = Join-Path $HOME ".gemini"
         $AntigravityGlobalFile = Join-Path $AntigravityGlobalDir "AGENTS.md"
-        if (-not (Test-Path $AntigravityGlobalDir)) {
-            New-Item -ItemType Directory -Path $AntigravityGlobalDir -Force | Out-Null
-        }
-        if (-not (Test-Path $AntigravityGlobalFile)) {
-            Copy-Item -Path $ResolvedGlobalTemplate -Destination $AntigravityGlobalFile
-            Write-Host "  [OK] Initialized Antigravity global rule: $AntigravityGlobalFile" -ForegroundColor Green
-        } elseif ($Update) {
-            $AntigravityGlobalTemplate = Join-Path $AntigravityGlobalDir "AGENTS.template.md"
-            Backup-ManagedPath $AntigravityGlobalTemplate
-            Copy-Item -Path $ResolvedGlobalTemplate -Destination $AntigravityGlobalTemplate -Force
-            Write-Host "  [INFO] Preserved existing AGENTS.md; review template: $AntigravityGlobalTemplate" -ForegroundColor Gray
+        Sync-GlobalRule $ResolvedGlobalTemplate $AntigravityGlobalFile "Antigravity 2.0 / CLI / IDE" $Update
+        $AntigravityGeminiFile = Join-Path $AntigravityGlobalDir "GEMINI.md"
+        if (Test-Path -LiteralPath $AntigravityGeminiTemplate -PathType Leaf) {
+            Sync-GlobalRule $AntigravityGeminiTemplate $AntigravityGeminiFile "Antigravity legacy GEMINI.md compatibility" $Update
         } else {
-            Write-Host "  [INFO] Preserved existing Antigravity global rule: $AntigravityGlobalFile (use -Update to generate a review template)." -ForegroundColor Gray
+            Write-Warning "Antigravity GEMINI.md compatibility template not found: $AntigravityGeminiTemplate"
         }
+
+        # C. Codex CLI / app (~/.codex by default, or $CODEX_HOME)
+        $CodexGlobalDir = if ([string]::IsNullOrWhiteSpace($env:CODEX_HOME)) { Join-Path $HOME ".codex" } else { [Environment]::ExpandEnvironmentVariables($env:CODEX_HOME) }
+        $CodexOverrideFile = Join-Path $CodexGlobalDir "AGENTS.override.md"
+        $CodexGlobalFile = Join-Path $CodexGlobalDir "AGENTS.md"
+        if ((Test-Path -LiteralPath $CodexOverrideFile -PathType Leaf) -and (Get-Item -LiteralPath $CodexOverrideFile).Length -gt 0) {
+            $CodexGlobalFile = $CodexOverrideFile
+            Write-Host "  [INFO] Active Codex global override detected; updating that effective instruction file." -ForegroundColor Gray
+        }
+        Sync-GlobalRule $ResolvedGlobalTemplate $CodexGlobalFile "Codex" $Update
     }
 }
 

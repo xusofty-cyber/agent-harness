@@ -1,4 +1,4 @@
-# Multi-Tool (Codex / Claude Code / Antigravity IDE / Zed IDE) AI Engineering Deployment & Configuration Guide
+# Multi-Tool (Codex / Claude Code / Antigravity 2.0 / CLI / IDE / Zed) AI Engineering Deployment & Configuration Guide
 
 > **Language / 语言**: **English** | [中文](多工具部署配置指南.md)
 
@@ -71,11 +71,11 @@ Rule discovery, inheritance, global settings, and memory mechanisms vary by prod
 
 | Tool/surface | Provided or written by this repository | Loading notes |
 | :--- | :--- | :--- |
-| Codex (ChatGPT/desktop) | Project-root `AGENTS.md`; the script does not write product global settings | Verify current ChatGPT/Codex product behavior; do not infer desktop behavior from the CLI |
-| Codex CLI | Project and directory `AGENTS.md`; user configures the global file | Official docs describe loading from Codex home and each directory from repository root to the current directory |
+| Codex (local app / IDE / CLI) | Global `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`); project and directory `AGENTS.md` | `-Global` creates the global file; `-Global -Update` backs up and replaces the active global instruction file. Codex uses a non-empty `AGENTS.override.md` in Codex home in preference to `AGENTS.md` |
 | Claude Code | `CLAUDE.md` bridge, `~/.claude/CLAUDE.md`, project hooks/skills | `CLAUDE.md` is an instruction entry point; Claude Auto memory is a separate optional machine-local project memory, not shared across tools |
-| Antigravity CLI | Project `AGENTS.md` / `.agents/rules/`; global `~/.gemini/AGENTS.md` | Official rules docs list workspace, directory, and global discovery paths |
-| Antigravity IDE | Project `AGENTS.md` / `.agents/rules/`; global `~/.gemini/AGENTS.md` | Official docs list IDE rule files and UI-based rule management |
+| Antigravity 2.0 | Project `AGENTS.md` / `GEMINI.md` / `.agents/rules/`; global `~/.gemini/AGENTS.md` and `GEMINI.md` compatibility pointer | Current docs list both global names; older releases can follow the pointer to the canonical file |
+| Antigravity CLI | Project/directory rules; global `~/.gemini/AGENTS.md` and `GEMINI.md` compatibility pointer; optional `~/.gemini/antigravity-cli/rules/*.md` | Common rules use the canonical entry; configure CLI-only rules separately |
+| Antigravity IDE / extensions | Project/directory rules; global `~/.gemini/AGENTS.md` and `GEMINI.md` compatibility pointer | Current IDE supports both global names; older IDE generations can follow the pointer |
 | GitHub Copilot | `.github/copilot-instructions.md` bridge | Confirm loading in Copilot's current product settings/docs |
 | Zed / Pi / OpenCode | Reusable Markdown only; no dedicated setup from this repository | Do not infer automatic discovery or global loading from file presence |
 
@@ -97,7 +97,7 @@ The installer copies [`.claude/settings.json`](.claude/settings.json) and deploy
 
 ## 4. Cross-Tool Deployment & Template Updates (deploy-agents)
 
-The scripts deploy files to configured paths. Tool-specific loading behavior is not guaranteed by file deployment. Existing user-level global instruction files are preserved; `-Update` writes adjacent review templates:
+The scripts deploy files to configured paths. Tool-specific loading behavior is not guaranteed by file deployment. `-Global` initializes missing global rule files and preserves existing ones. Combining `-Global -Update` first creates a timestamped backup, then replaces the active global rule with the current template. Antigravity receives the canonical `~/.gemini/AGENTS.md` plus a small `GEMINI.md` compatibility pointer instead of a duplicate full rule set. Codex uses `$CODEX_HOME` when set (otherwise `~/.codex`); if a non-empty `AGENTS.override.md` exists there, that active file is backed up and updated instead of `AGENTS.md`:
 - **Windows PowerShell**: [`deploy-agents.ps1`](deploy-agents.ps1)
 - **Linux / macOS Bash**: [`deploy-agents.sh`](deploy-agents.sh)
 
@@ -157,8 +157,8 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 
 **Parameters**:
 - `-ProjectPath` (Positional 0): Path to target project. If omitted with `-Global`, only updates user global rules.
-- `-Global` (`-g`): Initializes `~/.claude/CLAUDE.md` and `~/.gemini/AGENTS.md` only when absent. Existing files are preserved; with `-Update`, adjacent `CLAUDE.template.md` and `AGENTS.template.md` files are written for manual review/merge.
-- `-Update` (`-u`): Fast-forwards the template repository and syncs files to the target. Existing project-managed rules, hooks, skills, and lock metadata follow their documented backup/update behavior. Existing global instruction files are never replaced; an adjacent review template is generated instead. It does not upgrade global CLIs.
+- `-Global` (`-g`): Initializes missing `~/.claude/CLAUDE.md`, `~/.gemini/AGENTS.md`, and Codex `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`). Existing files are preserved without `-Update`.
+- `-Update` (`-u`): Fast-forwards the template repository and syncs files to the target. Combined with `-Global`, it backs up and replaces existing global rule files. Codex's non-empty `$CODEX_HOME/AGENTS.override.md` takes precedence and is updated as the active file. Existing project-managed rules, hooks, skills, and lock metadata follow their documented backup/update behavior. It does not upgrade global CLIs.
 - `-CometInit` (`-c`): Automatically executes `comet init` in the target project if Comet CLI is installed.
 
 **Examples**:
@@ -232,7 +232,7 @@ To enable Claude Code to discover skills located in `.agents/skills/`:
 
 1. Install and start ai-memory separately by following its [official installation guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md). Leave LLM and embedding providers unconfigured for the free, zero-key path.
 2. Review `.ai-memory.toml.example`, copy it to `.ai-memory.toml`, and replace both names. `.ai-memory.toml` is ignored by Git; committing this opt-in is intentionally avoided.
-3. From this repository, run `./setup-ai-memory.sh <claude-code|codex|antigravity-cli>` on Linux/macOS/WSL2, or `./setup-ai-memory.ps1 -Agent <claude-code|codex|antigravity-cli>` in PowerShell. Before changing any tool configuration, the helper requires a marker, a native `ai-memory` executable, and a native hook mode; it rejects Docker/script wrappers and non-native platform overrides. After preflight it delegates MCP, allowlist hooks, and managed instruction setup to the upstream merge-aware CLI. It does not download/install software or start the server. Confirm installer output reports capture-policy enforcement.
+3. Run `./setup-ai-memory.sh <claude-code|codex|antigravity|antigravity-ide|antigravity-cli>` on Linux/macOS/WSL2, or the equivalent `-Agent` value in PowerShell. Use `antigravity` for Antigravity 2.0 and `antigravity-ide` for the IDE; both configure MCP and managed instructions. The CLI target additionally installs allowlist hooks. Native executable and hook-mode preflight applies to hook targets; MCP-only targets do not need it. The helper does not download software or start the server.
 4. Keep the server bound to loopback for same-machine use. Default data locations are `~/.local/share/ai-memory` on Linux, `~/Library/Application Support/ai-memory` on macOS, and typically `%LOCALAPPDATA%\ai-memory` on Windows; `AI_MEMORY_DATA_DIR` can override them. Back up with `ai-memory --data-dir <data-dir> backup --to <archive-path>` (for Docker deployments, use the upstream container command). `ai-memory uninstall --apply` removes managed client integrations but does not delete the data. To erase memory, stop the service and remove its configured data directory only after confirming the backup and target. See the [official installation/operations guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md).
 
 #### Host boundaries
@@ -240,7 +240,7 @@ To enable Claude Code to discover skills located in `.agents/skills/`:
 - **Claude Code:** upstream MCP/hooks; ai-memory owns only its entries and preserves unrelated hooks. The existing Claude `PreToolUse` security hook remains separate. Claude Code's default auto-memory is also separate and machine-local.
 - **Codex CLI:** upstream `--client codex` / `--agent codex` integration. **Codex desktop:** uses the local Codex configuration surface where supported; verify the installed app's hook/MCP availability instead of assuming every CLI version behaves identically.
 - **Antigravity CLI:** upstream `antigravity-cli` MCP/hooks. On Windows, run setup in the same environment that launches the agent.
-- **Antigravity IDE:** MCP only; configure a local server in the IDE's MCP settings or its documented `~/.gemini/config/mcp_config.json` / project `.agents/mcp_config.json`. For same-machine use, the Antigravity schema uses `serverUrl` set to the ai-memory MCP endpoint `http://127.0.0.1:49374/mcp`. The IDE integration does not imply automatic lifecycle capture.
+- **Antigravity 2.0 and IDE:** the helper uses the upstream Antigravity MCP installer to write the shared `~/.gemini/config/mcp_config.json` and managed project instructions. The current ai-memory upstream has no dedicated 2.0/IDE lifecycle-hook target, so this is MCP-only and does not automatically capture session events. Manual MCP setup uses `serverUrl=http://127.0.0.1:49374/mcp`; see [Antigravity MCP docs](https://www.antigravity.google/docs/mcp).
 - **ChatGPT web:** the no-key, loopback setup has no direct connection to a remote web chat. Use a concise Markdown handoff manually. Remote MCP/write access is outside this free local setup.
 - **Windows:** upstream documents both WSL2 and native Windows. Install and configure ai-memory in the same environment that launches each agent; do not mix WSL and Windows hook paths. Review the [Windows guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/windows.md) for client-specific support.
 
@@ -290,7 +290,7 @@ Loaded progressively on-demand:
 > **Answer**: Global rules are resident across all sessions on the machine. Adding project-specific commands creates cross-project context pollution and wastes prompt tokens.
 
 ### Q2: How does online update (`-Update`) protect custom project configurations?
-> **Answer**: If project `AGENTS.md` already exists, the script preserves it and generates [`AGENTS.template.md`](AGENTS.template.md) on update. Existing Claude Code and Antigravity global instruction files are also preserved; update mode writes adjacent `CLAUDE.template.md` and `AGENTS.template.md` for manual review. Other managed sub-rules, skills, and version metadata follow their documented update behavior.
+> **Answer**: Existing project `AGENTS.md` is preserved and an `AGENTS.template.md` is generated for review. `-Global` initializes missing Claude Code, Antigravity, and Codex global instructions while preserving existing files. Combining `-Global -Update` makes timestamped backups and replaces those global files with the current template; Codex's active non-empty `AGENTS.override.md` is updated in place of `AGENTS.md`.
 
 ### Q3: How do 40+ skills avoid blowing up the context window?
 > **Answer**: It depends on how the host discovers and loads Skills. Do not assume fixed metadata costs or cache discounts; keep only useful Skills enabled and verify behavior in the target host.

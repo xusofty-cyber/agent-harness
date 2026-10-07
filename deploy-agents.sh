@@ -3,7 +3,7 @@
 # deploy-agents.sh
 # Platforms: Linux / macOS (Bash)
 # Purpose: One-click deploy & online update AI Agents Harness spec, rules & skills
-#          (Supports Codex / Claude Code / Antigravity IDE)
+#          (Supports Codex / Claude Code / Antigravity 2.0 / CLI / IDE)
 # ==============================================================================
 
 set -euo pipefail
@@ -19,12 +19,12 @@ NC='\033[0m' # No Color
 usage() {
     echo -e "${CYAN}用法 (Usage):${NC}"
     echo "  $0 <项目根目录路径> [--global|-g] [--update|-u] [--comet-init]"
-    echo "  $0 --global|-g [--update|-u]   # 初始化全局配置；已有配置保留，--update 生成审阅模板"
+    echo "  $0 --global|-g [--update|-u]   # 初始化全局配置；--update 先备份再覆盖已有规则"
     echo ""
     echo -e "${CYAN}参数说明 (Parameters):${NC}"
     echo "  <项目根目录路径>   目标项目所在的相对路径或绝对路径。"
-    echo "  --global, -g       初始化不存在的用户全局规则；已有文件保留，--update 生成旁置审阅模板。"
-    echo "  --update, -u       执行在线检测与更新（拉取最新规则、更新技能库与配套脚手架）。"
+    echo "  --global, -g       初始化 Claude、Antigravity 2.0/CLI/IDE、Codex 用户全局规则。"
+    echo "  --update, -u       更新模板仓库；与 --global 一起使用时，先备份再覆盖全局规则。"
     echo "  --comet-init       若系统中已安装 comet CLI，自动在目标项目中运行 comet init。"
     echo ""
     echo -e "${CYAN}示例 (Examples):${NC}"
@@ -90,6 +90,50 @@ backup_path() {
     if [ -e "$path" ] || [ -L "$path" ]; then
         cp -a "$path" "${path}.bak.$(date +%Y%m%d%H%M%S)"
     fi
+}
+
+backup_global_rule() {
+    local path="$1"
+    local backup_path="${path}.bak.$(date +%Y%m%d%H%M%S)"
+    local suffix=1
+    while [ -e "$backup_path" ] || [ -L "$backup_path" ]; do
+        backup_path="${path}.bak.$(date +%Y%m%d%H%M%S).${suffix}"
+        suffix=$((suffix + 1))
+    done
+    cp -a "$path" "$backup_path"
+    printf '%s' "$backup_path"
+}
+
+deploy_global_rule() {
+    local tool_name="$1"
+    local target_path="$2"
+    local source_template="${3:-$GLOBAL_TEMPLATE}"
+    local target_dir
+    target_dir="$(dirname "$target_path")"
+    mkdir -p "$target_dir"
+
+    if [ -e "$target_path" ] || [ -L "$target_path" ]; then
+        if [ -d "$target_path" ] && [ ! -L "$target_path" ]; then
+            echo "  [!] ${tool_name} global rule target is a directory: ${target_path}" >&2
+            return 1
+        fi
+        if [ "$DO_UPDATE" != true ]; then
+            echo "  [i] 保留现有 ${tool_name} 全局规则: ${target_path}（使用 -u 备份并覆盖）"
+            return
+        fi
+
+        local backup_file
+        backup_file="$(backup_global_rule "$target_path")"
+        if [ -L "$target_path" ]; then
+            rm "$target_path"
+        fi
+        cp -f "$source_template" "$target_path"
+        echo "  [√] 已更新 ${tool_name} 全局规则: ${target_path}（备份: ${backup_file}）"
+        return
+    fi
+
+    cp "$source_template" "$target_path"
+    echo "  [√] 已初始化 ${tool_name} 全局规则: ${target_path}"
 }
 
 prompt_yes_no() {
@@ -194,41 +238,31 @@ fi
 # ==============================================================================
 if [ "$DEPLOY_GLOBAL" = true ]; then
     echo -e "\n${YELLOW}>>> [1/3] 正在部署/更新用户全局规则...${NC}"
+    ANTIGRAVITY_GEMINI_TEMPLATE="${SCRIPT_DIR}/templates/antigravity-GEMINI.md"
 
     if [ ! -f "${GLOBAL_TEMPLATE}" ]; then
         echo -e "${YELLOW}[警告] 未找到全局模板 ${GLOBAL_TEMPLATE}，跳过全局部署。${NC}"
     else
         # A. Claude Code (~/.claude/CLAUDE.md)
-        mkdir -p "${HOME}/.claude"
-        if [ -e "${HOME}/.claude/CLAUDE.md" ] || [ -L "${HOME}/.claude/CLAUDE.md" ]; then
-            if [ "$DO_UPDATE" = true ]; then
-                CLAUDE_GLOBAL_TEMPLATE="${HOME}/.claude/CLAUDE.template.md"
-                if [ -e "$CLAUDE_GLOBAL_TEMPLATE" ] || [ -L "$CLAUDE_GLOBAL_TEMPLATE" ]; then backup_path "$CLAUDE_GLOBAL_TEMPLATE"; fi
-                cp -f "${GLOBAL_TEMPLATE}" "$CLAUDE_GLOBAL_TEMPLATE"
-                echo -e "  ${NC}[i] Preserved existing ~/.claude/CLAUDE.md; review template: ${CLAUDE_GLOBAL_TEMPLATE}${NC}"
-            else
-                echo -e "  ${NC}[i] Preserved existing ~/.claude/CLAUDE.md (use --update to generate a review template).${NC}"
-            fi
+        deploy_global_rule "Claude Code" "${HOME}/.claude/CLAUDE.md"
+
+        # B. Current Antigravity releases load AGENTS.md; GEMINI.md supports older surfaces.
+        deploy_global_rule "Antigravity 2.0 / CLI / IDE" "${HOME}/.gemini/AGENTS.md"
+        if [ -f "$ANTIGRAVITY_GEMINI_TEMPLATE" ]; then
+            deploy_global_rule "Antigravity legacy GEMINI.md compatibility" "${HOME}/.gemini/GEMINI.md" "$ANTIGRAVITY_GEMINI_TEMPLATE"
         else
-            cp "${GLOBAL_TEMPLATE}" "${HOME}/.claude/CLAUDE.md"
-            echo -e "  ${GREEN}[√] Initialized Claude Code global rule: ${HOME}/.claude/CLAUDE.md${NC}"
+            echo "  [!] Antigravity GEMINI.md compatibility template not found: ${ANTIGRAVITY_GEMINI_TEMPLATE}" >&2
         fi
 
-        # B. Antigravity IDE (~/.gemini/AGENTS.md — standalone, always active, no frontmatter needed)
-        mkdir -p "${HOME}/.gemini"
-        if [ -e "${HOME}/.gemini/AGENTS.md" ] || [ -L "${HOME}/.gemini/AGENTS.md" ]; then
-            if [ "$DO_UPDATE" = true ]; then
-                ANTIGRAVITY_GLOBAL_TEMPLATE="${HOME}/.gemini/AGENTS.template.md"
-                if [ -e "$ANTIGRAVITY_GLOBAL_TEMPLATE" ] || [ -L "$ANTIGRAVITY_GLOBAL_TEMPLATE" ]; then backup_path "$ANTIGRAVITY_GLOBAL_TEMPLATE"; fi
-                cp -f "${GLOBAL_TEMPLATE}" "$ANTIGRAVITY_GLOBAL_TEMPLATE"
-                echo -e "  ${NC}[i] Preserved existing ~/.gemini/AGENTS.md; review template: ${ANTIGRAVITY_GLOBAL_TEMPLATE}${NC}"
-            else
-                echo -e "  ${NC}[i] Preserved existing ~/.gemini/AGENTS.md (use --update to generate a review template).${NC}"
-            fi
+        # C. Codex CLI / app (CODEX_HOME or ~/.codex); an active override wins.
+        CODEX_HOME_DIR="${CODEX_HOME:-${HOME}/.codex}"
+        if [ -s "${CODEX_HOME_DIR}/AGENTS.override.md" ]; then
+            CODEX_GLOBAL_FILE="${CODEX_HOME_DIR}/AGENTS.override.md"
+            echo "  [i] 检测到 Codex 全局覆盖文件，将更新当前生效的 AGENTS.override.md。"
         else
-            cp "${GLOBAL_TEMPLATE}" "${HOME}/.gemini/AGENTS.md"
-            echo -e "  ${GREEN}[√] Initialized Antigravity global rule: ${HOME}/.gemini/AGENTS.md${NC}"
+            CODEX_GLOBAL_FILE="${CODEX_HOME_DIR}/AGENTS.md"
         fi
+        deploy_global_rule "Codex" "$CODEX_GLOBAL_FILE"
     fi
 fi
 

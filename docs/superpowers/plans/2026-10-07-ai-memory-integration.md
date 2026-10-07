@@ -74,7 +74,7 @@ Upstream behavior used by this plan is documented in [ai-memory install guide](h
 - [x] Keep ordinary template deployment independent of ai-memory and its service state.
 - [x] Add an explicit opt-in setup path that first verifies `ai-memory` is already available, then calls only supported upstream installation commands with allowlist capture. Do not download/install or start anything.
 - [x] Use official merge-aware hook/MCP/instruction/skill installers; never hand-edit JSON hook configuration or overwrite existing Claude security handlers.
-- [x] Limit setup helpers to upstream-supported CLI targets; document Antigravity IDE's manual MCP path.
+- [x] Configure Antigravity CLI with upstream MCP/hooks and Antigravity 2.0/IDE with MCP-only setup through the shared MCP config; do not claim IDE lifecycle hooks without a first-party target.
 - [x] Document the matching upstream uninstall commands and local-data deletion/backup controls; do not silently remove memory data on uninstall.
 - [x] If one or more upstream commands cannot safely cover a host, document its manual steps instead of writing a second installer.
 

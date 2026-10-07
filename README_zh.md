@@ -35,23 +35,23 @@
 4. **一键部署与模板同步（`deploy-agents`）**：
    - Windows PowerShell（[`deploy-agents.ps1`](deploy-agents.ps1)，内置 UTF-8 兼容与 Junction 权限免提权穿透）与 Linux/macOS Bash（[`deploy-agents.sh`](deploy-agents.sh)）；
    - 项目脚本创建 `AGENTS.md`（若不存在）、Claude Code 与 Copilot 桥接，并部署 Claude Code Hook；其他工具的具体加载行为以支持矩阵为准；
-   - `--global` 配置 Claude Code 与 Antigravity 全局规则，覆盖前备份；
+   - `--global` 配置 Claude Code、Antigravity 与 Codex 全局规则；`--global --update` 覆盖前备份；
    - `--update` 通过 fast-forward 更新本模板仓库并同步文件。覆盖工具管理的目标规则/技能前会创建备份；`skills-lock.json` 是来源/完整性元数据，不代表脚本按锁定哈希下载技能。Ponytail/Caveman 以 Skill 文件随项目复制；CodeGraph/RTK 的 CLI、Agent 接线与项目初始化是可选步骤；部署脚本会在交互模式下征询是否执行。
    - 项目部署后会检测可选的 CodeGraph/RTK CLI，并逐项询问是否安装、是否配置 Agent/项目；默认拒绝。非交互执行会跳过安装并输出后续命令。
 
 5. **可选跨工具项目记忆（`ai-memory`）**：
    - 选择本地优先方案；不配置 LLM、embedding provider 或 API Key 也可使用；普通部署脚本不会安装或启动服务；
    - 自动采集需通过被 Git 忽略的 `.ai-memory.toml` 显式加入项目，并以 allowlist 模式安装上游 hooks；
-   - 专用辅助脚本通过上游合并式 CLI 配置 Claude Code、Codex 或 Antigravity CLI。Antigravity IDE 使用手动 MCP 配置；免费本地方案下 ChatGPT 网页版采用人工 Markdown 交接。
+   - 专用辅助脚本通过上游合并式 CLI 配置 Claude Code、Codex 和 Antigravity CLI；Antigravity 2.0 与 IDE 通过共用全局配置接入 MCP。免费本地方案下 ChatGPT 网页版采用人工 Markdown 交接。
 
 ### 支持范围
 
 | 工具 | 本仓库提供的配置/接线 | 状态 |
 |---|---|---|
 | Claude Code | `CLAUDE.md` 桥接、`.claude/skills/` 链接、`.claude/settings.json` Hook | 脚本配置；Hook 仅在 Claude Code 客户端运行 |
-| Antigravity | 项目规则/技能目录；`--global` 写入 `~/.gemini/AGENTS.md` | 文件部署；具体加载依版本和界面配置 |
-| Codex | 项目 `AGENTS.md` 与 `.agents/skills/` | 提供文件；脚本不配置 Codex 全局规则或 Hook |
-| ai-memory | Claude Code、Codex CLI、Antigravity CLI 的可选 MCP/hooks；Antigravity IDE MCP | 项目显式选择加入；Codex 桌面版按安装版本核实；ChatGPT 网页版人工交接 |
+| Antigravity 2.0 / CLI / IDE 与扩展 | 项目规则/技能目录；`--global` 写入 `~/.gemini/AGENTS.md` 和 `GEMINI.md` 兼容指针 | 当前表面支持两个全局文件名；较早 IDE 可跟随指针读取规范文件；CLI 专属规则另行配置 |
+| Codex | 全局 `$CODEX_HOME/AGENTS.md`（默认 `~/.codex/AGENTS.md`）、项目 `AGENTS.md` 与 `.agents/skills/` | `-Global` 初始化 Codex 全局文件；`-Global -Update` 备份后覆盖当前生效的全局规则 |
+| ai-memory | Claude Code、Codex CLI、Antigravity CLI 的可选 MCP/hooks；Antigravity 2.0 与 IDE 提供 MCP-only 设置 | 项目显式选择加入；Codex 桌面版按安装版本核实；ChatGPT 网页版人工交接 |
 | GitHub Copilot | `.github/copilot-instructions.md` 桥接 | 脚本配置；具体行为依 Copilot 版本/模式 |
 | Zed | `AGENTS.md` 文件 | 提供可复用文件；脚本不创建 Zed 专属配置 |
 | Pi / OpenCode | 未提供专用入口或脚本验证 | 未适配；不能据此推断自动加载 |

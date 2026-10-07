@@ -34,23 +34,23 @@ The goal is to package mature, reusable engineering practices as a baseline for 
 4. **One-Click Deployment & Template Sync (`deploy-agents`)**:
    - PowerShell automation ([`deploy-agents.ps1`](deploy-agents.ps1)) with automatic Directory Junctions for non-admin permission penetration and Bash automation ([`deploy-agents.sh`](deploy-agents.sh));
    - The project script creates `AGENTS.md` when absent, Claude Code and Copilot bridges, and Claude Code hooks; see the support matrix for the actual scope;
-   - `--global` configures Claude Code and Antigravity global rule files and backs up replaced files;
+   - `--global` configures Claude Code, Antigravity, and Codex global rule files; `--global --update` backs up replaced files;
    - `--update` fast-forwards this template repository and syncs files. It backs up managed target rules/skills before replacement. `skills-lock.json` is source/integrity metadata; the script does not download skills by locked hashes. Ponytail and Caveman are copied as Skill files. CodeGraph and RTK setup is optional; the deployment scripts offer interactive prompts for installation, agent wiring, and project initialization.
    - After project deployment, the scripts detect optional CodeGraph/RTK CLIs and ask separately before installation and agent/project configuration. The default is No. Non-interactive runs skip installation and print follow-up commands.
 
 5. **Optional cross-tool project memory (`ai-memory`)**:
    - The selected backend is local-first and can run with no LLM, embedding provider, or API key; it is not installed or started by the normal deployment scripts;
    - Capture is project opt-in through an ignored local `.ai-memory.toml` and upstream hooks installed in allowlist mode;
-   - Dedicated setup helpers configure Claude Code, Codex, or Antigravity CLI through the upstream merge-aware CLI. Antigravity IDE uses manual MCP configuration; ChatGPT web uses a human-mediated Markdown handoff in the free local setup.
+   - Dedicated setup helpers configure Claude Code, Codex, and Antigravity CLI through the upstream merge-aware CLI; Antigravity 2.0 and IDE receive MCP-only setup through the same global config. ChatGPT web uses a human-mediated Markdown handoff in the free local setup.
 
 ### Support scope
 
 | Tool | Configuration provided here | Status |
 |---|---|---|
 | Claude Code | `CLAUDE.md` bridge, `.claude/skills/` links, `.claude/settings.json` hooks | Configured by script; hooks run only in the Claude Code client |
-| Antigravity | Project rules/skills; `--global` writes `~/.gemini/AGENTS.md` | File deployment; loading depends on version and settings |
-| Codex | Project `AGENTS.md` and `.agents/skills/` | Files provided; script does not configure Codex global rules or hooks |
-| ai-memory | Optional MCP/hooks for Claude Code, Codex CLI, and Antigravity CLI; MCP for Antigravity IDE | Explicit per-project opt-in; Codex desktop must be checked against its installed version; ChatGPT web uses manual handoff |
+| Antigravity 2.0 / CLI / IDE & extensions | Project rules/skills; `--global` writes `~/.gemini/AGENTS.md` plus a `GEMINI.md` compatibility pointer | Current surfaces load both global names; older IDE releases can follow the pointer. CLI-only rules remain separate |
+| Codex | Global `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`), project `AGENTS.md`, and `.agents/skills/` | `-Global` initializes the Codex global file; `-Global -Update` backs up and replaces the active global instructions |
+| ai-memory | Optional MCP/hooks for Claude Code, Codex CLI, and Antigravity CLI; MCP-only setup for Antigravity 2.0 and IDE | Explicit per-project opt-in; Codex desktop must be checked against its installed version; ChatGPT web uses manual handoff |
 | GitHub Copilot | `.github/copilot-instructions.md` bridge | Configured by script; behavior depends on Copilot version/mode |
 | Zed | `AGENTS.md` | Reusable files only; no Zed-specific setup by script |
 | Pi / OpenCode | No dedicated entry point or script validation | Not adapted; automatic loading is not implied |
