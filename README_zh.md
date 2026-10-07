@@ -39,6 +39,11 @@
    - `--update` 通过 fast-forward 更新本模板仓库并同步文件。覆盖工具管理的目标规则/技能前会创建备份；`skills-lock.json` 是来源/完整性元数据，不代表脚本按锁定哈希下载技能。Ponytail/Caveman 以 Skill 文件随项目复制；CodeGraph/RTK 的 CLI、Agent 接线与项目初始化是可选步骤；部署脚本会在交互模式下征询是否执行。
    - 项目部署后会检测可选的 CodeGraph/RTK CLI，并逐项询问是否安装、是否配置 Agent/项目；默认拒绝。非交互执行会跳过安装并输出后续命令。
 
+5. **可选跨工具项目记忆（`ai-memory`）**：
+   - 选择本地优先方案；不配置 LLM、embedding provider 或 API Key 也可使用；普通部署脚本不会安装或启动服务；
+   - 自动采集需通过被 Git 忽略的 `.ai-memory.toml` 显式加入项目，并以 allowlist 模式安装上游 hooks；
+   - 专用辅助脚本通过上游合并式 CLI 配置 Claude Code、Codex 或 Antigravity CLI。Antigravity IDE 使用手动 MCP 配置；免费本地方案下 ChatGPT 网页版采用人工 Markdown 交接。
+
 ### 支持范围
 
 | 工具 | 本仓库提供的配置/接线 | 状态 |
@@ -46,6 +51,7 @@
 | Claude Code | `CLAUDE.md` 桥接、`.claude/skills/` 链接、`.claude/settings.json` Hook | 脚本配置；Hook 仅在 Claude Code 客户端运行 |
 | Antigravity | 项目规则/技能目录；`--global` 写入 `~/.gemini/AGENTS.md` | 文件部署；具体加载依版本和界面配置 |
 | Codex | 项目 `AGENTS.md` 与 `.agents/skills/` | 提供文件；脚本不配置 Codex 全局规则或 Hook |
+| ai-memory | Claude Code、Codex CLI、Antigravity CLI 的可选 MCP/hooks；Antigravity IDE MCP | 项目显式选择加入；Codex 桌面版按安装版本核实；ChatGPT 网页版人工交接 |
 | GitHub Copilot | `.github/copilot-instructions.md` 桥接 | 脚本配置；具体行为依 Copilot 版本/模式 |
 | Zed | `AGENTS.md` 文件 | 提供可复用文件；脚本不创建 Zed 专属配置 |
 | Pi / OpenCode | 未提供专用入口或脚本验证 | 未适配；不能据此推断自动加载 |
@@ -77,6 +83,9 @@ agents-living/
 ├── Tools Practical Usage and Skills Panorama Guide.md # 英文版技能实战指南
 ├── deploy-agents.ps1                # Windows 一键部署与在线更新自动化脚本
 ├── deploy-agents.sh                 # Linux / macOS 一键部署与在线更新自动化脚本
+├── setup-ai-memory.ps1              # 单项目/单客户端显式安装辅助脚本
+├── setup-ai-memory.sh               # Linux / macOS / WSL 显式安装辅助脚本
+├── .ai-memory.toml.example          # 本地显式加入标记示例
 ├── skills-lock.json                 # 技能来源及部分文件完整性元数据
 ├── README.md                        # 项目总览（English）
 └── README_zh.md                     # 项目总览（中文）
@@ -102,7 +111,21 @@ agents-living/
   ./deploy-agents.sh /path/to/my-project --global
   ```
 
-### 2. 在线更新规范与技能库
+### 2. 可选：启用本地跨工具记忆
+
+先按 [ai-memory 上游指南](https://github.com/akitaonrails/ai-memory) 单独安装并启动服务。无 Key 本地模式不要配置 LLM 或 embedding provider。检查 `.ai-memory.toml.example`，复制为 `.ai-memory.toml` 并替换 workspace/project 名称；然后按需为每种客户端运行辅助脚本：
+
+```powershell
+.\setup-ai-memory.ps1 -Agent codex
+```
+
+```bash
+./setup-ai-memory.sh codex
+```
+
+脚本要求本机已安装 `ai-memory` 且项目标记存在；不会安装软件或启动服务。确认安装器选用了能执行 allowlist 门控的原生 hook。各工具边界、卸载和数据保留说明见部署指南。
+
+### 3. 在线更新规范与技能库
 
 当上游规则或 GitHub Skills 发生更新时，直接在项目根目录运行：
 ```powershell

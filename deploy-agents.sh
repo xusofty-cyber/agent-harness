@@ -19,11 +19,11 @@ NC='\033[0m' # No Color
 usage() {
     echo -e "${CYAN}用法 (Usage):${NC}"
     echo "  $0 <项目根目录路径> [--global|-g] [--update|-u] [--comet-init]"
-    echo "  $0 --global|-g [--update|-u]   # 仅部署/更新全局配置"
+    echo "  $0 --global|-g [--update|-u]   # 初始化全局配置；已有配置保留，--update 生成审阅模板"
     echo ""
     echo -e "${CYAN}参数说明 (Parameters):${NC}"
     echo "  <项目根目录路径>   目标项目所在的相对路径或绝对路径。"
-    echo "  --global, -g       同时部署/更新当前用户的全局规则 (~/.claude/ 与 ~/.gemini/)。"
+    echo "  --global, -g       初始化不存在的用户全局规则；已有文件保留，--update 生成旁置审阅模板。"
     echo "  --update, -u       执行在线检测与更新（拉取最新规则、更新技能库与配套脚手架）。"
     echo "  --comet-init       若系统中已安装 comet CLI，自动在目标项目中运行 comet init。"
     echo ""
@@ -200,22 +200,35 @@ if [ "$DEPLOY_GLOBAL" = true ]; then
     else
         # A. Claude Code (~/.claude/CLAUDE.md)
         mkdir -p "${HOME}/.claude"
-        # Backup existing file before overwrite
-        if [ -f "${HOME}/.claude/CLAUDE.md" ]; then
-            cp "${HOME}/.claude/CLAUDE.md" "${HOME}/.claude/CLAUDE.md.bak.$(date +%Y%m%d%H%M%S)"
-            echo -e "  ${NC}[i] Backed up existing ~/.claude/CLAUDE.md${NC}"
+        if [ -e "${HOME}/.claude/CLAUDE.md" ] || [ -L "${HOME}/.claude/CLAUDE.md" ]; then
+            if [ "$DO_UPDATE" = true ]; then
+                CLAUDE_GLOBAL_TEMPLATE="${HOME}/.claude/CLAUDE.template.md"
+                if [ -e "$CLAUDE_GLOBAL_TEMPLATE" ] || [ -L "$CLAUDE_GLOBAL_TEMPLATE" ]; then backup_path "$CLAUDE_GLOBAL_TEMPLATE"; fi
+                cp -f "${GLOBAL_TEMPLATE}" "$CLAUDE_GLOBAL_TEMPLATE"
+                echo -e "  ${NC}[i] Preserved existing ~/.claude/CLAUDE.md; review template: ${CLAUDE_GLOBAL_TEMPLATE}${NC}"
+            else
+                echo -e "  ${NC}[i] Preserved existing ~/.claude/CLAUDE.md (use --update to generate a review template).${NC}"
+            fi
+        else
+            cp "${GLOBAL_TEMPLATE}" "${HOME}/.claude/CLAUDE.md"
+            echo -e "  ${GREEN}[√] Initialized Claude Code global rule: ${HOME}/.claude/CLAUDE.md${NC}"
         fi
-        cp -f "${GLOBAL_TEMPLATE}" "${HOME}/.claude/CLAUDE.md"
-        echo -e "  ${GREEN}[√] Claude Code 全局规则已部署: ${HOME}/.claude/CLAUDE.md${NC}"
 
         # B. Antigravity IDE (~/.gemini/AGENTS.md — standalone, always active, no frontmatter needed)
         mkdir -p "${HOME}/.gemini"
-        if [ -f "${HOME}/.gemini/AGENTS.md" ]; then
-            cp "${HOME}/.gemini/AGENTS.md" "${HOME}/.gemini/AGENTS.md.bak.$(date +%Y%m%d%H%M%S)"
-            echo -e "  ${NC}[i] Backed up existing ~/.gemini/AGENTS.md${NC}"
+        if [ -e "${HOME}/.gemini/AGENTS.md" ] || [ -L "${HOME}/.gemini/AGENTS.md" ]; then
+            if [ "$DO_UPDATE" = true ]; then
+                ANTIGRAVITY_GLOBAL_TEMPLATE="${HOME}/.gemini/AGENTS.template.md"
+                if [ -e "$ANTIGRAVITY_GLOBAL_TEMPLATE" ] || [ -L "$ANTIGRAVITY_GLOBAL_TEMPLATE" ]; then backup_path "$ANTIGRAVITY_GLOBAL_TEMPLATE"; fi
+                cp -f "${GLOBAL_TEMPLATE}" "$ANTIGRAVITY_GLOBAL_TEMPLATE"
+                echo -e "  ${NC}[i] Preserved existing ~/.gemini/AGENTS.md; review template: ${ANTIGRAVITY_GLOBAL_TEMPLATE}${NC}"
+            else
+                echo -e "  ${NC}[i] Preserved existing ~/.gemini/AGENTS.md (use --update to generate a review template).${NC}"
+            fi
+        else
+            cp "${GLOBAL_TEMPLATE}" "${HOME}/.gemini/AGENTS.md"
+            echo -e "  ${GREEN}[√] Initialized Antigravity global rule: ${HOME}/.gemini/AGENTS.md${NC}"
         fi
-        cp -f "${GLOBAL_TEMPLATE}" "${HOME}/.gemini/AGENTS.md"
-        echo -e "  ${GREEN}[√] Antigravity IDE 全局规则已部署: ${HOME}/.gemini/AGENTS.md${NC}"
     fi
 fi
 

@@ -38,6 +38,11 @@ The goal is to package mature, reusable engineering practices as a baseline for 
    - `--update` fast-forwards this template repository and syncs files. It backs up managed target rules/skills before replacement. `skills-lock.json` is source/integrity metadata; the script does not download skills by locked hashes. Ponytail and Caveman are copied as Skill files. CodeGraph and RTK setup is optional; the deployment scripts offer interactive prompts for installation, agent wiring, and project initialization.
    - After project deployment, the scripts detect optional CodeGraph/RTK CLIs and ask separately before installation and agent/project configuration. The default is No. Non-interactive runs skip installation and print follow-up commands.
 
+5. **Optional cross-tool project memory (`ai-memory`)**:
+   - The selected backend is local-first and can run with no LLM, embedding provider, or API key; it is not installed or started by the normal deployment scripts;
+   - Capture is project opt-in through an ignored local `.ai-memory.toml` and upstream hooks installed in allowlist mode;
+   - Dedicated setup helpers configure Claude Code, Codex, or Antigravity CLI through the upstream merge-aware CLI. Antigravity IDE uses manual MCP configuration; ChatGPT web uses a human-mediated Markdown handoff in the free local setup.
+
 ### Support scope
 
 | Tool | Configuration provided here | Status |
@@ -45,6 +50,7 @@ The goal is to package mature, reusable engineering practices as a baseline for 
 | Claude Code | `CLAUDE.md` bridge, `.claude/skills/` links, `.claude/settings.json` hooks | Configured by script; hooks run only in the Claude Code client |
 | Antigravity | Project rules/skills; `--global` writes `~/.gemini/AGENTS.md` | File deployment; loading depends on version and settings |
 | Codex | Project `AGENTS.md` and `.agents/skills/` | Files provided; script does not configure Codex global rules or hooks |
+| ai-memory | Optional MCP/hooks for Claude Code, Codex CLI, and Antigravity CLI; MCP for Antigravity IDE | Explicit per-project opt-in; Codex desktop must be checked against its installed version; ChatGPT web uses manual handoff |
 | GitHub Copilot | `.github/copilot-instructions.md` bridge | Configured by script; behavior depends on Copilot version/mode |
 | Zed | `AGENTS.md` | Reusable files only; no Zed-specific setup by script |
 | Pi / OpenCode | No dedicated entry point or script validation | Not adapted; automatic loading is not implied |
@@ -78,6 +84,9 @@ agents-living/
 ├── 各工具实战使用与技能全景指南.md     # 各工具实战使用与技能全景指南（中文）
 ├── deploy-agents.ps1                # Windows PowerShell one-click deploy & update script
 ├── deploy-agents.sh                 # Linux / macOS Bash one-click deploy & update script
+├── setup-ai-memory.ps1              # Explicit ai-memory setup for one opted-in project/client
+├── setup-ai-memory.sh               # Linux / macOS / WSL setup helper
+├── .ai-memory.toml.example          # Safe-to-copy local opt-in marker example
 ├── skills-lock.json                 # Skill source and partial integrity metadata
 ├── README.md                        # Repository overview (English default)
 └── README_zh.md                     # 项目中文概览
@@ -101,7 +110,21 @@ agents-living/
   ./deploy-agents.sh /path/to/my-project --global
   ```
 
-### 2. Perform Online Updates
+### 2. Optional: enable local cross-tool memory
+
+Install and start [ai-memory](https://github.com/akitaonrails/ai-memory) separately. For the no-key local mode, leave LLM and embedding providers unconfigured. Review `.ai-memory.toml.example`, copy it to `.ai-memory.toml`, and replace the workspace/project names. Then run one helper for each client you explicitly want to configure:
+
+```powershell
+.\setup-ai-memory.ps1 -Agent codex
+```
+
+```bash
+./setup-ai-memory.sh codex
+```
+
+The helper requires the local opt-in marker and an existing `ai-memory` command; it does not install software or start the service. Review installer output to confirm the selected hook enforces allowlist mode. See the deployment guide for each host's limits and uninstall/data-retention details.
+
+### 3. Perform Online Updates
 
 When upstream rules or skills are updated, run directly in the repository:
 ```powershell

@@ -177,11 +177,11 @@ if ($Update) {
 if (-not $ProjectPath -and -not $Global) {
     Write-Host "`n[用法说明] Usage:" -ForegroundColor Cyan
     Write-Host "  .\deploy-agents.ps1 -ProjectPath <目标项目路径> [-Global] [-Update]"
-    Write-Host "  .\deploy-agents.ps1 -Global [-Update]   # 仅更新全局配置"
+    Write-Host "  .\deploy-agents.ps1 -Global [-Update]   # 初始化全局配置；已有配置保留，-Update 生成审阅模板"
     Write-Host ""
     Write-Host "[参数说明] Parameters:" -ForegroundColor Cyan
     Write-Host "  -ProjectPath   目标项目根目录路径。"
-    Write-Host "  -Global (-g)   同时部署/更新当前用户的全局规则 (~/.claude/ 与 ~/.gemini/)。"
+    Write-Host "  -Global (-g)   初始化不存在的用户全局规则；已有文件保留，-Update 生成旁置审阅模板。"
     Write-Host "  -Update (-u)   fast-forward 更新模板仓库，并将受管理文件同步到目标项目（覆盖前备份）。"
     exit 0
 }
@@ -201,14 +201,17 @@ if ($Global) {
         if (-not (Test-Path $ClaudeGlobalDir)) {
             New-Item -ItemType Directory -Path $ClaudeGlobalDir -Force | Out-Null
         }
-        # Backup existing file before overwrite
-        if (Test-Path $ClaudeGlobalFile) {
-            $backupName = "$ClaudeGlobalFile.bak.$(Get-Date -Format yyyyMMddHHmmss)"
-            Copy-Item -Path $ClaudeGlobalFile -Destination $backupName
-            Write-Host "  [INFO] Backed up existing CLAUDE.md to: $backupName" -ForegroundColor Gray
+        if (-not (Test-Path $ClaudeGlobalFile)) {
+            Copy-Item -Path $ResolvedGlobalTemplate -Destination $ClaudeGlobalFile
+            Write-Host "  [OK] Initialized Claude Code global rule: $ClaudeGlobalFile" -ForegroundColor Green
+        } elseif ($Update) {
+            $ClaudeGlobalTemplate = Join-Path $ClaudeGlobalDir "CLAUDE.template.md"
+            Backup-ManagedPath $ClaudeGlobalTemplate
+            Copy-Item -Path $ResolvedGlobalTemplate -Destination $ClaudeGlobalTemplate -Force
+            Write-Host "  [INFO] Preserved existing CLAUDE.md; review template: $ClaudeGlobalTemplate" -ForegroundColor Gray
+        } else {
+            Write-Host "  [INFO] Preserved existing Claude Code global rule: $ClaudeGlobalFile (use -Update to generate a review template)." -ForegroundColor Gray
         }
-        Copy-Item -Path $ResolvedGlobalTemplate -Destination $ClaudeGlobalFile -Force
-        Write-Host "  [OK] Claude Code global rule: $ClaudeGlobalFile" -ForegroundColor Green
 
         # B. Antigravity IDE (~/.gemini/AGENTS.md — standalone, always active, no frontmatter needed)
         $AntigravityGlobalDir = Join-Path $HOME ".gemini"
@@ -216,14 +219,17 @@ if ($Global) {
         if (-not (Test-Path $AntigravityGlobalDir)) {
             New-Item -ItemType Directory -Path $AntigravityGlobalDir -Force | Out-Null
         }
-        # Backup existing file before overwrite
-        if (Test-Path $AntigravityGlobalFile) {
-            $backupName = "$AntigravityGlobalFile.bak.$(Get-Date -Format yyyyMMddHHmmss)"
-            Copy-Item -Path $AntigravityGlobalFile -Destination $backupName
-            Write-Host "  [INFO] Backed up existing AGENTS.md to: $backupName" -ForegroundColor Gray
+        if (-not (Test-Path $AntigravityGlobalFile)) {
+            Copy-Item -Path $ResolvedGlobalTemplate -Destination $AntigravityGlobalFile
+            Write-Host "  [OK] Initialized Antigravity global rule: $AntigravityGlobalFile" -ForegroundColor Green
+        } elseif ($Update) {
+            $AntigravityGlobalTemplate = Join-Path $AntigravityGlobalDir "AGENTS.template.md"
+            Backup-ManagedPath $AntigravityGlobalTemplate
+            Copy-Item -Path $ResolvedGlobalTemplate -Destination $AntigravityGlobalTemplate -Force
+            Write-Host "  [INFO] Preserved existing AGENTS.md; review template: $AntigravityGlobalTemplate" -ForegroundColor Gray
+        } else {
+            Write-Host "  [INFO] Preserved existing Antigravity global rule: $AntigravityGlobalFile (use -Update to generate a review template)." -ForegroundColor Gray
         }
-        Copy-Item -Path $ResolvedGlobalTemplate -Destination $AntigravityGlobalFile -Force
-        Write-Host "  [OK] Antigravity IDE global rule: $AntigravityGlobalFile" -ForegroundColor Green
     }
 }
 
