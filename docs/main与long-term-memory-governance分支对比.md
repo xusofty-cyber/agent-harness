@@ -102,7 +102,7 @@
 
 ## 三、 代码与文件变动清单一览
 
-```
+```text
  .agents/skills/cross-tool-memory/SKILL.md          |  25 ++++       # [新增] 跨工具记忆标准实践技能
  .ai-memory.toml.example                            |  16 ++         # [新增] 本地记忆项目声明模板
  .gitignore                                         |   3 +          # [修改] 忽略 .ai-memory.toml 等本地状态

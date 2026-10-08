@@ -120,7 +120,8 @@ backup_path() {
 
 backup_global_rule() {
     local path="$1"
-    local backup_path="${path}.bak.$(date +%Y%m%d%H%M%S)"
+    local backup_path
+    backup_path="${path}.bak.$(date +%Y%m%d%H%M%S)"
     local suffix=1
     while [ -e "$backup_path" ] || [ -L "$backup_path" ]; do
         backup_path="${path}.bak.$(date +%Y%m%d%H%M%S).${suffix}"
@@ -239,7 +240,7 @@ guide_optional_cli_tools() {
 init_guidance() {
     local template="$1" output="$2" scope="$3" root="$4"
     local project_name="" repository_url="" default_branch="" language="" package_manager="" ci_path="" purpose="" owners="" module_name="" directory_path="" responsibility=""
-    local readme_summary="" manifests=() locks=() pending="" key value line content status tmp item file label
+    local readme_summary="" manifests=() locks=() pending="" key value content status tmp item file label
     local install_suggestion="" dev_suggestion="" build_suggestion="" unit_test_suggestion="" targeted_test_suggestion="" integration_suggestion="" lint_suggestion="" format_suggestion="" type_check_suggestion="" migration_suggestion="" local_test_suggestion="" local_lint_suggestion="" framework_suggestion="" store_suggestion="" frameworks="" stores="" script_report="" report_type="" report_value="" run_prefix="npm run" suggestion="" python_cmd="" local_manager=""
     project_name="$(basename "$root")"
     module_name="$project_name"
