@@ -9,14 +9,14 @@ The long-form guides are maintained in **pairs**:
 | English (source) | 中文 (translation) |
 |---|---|
 | `README.md` | `README_zh.md` |
-| `Multi-Tool Deployment and Configuration Guide.md` | `多工具部署配置指南.md` |
-| `Tools Practical Usage and Skills Panorama Guide.md` | `各工具实战使用与技能全景指南.md` |
+| `Multi-Tool Deployment and Configuration Guide.md` | `Multi-Tool Deployment and Configuration Guide.zh.md` |
+| `Tools Practical Usage and Skills Panorama Guide.md` | `Tools Practical Usage and Skills Panorama Guide.zh.md` |
 
 Rules:
 
 1. **English first**: write or change the English version first, then sync the Chinese translation in the same PR. A PR that changes one side without the other will be sent back.
-2. **Structure parity**: keep the same section structure and heading hierarchy on both sides, so anchors and the table of contents stay aligned. (CI checks that both files of a pair exist; structural drift is caught in review.)
-3. **Filenames**: the Chinese guides keep their Chinese filenames for now (renaming would break existing links). New guides must use ASCII filenames, e.g. `Some Guide.md` / `Some Guide.zh.md`.
+2. **Structure parity**: keep the same section structure and heading hierarchy on both sides, so anchors and the table of contents stay aligned. CI enforces `##` section-count parity per pair via `tests/repo_checks.py`; deeper drift is caught in review.
+3. **Filenames**: guides use ASCII filenames; Chinese translations use the `.zh.md` suffix (e.g. `Some Guide.zh.md`). No non-ASCII filenames for new documents.
 
 ## Templates stay generic（模板保持通用）
 
