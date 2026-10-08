@@ -23,7 +23,7 @@ The goal is to package mature, reusable engineering practices as a baseline for 
    - Some command patterns are hard-blocked while other cases emit non-blocking warnings;
    - Regex inspection cannot cover every command form and does not replace server-side branch protection.
 
-3. **39 Reusable Skill Directories ([`.agents/skills/`](.agents/skills/))**:
+3. **40 Reusable Skill Directories ([`.agents/skills/`](.agents/skills/))**:
    - **Comet integration guide**: checks the installed version and project configuration; this skill does not implement Comet's state machine or phase guards;
    - **Spec-Driven Development (SDD)**: Full 16-skill `openspec` suite (proposal, apply changes, verify, sync specs, archive, explore);
    - **Test-Driven Development (TDD)**: Full 15-skill `superpowers` suite (red-green cycle, systematic root-cause debugging, physical verification evidence gate, git worktrees);
@@ -69,7 +69,7 @@ agents-living/
 │   │   ├── git-workflow.md          # Git authorization model, protected branch isolation
 │   │   ├── security-boundary.md     # 8 High-risk operations protection matrix
 │   │   └── token-discipline.md      # Read/fetch/speak gates, log truncation
-│   └── skills/                      # 39 Native engineering skills (Comet, OpenSpec, Superpowers...)
+│   └── skills/                      # 40 Native engineering skills (Comet, OpenSpec, Superpowers...)
 ├── .claude/
 │   ├── settings.json                # Claude Code PreToolUse security interceptor config
 │   └── hooks/                       # Security hook scripts (Node.js, reads stdin JSON)

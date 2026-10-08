@@ -7,6 +7,11 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 ## [Unreleased]
 
 ### Added
+- New local skill `option-review` (`version: 0.1.0`): pre-decision review of
+  multiple candidate approaches. Fans out isolated reviewers across five
+  dimensions (security, engineering, reversibility, simplicity, cross-tool)
+  and returns a decision matrix; complements `requesting-code-review`
+  (which reviews completed work).
 - `VERSION` file (single source of truth for the release version);
   `tests/repo_checks.py` checks it matches the newest `CHANGELOG.md` version.
 - `tests/repo_checks.py`: `skill-version` check — in-repo-authored skills must

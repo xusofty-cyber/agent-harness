@@ -146,6 +146,12 @@
       "skillPath": "skills/openspec-verify-change/SKILL.md",
       "computedHash": "993a6b7dc13cea98068c983d9317dcaedc42aeeab6917d0971eac3e834d6adb5"
     },
+    "option-review": {
+      "source": "agents-living (authored in-repo)",
+      "sourceType": "local",
+      "version": "0.1.0",
+      "skillPath": ".agents/skills/option-review/SKILL.md"
+    },
     "pdf": {
       "source": "anthropics/skills",
       "sourceType": "github",
