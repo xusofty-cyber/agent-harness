@@ -16,6 +16,14 @@ param (
     [Alias("u")]
     [switch]$Update,
 
+    [Alias("i")]
+    [switch]$Initialize,
+
+    [Alias("k")]
+    [switch]$Check,
+
+    [string]$DirectoryPath,
+
     [Alias("c")]
     [switch]$CometInit
 )
@@ -55,6 +63,7 @@ function Backup-ManagedPath([string]$Path) {
         Copy-Item -Path $Path -Destination $backupPath -Recurse -Force
     }
 }
+$ResolvedDirectoryTemplate = Join-Path $ScriptDir "Directory AGENTS.md"
 
 function Backup-GlobalRule([string]$Path) {
     $backupBase = "$Path.bak.$(Get-Date -Format yyyyMMddHHmmssfff)"
@@ -215,11 +224,17 @@ if (-not $ProjectPath -and -not $Global) {
     Write-Host "  .\deploy-agents.ps1 -Global [-Update]   # 初始化全局配置；-Update 先备份再覆盖已有规则"
     Write-Host ""
     Write-Host "[参数说明] Parameters:" -ForegroundColor Cyan
+    Write-Host "  -Initialize (-i) 识别项目事实并生成规则，未知项加入待确认清单。"
+    Write-Host "  -DirectoryPath   配合 -Initialize 或 -Check，指定项目内已有子目录。"
+    Write-Host "  -Check (-k)      检查项目/指定目录 AGENTS.md 中尚未处理的占位项。"
     Write-Host "  -ProjectPath   目标项目根目录路径。"
     Write-Host "  -Global (-g)   初始化 Claude、Antigravity 2.0/CLI/IDE、Codex 用户全局规则。"
     Write-Host "  -Update (-u)   更新模板仓库；与 -Global 一起使用时，先备份再覆盖全局规则。"
     exit 0
 }
+if ($DirectoryPath -and -not ($Initialize -or $Check)) { throw "-DirectoryPath requires -Initialize or -Check." }
+if (($Initialize -or $Check) -and -not $ProjectPath) { throw "-Initialize and -Check require -ProjectPath." }
+if ($Check -and $Global) { throw "-Check cannot be combined with -Global." }
 
 # ==============================================================================
 # 2. Deploy / Update Global Rules (-Global)
@@ -259,6 +274,147 @@ if ($Global) {
     }
 }
 
+function Get-InitSuggestions([string]$Root, [string]$Scope) {
+    $values = @{}
+    if ($Scope -eq "project") {
+        $values["PROJECT_NAME"] = Split-Path -Leaf $Root.TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
+        if (Get-Command git -ErrorAction SilentlyContinue) {
+            $remote = (& git -C $Root remote get-url origin 2>$null | Select-Object -First 1)
+            if ($LASTEXITCODE -eq 0 -and $remote -and $remote -notmatch '://[^/]*@') { $values["REPOSITORY_URL"] = $remote.Trim() }
+            $branch = (& git -C $Root symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>$null | Select-Object -First 1)
+            if ($LASTEXITCODE -eq 0 -and $branch -match '^origin/(.+)$') { $values["DEFAULT_BRANCH"] = $Matches[1] }
+        }
+        $manifests = @(
+            @{ File = 'package.json'; Name = 'JavaScript/TypeScript (package.json; runtime version to confirm)' },
+            @{ File = 'pyproject.toml'; Name = 'Python (pyproject.toml; runtime version to confirm)' },
+            @{ File = 'Cargo.toml'; Name = 'Rust (Cargo.toml)' },
+            @{ File = 'go.mod'; Name = 'Go (go.mod)' },
+            @{ File = 'CMakeLists.txt'; Name = 'C/C++ (CMakeLists.txt)' },
+            @{ File = '*.csproj'; Name = '.NET (project file)' }
+        ) | Where-Object { (Test-Path -LiteralPath (Join-Path $Root $_.File)) -or (Get-ChildItem -Path $Root -Filter $_.File -File -ErrorAction SilentlyContinue | Select-Object -First 1) }
+        if ($manifests) { $values["LANGUAGE_AND_VERSION"] = (($manifests | ForEach-Object Name) -join '; ') }
+        $locks = @(
+            @{ File = 'pnpm-lock.yaml'; Name = 'pnpm' }, @{ File = 'yarn.lock'; Name = 'Yarn' },
+            @{ File = 'package-lock.json'; Name = 'npm' }, @{ File = 'uv.lock'; Name = 'uv' },
+            @{ File = 'poetry.lock'; Name = 'Poetry' }, @{ File = 'Cargo.lock'; Name = 'Cargo' },
+            @{ File = 'go.sum'; Name = 'Go modules' }, @{ File = 'Pipfile.lock'; Name = 'Pipenv' }
+        ) | Where-Object { Test-Path (Join-Path $Root $_.File) }
+        if ($locks) { $values["PACKAGE_MANAGER"] = (($locks | ForEach-Object Name) -join ', ') }
+        $ci = @()
+        $workflowDir = Join-Path $Root '.github\workflows'
+        if (Test-Path $workflowDir) { $ci += (Get-ChildItem $workflowDir -File | ForEach-Object { '.github/workflows/' + $_.Name }) }
+        foreach ($file in @('.gitlab-ci.yml', 'Jenkinsfile', 'azure-pipelines.yml')) { if (Test-Path (Join-Path $Root $file)) { $ci += $file } }
+        if ($ci) { $values["CI_PATH"] = $ci -join ', ' }
+        $readme = Join-Path $Root 'README.md'
+        if (Test-Path $readme) {
+            $summary = Get-Content $readme -TotalCount 40 | Where-Object { $_.Trim() -and $_ -notmatch '^\s*#' } | Select-Object -First 1
+            if ($summary) { $values["PROJECT_PURPOSE"] = $summary.Trim() }
+        }
+    } else {
+        $values["MODULE_NAME"] = Split-Path -Leaf $Root.TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
+    }
+    $packageJson = Join-Path $Root 'package.json'
+    if (Test-Path -LiteralPath $packageJson -PathType Leaf) {
+        try { $package = Get-Content -LiteralPath $packageJson -Raw | ConvertFrom-Json -ErrorAction Stop } catch { $package = $null }
+        if ($package) {
+            $manager = [string]$package.packageManager
+            if (-not $manager) {
+                if (Test-Path -LiteralPath (Join-Path $Root 'pnpm-lock.yaml')) { $manager = 'pnpm' }
+                elseif (Test-Path -LiteralPath (Join-Path $Root 'yarn.lock')) { $manager = 'yarn' }
+                elseif (Test-Path -LiteralPath (Join-Path $Root 'package-lock.json')) { $manager = 'npm' }
+            } else { $manager = ($manager -split '@')[0] }
+            $runPrefix = if ($manager -in @('pnpm','yarn')) { "$manager run" } else { 'npm run' }
+            if ($Scope -eq 'project' -and $manager) {
+                $values['PACKAGE_MANAGER'] = "建议确认：$manager（由 package.json/锁文件识别）"
+                $install = switch ($manager) { 'pnpm' { 'pnpm install --frozen-lockfile' } 'yarn' { 'yarn install --immutable' } default { 'npm ci' } }
+                $values['INSTALL_COMMAND'] = "建议确认：$install（根据锁文件推导）"
+            }
+            $scripts = @{}
+            if ($package.scripts) { foreach ($property in $package.scripts.PSObject.Properties) { $scripts[$property.Name] = $property.Value } }
+            $scriptValues = @{
+                DEV_COMMAND = @('dev'); BUILD_COMMAND = @('build'); UNIT_TEST_COMMAND = @('test','test:unit');
+                INTEGRATION_TEST_COMMAND = @('test:e2e','test:integration','e2e'); LINT_COMMAND = @('lint');
+                FORMAT_COMMAND = @('format','fmt'); TYPE_CHECK_COMMAND = @('typecheck','type-check');
+                MIGRATION_COMMAND = @('db:migrate','migrate')
+            }
+            foreach ($entry in $scriptValues.GetEnumerator()) {
+                foreach ($scriptName in $entry.Value) {
+                    if ($scripts.ContainsKey($scriptName)) {
+                        $suggested = "建议确认：$runPrefix $scriptName（package.json scripts.$scriptName）"
+                        if ($Scope -eq 'project') { $values[$entry.Key] = $suggested }
+                        if ($Scope -eq 'project' -and $entry.Key -eq 'UNIT_TEST_COMMAND') { $values['TARGETED_TEST_COMMAND'] = "建议确认：$runPrefix $scriptName -- <test-path>（需核验测试运行器参数）" }
+                        if ($Scope -eq 'directory' -and $scriptName -in @('test','test:unit')) { $values['LOCAL_TEST_COMMAND'] = $suggested }
+                        if ($Scope -eq 'directory' -and $scriptName -eq 'lint') { $values['LOCAL_LINT_COMMAND'] = $suggested }
+                        break
+                    }
+                }
+            }
+            if ($Scope -eq 'project') {
+                $deps = @()
+                foreach ($source in @($package.dependencies, $package.devDependencies)) {
+                    if ($source) { $deps += $source.PSObject.Properties.Name }
+                }
+                $frameworks = @()
+                foreach ($framework in @(@{ Package='next'; Name='Next.js' }, @{ Package='react'; Name='React' }, @{ Package='vue'; Name='Vue' }, @{ Package='@angular/core'; Name='Angular' }, @{ Package='express'; Name='Express' }, @{ Package='fastify'; Name='Fastify' })) {
+                    if ($deps -contains $framework.Package) { $frameworks += $framework.Name }
+                }
+                if ($frameworks) { $values['FRAMEWORK'] = "建议确认：$($frameworks -join ', ')（package.json dependencies）" }
+                $stores = $deps | Where-Object { $_ -match '^(pg|mysql2?|sqlite3?|mongoose|prisma|@prisma/client|redis|ioredis)$' } | Sort-Object -Unique
+                if ($stores) { $values['DATABASE_AND_CACHE'] = "建议确认：$($stores -join ', ')（依赖清单；实际运行配置需复核）" }
+            }
+        }
+    }
+    return $values
+}
+
+function Initialize-AgentInstructions([string]$TemplatePath, [string]$OutputPath, [string]$Scope, [string]$DisplayPath) {
+    $values = Get-InitSuggestions $DisplayPath $Scope
+    if ($Scope -eq 'directory') {
+        $baseUri = [Uri]($ResolvedProjectPath.TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar)
+        $relative = [Uri]::UnescapeDataString($baseUri.MakeRelativeUri([Uri]$DisplayPath).ToString())
+        $values['DIRECTORY_PATH'] = $relative
+        if ([Console]::IsInputRedirected) {
+            $values['RESPONSIBILITY'] = '待 Agent 检查并向用户确认'
+        } else {
+            $answer = Read-Host '请用一句话说明该目录的职责（留空则交给 Agent 根据代码检查）'
+            $values['RESPONSIBILITY'] = if ($answer.Trim()) { $answer.Trim() } else { '待 Agent 检查并向用户确认' }
+        }
+    } else {
+        if ([Console]::IsInputRedirected) {
+            $values['PROJECT_PURPOSE'] = '待确认（README 摘要需核实）'
+            $values['OWNERS'] = '待用户确认（不从 Git 提交记录推断）'
+        } else {
+            $purposeDefault = $values['PROJECT_PURPOSE']
+            $purposePrompt = if ($purposeDefault) { "项目用途（回车接受 README 摘要：$purposeDefault）" } else { '项目用途（一句话）' }
+            $purpose = Read-Host $purposePrompt
+            if ($purpose.Trim()) { $values['PROJECT_PURPOSE'] = $purpose.Trim() }
+            elseif (-not $purposeDefault) { $values['PROJECT_PURPOSE'] = '待用户确认' }
+            $owners = Read-Host '核心维护者（可填团队/账号；留空标记待确认）'
+            $values['OWNERS'] = if ($owners.Trim()) { $owners.Trim() } else { '待用户确认' }
+        }
+    }
+    $text = [IO.File]::ReadAllText($TemplatePath)
+    $pending = [Collections.Generic.List[string]]::new()
+    $text = [regex]::Replace($text, '<([A-Z][A-Z0-9_]*)>', [System.Text.RegularExpressions.MatchEvaluator]{
+        param($match)
+        $key = $match.Groups[1].Value
+        if ($values.ContainsKey($key) -and -not [string]::IsNullOrWhiteSpace([string]$values[$key])) {
+            if ([string]$values[$key] -match '^(待|建议确认：)') { $pending.Add($key) }
+            return [string]$values[$key]
+        }
+        $pending.Add($key)
+        return "待确认（$key）"
+    }.GetNewClosure())
+    $status = if ($pending.Count) { "## 初始化待确认项`r`n`r`n" + (($pending | Select-Object -Unique | ForEach-Object { "- $($_)" }) -join "`r`n") + "`r`n`r`n" } else { "## 初始化状态`r`n`r`n自动识别字段已填充；请复核后使用。`r`n`r`n" }
+    $text = $text -replace '(?s)\A', ($status + "<!-- Generated by deploy-agents.ps1 -Initialize; review before use. -->`r`n`r`n")
+    Set-Content -LiteralPath $OutputPath -Value $text -Encoding UTF8
+    Write-Host "  [OK] Initialized guidance file: $OutputPath" -ForegroundColor Green
+    if ($pending.Count) {
+        Write-Host "  [INFO] Fields needing agent inspection or human confirmation: $(($pending | Select-Object -Unique) -join ', ')" -ForegroundColor Yellow
+        Write-Host '  [NEXT] Ask your coding agent: Inspect the initialization checklist in this file, fill only facts supported by repository evidence, ask me about business purpose/ownership/module boundaries when needed, and do not guess.' -ForegroundColor Cyan
+    }
+}
+
 # If no target project path specified, finish here
 if (-not $ProjectPath) {
     Write-Host "`n[OK] Global operations completed successfully!" -ForegroundColor Green
@@ -271,6 +427,41 @@ if (-not (Test-Path $ProjectPath)) {
     exit 1
 }
 $ResolvedProjectPath = (Resolve-Path $ProjectPath).Path
+if (($Initialize -or $Check) -and $DirectoryPath) {
+    if ([IO.Path]::IsPathRooted($DirectoryPath)) { throw "-DirectoryPath must be relative to -ProjectPath." }
+    $directoryRoot = [IO.Path]::GetFullPath((Join-Path $ResolvedProjectPath $DirectoryPath))
+    $projectPrefix = $ResolvedProjectPath.TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
+    if (-not $directoryRoot.StartsWith($projectPrefix, [StringComparison]::OrdinalIgnoreCase)) { throw "-DirectoryPath must remain inside the project." }
+    if (-not (Test-Path -LiteralPath $directoryRoot -PathType Container)) { throw "Directory does not exist: $DirectoryPath" }
+    $pathCursor = $directoryRoot
+    while ($pathCursor.StartsWith($projectPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+        if ((Get-Item -LiteralPath $pathCursor -Force).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "-DirectoryPath cannot traverse a reparse point: $pathCursor" }
+        $pathCursor = Split-Path -Parent $pathCursor
+    }
+    if (-not (Test-Path -LiteralPath $ResolvedDirectoryTemplate -PathType Leaf)) { throw "Directory template not found: $ResolvedDirectoryTemplate" }
+}
+if ($Initialize -and (Test-Path -LiteralPath (Join-Path $ResolvedProjectPath 'AGENTS.md') -PathType Leaf) -and (Test-Path -LiteralPath (Join-Path $ResolvedProjectPath 'AGENTS.generated.md'))) {
+    throw "Refusing to overwrite existing generated project guidance: $(Join-Path $ResolvedProjectPath 'AGENTS.generated.md')"
+}
+if ($Initialize -and $DirectoryPath -and (Test-Path -LiteralPath (Join-Path $directoryRoot 'AGENTS.md') -PathType Leaf) -and (Test-Path -LiteralPath (Join-Path $directoryRoot 'AGENTS.generated.md'))) {
+    throw "Refusing to overwrite existing generated directory guidance: $(Join-Path $directoryRoot 'AGENTS.generated.md')"
+}
+if ($Check) {
+    $checkFiles = @((Join-Path $ResolvedProjectPath 'AGENTS.md'), (Join-Path $ResolvedProjectPath 'AGENTS.generated.md'))
+    if ($DirectoryPath) { $checkFiles += (Join-Path $directoryRoot 'AGENTS.md'), (Join-Path $directoryRoot 'AGENTS.generated.md') }
+    $incomplete = $false
+    $checkedCount = 0
+    foreach ($file in $checkFiles) {
+        if (-not (Test-Path -LiteralPath $file -PathType Leaf)) { continue }
+        $checkedCount++
+        $matches = Select-String -LiteralPath $file -Pattern '<[A-Z][A-Z0-9_]*>|待确认（[A-Z][A-Z0-9_]*）|待用户确认|待 Agent 检查|建议确认：' -AllMatches
+        if ($matches) { Write-Host "[!] Unresolved fields in $file" -ForegroundColor Yellow; $matches | ForEach-Object { Write-Host "    line $($_.LineNumber): $($_.Line.Trim())" }; $incomplete = $true }
+        else { Write-Host "[OK] No initialization placeholders: $file" -ForegroundColor Green }
+    }
+    if (-not $checkedCount) { Write-Host '[!] No AGENTS.md or AGENTS.generated.md found to check.' -ForegroundColor Yellow; $incomplete = $true }
+    if ($incomplete) { exit 1 }
+    exit 0
+}
 
 Write-Host "==================================================" -ForegroundColor Cyan
 Write-Host " Target Project: $ResolvedProjectPath" -ForegroundColor Cyan
@@ -282,6 +473,7 @@ Write-Host "==================================================" -ForegroundColor
 Write-Host "`n>>> [2/3] Deploying project rules and tool bridges..." -ForegroundColor Yellow
 
 $TargetAgentsFile = Join-Path $ResolvedProjectPath "AGENTS.md"
+$HadProjectAgents = Test-Path -LiteralPath $TargetAgentsFile -PathType Leaf
 if (-not (Test-Path $TargetAgentsFile)) {
     Copy-Item -Path $ResolvedProjectTemplate -Destination $TargetAgentsFile
     Write-Host "  [OK] Created AGENTS.md from template" -ForegroundColor Green
@@ -292,6 +484,26 @@ if (-not (Test-Path $TargetAgentsFile)) {
         $TargetRefTemplate = Join-Path $ResolvedProjectPath "AGENTS.template.md"
         Copy-Item -Path $ResolvedProjectTemplate -Destination $TargetRefTemplate -Force
         Write-Host "  [INFO] Created AGENTS.template.md for reference with latest specs." -ForegroundColor Gray
+    }
+}
+
+if ($Initialize) {
+    $projectOutput = if ($HadProjectAgents) { Join-Path $ResolvedProjectPath "AGENTS.generated.md" } else { $TargetAgentsFile }
+    if ($HadProjectAgents -and (Test-Path -LiteralPath $projectOutput)) { throw "Refusing to overwrite existing generated guidance: $projectOutput" }
+    Initialize-AgentInstructions $ResolvedProjectTemplate $projectOutput 'project' $ResolvedProjectPath
+
+    if ($DirectoryPath) {
+        if ([IO.Path]::IsPathRooted($DirectoryPath)) { throw "-DirectoryPath must be relative to -ProjectPath." }
+        $directoryRoot = [IO.Path]::GetFullPath((Join-Path $ResolvedProjectPath $DirectoryPath))
+        $projectPrefix = $ResolvedProjectPath.TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
+        if (-not $directoryRoot.StartsWith($projectPrefix, [StringComparison]::OrdinalIgnoreCase)) { throw "-DirectoryPath must remain inside the project." }
+        if (-not (Test-Path -LiteralPath $directoryRoot -PathType Container)) { throw "Directory does not exist: $DirectoryPath" }
+        if (-not (Test-Path -LiteralPath $ResolvedDirectoryTemplate -PathType Leaf)) { throw "Directory template not found: $ResolvedDirectoryTemplate" }
+        $directoryAgents = Join-Path $directoryRoot 'AGENTS.md'
+        $hadDirectoryAgents = Test-Path -LiteralPath $directoryAgents -PathType Leaf
+        $directoryOutput = if ($hadDirectoryAgents) { Join-Path $directoryRoot 'AGENTS.generated.md' } else { $directoryAgents }
+        if ($hadDirectoryAgents -and (Test-Path -LiteralPath $directoryOutput)) { throw "Refusing to overwrite existing generated guidance: $directoryOutput" }
+        Initialize-AgentInstructions $ResolvedDirectoryTemplate $directoryOutput 'directory' $directoryRoot
     }
 }
 

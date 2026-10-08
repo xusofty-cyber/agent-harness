@@ -9,6 +9,7 @@
 ## 主要内容
 
 - `Global AGENTS.md`、`Project AGENTS.md`、`Directory AGENTS.md`：全局、项目与目录层级的规则模板。
+- `deploy-agents.ps1` / `.sh` 的 `-Initialize` / `--initialize` 可生成项目和指定目录的规则草稿，提取可验证的 Git/清单/CI 信息并列出待确认项；`-Check` / `--check` 检查尚未确认的字段。已有 `AGENTS.md` 保留，候选写入 `AGENTS.generated.md`。
 - `.agents/rules/`、`.agents/skills/`：按需加载的规则与技能资料。
 - `deploy-agents.ps1`、`deploy-agents.sh`：将模板部署到项目或受支持的用户级入口；`-g` 初始化 Claude、Antigravity `~/.gemini/AGENTS.md` 规则和旧版 `GEMINI.md` 兼容指针，以及 Codex 全局规则，`-g -u` 先备份再覆盖；部署文件不等于宿主已加载文件。
 - `.claude/settings.json` 等工具配置及中英文指南：说明当前适配方式、边界和部署流程。Claude Code PreToolUse 钩子属于客户端工具调用控制，不是操作系统级拦截器或长期记忆系统。

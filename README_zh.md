@@ -91,7 +91,7 @@ agents-living/
 └── README_zh.md                     # 项目总览（中文）
 ```
 
-`Directory AGENTS.md` 是模板，不会由部署脚本自动写入未知的子目录。需要模块规则时，复制该模板到目标模块并命名为 `AGENTS.md`，填写模块职责、边界和验证命令；只在确有边界差异的目录添加，避免重复根规则。
+首次部署时可用 `-Initialize` / `--initialize` 生成带项目事实和待确认清单的规则；使用 `-DirectoryPath` / `--directory` 指定一个已存在的模块目录，同时生成目录级规则。脚本只自动填写可从本地 Git、清单/锁文件和 CI 配置核实的信息；检测到 `package.json` 时还会把存在的 scripts 命令、常见框架/存储依赖列为“建议确认”，不会当成已验证的事实。业务定位、维护者、模块职责和边界交由用户或当前编码 Agent 确认。已有 `AGENTS.md` 不会被覆盖，改为生成 `AGENTS.generated.md` 供审阅。完成后使用 `-Check` / `--check` 检查待确认项。
 
 ---
 
@@ -102,13 +102,15 @@ agents-living/
 - **Windows 环境 (PowerShell)**:
   ```powershell
   # 部署到指定项目，并同时配置当前用户全局规则
-  .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Global
+  .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Global -Initialize -DirectoryPath "packages/core"
+  .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Check -DirectoryPath "packages/core"
   ```
 
 - **Linux / macOS 环境 (Bash)**:
   ```bash
   chmod +x ./deploy-agents.sh
-  ./deploy-agents.sh /path/to/my-project --global
+  ./deploy-agents.sh /path/to/my-project --global --initialize --directory packages/core
+  ./deploy-agents.sh /path/to/my-project --check --directory packages/core
   ```
 
 ### 2. 可选：启用本地跨工具记忆（ai-memory）

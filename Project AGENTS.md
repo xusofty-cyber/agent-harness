@@ -10,7 +10,7 @@
 - **项目名称**：`<PROJECT_NAME>`
 - **业务定位**：`<PROJECT_PURPOSE>`（一句话说明核心业务场景与目标受众）
 - **核心维护者**：`<OWNERS>`
-- **代码仓库与默认分支**：`<DEFAULT_BRANCH>`（如 `main` / `master`）
+- **代码仓库与默认分支**：`<REPOSITORY_URL>`；默认分支 `<DEFAULT_BRANCH>`（以远端 `origin/HEAD` 为准）
 
 ## 常用开发命令（CLI 上下文）
 
@@ -88,4 +88,4 @@
 ## 目录级规则索引
 
 当项目为 Monorepo 或存在高隔离独立子模块时，仅在必要子目录下按需创建 `AGENTS.md`：
-- `<PATH_TO_SUBMODULE>/AGENTS.md`：定义该子模块的 In/Out Scope 与专属快速测试命令；普通目录直接继承本文件，严禁冗余泛滥。
+- 在确有独立边界的子模块中新增其 `AGENTS.md`，定义专属 In/Out Scope 与快速验证命令；普通目录直接继承本文件，避免重复根规则。

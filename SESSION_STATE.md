@@ -41,3 +41,9 @@
 - **改动**：只吸收适合本项目的实现简化原则；修订 Ponytail Skill 的适用范围、调用路径调查方式、用户范围边界和回答详略规则；同步 `.agents/rules/engineering-spec.md`、`Global AGENTS.md` 与本文件。
 - **明确不引入**：不添加独立 Ponytail 插件/依赖，不复制上游适配器；保留当前跨工具共享 Skill 路径。
 - **验证**：`git diff --check` 通过；旧的全响应强制、逐字 grep 和固定回答长度冲突措辞已清除；两个 `.agents` Markdown 文件保留 UTF-8 无 BOM 与 CRLF。未运行测试，变更仅涉及规范文档；Skill 的压力场景测试未执行，后续可在多 Agent 环境补测。
+
+## 2026-10-08 AGENTS 初始化向导
+
+- **改动**：PowerShell/Bash 部署脚本新增项目与目录规则初始化、事实候选提取、待确认清单、占位检查；已有规则不覆盖，输出生成文件供审阅。同步 Project 模板、中英文 README 与部署指南。
+- **识别范围**：本地目录名、Git origin 和明确的 `origin/HEAD`、常见清单/锁文件、CI 路径；`package.json` 可选解析脚本及常见框架/存储依赖，并以“建议确认”标记。用途、维护者、职责与边界不作猜测。
+- **验证**：PowerShell AST 与 Git Bash `-n` 语法检查通过；PowerShell/Bash 临时项目均完成初始化 smoke check，验证项目和目录字段、候选命令以及 `--Check` 对未确认字段返回失败；另确认 Bash 按 `package.json` 的 `packageManager` 生成 pnpm 安装/脚本建议。`git diff --check` 通过，临时验证目录已清理。未修改测试套件。

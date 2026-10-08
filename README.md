@@ -55,7 +55,7 @@ The goal is to package mature, reusable engineering practices as a baseline for 
 | Zed | `AGENTS.md` | Reusable files only; no Zed-specific setup by script |
 | Pi / OpenCode | No dedicated entry point or script validation | Not adapted; automatic loading is not implied |
 
-`Directory AGENTS.md` is a template and is not copied into an unknown module path by the installer. For a module that needs distinct rules, copy it into that module as `AGENTS.md`, then fill in its ownership, boundaries, and validation commands. Add nested files only where they add constraints beyond the root rules.
+Use `-Initialize` / `--initialize` during deployment to create guidance with locally verifiable project facts and a checklist for unknowns. Add `-DirectoryPath` / `--directory` with an existing module path to generate its directory-level guidance too. The scripts only infer facts supported by local Git metadata, manifests, lockfiles, and CI files. For `package.json`, detected scripts and common framework/storage dependencies are marked as suggestions for review, not verified facts. Users or the active coding agent must confirm purpose, ownership, module responsibility, and boundaries. Existing `AGENTS.md` files are preserved; a review copy is written as `AGENTS.generated.md`. Run `-Check` / `--check` to find unresolved items.
 
 ---
 
@@ -101,13 +101,15 @@ agents-living/
 - **Windows (PowerShell)**:
   ```powershell
   # Deploy to target project and update current user's global rules
-  .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Global
+  .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Global -Initialize -DirectoryPath "packages/core"
+  .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Check -DirectoryPath "packages/core"
   ```
 
 - **Linux / macOS (Bash)**:
   ```bash
   chmod +x ./deploy-agents.sh
-  ./deploy-agents.sh /path/to/my-project --global
+  ./deploy-agents.sh /path/to/my-project --global --initialize --directory packages/core
+  ./deploy-agents.sh /path/to/my-project --check --directory packages/core
   ```
 
 ### 2. Optional: Enable Local Cross-Tool Memory (ai-memory)
