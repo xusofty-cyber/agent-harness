@@ -156,7 +156,9 @@ if (
 }
 
 // 6. Recursive delete
-if (/\brm\s+(-rf|-r\s|-fr)/.test(command)) {
+// NOTE: flag bundle allows any mix of rm short flags containing r/R
+// (old pattern `-r\s` also missed `rm -r` at end-of-command).
+if (/\brm\s+(?:-(?:[fidrRv]*[rR][fidrRv]*)(?!\S)|--recursive\b)/.test(command)) {
   warn(
     `检测到 rm -rf 递归删除，请确认目标路径非核心系统/项目源码目录！`
   );
@@ -170,7 +172,11 @@ if (/\bgit\s+reset\s+--hard\b/.test(command)) {
 }
 
 // 8. Blind git add
-if (/\bgit\s+add\s+(-A|\.)\b/.test(command)) {
+// NOTE: `\.` must not be followed by `\b` — there is no word boundary after
+// "." at end-of-command or before a space, so the old pattern never matched
+// `git add .`. `(?!\S)` requires end-of-command or whitespace instead.
+// `--all` is the long form of `-A` and is covered too.
+if (/\bgit\s+add\s+(?:(?:-A|--all)(?!\S)|\.(?!\S))/.test(command)) {
   warn(
     `严禁 git add . 全量盲目暂存（防止误带入编译产物与临时文件），请改用 git add <明确路径>！`
   );
