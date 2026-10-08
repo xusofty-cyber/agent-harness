@@ -24,12 +24,13 @@
    - 永久硬拦截（`exit 2`）：受保护分支（`develop`/`master`/`main`/`release*`）直改提交、`git push --force`、删除受保护远端分支、受保护分支 rebase；
    - 部分命令会硬拒绝，其他情况只是非阻断警告；正则检查不能覆盖所有命令形式，也不能替代 Git 服务端分支保护。
 
-3. **39 个可复用技能目录（[`.agents/skills/`](.agents/skills/)）**：
+3. **40 个可复用技能目录（[`.agents/skills/`](.agents/skills/)）**：
    - **Comet 集成说明**：引导检查已安装版本和项目配置；此技能本身不实现 Comet 状态机或阶段守卫。
    - **规范驱动开发（SDD）**：`openspec` 全套 16 个技能（提案、变更应用、验证、主文档同步、归档）。
    - **测试驱动开发（TDD）**：`superpowers` 全套 15 个技能（TDD 红绿循环、系统性排障、完工验证证据门、工作区隔离）。
    - **实现与检索指导**：`ponytail`（最小实现决策阶梯）与 `codegraph`（CodeGraph 可选集成指引；CLI/MCP 需单独安装配置）。
    - **输出与表达指导**：`rtk`（Rust Token Killer 可选 CLI 指引；需配置命令重写 Hook）与 `caveman`（简明表达 Skill）。
+   - **事前决策评审与共享记忆**：`option-review`（5 维度多候选方案事前独立评审与决策矩阵）与 `cross-tool-memory`（跨工具项目长期记忆导航与经验检索）。
    - **专业文档处理**：`docx`（Word 专业排版）、`pdf`（结构化抽取与分析）。
 
 4. **一键部署与模板同步（`deploy-agents`）**：
@@ -68,7 +69,7 @@ agents-living/
 │   │   ├── git-workflow.md          # Git 授权模型、受保护分支强隔离、提交规范
 │   │   ├── security-boundary.md     # 八大高风险操作防呆矩阵、凭证零泄露
 │   │   └── token-discipline.md      # 读拿说三道闸门、上下文防漏与日志截断
-│   └── skills/                      # 39 个原生工程技能库（Comet, OpenSpec, Superpowers...）
+│   └── skills/                      # 40 个原生工程技能库（Comet, OpenSpec, Superpowers...）
 ├── .claude/
 │   ├── settings.json                # Claude Code PreToolUse 安全拦截配置
 │   └── hooks/                       # 安全钩子脚本（Node.js，读取 stdin JSON）
@@ -79,7 +80,7 @@ agents-living/
 ├── Directory AGENTS.md              # Monorepo / 子模块边界隔离微型补丁
 ├── Multi-Tool Deployment and Configuration Guide.zh.md              # 跨工具适配原理、安全钩子与部署更新专著（中文）
 ├── Multi-Tool Deployment and Configuration Guide.md # 英文版部署配置指南
-├── Tools Practical Usage and Skills Panorama Guide.zh.md     # 39 个技能详解、Token 经济学与实战流转（中文）
+├── Tools Practical Usage and Skills Panorama Guide.zh.md     # 40 个技能详解、Token 经济学与实战流转（中文）
 ├── Tools Practical Usage and Skills Panorama Guide.md # 英文版技能实战指南
 ├── deploy-agents.ps1                # Windows 一键部署与在线更新自动化脚本
 ├── deploy-agents.sh                 # Linux / macOS 一键部署与在线更新自动化脚本

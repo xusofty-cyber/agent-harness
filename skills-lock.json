@@ -149,7 +149,7 @@
     "option-review": {
       "source": "agents-living (authored in-repo)",
       "sourceType": "local",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "skillPath": ".agents/skills/option-review/SKILL.md"
     },
     "pdf": {

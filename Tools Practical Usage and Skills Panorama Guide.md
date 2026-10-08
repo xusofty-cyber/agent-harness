@@ -148,6 +148,10 @@ The installer copies the repository's skill directories into `.agents/skills/`; 
 - **`docx`**: Word document generation, editing, and styling.
 - **`pdf`**: PDF text/table extraction and processing.
 
+#### 7. Pre-Decision Review & Cross-Tool Memory (In-Repo Skills)
+- **`cross-tool-memory`**: Cross-tool project-scoped memory navigation and recall aid (pairs with local ai-memory backend).
+- **`option-review`**: Pre-decision multi-option review generating an isolated 5-dimension decision matrix.
+
 ---
 
 ### 2.2 Version Locking & Online Updates (`skills-lock.json` + `deploy-agents`)
