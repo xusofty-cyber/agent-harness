@@ -6,6 +6,19 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+### Fixed
+- `setup-ai-memory.sh` / `.ps1`: pass `--no-skills` to
+  `ai-memory install-instructions` — this repo curates `cross-tool-memory`
+  as its only memory skill; upstream managed skills must not be dropped
+  into `.agents/skills/` (they would break the `skills-lock.json`
+  consistency check and leak into downstream deploys).
+- `tests/repo_checks.py`: new `exec-bit` guard asserting `deploy-agents.sh`
+  and `setup-ai-memory.sh` are `100755` in the git index — the GitHub
+  contents API resets the exec bit to `100644` on every content push, so
+  restore locally with `git update-index --chmod=+x` after API-driven PRs.
+- `docs/internal/SESSION_STATE.md`: updated from the stale
+  pre-merge state to the `v0.1.0` closed state.
+
 ## [0.1.0] - 2026-10-08
 
 First tagged release.

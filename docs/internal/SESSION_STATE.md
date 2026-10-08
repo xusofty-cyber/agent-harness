@@ -3,7 +3,15 @@
 > **最后更新**：2026-10-08
 > **任务**：跨工具记忆治理、ai-memory 集成与全局规则更新行为修复
 
-## 当前状态
+## 当前状态（已闭环）
+
+- **分支**：`long-term-memory-governance` 已合入 `main`（PR #2，merge commit `b5cd534`，血缘验证通过）。
+- **版本**：`v0.1.0` tag 已打（指向 PR #4 的 merge commit `62d932e`）。
+- **CI**：GitHub Actions 全绿（`lint-and-test`、`ps-analyzer`）。
+- **分析报告 13 项 + 后续 5 项补遗**：全部落地。PR #1（CI+正则修复）→ PR #2（LTMG 合入）→ PR #3（P1/P2 打磨）→ PR #4（.zh.md 改名、双语 CI 检查、ai-memory pin v2.6.0、CHANGELOG v0.1.0）→ PR #5（`--no-skills`、exec-bit 回归检查）。
+- **已知待办**：`deploy-agents.sh` / `setup-ai-memory.sh` 的 exec 位需在本地用 `git update-index --chmod=+x` 恢复后 push（API 推送会将其洗回 100644，`tests/repo_checks.py` 的 `exec-bit` 检查负责回归拦截）。
+
+## 历史记录（2026-10-08 前）
 
 - **分支**：`long-term-memory-governance`，跟踪 `origin/long-term-memory-governance`。
 - **本轮功能提交**：`c476978218f042155b6f89f5d129564c39e525fc`，已推送；`git ls-remote origin refs/heads/long-term-memory-governance` 返回相同 hash。

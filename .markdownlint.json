@@ -5,6 +5,7 @@
   // Chinese punctuation, compact tables, setext/emphasis headings and
   // blank-line density are author style choices — disabled below.
   "default": true,
+  "MD024": { "siblings_only": true },
   "MD003": false,
   "MD013": false,
   "MD022": false,

@@ -129,6 +129,25 @@ for en, zh in BILINGUAL_PAIRS:
     check(f"bilingual:{en}=={zh}", en_n == zh_n,
           f"## section count drift: {en_n} vs {zh_n}")
 
+# --- 7. Executable bit on entry-point scripts ---
+# The GitHub contents API resets the exec bit to 100644 on every content push,
+# so this guard catches the regression in CI. If it fails, run locally:
+#   git update-index --chmod=+x deploy-agents.sh setup-ai-memory.sh
+import subprocess
+EXEC_SCRIPTS = ["deploy-agents.sh", "setup-ai-memory.sh"]
+try:
+    ls = subprocess.run(["git", "ls-files", "-s", "--", *EXEC_SCRIPTS],
+                        capture_output=True, text=True, cwd=ROOT, check=True).stdout
+    modes = {line.split("\t", 1)[1]: line.split()[0]
+             for line in ls.splitlines() if line.strip()}
+except Exception as e:  # not a git checkout (e.g. sdist)
+    modes = {}
+    check("exec-bit:git-available", False, f"cannot query git index: {e}")
+for script in EXEC_SCRIPTS:
+    check(f"exec-bit:{script}", modes.get(script) == "100755",
+          f"mode is {modes.get(script)}, expected 100755 — run: "
+          f"git update-index --chmod=+x {script}")
+
 print()
 if failures:
     print(f"{len(failures)} check(s) failed.")
