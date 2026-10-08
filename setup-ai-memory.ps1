@@ -23,6 +23,17 @@ if (-not $aiMemory) {
     throw 'ai-memory is not installed in this environment. Install it separately using the upstream guide; this helper never downloads or starts it.'
 }
 
+# Version this repository was validated against. Bump deliberately after
+# re-verifying the install flags against the new release's docs.
+$aiMemoryPinnedVersion = '2.6.0'
+$verOutput = ((& ai-memory --version 2>$null) | Out-String)
+if ($verOutput -notmatch "(^|[^0-9.])$([regex]::Escape($aiMemoryPinnedVersion))([^0-9.]|$)") {
+    Write-Warning "ai-memory version mismatch: this repo pins $aiMemoryPinnedVersion (got: $($verOutput.Trim())). Set `$env:AI_MEMORY_ALLOW_OTHER_VERSION='1' to override."
+    if ($env:AI_MEMORY_ALLOW_OTHER_VERSION -ne '1') {
+        throw "ai-memory version mismatch: expected $aiMemoryPinnedVersion."
+    }
+}
+
 if ($Agent -in @('claude-code', 'codex', 'antigravity-cli')) {
     # Allowlist is enforced inside the native hook binary. Reject wrappers and
     # compatibility script modes before any user-level tool configuration changes.

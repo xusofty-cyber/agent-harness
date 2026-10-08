@@ -109,6 +109,26 @@ orphan_lock = sorted(lock_skills - dir_skills - META_ENTRIES)
 check("lock:no-orphans", not orphan_lock,
       f"lock entries without skill dir: {orphan_lock}")
 
+# --- 6. Bilingual doc pairs: structural parity ---
+# Each EN/ZH guide pair must keep the same ## section count, so the
+# translated structure cannot silently drift from the source.
+BILINGUAL_PAIRS = [
+    ("README.md", "README_zh.md"),
+    ("Multi-Tool Deployment and Configuration Guide.md",
+     "Multi-Tool Deployment and Configuration Guide.zh.md"),
+    ("Tools Practical Usage and Skills Panorama Guide.md",
+     "Tools Practical Usage and Skills Panorama Guide.zh.md"),
+]
+
+def h2_count(path):
+    return sum(1 for line in (ROOT / path).read_text(encoding="utf-8").splitlines()
+               if line.startswith("## "))
+
+for en, zh in BILINGUAL_PAIRS:
+    en_n, zh_n = h2_count(en), h2_count(zh)
+    check(f"bilingual:{en}=={zh}", en_n == zh_n,
+          f"## section count drift: {en_n} vs {zh_n}")
+
 print()
 if failures:
     print(f"{len(failures)} check(s) failed.")
