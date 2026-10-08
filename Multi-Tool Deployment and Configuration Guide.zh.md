@@ -522,4 +522,4 @@ allowlist 只有在已安装的原生 hook 执行 capture-policy 时，才能保
 ## 八、 实战演练与高级技能指南索引
 
 更详细的各生态工具（Comet、OpenSpec、Superpowers、CodeGraph、Ponytail、Caveman、RTK）深度使用说明、四大平台原生斜杠命令（`/plan`、`/goal`、`/opsx` 等）、以及端到端典型研发实战流转演练，请参阅兄弟指南：
-👉 [各工具实战使用与技能全景指南.md](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md)
+👉 [各工具实战使用与技能全景指南.zh.md](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md)

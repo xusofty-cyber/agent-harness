@@ -578,7 +578,7 @@ cat tasks/lessons.md
   - Windows：[`deploy-agents.ps1`](deploy-agents.ps1)
   - Linux/macOS：[`deploy-agents.sh`](deploy-agents.sh)
 - 跨工具部署与配置专著：
-  - 👉 [`多工具部署配置指南.md`](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md)
+  - 👉 [`多工具部署配置指南.zh.md`](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md)
 - 规则中枢文件：
   - 全局宪法：[`Global AGENTS.md`](Global%20AGENTS.md)
   - 项目枢纽：[`Project AGENTS.md`](Project%20AGENTS.md)
