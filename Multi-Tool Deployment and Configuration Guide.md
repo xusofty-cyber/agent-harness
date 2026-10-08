@@ -92,6 +92,10 @@ The hooks in `.claude/settings.json` are Claude Code-specific and run only befor
 
 The installer copies [`.claude/settings.json`](.claude/settings.json) and deploys [`.claude/hooks/guard.mjs`](.claude/hooks/guard.mjs) plus [`guard-write.mjs`](.claude/hooks/guard-write.mjs). Inspect those source files directly; do not copy hook examples from older guide versions because the protocol and implementation can change.
 
+### Equivalents on other tools (extension point)
+
+PreToolUse hooks are Claude Code-specific; the installer does not install interceptors for other tools. For equivalent protection, wire up each tool's own hook/approval mechanism: the decision logic in `guard.mjs` (protected branches, dangerous command patterns) is plain Node.js — reuse its regexes and branch table and adapt them to the target tool's hook entry point. Whichever layer you hook, it never replaces server-side branch protection; client-side interception is only one layer of defense in depth.
+
 ---
 
 ## 4. Cross-Tool Deployment & Template Updates (deploy-agents)
@@ -225,6 +229,8 @@ To enable Claude Code to discover skills located in `.agents/skills/`:
   4. Label uncertainty and date/source facts likely to change. Never store credentials, private keys, raw personal data, full conversation/tool logs, or unnecessary personal information.
 
 **Selected optional backend: [ai-memory](https://github.com/akitaonrails/ai-memory).** Its local mode provides Markdown-backed project memory, full-text retrieval, and cross-agent handoff without an LLM or API key. It is not required for ordinary use. This repository supplies an explicit setup helper but never installs or starts the backend, creates a local opt-in marker, or changes tool configuration during normal deployment.
+
+> **Supply-chain note**: ai-memory is a third-party native binary with prompt-reading hooks. Download it only from the official Releases page and verify the published SHA256 checksums (for `cargo install`, confirm the crate name is `ai-memory`). `setup-ai-memory.*` deliberately never downloads it for you and verifies it is a native executable (rejecting wrapper scripts) before configuring anything. Record your verified version via `ai-memory --version`, and check upstream release notes before upgrading.
 
 #### Explicit project opt-in and setup
 
