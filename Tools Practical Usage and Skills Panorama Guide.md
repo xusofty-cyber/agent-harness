@@ -40,7 +40,7 @@ This guide provides a comprehensive handbook for software engineering and techni
 
 Without physical boundaries, AI-assisted development frequently drifts, over-engineers, or breaks backward compatibility. Our Harness architecture enforces five consecutive gates:
 
-```
+```text
        [ User Request ]
               │
        ┌──────▼─────────────────────────────────────────────────┐
@@ -202,7 +202,6 @@ Comet is an independently versioned workflow tool. Check the project's `.comet/c
 Use Comet's current upstream documentation for version-specific entry points, configuration, artifact paths, and archive behavior.
 
 ---
-
 
 ### 3.2 OpenSpec: Spec-Driven Development
 
@@ -366,7 +365,7 @@ Human confirmation is mandatory before:
 
 **Requirement**: "Add a CSV export endpoint with date range filtering to the order service."
 
-```
+```text
 Step 1: Session Ceremony & Breakpoint Awareness (Session Start)
   ├─ Prioritize reading PROJECT_CONTEXT.md & SESSION_STATE.md to restore architecture & resume from breakpoint
   ├─ Check tasks/lessons.md and tasks/todo.md (if present)

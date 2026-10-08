@@ -9,9 +9,9 @@ This guide provides an end-to-end specification on how to deploy, configure, and
 ## Table of Contents
 
 1. [Architecture & Layered Positioning (Harness + Progressive Disclosure)](#1-architecture--layered-positioning-harness--progressive-disclosure)
-2. [Four Mainstream Tools: Loading Mechanisms & Adaptation Strategies](#2-four-mainstream-tools-loading-mechanisms--adaptation-strategies)
+2. [Configuration Scope by Tool](#2-configuration-scope-by-tool)
 3. [Claude Code Client Hooks: PreToolUse (.claude/settings.json)](#3-claude-code-client-hooks-pretooluse-claudesettingsjson)
-4. [Cross-Tool Automated Deployment & Online Update Pipeline (deploy-agents)](#4-cross-tool-automated-deployment--online-update-pipeline-deploy-agents)
+4. [Cross-Tool Deployment & Template Updates (deploy-agents)](#4-cross-tool-deployment--template-updates-deploy-agents)
    - 4.1 Script Core Architecture & Pipeline
    - 4.2 Windows Deployment (`deploy-agents.ps1`)
    - 4.3 Linux / macOS Deployment (`deploy-agents.sh`)
@@ -31,7 +31,7 @@ This guide provides an end-to-end specification on how to deploy, configure, and
 
 This repository organizes reusable rules as a **project entry point plus on-demand sub-rules** so teams can adapt the baseline and avoid loading unrelated guidance. Actual discovery and context cost depend on the host tool:
 
-```
+```text
 ┌────────────────────────────────────────────────────────────────────────┐
 │ 1. Global Level (Global AGENTS.md)                                     │
 │    - Role: Cross-project engineering constitution & security baseline │
@@ -100,7 +100,7 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 
 ### 4.1 Script Core Architecture & Pipeline
 
-```
+```text
 [ Execute Deployment Script ]
        │
        ▼

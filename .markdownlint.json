@@ -1,0 +1,20 @@
+{
+  // markdownlint config for agents-living.
+  // Philosophy: catch structural breakage (broken anchors, fenced blocks
+  // without language, bare URLs, duplicate headings), not prose style.
+  // Chinese punctuation, compact tables, setext/emphasis headings and
+  // blank-line density are author style choices — disabled below.
+  "default": true,
+  "MD003": false,
+  "MD013": false,
+  "MD022": false,
+  "MD026": false,
+  "MD028": false,
+  "MD031": false,
+  "MD032": false,
+  "MD033": false,
+  "MD036": false,
+  "MD041": false,
+  "MD058": false,
+  "MD060": false
+}

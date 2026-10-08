@@ -54,7 +54,7 @@
 
 ## 目录结构
 
-```
+```text
 agents-living/
 ├── .agents/
 │   ├── rules/                       # 细粒度工程子规则库（按需渐进式加载）
@@ -117,9 +117,9 @@ agents-living/
 
 ## 文档索引
 
-* 📖 **部署与配置指南**：[`多工具部署配置指南.md`](多工具部署配置指南.md) | [English Version](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md)
-* 📖 **实战与技能全景**：[`各工具实战使用与技能全景指南.md`](各工具实战使用与技能全景指南.md) | [English Version](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md)
-* 📜 **规则宪法**：[`Global AGENTS.md`](Global%20AGENTS.md) | [`Project AGENTS.md`](Project%20AGENTS.md) | [`Directory AGENTS.md`](Directory%20AGENTS.md)
+- 📖 **部署与配置指南**：[`多工具部署配置指南.md`](多工具部署配置指南.md) | [English Version](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md)
+- 📖 **实战与技能全景**：[`各工具实战使用与技能全景指南.md`](各工具实战使用与技能全景指南.md) | [English Version](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md)
+- 📜 **规则宪法**：[`Global AGENTS.md`](Global%20AGENTS.md) | [`Project AGENTS.md`](Project%20AGENTS.md) | [`Directory AGENTS.md`](Directory%20AGENTS.md)
 
 ---
 
