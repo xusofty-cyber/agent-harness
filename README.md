@@ -55,7 +55,7 @@ The goal is to package mature, reusable engineering practices as a baseline for 
 
 ## Directory Structure
 
-```
+```text
 agents-living/
 ├── .agents/
 │   ├── rules/                       # Modular sub-rules (loaded on-demand)
@@ -116,13 +116,13 @@ When upstream rules or skills are updated, run directly in the repository:
 
 ## Documentation Index
 
-* 📖 **Deployment & Configuration**:
+- 📖 **Deployment & Configuration**:
   - [Multi-Tool Deployment and Configuration Guide (English)](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md)
   - [多工具部署配置指南 (中文)](多工具部署配置指南.md)
-* 📖 **Practical Usage & Skills Panorama**:
+- 📖 **Practical Usage & Skills Panorama**:
   - [Tools Practical Usage and Skills Panorama Guide (English)](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md)
   - [各工具实战使用与技能全景指南 (中文)](各工具实战使用与技能全景指南.md)
-* 📜 **Three-Tier Rules Architecture**:
+- 📜 **Three-Tier Rules Architecture**:
   - [`Global AGENTS.md`](Global%20AGENTS.md)
   - [`Project AGENTS.md`](Project%20AGENTS.md)
   - [`Directory AGENTS.md`](Directory%20AGENTS.md)

@@ -94,4 +94,3 @@
 当前 AI Agents Harness 规范体系、跨工具部署脚本、官方技能套件与实战指南已**全部处于 100% 生产就绪状态**。
 - **日常部署新项目**：直接运行 `.\deploy-agents.ps1 -ProjectPath <目标路径> [-Global]` 即可一键完成全套规约（包含 Claude/Antigravity/Codex/Zed 四端桥接）、安全拦截 Hook、OpenSpec 骨架与技能初始化。
 - **在线同步上游最新版本**：运行 `.\deploy-agents.ps1 -Update` 即可全自动差量拉取最新规范与 GitHub Skills。
-
