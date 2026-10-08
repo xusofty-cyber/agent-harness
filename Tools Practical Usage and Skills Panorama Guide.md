@@ -215,7 +215,6 @@ Use Comet's current upstream documentation for version-specific entry points, co
 
 ---
 
-
 ### 3.2 OpenSpec: Spec-Driven Development
 
 - `/opsx:propose <name>`: Proposes new change under `docs/openspec/changes/`;
@@ -321,7 +320,6 @@ To opt in one repository, copy `.ai-memory.toml.example` to the ignored `.ai-mem
 The setup includes Claude Code and Codex CLI MCP/hooks, plus Antigravity CLI MCP/hooks. Codex desktop support depends on the installed desktop version exposing the local Codex integration; verify it in the app. Antigravity IDE is MCP-only: add `http://127.0.0.1:49374/mcp` as `serverUrl` through its MCP settings or the documented config file. ChatGPT web uses manual Markdown handoff in the free local setup.
 
 Windows supports both WSL2 and native modes upstream. Install and configure ai-memory in the same environment that launches the agent; see the [Windows guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/windows.md). Path exclusions do not redact arbitrary prompt text. Back up with `ai-memory --data-dir <data-dir> backup --to <archive-path>`; uninstall removes integrations but not data. Stop the service and verify the configured data directory before intentionally deleting it. See the [marker reference](https://github.com/akitaonrails/ai-memory/blob/main/docs/marker-file.md) and [installation guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md) for platform paths and Docker commands.
-
 
 ### 3.10 8 High-Risk Operations Protection Matrix
 

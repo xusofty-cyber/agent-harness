@@ -83,7 +83,6 @@ References: [Codex AGENTS.md](https://developers.openai.com/codex/guides/agents-
 
 ---
 
-
 ## 3. Claude Code Client Hooks: PreToolUse (.claude/settings.json)
 
 ### Capability boundaries
@@ -225,7 +224,6 @@ To enable Claude Code to discover skills located in `.agents/skills/`:
   3. `PROJECT_CONTEXT.md` is a project summary and navigation aid, not a single source of truth over code, configuration, or maintained documentation. Current user instructions and reproducible evidence take precedence over memory.
   4. Label uncertainty and date/source facts likely to change. Never store credentials, private keys, raw personal data, full conversation/tool logs, or unnecessary personal information.
 
-
 **Selected optional backend: [ai-memory](https://github.com/akitaonrails/ai-memory).** Its local mode provides Markdown-backed project memory, full-text retrieval, and cross-agent handoff without an LLM or API key. It is not required for ordinary use. This repository supplies an explicit setup helper but never installs or starts the backend, creates a local opt-in marker, or changes tool configuration during normal deployment.
 
 #### Explicit project opt-in and setup
@@ -312,7 +310,6 @@ Loaded progressively on-demand:
 
 ### Q5: When should `PROJECT_CONTEXT.md` and `SESSION_STATE.md` be updated?
 > At meaningful task/session boundaries, update `SESSION_STATE.md` with completed work, actual verification evidence, remaining steps, and still-relevant risks. Update `PROJECT_CONTEXT.md` only when durable architecture, constraints, or confirmed decisions change. Do not create no-op updates. Both files summarize project memory; they do not override current user instructions, code, configuration, or reproducible evidence. Never store credentials, raw personal data, or full conversation/tool logs.
-
 
 ---
 

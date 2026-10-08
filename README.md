@@ -181,8 +181,6 @@ Execute the setup script to register the MCP endpoint and managed skill instruct
 - **For Claude Code / Codex CLI**:
   Native lifecycle hooks capture sessions automatically, or use `ai-memory run <harness>` for a managed workstream launch.
 
-
-
 ### 3. Perform Online Updates
 
 When upstream rules or skills are updated, run directly in the repository:

@@ -182,7 +182,6 @@ ai-memory 采用安全优先的 Fail-closed 门禁，必须显式声明才激活
 - **面向 Claude Code / Codex CLI**：
   可通过原生 hooks 自动捕获，或使用 `ai-memory run <harness>` 进行受管托管启动。
 
-
 ### 3. 在线更新规范与技能库
 
 当上游规则或 GitHub Skills 发生更新时，直接在项目根目录运行：
