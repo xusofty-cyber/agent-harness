@@ -19,15 +19,18 @@
 | **历史改写** | **`git push --force` / `-f` / `--force-with-lease`** | — | **永久禁止（Hook + 规则硬拦截 exit 1）** |
 | **受保护分支 rebase** | **在受保护分支上执行 `git rebase`** | — | **永久禁止（Hook 硬拦截 exit 1）** |
 | **删除受保护远端** | `git push origin --delete develop/master/main...` | — | **永久禁止（Hook 硬拦截 exit 1）** |
-| **删除临时远端分支** | `git push origin --delete feature/xxx` | **必须人类明确授权** | 先确认该分支已合并：`git branch -r --merged origin/develop` |
-| **绕过式推送** | `git push origin <A>:<develop>` | 同「推送受保护分支」 | **必须人类明确授权** |
+| **删除临时远端分支** | `git push origin --delete feature/xxx` | **必须人类明确授权** | 先确认该分支已合并：`git branch -r --merged origin/<DEFAULT_BRANCH>` |
+| **绕过式推送** | `git push origin <A>:<DEFAULT_BRANCH>` | 同「推送受保护分支」 | **必须人类明确授权** |
 
 ---
 
 ## 2. 标准协作流程（Feature 合入主干）
 
+> `<DEFAULT_BRANCH>` 指本项目的主干分支（如 `main` / `master` / `develop`），
+> 以 `Project AGENTS.md` 中声明的为准；下文命令中的占位符请替换为实际分支名。
+
 ```
-[确保工作区干净] → [git fetch origin] → [对齐主干: git checkout develop && git merge --ff-only]
+[确保工作区干净] → [git fetch origin] → [对齐主干: git checkout <DEFAULT_BRANCH> && git merge --ff-only]
        │
        ▼
 [切临时分支: git checkout -b {type}/short-description]
@@ -39,16 +42,16 @@
 [向人类出具 Diff 概览与 Commit 提议] ──(确认后)──► [执行 git commit]
        │
        ▼
-[拉取远端最新变化并在 feature 分支解冲突: git merge origin/develop]
+[拉取远端最新变化并在 feature 分支解冲突: git merge origin/<DEFAULT_BRANCH>]
        │
        ▼
 [向人类请求合入与推送授权] ──(未获授权)──► [停下并输出待执行命令]
        │ (已获明确授权)
        ▼
 [回受保护分支 merge 并推送]:
-  git checkout develop
+  git checkout <DEFAULT_BRANCH>
   git merge --no-ff {type}/short-description
-  git push origin develop
+  git push origin <DEFAULT_BRANCH>
   git branch -d {type}/short-description
 ```
 
@@ -65,7 +68,7 @@
    - 严禁全量 add！本纪律用于防止将本地临时大文件、自动保存文件（如 `*.autosave`）、构建产物（`image/`、`build/`、`dist/`）、以及含敏感配置的本地文件误带入仓库；
    - 必须通过 `git add <明确路径>` 单独添加预期文件。
 4. **冲突一律在临时分支解决**：
-   - 遇到合并冲突时，必须在 feature 临时分支上 `merge origin/develop` 解决并验证，绝不在 develop 主干上解冲突。
+   - 遇到合并冲突时，必须在 feature 临时分支上 `merge origin/<DEFAULT_BRANCH>` 解决并验证，绝不在 `<DEFAULT_BRANCH>` 主干上解冲突。
 
 ---
 

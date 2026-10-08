@@ -23,13 +23,13 @@ The goal is to package mature, reusable engineering practices as a baseline for 
    - Some command patterns are hard-blocked while other cases emit non-blocking warnings;
    - Regex inspection cannot cover every command form and does not replace server-side branch protection.
 
-3. **40+ Reusable Skill Directories ([`.agents/skills/`](.agents/skills/))**:
+3. **39 Reusable Skill Directories ([`.agents/skills/`](.agents/skills/))**:
    - **Comet integration guide**: checks the installed version and project configuration; this skill does not implement Comet's state machine or phase guards;
    - **Spec-Driven Development (SDD)**: Full 16-skill `openspec` suite (proposal, apply changes, verify, sync specs, archive, explore);
    - **Test-Driven Development (TDD)**: Full 15-skill `superpowers` suite (red-green cycle, systematic root-cause debugging, physical verification evidence gate, git worktrees);
    - **Implementation and retrieval guidance**: `ponytail` (minimal-solution ladder) and `codegraph` (optional CodeGraph integration guide; CLI/MCP setup is separate);
    - **Output and communication guidance**: `rtk` (optional Rust Token Killer CLI guide; command-rewrite hooks require setup) and `caveman` (concise-response Skill);
-   - **Professional Document Processing**: `docx` (Word formatting & manipulation) and `pdf` (structured extraction & analysis).
+   - **Professional Document Processing**: `docx` (Word formatting & manipulation) and `pdf` (structured extraction & analysis). Note: `docx` ships its full OOXML validation toolchain (~1.3 MB, mostly XSD schemas), making it the largest skill in the repo — delete the directory from your target project if you never process Word files.
 
 4. **One-Click Deployment & Template Sync (`deploy-agents`)**:
    - PowerShell automation ([`deploy-agents.ps1`](deploy-agents.ps1)) with automatic Directory Junctions for non-admin permission penetration and Bash automation ([`deploy-agents.sh`](deploy-agents.sh));
@@ -69,7 +69,7 @@ agents-living/
 │   │   ├── git-workflow.md          # Git authorization model, protected branch isolation
 │   │   ├── security-boundary.md     # 8 High-risk operations protection matrix
 │   │   └── token-discipline.md      # Read/fetch/speak gates, log truncation
-│   └── skills/                      # 40+ Native engineering skills (Comet, OpenSpec, Superpowers...)
+│   └── skills/                      # 39 Native engineering skills (Comet, OpenSpec, Superpowers...)
 ├── .claude/
 │   ├── settings.json                # Claude Code PreToolUse security interceptor config
 │   └── hooks/                       # Security hook scripts (Node.js, reads stdin JSON)
