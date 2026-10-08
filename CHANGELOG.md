@@ -6,6 +6,10 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-08
+
+First tagged release.
+
 ### Added
 - GitHub Actions CI (`.github/workflows/ci.yml`): markdownlint, shellcheck,
   `node --check`, hook behavior tests, repo static checks, and a
@@ -15,6 +19,11 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 - `tests/repo_checks.py`: JSON/TOML validity, `SKILL.md` frontmatter
   (`name`/`description`), `deploy-agents.ps1`/`.sh` feature-parity markers,
   and `skills-lock.json` ↔ skill directory consistency.
+- `tests/repo_checks.py`: bilingual `##` section-count parity check for the
+  EN/ZH guide pairs.
+- `setup-ai-memory.sh` / `setup-ai-memory.ps1`: pin the validated ai-memory
+  version (currently `2.6.0`); refuse to configure on mismatch unless
+  `AI_MEMORY_ALLOW_OTHER_VERSION=1` is set.
 - `CONTRIBUTING.md`: bilingual doc sync policy, template-genericity rule,
   dual-script parity rule.
 - `docs/internal/`: home for this repository's own dev notes
@@ -25,6 +34,11 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 - `skills-lock.json`: added missing `cross-tool-memory` entry.
 
 ### Changed
+- Chinese guide filenames are now ASCII with a `.zh.md` suffix
+  (`Multi-Tool Deployment and Configuration Guide.zh.md`,
+  `Tools Practical Usage and Skills Panorama Guide.zh.md`); all cross-references updated.
+- Removed the two `docs/BRANCH_COMPARISON*` documents: the branches are merged,
+  and their content is summarized in this changelog.
 - Merged `long-term-memory-governance`: cross-tool memory governance
   (`cross-tool-memory` skill, optional local ai-memory backend),
   safe global-rule sync (preserve by default, timestamped backup on `-Update`),

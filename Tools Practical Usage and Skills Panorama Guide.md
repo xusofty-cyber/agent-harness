@@ -1,6 +1,6 @@
 # Practical Guide to AI Tooling and Skills Panorama (Claude Code / Codex / Antigravity IDE / Zed IDE)
 
-> **Language / 语言**: **English** | [中文](各工具实战使用与技能全景指南.md)
+> **Language / 语言**: **English** | [中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md)
 
 This guide provides a comprehensive handbook for software engineering and technical documentation with AI agents: **which skills and Harness tools to install, underlying token economics, tool configuration and wiring, when and how to invoke core slash commands (e.g., `/comet`, `/plan`, `/opsx`, `codegraph`), and an end-to-end practical walkthrough.**
 
@@ -425,7 +425,7 @@ Read `tasks/lessons.md` when it is relevant to the task.
   - Linux / macOS: [`deploy-agents.sh`](deploy-agents.sh)
 - Deployment & Configuration Guide:
   - [Multi-Tool Deployment and Configuration Guide (English)](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md)
-  - [多工具部署配置指南 (中文)](多工具部署配置指南.md)
+  - [多工具部署配置指南 (中文)](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md)
 - Rules Architecture:
   - [`Global AGENTS.md`](Global%20AGENTS.md)
   - [`Project AGENTS.md`](Project%20AGENTS.md)

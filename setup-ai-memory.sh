@@ -28,6 +28,16 @@ if ! command -v ai-memory >/dev/null 2>&1; then
   exit 1
 fi
 
+# Version this repository was validated against. Bump deliberately after
+# re-verifying the install flags against the new release's docs.
+AI_MEMORY_PINNED_VERSION="2.6.0"
+ver_output="$(ai-memory --version 2>/dev/null || true)"
+if ! printf '%s\n' "$ver_output" | grep -Eq "(^|[^0-9.])${AI_MEMORY_PINNED_VERSION}([^0-9.]|$)"; then
+  printf 'ai-memory version mismatch: this repo pins %s (got: %s). ' "$AI_MEMORY_PINNED_VERSION" "${ver_output:-<unknown>}" >&2
+  printf 'Set AI_MEMORY_ALLOW_OTHER_VERSION=1 to override.\n' >&2
+  if [[ "${AI_MEMORY_ALLOW_OTHER_VERSION:-}" != "1" ]]; then exit 1; fi
+fi
+
 if [[ "$agent" == "claude-code" || "$agent" == "codex" || "$agent" == "antigravity-cli" ]]; then
   # Allowlist is enforced inside the native hook binary. Reject wrappers and
   # compatibility script modes before any user-level tool configuration changes.

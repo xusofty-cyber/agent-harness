@@ -79,9 +79,9 @@ agents-living/
 ├── Project AGENTS.md                # Project root template & central router
 ├── Directory AGENTS.md              # Monorepo / submodule micro-boundary patch
 ├── Multi-Tool Deployment and Configuration Guide.md # Comprehensive deployment & configuration guide (English)
-├── 多工具部署配置指南.md              # 跨工具部署与配置指南（中文）
+├── Multi-Tool Deployment and Configuration Guide.zh.md              # 跨工具部署与配置指南（中文）
 ├── Tools Practical Usage and Skills Panorama Guide.md # Practical usage, token economics & skills panorama (English)
-├── 各工具实战使用与技能全景指南.md     # 各工具实战使用与技能全景指南（中文）
+├── Tools Practical Usage and Skills Panorama Guide.zh.md     # 各工具实战使用与技能全景指南（中文）
 ├── deploy-agents.ps1                # Windows PowerShell one-click deploy & update script
 ├── deploy-agents.sh                 # Linux / macOS Bash one-click deploy & update script
 ├── setup-ai-memory.ps1              # Explicit ai-memory setup for one opted-in project/client
@@ -198,10 +198,10 @@ When upstream rules or skills are updated, run directly in the repository:
 
 - 📖 **Deployment & Configuration**:
   - [Multi-Tool Deployment and Configuration Guide (English)](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md)
-  - [多工具部署配置指南 (中文)](多工具部署配置指南.md)
+  - [多工具部署配置指南 (中文)](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md)
 - 📖 **Practical Usage & Skills Panorama**:
   - [Tools Practical Usage and Skills Panorama Guide (English)](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md)
-  - [各工具实战使用与技能全景指南 (中文)](各工具实战使用与技能全景指南.md)
+  - [各工具实战使用与技能全景指南 (中文)](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md)
 - 📜 **Three-Tier Rules Architecture**:
   - [`Global AGENTS.md`](Global%20AGENTS.md)
   - [`Project AGENTS.md`](Project%20AGENTS.md)

@@ -1,6 +1,6 @@
 # Multi-Tool (Codex / Claude Code / Antigravity 2.0 / CLI / IDE / Zed) AI Engineering Deployment & Configuration Guide
 
-> **Language / 语言**: **English** | [中文](多工具部署配置指南.md)
+> **Language / 语言**: **English** | [中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md)
 
 This guide provides an end-to-end specification on how to deploy, configure, and collaboratively utilize the **Three-Tier AGENTS.md Architecture** (Global, Project, and Directory levels) across **OpenAI Codex / GitHub Copilot**, **Claude Code**, **Google Antigravity IDE**, and **Zed IDE**, tailored for real-world scenarios emphasizing software engineering while supporting professional technical documentation.
 
@@ -230,7 +230,7 @@ To enable Claude Code to discover skills located in `.agents/skills/`:
 
 **Selected optional backend: [ai-memory](https://github.com/akitaonrails/ai-memory).** Its local mode provides Markdown-backed project memory, full-text retrieval, and cross-agent handoff without an LLM or API key. It is not required for ordinary use. This repository supplies an explicit setup helper but never installs or starts the backend, creates a local opt-in marker, or changes tool configuration during normal deployment.
 
-> **Supply-chain note**: ai-memory is a third-party native binary with prompt-reading hooks. Download it only from the official Releases page and verify the published SHA256 checksums (for `cargo install`, confirm the crate name is `ai-memory`). `setup-ai-memory.*` deliberately never downloads it for you and verifies it is a native executable (rejecting wrapper scripts) before configuring anything. Record your verified version via `ai-memory --version`, and check upstream release notes before upgrading.
+> **Supply-chain note**: ai-memory is a third-party native binary with prompt-reading hooks. Download it only from the official Releases page and verify the published SHA256 checksums (for `cargo install`, confirm the crate name is `ai-memory`). `setup-ai-memory.*` deliberately never downloads it for you, verifies it is a native executable (rejecting wrapper scripts) before configuring anything, and pins the validated version (currently **v2.6.0** — a mismatch refuses to configure). Check upstream release notes before upgrading, and re-verify the install flags before bumping the pin.
 
 #### Explicit project opt-in and setup
 
@@ -322,4 +322,4 @@ Loaded progressively on-demand:
 ## 8. Practical Usage & Skills Panorama Guide Reference
 
 For detailed tutorials on Slash Commands (`/comet`, `/plan`, `/opsx`), CodeGraph, TDD, and full end-to-end execution walkthroughs, see:
-👉 [Tools Practical Usage and Skills Panorama Guide (English)](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [中文说明](各工具实战使用与技能全景指南.md)
+👉 [Tools Practical Usage and Skills Panorama Guide (English)](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [中文说明](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md)

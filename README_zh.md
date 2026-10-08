@@ -77,9 +77,9 @@ agents-living/
 ├── Global AGENTS.md                 # 全局规则模板（需部署到各工具的全局入口）
 ├── Project AGENTS.md                # 项目根目录标准模板与中枢路由器
 ├── Directory AGENTS.md              # Monorepo / 子模块边界隔离微型补丁
-├── 多工具部署配置指南.md              # 跨工具适配原理、安全钩子与部署更新专著（中文）
+├── Multi-Tool Deployment and Configuration Guide.zh.md              # 跨工具适配原理、安全钩子与部署更新专著（中文）
 ├── Multi-Tool Deployment and Configuration Guide.md # 英文版部署配置指南
-├── 各工具实战使用与技能全景指南.md     # 39 个技能详解、Token 经济学与实战流转（中文）
+├── Tools Practical Usage and Skills Panorama Guide.zh.md     # 39 个技能详解、Token 经济学与实战流转（中文）
 ├── Tools Practical Usage and Skills Panorama Guide.md # 英文版技能实战指南
 ├── deploy-agents.ps1                # Windows 一键部署与在线更新自动化脚本
 ├── deploy-agents.sh                 # Linux / macOS 一键部署与在线更新自动化脚本
@@ -197,8 +197,8 @@ ai-memory 采用安全优先的 Fail-closed 门禁，必须显式声明才激活
 
 ## 文档索引
 
-- 📖 **部署与配置指南**：[`多工具部署配置指南.md`](多工具部署配置指南.md) | [English Version](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md)
-- 📖 **实战与技能全景**：[`各工具实战使用与技能全景指南.md`](各工具实战使用与技能全景指南.md) | [English Version](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md)
+- 📖 **部署与配置指南**：[`多工具部署配置指南.md`](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [English Version](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md)
+- 📖 **实战与技能全景**：[`各工具实战使用与技能全景指南.md`](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [English Version](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md)
 - 📜 **规则宪法**：[`Global AGENTS.md`](Global%20AGENTS.md) | [`Project AGENTS.md`](Project%20AGENTS.md) | [`Directory AGENTS.md`](Directory%20AGENTS.md)
 
 ---

@@ -275,7 +275,7 @@ chmod +x ./deploy-agents.sh
 
 **本仓库选择的可选后端：[ai-memory](https://github.com/akitaonrails/ai-memory)。** 本地模式以 Markdown 保存项目记忆，支持全文检索和跨 Agent 交接；不需要 LLM 或 API Key，也不影响未启用时的常规使用。本仓库只提供显式安装辅助脚本，不安装/启动后端、不创建本地加入标记，也不在普通部署时改写工具配置。
 
-> **供应链信任说明**：ai-memory 是读取 prompt 的第三方原生二进制，务必从官方 Releases 页面下载并核对发布的 SHA256 校验和；`cargo install` 时确认 crate 名为 `ai-memory`。`setup-ai-memory.*` 出于安全考虑**永远不会**替你下载它，配置前还会校验它是原生可执行文件（拒绝包装脚本）。建议用 `ai-memory --version` 记录你验证过的版本号，升级前先看 upstream 的 release notes。
+> **供应链信任说明**：ai-memory 是读取 prompt 的第三方原生二进制，务必从官方 Releases 页面下载并核对发布的 SHA256 校验和；`cargo install` 时确认 crate 名为 `ai-memory`。`setup-ai-memory.*` 出于安全考虑**永远不会**替你下载它，配置前还会校验它是原生可执行文件（拒绝包装脚本），并 pin 定验证过的版本（当前为 **v2.6.0**，版本不符会拒绝配置）。升级前先看 upstream 的 release notes，重新验证安装参数后再 bump pin。
 
 #### 显式启用项目记忆（详细端到端实战流程）
 
@@ -522,4 +522,4 @@ allowlist 只有在已安装的原生 hook 执行 capture-policy 时，才能保
 ## 八、 实战演练与高级技能指南索引
 
 更详细的各生态工具（Comet、OpenSpec、Superpowers、CodeGraph、Ponytail、Caveman、RTK）深度使用说明、四大平台原生斜杠命令（`/plan`、`/goal`、`/opsx` 等）、以及端到端典型研发实战流转演练，请参阅兄弟指南：
-👉 [各工具实战使用与技能全景指南.md](各工具实战使用与技能全景指南.md)
+👉 [各工具实战使用与技能全景指南.md](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md)
