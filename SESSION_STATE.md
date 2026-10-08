@@ -28,13 +28,17 @@
 ## 验证与后续
 
 - 4 份核心文档修改已通过 `git diff --stat` 校验，内容结构中英对齐无遗漏。
-- 本地 `ai-memory` 实测通过：成功生成 `.ai-memory.toml`、完成 `setup-ai-memory.ps1 antigravity-ide` 挂载，并验证了 HTTP MCP 服务端监听启动与记忆读写查询完整闭环。
+- 本地 `ai-memory` 实测通过（Linux x86_64 环境）：
+  - 二进制已软链接至 `~/.local/bin/ai-memory`（版本 2.6.0）。
+  - 已生成本仓库 `.ai-memory.toml`（`default/agents-living`）。
+  - 执行 `./setup-ai-memory.sh antigravity-ide` 完成 Antigravity IDE 的 MCP 配置（写入 `~/.gemini/config/mcp_config.json`）、项目 `AGENTS.md` 托管指令和 `.agents/skills/` 技能文件。
+  - Systemd 用户服务 `~/.config/systemd/user/ai-memory.service` 已部署并激活（自启动监听 `127.0.0.1:49374`），通过 `curl` 验证 HTTP MCP 握手及工具调用，并通过 CLI 验证读写闭环。
 
 ## 已知现场约束
 
 - `.claude/settings.json` 等既存本地工作区改动与未跟踪文件不属于本轮修改目标，必须保留；用户级工具配置当前仍为本地未提交状态。
 - 当前工作区有用户本地工具配置；不要将其误作为本轮新建或已验证的仓库规范。
-- 本仓库没有本地 `.ai-memory.toml`，也未安装/启动 ai-memory；因此本轮只静态验证脚本和文档，没有激活任何记忆采集。Bash 语法仍待可用 Bash 环境验证。
+- 仓库内 `.ai-memory.toml` 为本地单机生效项（已在 `.gitignore` 中），不随提交共享。
 
 ## 2026-10-08 Ponytail 规范适配
 
