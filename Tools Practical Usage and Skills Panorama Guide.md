@@ -28,7 +28,7 @@ This guide provides a comprehensive handbook for software engineering and techni
    - 3.10 8 High-Risk Operations Protection Matrix
 4. [Platform-Specific Native Commands & Best Practices](#4-platform-specific-native-commands--best-practices)
    - 4.1 Google Antigravity IDE
-   - 4.2 Claude Code & PreToolUse Hardware Interception
+   - 4.2 Claude Code & PreToolUse Hooks
    - 4.3 OpenAI Codex / GitHub Copilot
    - 4.4 Zed IDE
 5. [End-to-End Practical Walkthrough (Real-World Feature Development)](#5-end-to-end-practical-walkthrough-real-world-feature-development)
@@ -76,6 +76,18 @@ Without physical boundaries, AI-assisted development frequently drifts, over-eng
 | **Caveman** | Concise-communication guidance Skill | Overlong responses | Style guidance when loaded; preserve clarity and safety details |
 | **RTK** | Optional Rust Token Killer CLI | Verbose terminal output | Requires CLI installation and a supported agent hook |
 | **Git Auth** | Protected branch guidance plus limited client hook checks | Preventing accidental shared-branch operations | Rules, Claude Code client hook, and server-side branch protection |
+
+### Rule and Memory Scope by Coding Tool
+
+| Tool/surface | Instruction entry point | Memory scope |
+|---|---|---|
+| Codex desktop app | Project `AGENTS.md`; ai-memory can use the local Codex integration where the installed app exposes configured MCP/hooks | Verify the exact desktop version; ChatGPT web conversation memory is separate |
+| Codex CLI | Codex home and `AGENTS.md` files from repository root through the current directory; ai-memory upstream installer supports MCP/hooks | Project context/checkpoint files remain repository-managed |
+| Claude Code | User/project/directory `CLAUDE.md` or supported `AGENTS.md` | Optional Auto memory is machine-local and Claude-specific; `/memory` opens its controls |
+| Antigravity CLI | Global, workspace, and directory `AGENTS.md` / `.agents/rules/*.md`; ai-memory upstream supports MCP/hooks | Run setup in the same environment as the CLI |
+| Antigravity IDE | Project Markdown rules/skills plus a manually configured ai-memory MCP server | MCP provides explicit retrieval/write tools; no automatic lifecycle capture is claimed |
+
+The deployment scripts write paths; check each host's current documentation and loaded context before assuming a file was consumed.
 
 ---
 
@@ -287,37 +299,27 @@ Query the configured CodeGraph MCP tool for `OrderService::calculateDiscount`.
 
 ---
 
-### 3.9 Session Ceremony & Dual-Track State Memory Loop (`PROJECT_CONTEXT.md` & `SESSION_STATE.md`)
+### 3.9 Project Memory and Session Checkpoint (`PROJECT_CONTEXT.md` / `SESSION_STATE.md`)
 
-Strictly enforce session lifecycle closure and dual-track state memory to ensure seamless breakpoint continuation and long-term architectural asset accumulation:
-1. **Session Start**:
-   - Prioritize reading `PROJECT_CONTEXT.md` (long-term architectural memory) and `SESSION_STATE.md` (short-term workbench breakpoint) in the project root to restore context and architecture instantly without re-explaining history;
-   - If present and relevant, inspect `tasks/todo.md`, `tasks/lessons.md`, and current branch status.
-2. **In-Progress**:
-   - Maintain checklists for multi-step tasks; re-plan immediately if assumptions fail;
-   - **Autonomous Troubleshooting**: Read trace/stacks, isolate root causes, craft fixes, and verify independently;
-   - **Strict Verification Gate**: No task is complete without physical terminal output evidence (passing tests, runs, or diffs).
-3. **Session Finish & State Solidification**:
-   - **Dual-Track State Synchronization Law**: Whenever completing a coding session, new feature development, or bug fix, **MUST update/sync two files in the project root**:
-     - **`PROJECT_CONTEXT.md` (Project Panorama & Evolution Chronicle / Long-Term Memory)**:
-       - **Role**: **Single Source of Truth** and global architectural manual.
-       - **Core Content**:
-         1. **System Architecture & Topology**: Layered architecture (e.g. OpenClaw 3-tier: Go bootloader, Node.js scheduler core, Web/Electron shell);
-         2. **Core Engineering Hard Rules**: Mandatory AST obfuscation pipeline, Nuitka C++ native compilation, physical USB hardware seals, etc.;
-         3. **Branch Matrix & Role Division**: Clear definition of main, lite-edition, standalone-app branches and their technical positioning;
-         4. **Version Evolution Chronicle**: Evolution milestones and major architectural decisions from v1.0 to current (cloud auth self-healing, dst_node dynamic discovery, cross-branch model sync, etc.).
-       - **Core Value**: Ensures that regardless of time elapsed, machine switched, or developer/AI turnover, reading this file provides a comprehensive view in seconds, preventing reinventing the wheel or violating underlying conventions.
-     - **`SESSION_STATE.md` (Session State & Real-Time Breakpoint / Short-Term Workbench)**:
-       - **Role**: Current task status board and breakpoint resumption engine.
-       - **Core Content**:
-         1. **Current Development Context**: Active branch (e.g. lite-edition), latest commit hash, and remote sync status;
-         2. **Latest Fixes/Features List**: Problems solved and critical files touched in the current session;
-         3. **Next Steps**: Unverified items, pending edge cases, or upcoming build commands;
-         4. **Known Risks Memo**: Environment quirks such as file locks or uncleaned binaries.
-       - **Core Value**: Counteracts context window truncation or restarts; enables subsequent AI sessions to resume work directly from the breakpoint without re-explaining history.
-   - Synchronize `tasks/todo.md` and `tasks/lessons.md` when checklists or reusable takeaways are produced.
+Treat memory as a verifiable summary and navigation aid, not as a replacement for code or maintained documentation:
+1. **Task start:** Read `PROJECT_CONTEXT.md` (verified durable project facts) and `SESSION_STATE.md` (current checkpoint) only when present and relevant; verify branch, configuration, and implementation facts that affect the task.
+2. **During work:** Keep plans when useful for multi-step work. Do not add automatic capture of prompts, tool inputs/outputs, source files, or terminal commands.
+3. **Meaningful closeout:** Update `SESSION_STATE.md` with completed work, actual verification evidence, remaining steps, and still-relevant risks; remove stale items. Update `PROJECT_CONTEXT.md` only when durable architecture, constraints, or confirmed decisions change. No-op sessions need no empty update.
+4. **Sources and conflicts:** Label uncertainty and date/source facts likely to change. Current user instructions and current code/configuration/reproducible evidence take precedence over memory summaries.
+5. **Privacy:** Do not record credentials, private keys, raw personal data, full conversation/tool logs, or unnecessary personal information. Shared global templates must not contain private user preferences.
+6. **Directory scope:** A directory `AGENTS.md` contains only local boundaries and constraints. Do not create directory memory files by default; keep project facts and checkpoints in their root files.
 
----
+**Claude Code native Auto memory** is a separate machine-local project memory that can be inspected, edited, or deleted with `/memory`. It is not shared across tools or machines and does not replace the project files above. Claude Code manages this feature; this repository's deployer does not enable, disable, or capture it. See the [Claude Code memory docs](https://code.claude.com/docs/en/memory).
+
+#### Optional cross-agent memory: ai-memory
+
+This repository selects only [ai-memory](https://github.com/akitaonrails/ai-memory) as an optional cross-agent backend. Its local Markdown and full-text search path uses no LLM, embedding provider, or API key. The repository does not install or start it automatically.
+
+To opt in one repository, copy `.ai-memory.toml.example` to the ignored `.ai-memory.toml`, replace the workspace/project names, then run `setup-ai-memory.ps1 -Agent <claude-code|codex|antigravity-cli>` or `./setup-ai-memory.sh <claude-code|codex|antigravity-cli>`. The helper requires an existing ai-memory install and delegates configuration to its upstream merge-aware commands. Review the hook capability output; allowlist mode is effective only for hooks that enforce native capture policy.
+
+The setup includes Claude Code and Codex CLI MCP/hooks, plus Antigravity CLI MCP/hooks. Codex desktop support depends on the installed desktop version exposing the local Codex integration; verify it in the app. Antigravity IDE is MCP-only: add `http://127.0.0.1:49374/mcp` as `serverUrl` through its MCP settings or the documented config file. ChatGPT web uses manual Markdown handoff in the free local setup.
+
+Windows supports both WSL2 and native modes upstream. Install and configure ai-memory in the same environment that launches the agent; see the [Windows guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/windows.md). Path exclusions do not redact arbitrary prompt text. Back up with `ai-memory --data-dir <data-dir> backup --to <archive-path>`; uninstall removes integrations but not data. Stop the service and verify the configured data directory before intentionally deleting it. See the [marker reference](https://github.com/akitaonrails/ai-memory/blob/main/docs/marker-file.md) and [installation guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md) for platform paths and Docker commands.
 
 ### 3.10 8 High-Risk Operations Protection Matrix
 
@@ -329,27 +331,29 @@ Human confirmation is mandatory before:
 - [ ] 5. Changing wire protocols or serialization contracts (`protofile/`);
 - [ ] 6. Altering license, cryptography, or auth code;
 - [ ] 7. Modifying `.gitignore` or CI/CD pipelines;
-- [ ] 8. Making large cross-module changes spanning 3+ files.
+- [ ] 8. High-impact cross-module changes that affect shared contracts or require broad coordination (file count alone is not a risk trigger).
 
 ---
 
 ## 4. Platform-Specific Native Commands & Best Practices
 
-### 4.1 Google Antigravity IDE
+### 4.1 Google Antigravity CLI and IDE
+- The CLI runs as `agy`; the desktop IDE is a separate surface. Both document file-based workspace/global rules, but CLI slash commands and IDE controls are surface-specific.
 - `/plan`: Structured task planning for $\ge 3$ steps;
 - `/goal`: Unattended autonomous loop until verified completion;
 - `/grill-me`: Interactive discovery interview when requirements are ambiguous;
 - `/learn`: Captures lessons learned into `tasks/lessons.md`;
 - `/schedule`: Background timers and recurring cron monitoring.
 
-### 4.2 Claude Code & PreToolUse Hardware Interception
+### 4.2 Claude Code and PreToolUse Client Hook
 - `/compact`: Compresses conversation history when token count is high;
 - `/cost`: Real-time session token usage;
 - `/review`: Reviews working copy diffs;
 - `@<path>`: Dynamically loads specific rules on demand.
-- **Hardware Hook**: `.claude/settings.json` enforces OS-level `exit 1` on forbidden git actions.
+- **Security hook**: `.claude/settings.json` runs Claude Code client-side checks for matching tool calls. It can reject selected patterns or warn; it is not an operating-system control or memory collector.
 
-### 4.3 OpenAI Codex / GitHub Copilot
+### 4.3 Codex in ChatGPT, Codex CLI, and GitHub Copilot
+- Codex CLI documents `AGENTS.md` discovery from Codex home and the repository path to the current directory. Do not infer that exact behavior for ChatGPT/desktop; check its current product behavior and configuration.
 - `/hooks`: Inspects and trusts lifecycle hooks;
 - `$comet`: Triggers Comet state machine in Codex CLI;
 - `@workspace`: Scans workspace context in VS Code.
@@ -393,14 +397,14 @@ Step 6: Green Verification (RTK)
   ├─ pytest tests/test_export.py -q -> PASSED (Green, 2 passed in 0.3s)
   └─ npm test -- packages/order --reporter=dot
 
-Step 7: Delivery, Safe Commit & Dual-Track Solidification (Session Finish)
+Step 7: Delivery, Safe Commit & Selective Memory Closeout (Session Finish)
   ├─ Output: Concise diff and passing test evidence
   ├─ git add tests/test_export.py api/router.py repo/order_repo.py
   ├─ git commit -m "feat: add date-range CSV export endpoint"
   ├─ Ask human before git push
-  ├─ Dual-Track State Solidification (Iron Law):
-  │   ├─ Update PROJECT_CONTEXT.md with new export capabilities and architectural decisions
-  │   └─ Update SESSION_STATE.md with latest commit hash, finished items, and Next Steps
+  ├─ Selective memory closeout:
+  │   ├─ Update SESSION_STATE.md at meaningful task boundaries with actual evidence and remaining work
+  │   └─ Update PROJECT_CONTEXT.md only when durable project facts change; skip empty updates
   ├─ Update tasks/todo.md
   └─ Archive OpenSpec change
 ```

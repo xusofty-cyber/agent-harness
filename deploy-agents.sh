@@ -3,7 +3,7 @@
 # deploy-agents.sh
 # Platforms: Linux / macOS (Bash)
 # Purpose: One-click deploy & online update AI Agents Harness spec, rules & skills
-#          (Supports Codex / Claude Code / Antigravity IDE)
+#          (Supports Codex / Claude Code / Antigravity 2.0 / CLI / IDE)
 # ==============================================================================
 
 set -euo pipefail
@@ -18,13 +18,16 @@ NC='\033[0m' # No Color
 # Print usage
 usage() {
     echo -e "${CYAN}用法 (Usage):${NC}"
-    echo "  $0 <项目根目录路径> [--global|-g] [--update|-u] [--comet-init]"
-    echo "  $0 --global|-g [--update|-u]   # 仅部署/更新全局配置"
+    echo "  $0 <项目根目录路径> [--global|-g] [--update|-u] [--initialize|-i] [--directory <相对目录>] [--check|-k]"
+    echo "  $0 --global|-g [--update|-u]   # 初始化全局配置；--update 先备份再覆盖已有规则"
     echo ""
     echo -e "${CYAN}参数说明 (Parameters):${NC}"
     echo "  <项目根目录路径>   目标项目所在的相对路径或绝对路径。"
-    echo "  --global, -g       同时部署/更新当前用户的全局规则 (~/.claude/ 与 ~/.gemini/)。"
-    echo "  --update, -u       执行在线检测与更新（拉取最新规则、更新技能库与配套脚手架）。"
+    echo "  --global, -g       初始化 Claude、Antigravity 2.0/CLI/IDE、Codex 用户全局规则。"
+    echo "  --update, -u       更新模板仓库；与 --global 一起使用时，先备份再覆盖全局规则。"
+    echo "  --initialize, -i 识别项目事实，生成 AGENTS.md 并列出待确认项。"
+    echo "  --directory       与 --initialize 配合，为现有子目录生成目录级 AGENTS.md。"
+    echo "  --check, -k       检查项目级规则中的初始化占位项；可搭配 --directory 检查模块规则。"
     echo "  --comet-init       若系统中已安装 comet CLI，自动在目标项目中运行 comet init。"
     echo ""
     echo -e "${CYAN}示例 (Examples):${NC}"
@@ -40,8 +43,14 @@ TARGET_PROJECT_ARG=""
 DEPLOY_GLOBAL=false
 DO_UPDATE=false
 DO_COMET_INIT=false
+DO_INITIALIZE=false
+DO_CHECK=false
+DIRECTORY_PATH=""
 
-for arg in "$@"; do
+args=("$@")
+arg_index=0
+while [ "$arg_index" -lt "$#" ]; do
+    arg="${args[$arg_index]}"
     case "$arg" in
         --global|-g)
             DEPLOY_GLOBAL=true
@@ -52,6 +61,17 @@ for arg in "$@"; do
         --comet-init)
             DO_COMET_INIT=true
             ;;
+        --initialize|-i)
+            DO_INITIALIZE=true
+            ;;
+        --check|-k)
+            DO_CHECK=true
+            ;;
+        --directory)
+            arg_index=$((arg_index + 1))
+            if [ "$arg_index" -ge "$#" ]; then echo "[!] --directory requires a relative path" >&2; exit 2; fi
+            DIRECTORY_PATH="${args[$arg_index]}"
+            ;;
         --help|-h)
             usage
             ;;
@@ -61,7 +81,12 @@ for arg in "$@"; do
             fi
             ;;
     esac
+    arg_index=$((arg_index + 1))
 done
+
+if [ -n "$DIRECTORY_PATH" ] && [ "$DO_INITIALIZE" != true ] && [ "$DO_CHECK" != true ]; then echo "[!] --directory requires --initialize or --check" >&2; exit 2; fi
+if { [ "$DO_INITIALIZE" = true ] || [ "$DO_CHECK" = true ]; } && [ -z "$TARGET_PROJECT_ARG" ]; then echo "[!] --initialize/--check requires a project path" >&2; exit 2; fi
+if [ "$DO_CHECK" = true ] && [ "$DEPLOY_GLOBAL" = true ]; then echo "[!] --check cannot be combined with --global" >&2; exit 2; fi
 
 if [ -z "$TARGET_PROJECT_ARG" ] && [ "$DEPLOY_GLOBAL" = false ]; then
     echo -e "${RED}[错误] 请指定目标项目路径，或者使用 --global 仅更新全局配置。${NC}\n"
@@ -79,6 +104,7 @@ PROJECT_TEMPLATE="${SCRIPT_DIR}/Project AGENTS.md"
 if [ ! -f "${PROJECT_TEMPLATE}" ]; then
     PROJECT_TEMPLATE="${SCRIPT_DIR}/项目级 AGENTS.md"
 fi
+DIRECTORY_TEMPLATE="${SCRIPT_DIR}/Directory AGENTS.md"
 SOURCE_RULES_DIR="${SCRIPT_DIR}/.agents/rules"
 SOURCE_SKILLS_DIR="${SCRIPT_DIR}/.agents/skills"
 SOURCE_SKILLS_LOCK="${SCRIPT_DIR}/skills-lock.json"
@@ -90,6 +116,51 @@ backup_path() {
     if [ -e "$path" ] || [ -L "$path" ]; then
         cp -a "$path" "${path}.bak.$(date +%Y%m%d%H%M%S)"
     fi
+}
+
+backup_global_rule() {
+    local path="$1"
+    local backup_path
+    backup_path="${path}.bak.$(date +%Y%m%d%H%M%S)"
+    local suffix=1
+    while [ -e "$backup_path" ] || [ -L "$backup_path" ]; do
+        backup_path="${path}.bak.$(date +%Y%m%d%H%M%S).${suffix}"
+        suffix=$((suffix + 1))
+    done
+    cp -a "$path" "$backup_path"
+    printf '%s' "$backup_path"
+}
+
+deploy_global_rule() {
+    local tool_name="$1"
+    local target_path="$2"
+    local source_template="${3:-$GLOBAL_TEMPLATE}"
+    local target_dir
+    target_dir="$(dirname "$target_path")"
+    mkdir -p "$target_dir"
+
+    if [ -e "$target_path" ] || [ -L "$target_path" ]; then
+        if [ -d "$target_path" ] && [ ! -L "$target_path" ]; then
+            echo "  [!] ${tool_name} global rule target is a directory: ${target_path}" >&2
+            return 1
+        fi
+        if [ "$DO_UPDATE" != true ]; then
+            echo "  [i] 保留现有 ${tool_name} 全局规则: ${target_path}（使用 -u 备份并覆盖）"
+            return
+        fi
+
+        local backup_file
+        backup_file="$(backup_global_rule "$target_path")"
+        if [ -L "$target_path" ]; then
+            rm "$target_path"
+        fi
+        cp -f "$source_template" "$target_path"
+        echo "  [√] 已更新 ${tool_name} 全局规则: ${target_path}（备份: ${backup_file}）"
+        return
+    fi
+
+    cp "$source_template" "$target_path"
+    echo "  [√] 已初始化 ${tool_name} 全局规则: ${target_path}"
 }
 
 prompt_yes_no() {
@@ -166,6 +237,168 @@ guide_optional_cli_tools() {
     fi
 }
 
+init_guidance() {
+    local template="$1" output="$2" scope="$3" root="$4"
+    local project_name="" repository_url="" default_branch="" language="" package_manager="" ci_path="" purpose="" owners="" module_name="" directory_path="" responsibility=""
+    local readme_summary="" manifests=() locks=() pending="" key value content status tmp item file label
+    local install_suggestion="" dev_suggestion="" build_suggestion="" unit_test_suggestion="" targeted_test_suggestion="" integration_suggestion="" lint_suggestion="" format_suggestion="" type_check_suggestion="" migration_suggestion="" local_test_suggestion="" local_lint_suggestion="" framework_suggestion="" store_suggestion="" frameworks="" stores="" script_report="" report_type="" report_value="" run_prefix="npm run" suggestion="" python_cmd="" local_manager=""
+    project_name="$(basename "$root")"
+    module_name="$project_name"
+    if [ "$scope" = project ]; then
+        repository_url="$(git -C "$root" remote get-url origin 2>/dev/null || true)"
+        if [[ "$repository_url" == *://*@* ]]; then repository_url=""; fi
+        default_branch="$(git -C "$root" symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null || true)"
+        default_branch="${default_branch#origin/}"
+        for item in 'package.json:JavaScript/TypeScript (package.json; runtime version to confirm)' 'pyproject.toml:Python (pyproject.toml; runtime version to confirm)' 'Cargo.toml:Rust (Cargo.toml)' 'go.mod:Go (go.mod)' 'CMakeLists.txt:C/C++ (CMakeLists.txt)' ; do
+            file="${item%%:*}"; label="${item#*:}"
+            if [ -f "$root/$file" ]; then manifests+=("$label"); fi
+        done
+        for item in 'pnpm-lock.yaml:pnpm' 'yarn.lock:Yarn' 'package-lock.json:npm' 'uv.lock:uv' 'poetry.lock:Poetry' 'Cargo.lock:Cargo' 'go.sum:Go modules' 'Pipfile.lock:Pipenv'; do
+            file="${item%%:*}"; label="${item#*:}"
+            if [ -f "$root/$file" ]; then locks+=("$label"); fi
+        done
+        for file in "$root"/*.csproj; do if [ -f "$file" ]; then manifests+=(".NET (project file)"); break; fi; done
+        language="$(IFS='; '; echo "${manifests[*]}")"
+        package_manager="$(IFS=', '; echo "${locks[*]}")"
+        if [ -d "$root/.github/workflows" ]; then
+            for file in "$root/.github/workflows"/*.yml "$root/.github/workflows"/*.yaml; do
+                if [ -f "$file" ]; then ci_path="${ci_path:+$ci_path, }.github/workflows/$(basename "$file")"; fi
+            done
+        fi
+        for file in .gitlab-ci.yml Jenkinsfile azure-pipelines.yml; do if [ -f "$root/$file" ]; then ci_path="${ci_path:+$ci_path, }$file"; fi; done
+        if [ -f "$root/README.md" ]; then
+            readme_summary="$(awk 'NF && $0 !~ /^[[:space:]]*#/ {print; exit}' "$root/README.md")"
+        fi
+        if [ -t 0 ] && [ -r /dev/tty ]; then
+            if [ -n "$readme_summary" ]; then
+                read -r -p "项目用途（留空接受 README 摘要：$readme_summary）: " purpose </dev/tty
+                purpose="${purpose:-$readme_summary}"
+            else
+                read -r -p "项目用途（一句话；留空标记待确认）: " purpose </dev/tty
+            fi
+            read -r -p "核心维护者（团队/账号；留空标记待确认）: " owners </dev/tty
+        fi
+    else
+        directory_path="${root#"$TARGET_PROJECT_DIR"/}"
+        directory_path="${directory_path//\\//}"
+        if [ -t 0 ] && [ -r /dev/tty ]; then read -r -p "目录职责（一句话；留空交给 Agent 检查）: " responsibility </dev/tty; fi
+    fi
+
+    if command -v python3 >/dev/null 2>&1 && python3 -c 'import json' >/dev/null 2>&1; then python_cmd=python3
+    elif command -v python >/dev/null 2>&1 && python -c 'import json' >/dev/null 2>&1; then python_cmd=python
+    fi
+    if [ -f "$root/package.json" ] && [ -n "$python_cmd" ]; then
+        script_report="$("$python_cmd" - "$root/package.json" 2>/dev/null <<'PY'
+import json, sys
+try:
+    with open(sys.argv[1], encoding='utf-8') as source: data = json.load(source)
+except Exception:
+    raise SystemExit(0)
+manager = (data.get('packageManager') or '').split('@')[0]
+if manager: print('manager\t' + manager)
+scripts = data.get('scripts') or {}
+for name in ('dev','build','test','test:unit','test:e2e','test:integration','e2e','lint','format','fmt','typecheck','type-check','db:migrate','migrate'):
+    if name in scripts: print('script\t' + name)
+deps = set((data.get('dependencies') or {})) | set((data.get('devDependencies') or {}))
+for package, label in (('next','Next.js'),('react','React'),('vue','Vue'),('@angular/core','Angular'),('express','Express'),('fastify','Fastify')):
+    if package in deps: print('framework\t' + label)
+for package in ('pg','mysql','mysql2','sqlite3','better-sqlite3','mongoose','prisma','@prisma/client','redis','ioredis'):
+    if package in deps: print('store\t' + package)
+PY
+)" || script_report=""
+    elif [ -f "$root/package.json" ] && command -v node >/dev/null 2>&1; then
+        script_report="$(node -e 'const p=require(process.argv[1]); const m=(p.packageManager||"").split("@")[0]; if(m) console.log("manager\t"+m); for (const n of ["dev","build","test","test:unit","test:e2e","test:integration","e2e","lint","format","fmt","typecheck","type-check","db:migrate","migrate"]) if (p.scripts?.[n] !== undefined) console.log("script\t"+n); const d={...(p.dependencies||{}),...(p.devDependencies||{})}; for (const [n,l] of [["next","Next.js"],["react","React"],["vue","Vue"],["@angular/core","Angular"],["express","Express"],["fastify","Fastify"]]) if(d[n]) console.log("framework\t"+l); for(const n of ["pg","mysql","mysql2","sqlite3","better-sqlite3","mongoose","prisma","@prisma/client","redis","ioredis"]) if(d[n]) console.log("store\t"+n)' "$root/package.json" 2>/dev/null)" || script_report=""
+    fi
+    case "$package_manager" in pnpm*) run_prefix='pnpm run'; install_suggestion='建议确认：pnpm install --frozen-lockfile（根据锁文件推导）' ;; Yarn*) run_prefix='yarn run'; install_suggestion='建议确认：yarn install --immutable（根据锁文件推导）' ;; npm*) install_suggestion='建议确认：npm ci（根据锁文件推导）' ;; esac
+    while IFS="$(printf '\t')" read -r report_type report_value; do
+        [ -n "$report_type" ] || continue
+        report_value="${report_value%$'\r'}"
+        case "$report_type" in
+            manager)
+                local_manager="$report_value"
+                case "$local_manager" in
+                    pnpm) run_prefix='pnpm run' ; [ "$scope" = project ] && { package_manager='建议确认：pnpm（package.json packageManager）'; install_suggestion='建议确认：pnpm install --frozen-lockfile（packageManager 字段）'; } ;;
+                    yarn) run_prefix='yarn run' ; [ "$scope" = project ] && { package_manager='建议确认：yarn（package.json packageManager）'; install_suggestion='建议确认：yarn install --immutable（packageManager 字段）'; } ;;
+                    npm) run_prefix='npm run' ; [ "$scope" = project ] && { package_manager='建议确认：npm（package.json packageManager）'; install_suggestion='建议确认：npm ci（packageManager 字段）'; } ;;
+                esac
+                ;;
+            script)
+                suggestion="建议确认：$run_prefix $report_value（package.json scripts.$report_value）"
+                case "$report_value" in
+                    dev) dev_suggestion="$suggestion" ;;
+                    build) build_suggestion="$suggestion" ;;
+                    test|test:unit) unit_test_suggestion="$suggestion"; targeted_test_suggestion="建议确认：$run_prefix $report_value -- <test-path>（需核验参数）"; local_test_suggestion="$suggestion" ;;
+                    test:e2e|test:integration|e2e) integration_suggestion="$suggestion" ;;
+                    lint) lint_suggestion="$suggestion"; local_lint_suggestion="$suggestion" ;;
+                    format|fmt) format_suggestion="$suggestion" ;;
+                    typecheck|type-check) type_check_suggestion="$suggestion" ;;
+                    db:migrate|migrate) migration_suggestion="$suggestion" ;;
+                esac
+                ;;
+            framework) frameworks="${frameworks:+$frameworks, }$report_value" ;;
+            store) stores="${stores:+$stores, }$report_value" ;;
+        esac
+    done <<EOF
+$script_report
+EOF
+    if [ -n "$frameworks" ]; then framework_suggestion="建议确认：$frameworks（package.json dependencies）"; fi
+    if [ -n "$stores" ]; then store_suggestion="建议确认：$stores（依赖清单；实际运行配置需复核）"; fi
+
+    content="$(cat "$template")"
+    while [[ "$content" =~ \<([A-Z][A-Z0-9_]*)\> ]]; do
+        key="${BASH_REMATCH[1]}"; value=""
+        case "$key" in
+            PROJECT_NAME) value="$project_name" ;;
+            REPOSITORY_URL) value="$repository_url" ;;
+            DEFAULT_BRANCH) value="$default_branch" ;;
+            LANGUAGE_AND_VERSION) value="$language" ;;
+            PACKAGE_MANAGER) value="$package_manager" ;;
+            INSTALL_COMMAND) value="$install_suggestion" ;;
+            DEV_COMMAND) value="$dev_suggestion" ;;
+            BUILD_COMMAND) value="$build_suggestion" ;;
+            UNIT_TEST_COMMAND) value="$unit_test_suggestion" ;;
+            TARGETED_TEST_COMMAND) value="$targeted_test_suggestion" ;;
+            INTEGRATION_TEST_COMMAND) value="$integration_suggestion" ;;
+            LINT_COMMAND) value="$lint_suggestion" ;;
+            FORMAT_COMMAND) value="$format_suggestion" ;;
+            TYPE_CHECK_COMMAND) value="$type_check_suggestion" ;;
+            MIGRATION_COMMAND) value="$migration_suggestion" ;;
+            FRAMEWORK) value="$framework_suggestion" ;;
+            DATABASE_AND_CACHE) value="$store_suggestion" ;;
+            CI_PATH) value="$ci_path" ;;
+            PROJECT_PURPOSE) value="$purpose" ;;
+            OWNERS) value="$owners" ;;
+            MODULE_NAME) value="$module_name" ;;
+            DIRECTORY_PATH) value="$directory_path" ;;
+            RESPONSIBILITY) value="$responsibility" ;;
+            LOCAL_TEST_COMMAND) value="$local_test_suggestion" ;;
+            LOCAL_LINT_COMMAND) value="$local_lint_suggestion" ;;
+        esac
+        if [ -z "$value" ] || [[ "$value" == 待* ]] || [[ "$value" == 建议确认：* ]]; then
+            case ",$pending," in *",$key,"*) ;; *) pending="${pending:+$pending, }$key" ;; esac
+        fi
+        if [ -z "$value" ]; then
+            value="待确认（$key）"
+        fi
+        content="${content//"<$key>"/"$value"}"
+    done
+    if [ -n "$pending" ]; then
+        status="## 初始化待确认项\n\n"
+        IFS=', ' read -r -a pending_items <<< "$pending"
+        for pending_item in "${pending_items[@]}"; do status+="- $pending_item\n"; done
+    else
+        status="## 初始化状态\n\n自动识别字段已填充；请复核后使用。"
+    fi
+    tmp="$(mktemp "${output}.tmp.XXXXXX")"
+    { printf '%b\n\n<!-- Generated by deploy-agents.sh --initialize; review before use. -->\n\n' "$status"; printf '%s\n' "$content"; } > "$tmp"
+    mv "$tmp" "$output"
+    echo "  [√] 已初始化规则文件: $output"
+    if [ -n "$pending" ]; then
+        echo "  [i] 待 Agent 检查或人工确认: $pending"
+        echo "  [下一步] 请让当前编码 Agent 检查此文件待确认项；仅填入有仓库证据的信息，对业务定位、维护者和模块边界先询问，不要猜测。"
+    fi
+}
+
 # ==============================================================================
 # 1. Online Update Phase (--update)
 # ==============================================================================
@@ -194,28 +427,31 @@ fi
 # ==============================================================================
 if [ "$DEPLOY_GLOBAL" = true ]; then
     echo -e "\n${YELLOW}>>> [1/3] 正在部署/更新用户全局规则...${NC}"
+    ANTIGRAVITY_GEMINI_TEMPLATE="${SCRIPT_DIR}/templates/antigravity-GEMINI.md"
 
     if [ ! -f "${GLOBAL_TEMPLATE}" ]; then
         echo -e "${YELLOW}[警告] 未找到全局模板 ${GLOBAL_TEMPLATE}，跳过全局部署。${NC}"
     else
         # A. Claude Code (~/.claude/CLAUDE.md)
-        mkdir -p "${HOME}/.claude"
-        # Backup existing file before overwrite
-        if [ -f "${HOME}/.claude/CLAUDE.md" ]; then
-            cp "${HOME}/.claude/CLAUDE.md" "${HOME}/.claude/CLAUDE.md.bak.$(date +%Y%m%d%H%M%S)"
-            echo -e "  ${NC}[i] Backed up existing ~/.claude/CLAUDE.md${NC}"
-        fi
-        cp -f "${GLOBAL_TEMPLATE}" "${HOME}/.claude/CLAUDE.md"
-        echo -e "  ${GREEN}[√] Claude Code 全局规则已部署: ${HOME}/.claude/CLAUDE.md${NC}"
+        deploy_global_rule "Claude Code" "${HOME}/.claude/CLAUDE.md"
 
-        # B. Antigravity IDE (~/.gemini/AGENTS.md — standalone, always active, no frontmatter needed)
-        mkdir -p "${HOME}/.gemini"
-        if [ -f "${HOME}/.gemini/AGENTS.md" ]; then
-            cp "${HOME}/.gemini/AGENTS.md" "${HOME}/.gemini/AGENTS.md.bak.$(date +%Y%m%d%H%M%S)"
-            echo -e "  ${NC}[i] Backed up existing ~/.gemini/AGENTS.md${NC}"
+        # B. Current Antigravity releases load AGENTS.md; GEMINI.md supports older surfaces.
+        deploy_global_rule "Antigravity 2.0 / CLI / IDE" "${HOME}/.gemini/AGENTS.md"
+        if [ -f "$ANTIGRAVITY_GEMINI_TEMPLATE" ]; then
+            deploy_global_rule "Antigravity legacy GEMINI.md compatibility" "${HOME}/.gemini/GEMINI.md" "$ANTIGRAVITY_GEMINI_TEMPLATE"
+        else
+            echo "  [!] Antigravity GEMINI.md compatibility template not found: ${ANTIGRAVITY_GEMINI_TEMPLATE}" >&2
         fi
-        cp -f "${GLOBAL_TEMPLATE}" "${HOME}/.gemini/AGENTS.md"
-        echo -e "  ${GREEN}[√] Antigravity IDE 全局规则已部署: ${HOME}/.gemini/AGENTS.md${NC}"
+
+        # C. Codex CLI / app (CODEX_HOME or ~/.codex); an active override wins.
+        CODEX_HOME_DIR="${CODEX_HOME:-${HOME}/.codex}"
+        if [ -s "${CODEX_HOME_DIR}/AGENTS.override.md" ]; then
+            CODEX_GLOBAL_FILE="${CODEX_HOME_DIR}/AGENTS.override.md"
+            echo "  [i] 检测到 Codex 全局覆盖文件，将更新当前生效的 AGENTS.override.md。"
+        else
+            CODEX_GLOBAL_FILE="${CODEX_HOME_DIR}/AGENTS.md"
+        fi
+        deploy_global_rule "Codex" "$CODEX_GLOBAL_FILE"
     fi
 fi
 
@@ -232,6 +468,33 @@ if [ ! -d "${TARGET_PROJECT_ARG}" ]; then
 fi
 
 TARGET_PROJECT_DIR="$(cd "${TARGET_PROJECT_ARG}" && pwd)"
+if { [ "$DO_INITIALIZE" = true ] || [ "$DO_CHECK" = true ]; } && [ -n "$DIRECTORY_PATH" ]; then
+    case "$DIRECTORY_PATH" in /*|../*|*/../*|*/..) echo "[!] --directory must be a relative path inside the project" >&2; exit 2 ;; esac
+    DIRECTORY_ROOT="$(cd "${TARGET_PROJECT_DIR}/${DIRECTORY_PATH}" 2>/dev/null && pwd -P)" || { echo "[!] Directory does not exist: $DIRECTORY_PATH" >&2; exit 1; }
+    PROJECT_ROOT_REAL="$(cd "$TARGET_PROJECT_DIR" && pwd -P)"
+    case "$DIRECTORY_ROOT" in "$PROJECT_ROOT_REAL"/*) ;; *) echo "[!] --directory resolves outside the project" >&2; exit 2 ;; esac
+    if [ -f "${DIRECTORY_ROOT}/AGENTS.md" ] && [ -e "${DIRECTORY_ROOT}/AGENTS.generated.md" ]; then echo "[!] Existing generated directory guidance would be overwritten." >&2; exit 1; fi
+fi
+if [ "$DO_INITIALIZE" = true ] && [ -f "${TARGET_PROJECT_DIR}/AGENTS.md" ] && [ -e "${TARGET_PROJECT_DIR}/AGENTS.generated.md" ]; then echo "[!] Existing generated project guidance would be overwritten." >&2; exit 1; fi
+if [ "$DO_CHECK" = true ]; then
+    check_failed=false
+    checked_count=0
+    check_files=("${TARGET_PROJECT_DIR}/AGENTS.md" "${TARGET_PROJECT_DIR}/AGENTS.generated.md")
+    if [ -n "$DIRECTORY_PATH" ]; then check_files+=("${DIRECTORY_ROOT}/AGENTS.md" "${DIRECTORY_ROOT}/AGENTS.generated.md"); fi
+    for check_file in "${check_files[@]}"; do
+        if [ ! -f "$check_file" ]; then continue; fi
+        checked_count=$((checked_count + 1))
+        if grep -nE '<[A-Z][A-Z0-9_]*>|待确认（[A-Z][A-Z0-9_]*）|待用户确认|待 Agent 检查|建议确认：' "$check_file"; then
+            echo "[!] Unresolved initialization fields in: $check_file"
+            check_failed=true
+        else
+            echo "[√] No initialization placeholders: $check_file"
+        fi
+    done
+    if [ "$checked_count" -eq 0 ]; then echo "[!] No AGENTS.md or AGENTS.generated.md found to check."; check_failed=true; fi
+    [ "$check_failed" = false ] || exit 1
+    exit 0
+fi
 
 echo -e "\n${CYAN}==================================================${NC}"
 echo -e "${CYAN} 目标项目路径: ${TARGET_PROJECT_DIR}${NC}"
@@ -243,6 +506,8 @@ echo -e "${CYAN}==================================================${NC}"
 echo -e "\n${YELLOW}>>> [2/3] 正在部署项目级规则与跨工具桥接...${NC}"
 
 TARGET_AGENTS="${TARGET_PROJECT_DIR}/AGENTS.md"
+HAD_PROJECT_AGENTS=false
+if [ -f "$TARGET_AGENTS" ]; then HAD_PROJECT_AGENTS=true; fi
 if [ ! -f "${TARGET_AGENTS}" ]; then
     cp "${PROJECT_TEMPLATE}" "${TARGET_AGENTS}"
     echo -e "  ${GREEN}[√] 已生成项目级 AGENTS.md（从模板初始化）${NC}"
@@ -251,6 +516,22 @@ else
     if [ "$DO_UPDATE" = true ]; then
         cp -f "${PROJECT_TEMPLATE}" "${TARGET_PROJECT_DIR}/AGENTS.template.md"
         echo "  [i] 已生成最新的 AGENTS.template.md 供参照。"
+    fi
+fi
+
+if [ "$DO_INITIALIZE" = true ]; then
+    PROJECT_OUTPUT="$TARGET_AGENTS"
+    if [ "$HAD_PROJECT_AGENTS" = true ]; then PROJECT_OUTPUT="${TARGET_PROJECT_DIR}/AGENTS.generated.md"; fi
+    if [ "$HAD_PROJECT_AGENTS" = true ] && [ -e "$PROJECT_OUTPUT" ]; then echo "[!] Refusing to overwrite existing generated guidance: $PROJECT_OUTPUT" >&2; exit 1; fi
+    init_guidance "$PROJECT_TEMPLATE" "$PROJECT_OUTPUT" project "$TARGET_PROJECT_DIR"
+
+    if [ -n "$DIRECTORY_PATH" ]; then
+        if [ ! -f "$DIRECTORY_TEMPLATE" ]; then echo "[!] Directory template not found: $DIRECTORY_TEMPLATE" >&2; exit 1; fi
+        DIRECTORY_AGENTS="${DIRECTORY_ROOT}/AGENTS.md"
+        DIRECTORY_OUTPUT="$DIRECTORY_AGENTS"
+        if [ -f "$DIRECTORY_AGENTS" ]; then DIRECTORY_OUTPUT="${DIRECTORY_ROOT}/AGENTS.generated.md"; fi
+        if [ -f "$DIRECTORY_AGENTS" ] && [ -e "$DIRECTORY_OUTPUT" ]; then echo "[!] Refusing to overwrite existing generated guidance: $DIRECTORY_OUTPUT" >&2; exit 1; fi
+        init_guidance "$DIRECTORY_TEMPLATE" "$DIRECTORY_OUTPUT" directory "$DIRECTORY_ROOT"
     fi
 fi
 

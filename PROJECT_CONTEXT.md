@@ -1,53 +1,34 @@
-# PROJECT_CONTEXT.md —— 项目全景与演进编年史
+# PROJECT_CONTEXT.md — 项目全景与长期事实
 
-> **项目定位**：AI Agents 通用工程规约体系、多工具适配中枢与官方 GitHub 原生技能套件（单一真理源 / Single Source of Truth）。
+> 本文件是便于代理快速定位的项目摘要，不替代源代码、官方文档或用户当前指令。事实冲突时先核验当前仓库。
 
----
+## 项目定位
 
-## 一、 系统架构与拓扑
+本仓库维护面向多种 AI 编码工具的规则模板、技能与辅助部署脚本，目标是让通用规范可复用，同时保留各宿主工具的差异。它不是 OpenClaw 产品仓库；当前内容不支持关于 Go/Node/Electron 架构、硬件封签、Nuitka 或 AST 混淆流水线的旧描述。
 
-本项目为多平台 AI 研发代理（Claude Code、OpenAI Codex、Google Antigravity IDE、Zed IDE）提供统一的工程规范、硬件级安全拦截与按需调度的技能扩展库。
+## 主要内容
 
-### 1. 三级规则架构（Harness + 渐进式披露）
-- **全局宪法（Global AGENTS.md）**：跨项目跨工具统一行为底线、去废话沟通标准、Ponytail 极简阶梯、Git 授权铁律与双轨状态记忆。
-- **项目枢纽（Project AGENTS.md）**：代码仓库确定性工程上下文、标准 CLI 脚本槽位、核心红线与技能调度路由器（Router）。
-- **目录隔离补丁（Directory AGENTS.md）**：Monorepo 子包与独立隔离模块的边界约束，定义 In/Out Scope 与极速单测命令。
-- **细粒度子规则（.agents/rules/）**：`token-discipline.md`、`engineering-spec.md`、`security-boundary.md`、`git-workflow.md`。
+- `Global AGENTS.md`、`Project AGENTS.md`、`Directory AGENTS.md`：全局、项目与目录层级的规则模板。
+- `deploy-agents.ps1` / `.sh` 的 `-Initialize` / `--initialize` 可生成项目和指定目录的规则草稿，提取可验证的 Git/清单/CI 信息并列出待确认项；`-Check` / `--check` 检查尚未确认的字段。已有 `AGENTS.md` 保留，候选写入 `AGENTS.generated.md`。
+- `.agents/rules/`、`.agents/skills/`：按需加载的规则与技能资料。
+- `deploy-agents.ps1`、`deploy-agents.sh`：将模板部署到项目或受支持的用户级入口；`-g` 初始化 Claude、Antigravity `~/.gemini/AGENTS.md` 规则和旧版 `GEMINI.md` 兼容指针，以及 Codex 全局规则，`-g -u` 先备份再覆盖；部署文件不等于宿主已加载文件。
+- `.claude/settings.json` 等工具配置及中英文指南：说明当前适配方式、边界和部署流程。Claude Code PreToolUse 钩子属于客户端工具调用控制，不是操作系统级拦截器或长期记忆系统。
+- `PROJECT_CONTEXT.md`、`SESSION_STATE.md`、可选 `tasks/lessons.md`：按需读取的项目摘要、短期断点与经验记录。
 
-### 2. 工具适配与桥接拓扑
-- **Claude Code**：通过根目录 `CLAUDE.md`（符号链接或 `@AGENTS.md` 引用）与 `.claude/settings.json`（PreToolUse 客户端安全钩子）接入。
-- **Google Antigravity IDE**：原生识别根目录 `AGENTS.md` 与 `.agents/` 目录结构。
-- **OpenAI Codex / Copilot**：通过 `.github/copilot-instructions.md` 桥接。
-- **Zed IDE**：通过项目根目录 `AGENTS.md` 统一识别。
+## 规则与记忆治理
 
----
+- 共享全局模板只放跨项目稳定规则，不放个人偏好、项目专属事实或秘密。
+- Ponytail 作为可选编码 Skill 只指导实现、代码审查与技术方案中的简化选择；不得把它扩展为全局回答风格或用来缩减用户明确要求。规则以 `.agents/skills/ponytail/SKILL.md` 为详版、`.agents/rules/engineering-spec.md` 与全局模板为规范入口。
+- 项目记忆应精简、可核验并及时清理过期状态；当前用户指令、代码与可复现证据优先于摘要。
+- 有意义的任务收尾更新 `SESSION_STATE.md`；只有确认的长期架构、约束或决策变化时才更新本文件。无实质变化时无需写空记录。
+- 本仓库只选择 ai-memory 作为可选跨工具长期记忆后端；它不属于普通部署依赖，默认本地工作流不需要 LLM、embedding provider 或 API Key。显式加入通过被 Git 忽略的项目 `.ai-memory.toml` 和上游合并式 CLI 完成。能力边界与启用方式见双语部署/实战指南及 `.agents/skills/cross-tool-memory/SKILL.md`。
 
-## 二、 核心工程硬性规则
+## 工具适配边界
 
-1. **Git 受保护分支强隔离**：`develop` / `master` / `main` / `release*` 分支严禁直接 commit；所有改动必须在临时分支（`feature/*`, `fix/*`）进行。
-2. **触碰远端强授权**：执行 `git push`、合入受保护分支前必须获得人类明确授权。
-3. **永久禁止破坏性操作**：严禁 `git push --force`；严禁在受保护分支执行 `git rebase`；回滚代码优先使用 `git revert -m 1`。
-4. **防误提交闸门**：严禁盲目 `git add .` 或 `git add -A`，必须只 `git add <明确路径>`。
-5. **Windows 脚本编码硬性约束**：`deploy-agents.ps1` 必须强制包含 UTF-8 BOM（`\xEF\xBB\xBF`），防止 Windows PowerShell 5.1 在 CP936 默认代码页下产生语法解析与乱码错误。
-6. **双轨状态记忆铁律**：每次会话完成、新需求开发或 Bug 修复时，必须在项目根目录同步更新 `PROJECT_CONTEXT.md` 与 `SESSION_STATE.md`。
+Codex CLI、Codex 桌面产品、Claude Code、Antigravity 2.0、CLI 与 IDE 对规则文件和记忆的加载方式各不相同。ai-memory 上游支持 Claude Code、Codex、Antigravity CLI 的 MCP/hooks；本仓库设置脚本为 Antigravity 2.0 与 IDE 提供 MCP-only 配置，因为上游没有其独立生命周期 hook target；Codex 桌面端需核实当前版本能力；ChatGPT 网页在免费本地方案下使用人工 Markdown 交接。Windows 上游支持 WSL2 与原生两种模式，但必须在与 Agent 相同的运行环境安装/配置。指南应注明适用的具体表面，并链接官方文档；不得仅凭脚本写入文件就声称宿主会自动加载。Claude Code Auto memory 是独立的 Claude 专属机器本地功能，不等同于仓库共享记忆。
 
----
+## 已确认的仓库约定
 
-## 三、 分支矩阵与分工
-
-- **`main`**：生产就绪发布主干。保持绝对线性安全与端到端验证通过，严禁直接提交。
-- **`feature/*`**：新功能开发分支（如 `feature/dual-track-state-memory`）。
-- **`fix/*`**：紧急 Bug 修复分支（如修复编码、路径、拦截 Hook 等）。
-- **`refactor/*`**：规约重构与架构微调分支。
-
----
-
-## 四、 版本演进编年史
-
-- **v1.0**：初始化 AI Agents 研发规约底线、PreToolUse 硬件拦截钩子与 40+ 原生技能套件（Comet、OpenSpec、Superpowers、CodeGraph 等）。
-- **v1.1**：规范模板统一重命名为标准英文（Global/Project/Directory AGENTS.md），完善跨平台部署流水线（`deploy-agents.ps1` / `deploy-agents.sh`），建立中英双语文档体系。
-- **v1.2**：集成 CodeGraph AST 代码图谱 MCP 权限体系；优化 RTK 输出截断与 Ponytail 防过度设计机制。
-- **v1.3（当前）**：
-  - 确立 `PROJECT_CONTEXT.md`（长期真理源）与 `SESSION_STATE.md`（短期工作台）双轨状态更新铁律；
-  - 修复 Windows PowerShell 5.1 UTF-8 BOM 编码解析缺陷；
-  - 全量同步更新中英部署指南与实战全景指南。
+- 受保护分支规则、远端操作授权和精确暂存要求见 `Global AGENTS.md` 与项目规则；执行前检查实际仓库状态。
+- Windows PowerShell 脚本需保留 UTF-8 BOM 以兼容 Windows PowerShell 5.1；修改后做语法/编码核验。
+- 当前仓库没有经此摘要确认的产品版本编年史或 `main`、`lite-edition`、`standalone-app` 分支产品矩阵；需以 Git 与实际源码核验，不得沿用未经证实的历史陈述。

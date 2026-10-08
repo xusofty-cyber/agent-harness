@@ -1,0 +1,16 @@
+# Copy to .ai-memory.toml only when you intentionally opt this repository in.
+# Choose stable, non-sensitive names; do not include URLs, tokens, or secrets.
+workspace = "replace-with-workspace-name"
+project = "replace-with-project-name"
+
+[capture]
+# These path exclusions reduce accidental capture from common secret-bearing files.
+# They do not inspect or redact arbitrary text in prompts.
+ignore_paths = [
+  "**/.env*",
+  "**/*.pem",
+  "**/*.key",
+  "**/secrets/**",
+  "**/credentials/**",
+  "**/private/**",
+]
