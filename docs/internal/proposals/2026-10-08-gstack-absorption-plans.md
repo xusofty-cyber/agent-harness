@@ -19,11 +19,12 @@
              command: "node ${CLAUDE_PROJECT_DIR}/.claude/hooks/guard.mjs"
    ```
    `${CLAUDE_PROJECT_DIR}` 环境变量可解决相对路径问题（gstack 用 `$HOME` 绝对路径，不适合我们"部署到任意项目"的模型）。
-2. **关键不确定项**：skill frontmatter hooks 的激活语义。两种可能：
-   - (a) skill 被加载进上下文后，会话级生效；
-   - (b) 仅在 skill 被显式调用期间生效。
+2. **激活语义已查实（2026-10-08，多信源收敛）**：
+   - skill frontmatter hooks **绑定 skill 生命周期**：skill 被调用/加载时注册，完成后注销（dev.to 实测、`parseHooksFromFrontmatter()` 源码分析、liatrio-labs 研究报告一致）。
+   - `settings.json` hooks 才是**会话级常驻**。
+   - jakelin 的 effective-claude-code 明确写道：*"Reserve `settings.json` hooks for guarantees that should apply across every session — protected-branch guards…"* ——这正是 `guard.mjs` 的用例；skill-scoped hooks 适用于 `/careful`、`/freeze` 这类"特定工作流才需要的 guardrails"。
 
-   若为 (b)，把 `guard.mjs` 迁过去会打穿现有安全网——目前它是**无条件会话级**拦截。
+   **结论**：B 方案（迁移 `guard.mjs`）**否决**——会把无条件安全网降级为"skill 激活期间才有"，产生安全空洞。
 3. **跨工具死结**：Codex / Antigravity 不识别 skill frontmatter hooks。`settings.json` 仍是唯一的跨工具声明路径（虽然目前也只有 Claude Code 实现 PreToolUse）。
 
 ### 建议：混合方案（不迁移现有 hooks，新增 opt-in 严格模式）
@@ -39,15 +40,10 @@ C 方案 = 借鉴 gstack `/guard`（= `/careful` + `/freeze` 组合）的"严格
 - 脚本放在 skill 自带 `scripts/` 目录，command 用 `${CLAUDE_PROJECT_DIR}/.agents/skills/strict-guard/scripts/...` 引用。
 - 现有 `.claude/hooks/guard.mjs` + `settings.json` 一行不动——强制底线与可选增强解耦。
 
-### 先做验证实验（写代码之前）
+### 先做验证实验（✅ 已完成，2026-10-08）
 
-```bash
-# 1. 建测试 skill：.claude/skills/probe/SKILL.md，frontmatter 声明一个 PreToolUse Bash hook（echo 到 /tmp/probe.log）
-# 2. 不调用该 skill，直接让 Claude 执行一个 Bash 命令
-# 3. 检查 /tmp/probe.log 是否有记录
-```
-- 有记录 → 语义为 (a)，B 方案可行，C 方案更稳；
-- 无记录 → 语义为 (b)，B 方案**否决**，只做 C。
+**结论**：无需运行实验——官方文档 + 多方独立信源已给出决定性答案（见上"激活语义已查实"）。
+B 方案否决，C 方案确认可行。`strict-guard` skill 可直接按改动清单实施。
 
 ### 改动清单（C 方案）
 
@@ -126,6 +122,6 @@ C 方案 = 借鉴 gstack `/guard`（= `/careful` + `/freeze` 组合）的"严格
 
 | 方案 | 建议 | 理由 |
 |---|---|---|
-| 一（hooks） | 先做验证实验，再定 B/C | 激活语义是关键未知数，不可拍脑袋 |
-| 二（skill version） | ✅ 直接做 | 成本极低，收益明确 |
-| 三（VERSION） | ✅ 直接做 | 30 分钟，与现有 CHANGELOG/tag 体系互补 |
+| 一（hooks） | C 方案确认，直接实施 `strict-guard` | B 已否决；skill-scoped hooks 只适合 opt-in 增强 |
+| 二（skill version） | ✅ 已实施（本 PR） | 成本极低，收益明确 |
+| 三（VERSION） | ✅ 已实施（本 PR） | 30 分钟，与现有 CHANGELOG/tag 体系互补 |

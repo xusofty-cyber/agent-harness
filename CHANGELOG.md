@@ -6,12 +6,12 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
-### Changed
-- Moved merged-feature design docs (`docs/superpowers/plans|specs/2026-10-07-*`)
-  to `docs/internal/superpowers/`; the `docs/superpowers/plans/` save-location
-  convention referenced by skills is unaffected.
-- Fixed link display texts in the two `.zh.md` guides to show the new
-  `.zh.md` filenames.
+### Added
+- `VERSION` file (single source of truth for the release version);
+  `tests/repo_checks.py` checks it matches the newest `CHANGELOG.md` version.
+- `tests/repo_checks.py`: `skill-version` check — in-repo-authored skills must
+  declare semver `version:` in `SKILL.md` frontmatter, matching `skills-lock.json`.
+- `cross-tool-memory` skill: `version: 0.1.0` (first versioned skill).
 
 ### Fixed
 - `setup-ai-memory.sh` / `.ps1`: pass `--no-skills` to

@@ -63,6 +63,40 @@ for f in skill_files:
     check(f"skill:{name}:frontmatter", has_name and has_desc,
           "frontmatter must define non-empty name: and description:")
 
+# --- 3b. Skill version (in-repo-authored skills only) ---
+# Skills with sourceType "local" in skills-lock.json must declare a semver
+# `version:` in SKILL.md frontmatter, matching the lock entry. Vendored skills
+# are versioned upstream — a local version: there is ignored, not an error.
+SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
+lock_data = json.loads((ROOT / "skills-lock.json").read_text(encoding="utf-8-sig"))
+local_skills = {k for k, v in lock_data["skills"].items()
+                if v.get("sourceType") == "local"}
+for name in sorted(local_skills):
+    f = ROOT / ".agents" / "skills" / name / "SKILL.md"
+    fm_m = re.match(r"^---\n(.*?)\n---\n", f.read_text(encoding="utf-8-sig"), re.DOTALL)
+    ver_m = re.search(r"^version:\s*(\S+)", fm_m.group(1), re.MULTILINE) if fm_m else None
+    ver = ver_m.group(1).strip("\"'") if ver_m else ""
+    check(f"skill:{name}:version-present", bool(ver),
+          "local skill must declare version: in SKILL.md frontmatter")
+    check(f"skill:{name}:version-semver", bool(SEMVER.match(ver)),
+          f"version {ver!r} is not semver x.y.z")
+    check(f"skill:{name}:version-lock-match",
+          lock_data["skills"][name].get("version") == ver,
+          f"lock version {lock_data['skills'][name].get('version')!r} != frontmatter {ver!r}")
+
+# --- 3c. VERSION file consistency ---
+# VERSION must equal the newest ## [x.y.z] heading in CHANGELOG.md.
+# (Tag consistency is verified manually at release time; CI checkouts
+# don't fetch tags by default.)
+version_file = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+cl_headings = re.findall(r"^## \[(\d+\.\d+\.\d+)\]",
+                         (ROOT / "CHANGELOG.md").read_text(encoding="utf-8"),
+                         re.MULTILINE)
+check("version:file-exists", bool(version_file), "VERSION is empty")
+check("version:matches-changelog",
+      bool(cl_headings) and version_file == cl_headings[0],
+      f"VERSION={version_file!r} vs CHANGELOG newest={cl_headings[0] if cl_headings else None!r}")
+
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
 # its counterpart marker must exist in the other. Markers that exist in

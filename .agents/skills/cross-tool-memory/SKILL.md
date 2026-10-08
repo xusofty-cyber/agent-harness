@@ -1,6 +1,7 @@
 ---
 name: cross-tool-memory
 description: Use when continuing prior work or making durable coding, research, documentation, or design decisions in a project with ai-memory configured.
+version: 0.1.0
 ---
 
 # Cross-Tool Project Memory
