@@ -46,3 +46,23 @@ Keep `main` green: fix lint violations in your branch, don't merge red.
 
 Changes are recorded in `CHANGELOG.md` under `Unreleased`. The maintainer tags releases
 (`vX.Y.Z`) from `main` when a coherent set of changes is done.
+
+### Skill versions
+
+Skills authored in this repo (`sourceType: "local"` in `skills-lock.json`,
+currently `cross-tool-memory`) must declare a semver `version:` in their
+`SKILL.md` frontmatter, matching the `version` in their lock entry.
+Vendored skills (openspec, superpowers, …) are versioned upstream — do not
+add a local `version:` to them. Bump a skill's version when its behavior
+changes (patch: wording/threshold tweaks; minor: new trigger scenarios;
+major: incompatible behavior change). A skill version bump does not force a
+repository version bump.
+
+### Release process
+
+1. Record entries under `CHANGELOG.md` → `## [Unreleased]`.
+2. To cut a release: rename `[Unreleased]` to `## [x.y.z] - YYYY-MM-DD`,
+   write the same version into the `VERSION` file (CI checks they match),
+   merge to `main`.
+3. After merge: `git tag vx.y.z && git push origin vx.y.z`
+   (tags can't be created through the GitHub App API — do it locally).

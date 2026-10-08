@@ -29,6 +29,7 @@
     "cross-tool-memory": {
       "source": "agents-living (authored in-repo)",
       "sourceType": "local",
+      "version": "0.1.0",
       "skillPath": ".agents/skills/cross-tool-memory/SKILL.md"
     },
     "diagnosing-superpowers": {
