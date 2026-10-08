@@ -6,6 +6,13 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+### Changed
+- Moved merged-feature design docs (`docs/superpowers/plans|specs/2026-10-07-*`)
+  to `docs/internal/superpowers/`; the `docs/superpowers/plans/` save-location
+  convention referenced by skills is unaffected.
+- Fixed link display texts in the two `.zh.md` guides to show the new
+  `.zh.md` filenames.
+
 ### Fixed
 - `setup-ai-memory.sh` / `.ps1`: pass `--no-skills` to
   `ai-memory install-instructions` — this repo curates `cross-tool-memory`

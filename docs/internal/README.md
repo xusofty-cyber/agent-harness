@@ -10,3 +10,5 @@
 模板中提到的 `PROJECT_CONTEXT.md` / `SESSION_STATE.md` 双轨记忆模式，
 指的是**使用本模板的下游项目**应在自己项目根目录维护的两个文件，
 与本目录这三个文件是"模式"与"实例"的关系，不要混淆。
+
+- `superpowers/` —— 已合入功能的设计文档归档（`plans/` 实现计划、`specs/` 设计规格）。注意：各 skill 中提到的 `docs/superpowers/plans/` 是**未来新计划的存放约定**，不受此次归档影响。

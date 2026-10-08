@@ -16,7 +16,7 @@
 - **分支**：`long-term-memory-governance`，跟踪 `origin/long-term-memory-governance`。
 - **本轮功能提交**：`c476978218f042155b6f89f5d129564c39e525fc`，已推送；`git ls-remote origin refs/heads/long-term-memory-governance` 返回相同 hash。
 - **范围**：已完成 Antigravity 跨版本规则入口与 ai-memory 设置边界更新；保留工作区原有用户改动和未跟踪文件。
-- **设计与计划**：`docs/superpowers/specs/2026-10-07-cross-tool-memory-governance-design.md`、`docs/superpowers/plans/2026-10-07-cross-tool-memory-governance.md`、`docs/superpowers/plans/2026-10-07-ai-memory-integration.md`。
+- **设计与计划**（已归档至 `docs/internal/superpowers/`）：`specs/2026-10-07-cross-tool-memory-governance-design.md`、`plans/2026-10-07-cross-tool-memory-governance.md`、`plans/2026-10-07-ai-memory-integration.md`。
 
 ## 本轮变更
 
