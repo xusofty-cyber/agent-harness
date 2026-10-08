@@ -120,8 +120,8 @@ B 方案否决，C 方案确认可行。`strict-guard` skill 可直接按改动�
 
 ## 决策建议
 
-| 方案 | 建议 | 理由 |
+| 方案 | 决策（2026-10-08） | 理由 |
 |---|---|---|
-| 一（hooks） | C 方案确认，直接实施 `strict-guard` | B 已否决；skill-scoped hooks 只适合 opt-in 增强 |
-| 二（skill version） | ✅ 已实施（本 PR） | 成本极低，收益明确 |
-| 三（VERSION） | ✅ 已实施（本 PR） | 30 分钟，与现有 CHANGELOG/tag 体系互补 |
+| 一（hooks） | C 架构确认；`strict-guard` **暂缓实现**，按需触发 | B 已否决；现有 guard.mjs/guard-write.mjs 已覆盖强制底线，strict-guard 的目录边界等属 situational 需求，待真实用例出现再建（设计见上文改动清单） |
+| 二（skill version） | ✅ 已实施（PR #8） | 成本极低，收益明确 |
+| 三（VERSION） | ✅ 已实施（PR #8） | 30 分钟，与现有 CHANGELOG/tag 体系互补 |
