@@ -1,0 +1,89 @@
+# ==============================================================================
+# CI for agents-living
+# Triggers on pushes to the long-lived branches and on all pull requests.
+#
+# Jobs:
+#   lint-and-test  (ubuntu)  — markdownlint, shellcheck, node --check,
+#                              hook behavior tests, repo static checks,
+#                              deploy-agents.sh end-to-end smoke test
+#   ps-analyzer    (windows) — PSScriptAnalyzer on the PowerShell scripts
+#                              (Error severity fails the build; Warning/Info
+#                              are reported without failing)
+# ==============================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [main, long-term-memory-governance]
+  pull_request:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install linters
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq shellcheck
+          npm install -g markdownlint-cli
+
+      - name: Markdown lint
+        run: markdownlint '**/*.md'
+
+      - name: ShellCheck deploy scripts
+        run: shellcheck -S warning ./*.sh
+
+      - name: Node syntax check (hooks)
+        run: node --check .claude/hooks/guard.mjs && node --check .claude/hooks/guard-write.mjs
+
+      - name: Hook behavior tests
+        run: node tests/hooks.test.mjs
+
+      - name: Repository static checks
+        run: python3 tests/repo_checks.py
+
+      - name: Deploy smoke test (deploy-agents.sh)
+        run: |
+          mkdir -p /tmp/smoke-proj
+          bash deploy-agents.sh /tmp/smoke-proj < /dev/null
+          test -f /tmp/smoke-proj/AGENTS.md
+          test -f /tmp/smoke-proj/CLAUDE.md
+          test -f /tmp/smoke-proj/.agents/rules/security-boundary.md
+          test -f /tmp/smoke-proj/.claude/settings.json
+          test -f /tmp/smoke-proj/.claude/hooks/guard.mjs
+          test -f /tmp/smoke-proj/skills-lock.json
+          test -d /tmp/smoke-proj/.agents/skills
+          echo "deploy smoke test passed"
+
+  ps-analyzer:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PSScriptAnalyzer
+        shell: pwsh
+        run: Install-Module PSScriptAnalyzer -Force -Scope CurrentUser
+
+      - name: Analyze (Error severity fails)
+        shell: pwsh
+        run: |
+          $errors = Invoke-ScriptAnalyzer -Path . -Recurse -Severity Error
+          $errors | Format-Table -AutoSize | Out-String | Write-Host
+          if ($errors) { throw "$($errors.Count) PSScriptAnalyzer error(s) found." }
+
+      - name: Report warnings (non-blocking)
+        shell: pwsh
+        run: |
+          Invoke-ScriptAnalyzer -Path . -Recurse -Severity Warning, Information `
+            | Format-Table -AutoSize | Out-String | Write-Host
