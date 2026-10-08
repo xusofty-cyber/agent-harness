@@ -71,7 +71,7 @@ if ($Agent -in @('claude-code', 'codex', 'antigravity-cli')) {
     Write-Host 'MCP-only setup: this Antigravity surface does not have a first-party ai-memory lifecycle hook target.'
 }
 
-& ai-memory install-instructions --target (Join-Path $repoRoot $instructionTarget)
+& ai-memory install-instructions --target (Join-Path $repoRoot $instructionTarget) --no-skills  # no-skills: this repo curates cross-tool-memory; never let upstream drop managed skills here
 if ($LASTEXITCODE -ne 0) { throw "ai-memory install-instructions failed with exit code $LASTEXITCODE." }
 
 if ($Agent -in @('claude-code', 'codex', 'antigravity-cli')) {

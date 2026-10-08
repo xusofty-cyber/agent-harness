@@ -77,7 +77,7 @@ case "$agent" in
     printf 'MCP-only setup: this Antigravity surface does not have a first-party ai-memory lifecycle hook target.\n'
     ;;
 esac
-ai-memory install-instructions --target "$instruction_target"
+ai-memory install-instructions --target "$instruction_target" --no-skills
 
 case "$agent" in
   claude-code|codex|antigravity-cli)
