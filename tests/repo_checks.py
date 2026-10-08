@@ -95,6 +95,20 @@ for ps1_marker, sh_marker, feature in PARITY:
         detail = f"'{ps1_marker}' missing in deploy-agents.ps1"
     check(f"parity:{feature}", in_ps1 == in_sh, detail)
 
+# --- 5. skills-lock.json consistency ---
+# Every skill directory must have a lock entry (provenance metadata).
+# Lock entries without a directory are allowed only for known meta-entries
+# (suites, not single skills).
+META_ENTRIES = {"openspec", "superpowers"}
+lock_skills = set(json.loads((ROOT / "skills-lock.json").read_text(encoding="utf-8-sig"))["skills"])
+dir_skills = {p.name for p in (ROOT / ".agents" / "skills").iterdir() if p.is_dir()}
+missing_lock = sorted(dir_skills - lock_skills)
+check("lock:covers-all-dirs", not missing_lock,
+      f"skill dirs without lock entry: {missing_lock}")
+orphan_lock = sorted(lock_skills - dir_skills - META_ENTRIES)
+check("lock:no-orphans", not orphan_lock,
+      f"lock entries without skill dir: {orphan_lock}")
+
 print()
 if failures:
     print(f"{len(failures)} check(s) failed.")
