@@ -7,16 +7,22 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 ## [Unreleased]
 
 ### Added
-- New local skill `option-review` (`version: 0.1.0`): pre-decision review of
+- New local skill `option-review` (`version: 0.1.1`): pre-decision review of
   multiple candidate approaches. Fans out isolated reviewers across five
   dimensions (security, engineering, reversibility, simplicity, cross-tool)
-  and returns a decision matrix; complements `requesting-code-review`
-  (which reviews completed work).
+  and returns a decision matrix; includes single-agent CoT fallback when subagents
+  are unavailable, and impact thresholding to avoid over-triggering on minor code choices;
+  complements `requesting-code-review` (which reviews completed work).
 - `VERSION` file (single source of truth for the release version);
   `tests/repo_checks.py` checks it matches the newest `CHANGELOG.md` version.
 - `tests/repo_checks.py`: `skill-version` check — in-repo-authored skills must
   declare semver `version:` in `SKILL.md` frontmatter, matching `skills-lock.json`.
 - `cross-tool-memory` skill: `version: 0.1.0` (first versioned skill).
+
+### Changed
+- Synced 40 native skills count and in-repo skills descriptions across
+  `README.md`, `README_zh.md`, root `AGENTS.md`, and the bilingual
+  `Tools Practical Usage and Skills Panorama Guide` pairs.
 
 ### Fixed
 - `setup-ai-memory.sh` / `.ps1`: pass `--no-skills` to

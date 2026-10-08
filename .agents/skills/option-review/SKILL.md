@@ -1,7 +1,7 @@
 ---
 name: option-review
 description: Use when 2+ viable approaches exist for a task and a choice must be made — e.g. "should I do A or B?", "which approach is better?", "help me choose between these options". Fans out isolated reviewers (security, engineering, reversibility, simplicity, cross-tool), each in a separate subagent, and returns a decision matrix. Also user-invokable as /option-review.
-version: 0.1.0
+version: 0.1.1
 ---
 
 # Option Review
@@ -20,9 +20,13 @@ Trigger automatically when **all** of these hold:
 2. The options differ in **approach**, not just parameters
    (e.g. "REST vs gRPC" qualifies; "timeout 30s vs 60s" does not).
 3. The user has **not yet chosen**.
+4. The decision has **architectural, structural, security, or irreversible impact**
+   (e.g. storage/state strategy, library selection, API contract, migration path).
+   For routine local choices (naming, loop styles, minor refactorings), choose the
+   simpler path directly (YAGNI / Ponytail) without triggering a multi-agent review.
 
 Do **not** trigger for: single-option confirmations, trivial parameter choices,
-or decisions the user already made.
+routine low-impact coding choices, or decisions the user already made.
 
 ## Protocol
 
@@ -47,6 +51,13 @@ all in a single parallel batch. Each reviewer receives **only**:
 Reviewers get **no session history, no other reviewer's output,
 no hint of your preference**. Isolation is the point: independent
 angles must not anchor on each other.
+
+#### Fallback (single-agent harnesses)
+
+When the host environment does not support subagent dispatch (e.g. single-agent
+CLI or missing delegation tools), evaluate the five dimensions sequentially
+in your internal reasoning. Strictly isolate each perspective against its rubric
+in `references/rubrics.md` without letting conclusions from one angle bias the next.
 
 ### 3. Collect verdicts
 
