@@ -38,11 +38,19 @@ param (
 )
 
 $ToolClaude = $true
-$ToolCodex = $true
-$ToolAntigravity = $true
 $ToolCopilot = $true
 $ToolCursor = $true
-$ToolZed = $true
+$ToolGemini = $true
+$ToolWindsurf = $true
+$ToolCline = $true
+$ToolRoo = $true
+$ToolQwen = $true
+$ToolKiro = $true
+$ToolContinue = $true
+$ToolTrae = $true
+$ToolCodebuddy = $true
+# Native AGENTS.md readers — no bridge needed, always "supported":
+# Codex, Antigravity, Zed, OpenCode, Aider, Qoder, Pi
 
 $ErrorActionPreference = "Stop"
 
@@ -190,22 +198,39 @@ function Prompt-InteractiveWizard {
         if ([string]::IsNullOrWhiteSpace($inPath)) { $inPath = "." }
         $script:ProjectPath = $inPath
 
+        Write-Host ""
+        Write-Host "以下工具原生读取 AGENTS.md，无需桥接文件（自动支持）:" -ForegroundColor Cyan
+        Write-Host "  ✓ Codex · Antigravity · Zed · OpenCode · Aider · Qoder · Pi" -ForegroundColor Green
+        Write-Host ""
+
         $toolOptions = @(
-            @{ Label = "Claude Code (CLAUDE.md 桥接、安全拦截钩子与设置)"; Value = "claude"; Checked = $true },
-            @{ Label = "OpenAI Codex / CLI (AGENTS.md)"; Value = "codex"; Checked = $true },
-            @{ Label = "Google Antigravity (AGENTS.md / GEMINI.md 兼容入口)"; Value = "antigravity"; Checked = $true },
-            @{ Label = "GitHub Copilot (.github/copilot-instructions.md 桥接)"; Value = "copilot"; Checked = $true },
-            @{ Label = "Cursor (.cursorrules 规则桥接)"; Value = "cursor"; Checked = $true },
-            @{ Label = "Zed IDE (AGENTS.md)"; Value = "zed"; Checked = $true }
+            @{ Label = "Claude Code (CLAUDE.md 桥接 + 安全钩子)"; Value = "claude"; Checked = $true },
+            @{ Label = "GitHub Copilot (.github/copilot-instructions.md)"; Value = "copilot"; Checked = $true },
+            @{ Label = "Cursor (.cursorrules)"; Value = "cursor"; Checked = $true },
+            @{ Label = "Gemini CLI (GEMINI.md)"; Value = "gemini"; Checked = $true },
+            @{ Label = "Windsurf (.windsurf/rules/)"; Value = "windsurf"; Checked = $false },
+            @{ Label = "Cline (.clinerules/)"; Value = "cline"; Checked = $false },
+            @{ Label = "Roo Code (.roo/rules/)"; Value = "roo"; Checked = $false },
+            @{ Label = "Qwen Code (QWEN.md)"; Value = "qwen"; Checked = $false },
+            @{ Label = "Kiro (.kiro/steering/)"; Value = "kiro"; Checked = $false },
+            @{ Label = "Continue.dev (.continue/rules/)"; Value = "continue"; Checked = $false },
+            @{ Label = "Trae (.trae/rules/)"; Value = "trae"; Checked = $false },
+            @{ Label = "CodeBuddy (CODEBUDDY.md)"; Value = "codebuddy"; Checked = $false }
         )
-        $selectedTools = Prompt-MultiSelect "[4/5] 选择要配置的 Agent 工具 (Select Agent Tools to configure):" $toolOptions
+        $selectedTools = Prompt-MultiSelect "[4/5] 选择要创建桥接文件的 Agent 工具 (Select tools for bridge files):" $toolOptions
 
         $script:ToolClaude = $selectedTools -contains "claude"
-        $script:ToolCodex = $selectedTools -contains "codex"
-        $script:ToolAntigravity = $selectedTools -contains "antigravity"
         $script:ToolCopilot = $selectedTools -contains "copilot"
         $script:ToolCursor = $selectedTools -contains "cursor"
-        $script:ToolZed = $selectedTools -contains "zed"
+        $script:ToolGemini = $selectedTools -contains "gemini"
+        $script:ToolWindsurf = $selectedTools -contains "windsurf"
+        $script:ToolCline = $selectedTools -contains "cline"
+        $script:ToolRoo = $selectedTools -contains "roo"
+        $script:ToolQwen = $selectedTools -contains "qwen"
+        $script:ToolKiro = $selectedTools -contains "kiro"
+        $script:ToolContinue = $selectedTools -contains "continue"
+        $script:ToolTrae = $selectedTools -contains "trae"
+        $script:ToolCodebuddy = $selectedTools -contains "codebuddy"
     }
 
     $optOptions = @(
@@ -835,7 +860,83 @@ if ($ToolCursor) {
     }
 }
 
-# Note: no Zed-specific configuration is created.
+# Bridge for Gemini CLI (GEMINI.md)
+if ($ToolGemini) {
+    $TargetGeminiFile = Join-Path $ResolvedProjectPath "GEMINI.md"
+    if (-not (Test-Path $TargetGeminiFile)) {
+        try {
+            New-Item -ItemType SymbolicLink -Path $TargetGeminiFile -Target "AGENTS.md" -ErrorAction Stop | Out-Null
+            Write-Host "  [OK] Created symlink: GEMINI.md -> AGENTS.md" -ForegroundColor Green
+        } catch {
+            Set-Content -Path $TargetGeminiFile -Value "@AGENTS.md`n" -Encoding UTF8
+            Write-Host "  [OK] Created reference file: GEMINI.md (@AGENTS.md)" -ForegroundColor Green
+        }
+    } else {
+        Write-Host "  [INFO] GEMINI.md already exists, keeping existing file." -ForegroundColor Gray
+    }
+}
+
+# Bridge for Qwen Code (QWEN.md)
+if ($ToolQwen) {
+    $TargetQwenFile = Join-Path $ResolvedProjectPath "QWEN.md"
+    if (-not (Test-Path $TargetQwenFile)) {
+        try {
+            New-Item -ItemType SymbolicLink -Path $TargetQwenFile -Target "AGENTS.md" -ErrorAction Stop | Out-Null
+            Write-Host "  [OK] Created symlink: QWEN.md -> AGENTS.md" -ForegroundColor Green
+        } catch {
+            Set-Content -Path $TargetQwenFile -Value "@AGENTS.md`n" -Encoding UTF8
+            Write-Host "  [OK] Created reference file: QWEN.md (@AGENTS.md)" -ForegroundColor Green
+        }
+    } else {
+        Write-Host "  [INFO] QWEN.md already exists, keeping existing file." -ForegroundColor Gray
+    }
+}
+
+# Bridge for CodeBuddy (CODEBUDDY.md)
+if ($ToolCodebuddy) {
+    $TargetCodebuddyFile = Join-Path $ResolvedProjectPath "CODEBUDDY.md"
+    if (-not (Test-Path $TargetCodebuddyFile)) {
+        try {
+            New-Item -ItemType SymbolicLink -Path $TargetCodebuddyFile -Target "AGENTS.md" -ErrorAction Stop | Out-Null
+            Write-Host "  [OK] Created symlink: CODEBUDDY.md -> AGENTS.md" -ForegroundColor Green
+        } catch {
+            Set-Content -Path $TargetCodebuddyFile -Value "@AGENTS.md`n" -Encoding UTF8
+            Write-Host "  [OK] Created reference file: CODEBUDDY.md (@AGENTS.md)" -ForegroundColor Green
+        }
+    } else {
+        Write-Host "  [INFO] CODEBUDDY.md already exists, keeping existing file." -ForegroundColor Gray
+    }
+}
+
+function New-RuleDirBridge {
+    param([string]$ToolName, [string]$DirRel, [string]$FileName)
+    $TargetDir = Join-Path $ResolvedProjectPath $DirRel
+    if (-not (Test-Path $TargetDir)) {
+        New-Item -ItemType Directory -Path $TargetDir -Force | Out-Null
+    }
+    $TargetFile = Join-Path $TargetDir $FileName
+    if (-not (Test-Path $TargetFile)) {
+        try {
+            New-Item -ItemType SymbolicLink -Path $TargetFile -Target "../../AGENTS.md" -ErrorAction Stop | Out-Null
+            Write-Host "  [OK] Created ${ToolName} rule bridge: ${DirRel}/${FileName} -> AGENTS.md" -ForegroundColor Green
+        } catch {
+            Set-Content -Path $TargetFile -Value "@AGENTS.md`n" -Encoding UTF8
+            Write-Host "  [OK] Created ${ToolName} rule reference: ${DirRel}/${FileName} (@AGENTS.md)" -ForegroundColor Green
+        }
+    } else {
+        Write-Host "  [INFO] ${DirRel}/${FileName} already exists, keeping existing file." -ForegroundColor Gray
+    }
+}
+
+if ($ToolWindsurf) { New-RuleDirBridge "Windsurf" ".windsurf/rules" "agent-harness.md" }
+if ($ToolCline) { New-RuleDirBridge "Cline" ".clinerules" "agent-harness.md" }
+if ($ToolRoo) { New-RuleDirBridge "Roo Code" ".roo/rules" "agent-harness.md" }
+if ($ToolKiro) { New-RuleDirBridge "Kiro" ".kiro/steering" "agent-harness.md" }
+if ($ToolContinue) { New-RuleDirBridge "Continue.dev" ".continue/rules" "agent-harness.md" }
+if ($ToolTrae) { New-RuleDirBridge "Trae" ".trae/rules" "agent-harness.md" }
+
+# Note: Codex, Antigravity, Zed, OpenCode, Aider, Qoder, Pi read AGENTS.md
+# natively — no bridge files needed.
 
 # Deploy Claude Code PreToolUse Security Hooks (.claude/settings.json + .claude/hooks/)
 if ($ToolClaude -and (Test-Path $SourceClaudeSettings)) {
