@@ -116,17 +116,19 @@ prompt_multiselect() {
 
 SELECTED_AGENTS=()
 if [[ $# -ge 1 ]]; then
-  case "$1" in
-    claude-code|codex|antigravity|antigravity-ide|antigravity-cli)
-      SELECTED_AGENTS=("$1")
-      ;;
-    -h|--help)
-      usage
-      ;;
-    *)
-      usage
-      ;;
-  esac
+  for arg in "$@"; do
+    case "$arg" in
+      claude-code|codex|antigravity|antigravity-ide|antigravity-cli)
+        SELECTED_AGENTS+=("$arg")
+        ;;
+      -h|--help)
+        usage
+        ;;
+      *)
+        usage
+        ;;
+    esac
+  done
 else
   if [ -t 0 ]; then
     prompt_multiselect "\n=== Select Agent Tools for ai-memory Integration ===" \

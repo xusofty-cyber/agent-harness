@@ -121,9 +121,10 @@ def tui_multiselect(title: str, options: list[tuple[str, any, bool]]) -> list[an
                 return [values[i] for i, c in enumerate(checked) if c]
             selected = []
             for num in resp.split():
-                idx = int(num) - 1
-                if 0 <= idx < count:
-                    selected.append(values[idx])
+                if num.isdigit():
+                    idx = int(num) - 1
+                    if 0 <= idx < count:
+                        selected.append(values[idx])
             return selected
         except Exception:
             return [values[i] for i, c in enumerate(checked) if c]

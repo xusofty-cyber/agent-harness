@@ -195,6 +195,7 @@ PARITY = [
     ("Comet CLI", "Comet CLI", "optional Comet CLI detection"),
     ("Resolve-TemplateFile", "resolve_template", "multilingual template resolution"),
     ("Prompt-InteractiveWizard", "prompt_interactive_wizard", "interactive terminal wizard"),
+    ("--check-only", "--check-only", "pipeline read-only check mode"),
     ("GEMINI.md -> AGENTS.md", "GEMINI.md -> AGENTS.md", "Gemini CLI bridge"),
     ("QWEN.md -> AGENTS.md", "QWEN.md -> AGENTS.md", "Qwen Code bridge"),
     ("CODEBUDDY.md -> AGENTS.md", "CODEBUDDY.md -> AGENTS.md", "CodeBuddy bridge"),

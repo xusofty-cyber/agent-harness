@@ -16,14 +16,14 @@ This guide provides an end-to-end specification on how to deploy, configure, and
    - 4.2 Windows Deployment (`deploy-agents.ps1`)
    - 4.3 Linux / macOS Deployment (`deploy-agents.sh`)
    - 4.4 Symlink vs. Directory Junction Mechanics
-5. [Deep Dive into the Four Rule Layers](#5-deep-dive-into-the-four-rule-layers)
+5. Deep Dive into the Four Rule Layers
    - 5.1 Global Constitution: `Global AGENTS.md`
    - 5.2 Project Router: `Project AGENTS.md`
    - 5.3 Modular Sub-Rules: `.agents/rules/`
    - 5.4 Micro-Boundary Patch: `Directory AGENTS.md`
-6. [Dual-Track Practical Workflow: "Engineering First, Documentation Second"](#6-dual-track-practical-workflow-engineering-first-documentation-second)
-7. [Frequently Asked Questions & Best Practices (FAQ)](#7-frequently-asked-questions--best-practices-faq)
-8. [Practical Usage & Skills Panorama Guide Reference](#8-practical-usage--skills-panorama-guide-reference)
+6. Dual-Track Practical Workflow: "Engineering First, Documentation Second"
+7. Frequently Asked Questions & Best Practices (FAQ)
+8. Practical Usage & Skills Panorama Guide Reference
 
 ---
 
@@ -264,10 +264,12 @@ chmod +x ./deploy-agents.sh ./run-pipeline.sh ./pipeline.sh
 ./pipeline.sh --all -y
 
 # Exécuter des étapes spécifiques :
+```bash
 ./pipeline.sh --stages deploy,skills,docs
 ```
 
-# Deploy with ai-memory init
+### Deploy with ai-memory init
+```bash
 ./deploy-agents.sh /path/to/my-project --ai-memory-init
 ```
 

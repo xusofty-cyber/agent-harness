@@ -507,7 +507,7 @@ if [ "$STAGE_MEMORY" = true ]; then
                 if [ "$RUN_DETAIL_MODE" = "detailed" ] && [ -t 0 ]; then
                     "$REPO_ROOT/setup-ai-memory.sh"
                 else
-                    "$REPO_ROOT/setup-ai-memory.sh" "claude-code" "antigravity" || true
+                    "$REPO_ROOT/setup-ai-memory.sh" "claude-code" "codex" "antigravity-ide" || true
                 fi
             )
             echo -e "${GREEN}✔ 阶段 2 执行完成${NC}\n"
@@ -539,10 +539,15 @@ if [ "$STAGE_SKILLS" = true ]; then
         SUMMARY_DETAIL+=("未找到 Python 环境")
     else
         skills_cmd=("$PYTHON_BIN" "$REPO_ROOT/tools/sync-skills.py")
+        if [ "$CHECK_ONLY" = true ]; then
+            skills_cmd+=("--check-only")
+        fi
         if [ "$RUN_DETAIL_MODE" = "detailed" ] && [ -t 0 ]; then
             "${skills_cmd[@]}" || true
         else
-            if [ "$APPLY_SKILLS" = true ]; then
+            if [ "$CHECK_ONLY" = true ]; then
+                skills_cmd+=("--check")
+            elif [ "$APPLY_SKILLS" = true ]; then
                 skills_cmd+=("--apply")
             else
                 skills_cmd+=("--check")
@@ -572,11 +577,9 @@ if [ "$STAGE_DOCS" = true ]; then
         SUMMARY_STATUS+=("SKIP")
         SUMMARY_DETAIL+=("未找到 Python 环境")
     else
-        docs_cmd=("$PYTHON_BIN" "$REPO_ROOT/tools/doc-impact.py")
+        docs_cmd=("$PYTHON_BIN" "$REPO_ROOT/tools/doc-impact.py" "--root" "$TARGET_ABS")
         if [ "$RUN_DETAIL_MODE" = "detailed" ] && [ -t 0 ]; then
             docs_cmd+=("--interactive")
-        else
-            docs_cmd+=("--root" "$TARGET_ABS")
         fi
 
         if "${docs_cmd[@]}"; then
