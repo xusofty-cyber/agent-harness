@@ -1,15 +1,17 @@
 # SESSION_STATE.md — 会话断点
 
-> **最后更新**：2026-10-08
-> **任务**：跨工具记忆治理、ai-memory 集成与全局规则更新行为修复
+> **最后更新**：2026-10-09
+> **任务**：多语言 AGENTS 模板与部署语言选项、全景/部署核心文档多语言套件建设，以及文档启发描述清理
 
-## 当前状态（已闭环）
+## 当前状态（待确认合并）
 
-- **分支**：`long-term-memory-governance` 已合入 `main`（PR #2，merge commit `b5cd534`，血缘验证通过）。
-- **版本**：`v0.1.0` tag 已打（指向 PR #4 的 merge commit `62d932e`）。
-- **CI**：GitHub Actions 全绿（`lint-and-test`、`ps-analyzer`）。
-- **分析报告 13 项 + 后续 5 项补遗**：全部落地。PR #1（CI+正则修复）→ PR #2（LTMG 合入）→ PR #3（P1/P2 打磨）→ PR #4（.zh.md 改名、双语 CI 检查、ai-memory pin v2.6.0、CHANGELOG v0.1.0）→ PR #5（`--no-skills`、exec-bit 回归检查）。
-- **已知待办**：`deploy-agents.sh` / `setup-ai-memory.sh` 的 exec 位需在本地用 `git update-index --chmod=+x` 恢复后 push（API 推送会将其洗回 100644，`tests/repo_checks.py` 的 `exec-bit` 检查负责回归拦截）。
+- **分支**：`feat/multilingual-agents-templates`（基于 `main` 检出，已完成 2 个本地提交 `3ef0a76` 与 `e78f2a7`）。
+- **完成项**：
+  - 三级 AGENTS 模板多语言版（EN / 繁中 / 法语 / 德语）就绪；部署脚本（`deploy-agents.sh` / `.ps1`）新增 `--lang` / `-Language` 支持及降级保护。
+  - 三套核心文档多语言套件（`README`、`Multi-Tool Deployment and Configuration Guide`、`Tools Practical Usage and Skills Panorama Guide`）完整支持 EN、简中、繁中、法语、德语，全部通过 `##` 结构对称性自动化校验。
+  - 彻底清理 `README_zh.md` 及全库中关于外部启发文章的描述与链接。
+- **CI & 测试**：`python3 tests/repo_checks.py`、`node tests/hooks.test.mjs`、`python3 tests/sync_skills_test.py` 全数通过。
+- **后续动作**：等待用户明确授权后，合入 `main` 并推送到远端仓库 `git@github.com:xusofty-cyber/agent-harness.git`。
 
 ## 历史记录（2026-10-08 前）
 
