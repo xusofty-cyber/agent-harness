@@ -409,7 +409,7 @@ if ($stageMemory) {
                 if ($runDetailMode -eq "detailed" -and -not [Console]::IsInputRedirected) {
                     & $setupScript
                 } else {
-                    & $setupScript -Agent "claude-code"
+                    & $setupScript -Agent @("claude-code", "codex", "antigravity-ide")
                 }
                 Write-Host "`n✔ 阶段 2 执行完成`n" -ForegroundColor Green
                 $summaryStatus += "PASS"
@@ -444,11 +444,17 @@ if ($stageSkills) {
     } else {
         $syncScript = Join-Path $repoRoot "tools\sync-skills.py"
         try {
+            $syncArgs = @()
+            if ($CheckOnly.IsPresent) { $syncArgs += "--check-only" }
             if ($runDetailMode -eq "detailed" -and -not [Console]::IsInputRedirected) {
-                & $pythonCmd $syncScript
+                & $pythonCmd $syncScript @syncArgs
             } else {
-                $arg = if ($ApplySkills.IsPresent) { "--apply" } else { "--check" }
-                & $pythonCmd $syncScript $arg
+                if (-not $CheckOnly.IsPresent) {
+                    $syncArgs += if ($ApplySkills.IsPresent) { "--apply" } else { "--check" }
+                } else {
+                    $syncArgs += "--check"
+                }
+                & $pythonCmd $syncScript @syncArgs
             }
             Write-Host "`n✔ 阶段 3 检查完成`n" -ForegroundColor Green
             $summaryStatus += "PASS"

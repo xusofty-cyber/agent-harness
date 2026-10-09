@@ -70,6 +70,18 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 - **Shared TUI module**: extracted the duplicated `tui_select` from
   `tools/sync-skills.py` and `tools/doc-impact.py` into `tools/tui.py`.
 
+- **Pipeline Stage 4 `--root` fix**: `run-pipeline.sh`/`run-pipeline.ps1` now always
+  pass `--root <target>` to `doc-impact.py` (previously dropped in `--interactive`
+  mode, causing the wrong repo to be analyzed).
+- **Pipeline `--check-only` implemented**: the documented read-only flag now actually
+  works — `sync-skills.py` gained `--check-only` (forces check in wizard and CLI),
+  pipeline passes it through in both scripts.
+- **Pipeline Stage 2 multi-agent**: `setup-ai-memory.sh`/`.ps1` now accept multiple
+  agents (previously only `$1` was used, silently ignoring the rest); pipeline
+  defaults to `claude-code codex antigravity-ide` in unattended mode.
+- **`tui_multiselect` non-TTY fallback**: invalid tokens are now skipped individually
+  instead of nuking the entire selection.
+
 ## [0.2.1] - 2026-10-09
 
 ### Added
