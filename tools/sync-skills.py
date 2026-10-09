@@ -152,17 +152,21 @@ def apply_update(name: str, meta: dict, upstream: bytes) -> None:
                          encoding="utf-8")
 
 
-def prompt_interactive_wizard(lock: dict) -> tuple[bool, str | None, bool]:
+def prompt_interactive_wizard(lock: dict, check_only: bool = False) -> tuple[bool, str | None, bool]:
     """Returns (do_apply, target_skill, is_json)."""
     print("\n\033[36m==================================================")
     print(" 🔄 sync-skills: 外部技能同步向导 (Interactive Sync)")
     print("==================================================\033[0m")
 
-    action = tui_select("[1/3] 选择执行操作 (Select Action):", [
-        ("检查外部技能更新状态（只读汇报，安全）", "check"),
-        ("应用并就地更新过时技能文件（刷新 skills-lock.json）", "apply"),
-    ])
-    do_apply = (action == "apply")
+    if check_only:
+        print("(只读模式 --check-only: 跳过应用选项)")
+        do_apply = False
+    else:
+        action = tui_select("[1/3] 选择执行操作 (Select Action):", [
+            ("检查外部技能更新状态（只读汇报，安全）", "check"),
+            ("应用并就地更新过时技能文件（刷新 skills-lock.json）", "apply"),
+        ])
+        do_apply = (action == "apply")
 
     all_ext = [name for name, _ in external_skills(lock, None)]
     scope_options = [("同步所有外部技能 (All external skills)", "all")]
@@ -188,15 +192,16 @@ def main() -> int:
     ap.add_argument("--skill", default=None, help="limit to one skill")
     ap.add_argument("--json", action="store_true", help="JSON output")
     ap.add_argument("--interactive", "-i", action="store_true", help="launch interactive step wizard")
+    ap.add_argument("--check-only", action="store_true", help="read-only: never apply upstream changes")
     args = ap.parse_args()
 
     lock = load_lock()
     if args.interactive or (len(sys.argv) == 1 and sys.stdin.isatty()):
-        do_apply, target_skill, is_json = prompt_interactive_wizard(lock)
+        do_apply, target_skill, is_json = prompt_interactive_wizard(lock, check_only=args.check_only)
         args.skill = target_skill
         args.json = is_json
     else:
-        do_apply = args.apply
+        do_apply = args.apply and not args.check_only
 
     skills = external_skills(lock, args.skill)
     if args.skill and not skills:
