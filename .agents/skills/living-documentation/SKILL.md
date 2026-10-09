@@ -1,7 +1,7 @@
 ---
 name: living-documentation
 description: Maintain agile living documentation across the development lifecycle (specs, architecture, reference, guides), establish code-doc traceability with Frontmatter metadata, and integrate document gates with Comet workflows.
-version: 0.1.0
+version: 0.1.1
 ---
 
 # Living Documentation & Traceability
