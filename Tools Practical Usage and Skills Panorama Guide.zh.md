@@ -159,8 +159,20 @@
    - 针对外部依赖的技能，内置自动同步探测脚本；
    - **检查模式**：`python3 tools/sync-skills.py --check`（只读，比对 LF 标准化 SHA256，报告 🟢 in-sync / 🟡 outdated 状态）；
    - **应用模式**：`python3 tools/sync-skills.py --apply`（原地更新过期技能的 `SKILL.md`，并刷新 `skills-lock.json` 中的哈希；本地原创技能严格受保护不被覆盖）；
+   - 无参数执行时，自动调用 `tools/tui.py` 启动终端交互式向导选择执行范围；
    - **定向更新**：支持通过 `--skill <name>` 限制特定技能，支持 `--json` 输出结构化报表。
-3. **一键在线更新集成**：
+3. **活体文档影响分析与质检门禁 (`tools/doc-impact.py`)**：
+   - 针对代码变更自动分析对 `docs/{specs,architecture,reference,guides,adr}/` 活体文档的溯源影响；
+   - 支持工作区当前变更扫描、指定基线对比（`--since`）、文件列表传入以及交互式向导模式（`--interactive`）。
+4. **统一工程流水线执行器 (`pipeline.sh` / `pipeline.ps1`)**：
+   - 统合全部运维与部署阶段，按操作系统提供一键式流转：
+     - 阶段 1：规则分发与跨工具桥接部署 (`deploy-agents`)
+     - 阶段 2：AI 跨工具长效记忆与 MCP 配置 (`setup-ai-memory`)
+     - 阶段 3：外部技能锁定状态校验与更新 (`tools/sync-skills.py`)
+     - 阶段 4：活体文档溯源影响分析与门禁质检 (`tools/doc-impact.py`)
+   - 交互向导：`./pipeline.sh` (Linux/macOS) 或 `.\pipeline.ps1` (Windows)；
+   - 无人值守：`./pipeline.sh --all -y` 或 `.\pipeline.ps1 -All -Yes`。
+5. **一键在线更新集成**：
    - 当在项目根目录运行更新命令时：
      ```powershell
      # Windows 环境一键拉取最新规则与技能库
@@ -593,9 +605,16 @@ cat tasks/lessons.md
 ```
 
 ### 5. 跨工具部署与参考文档索引：
+- 统一工程流水线执行脚本：
+  - Windows：[`run-pipeline.ps1`](run-pipeline.ps1) / [`pipeline.ps1`](pipeline.ps1)
+  - Linux/macOS：[`run-pipeline.sh`](run-pipeline.sh) / [`pipeline.sh`](pipeline.sh)
 - 一键自动化部署脚本：
   - Windows：[`deploy-agents.ps1`](deploy-agents.ps1)
   - Linux/macOS：[`deploy-agents.sh`](deploy-agents.sh)
+- 运维与辅助工具集：
+  - 终端交互组件：[`tools/tui.py`](tools/tui.py)
+  - 外部技能同步：[`tools/sync-skills.py`](tools/sync-skills.py)
+  - 活体文档质检：[`tools/doc-impact.py`](tools/doc-impact.py)
 - 跨工具部署与配置专著：
   - 👉 [`多工具部署配置指南.zh.md`](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md)
 - 规则中枢文件：

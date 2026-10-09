@@ -72,10 +72,15 @@ agent-harness/
 ├── Multi-Tool Deployment and Configuration Guide.md    # Bereitstellungsleitfaden (Englisch)
 ├── Tools Practical Usage and Skills Panorama Guide.de.md # Praxisleitfaden (Deutsch)
 ├── Tools Practical Usage and Skills Panorama Guide.md    # Praxisleitfaden (Englisch)
+├── run-pipeline.ps1 / pipeline.ps1  # Windows PowerShell Pipeline-Runner
+├── run-pipeline.sh / pipeline.sh   # Linux / macOS Bash Pipeline-Runner
 ├── deploy-agents.ps1                # Windows PowerShell-Skript
 ├── deploy-agents.sh                 # Linux / macOS Bash-Skript
 ├── setup-ai-memory.ps1              # ai-memory Setup (Windows)
 ├── setup-ai-memory.sh               # ai-memory Setup (Unix)
+├── tools/tui.py                     # Terminal-UI-Auswahlbibliothek
+├── tools/sync-skills.py             # Synchronisierungs- und Drift-Prüftool
+├── tools/doc-impact.py              # Living-Doc-Auswirkungsanalyse und Gate
 ├── .ai-memory.toml.example          # Beispiel für lokalen Marker
 ├── skills-lock.json                 # Metadaten zu Quellen und Hashes
 ├── README.md                        # Übersicht (Englisch)
@@ -86,7 +91,27 @@ agent-harness/
 
 ## Schnellstart
 
-### 1. Regeln und Skills im Projekt bereitstellen
+### 1. Unified Pipeline Ein-Klick-Ausführung (Empfohlen)
+
+Führen Sie alle Phasen der Toolchain nacheinander über den Pipeline-Runner aus:
+
+- **Linux / macOS (Bash)**:
+  ```bash
+  # Interaktiver Assistent:
+  ./pipeline.sh
+  # Vollständige Pipeline ohne Benutzereingriff:
+  ./pipeline.sh --all -y
+  ```
+
+- **Windows (PowerShell)**:
+  ```powershell
+  # Interaktiver Assistent:
+  .\pipeline.ps1
+  # Vollständige Pipeline ohne Benutzereingriff:
+  .\pipeline.ps1 -All -Yes
+  ```
+
+### 2. Regeln und Skills im Projekt bereitstellen
 
 - **Windows (PowerShell)**:
   ```powershell

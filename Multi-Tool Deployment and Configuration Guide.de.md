@@ -177,6 +177,19 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 - `-Update` (`-u`): Fast-forwards the template repository, automatically invokes `tools/sync-skills.py --check` to scan external skills for upstream updates with interactive confirmation, and syncs files to the target. Combined with `-Global`, it backs up and replaces existing global rule files. Codex's non-empty `$CODEX_HOME/AGENTS.override.md` takes precedence and is updated as the active file. Existing project-managed rules, hooks, skills, and lock metadata follow their documented backup/update behavior. It does not upgrade global CLIs.
 - `-CometInit` (`-c`): Automatically executes `comet init` in the target project if Comet CLI is installed.
 - `-AiMemoryInit` (`-m`): Automatically initializes `.ai-memory.toml` in the target project (inferring `workspace` and `project`) for cross-tool ai-memory integration.
+- `-Pipeline`: Delegiert die Ausführung direkt an den Unified Pipeline-Runner ([`run-pipeline.ps1`](run-pipeline.ps1) / [`pipeline.ps1`](pipeline.ps1)).
+
+**Unified Pipeline-Runner (Windows)**:
+```powershell
+# Interaktiver Schritt-für-Schritt-Assistent (Sprache, Projekt, Phasen, Modus):
+.\pipeline.ps1
+
+# Vollständige Pipeline ohne Benutzereingriff:
+.\pipeline.ps1 -All -Yes
+
+# Bestimmte Phasen ausführen:
+.\pipeline.ps1 -Stages "deploy,skills,docs"
+```
 
 **Examples**:
 ```powershell
@@ -194,6 +207,9 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 
 # Initialize with cross-tool ai-memory configuration
 .\deploy-agents.ps1 "D:\Projects\my-project" -AiMemoryInit
+
+# Launch unified pipeline directly
+.\deploy-agents.ps1 -Pipeline
 
 # Update global rules only
 .\deploy-agents.ps1 -Global -Update
@@ -217,6 +233,22 @@ chmod +x ./deploy-agents.sh
 
 # Deploy with Comet CLI init
 ./deploy-agents.sh /path/to/my-project --comet-init
+
+# Launch unified pipeline directly
+./deploy-agents.sh --pipeline
+```
+
+**Unified Pipeline-Runner (Linux / macOS)**:
+```bash
+# Interaktiver Assistent:
+./pipeline.sh
+
+# Vollständige Pipeline ohne Benutzereingriff:
+./pipeline.sh --all -y
+
+# Bestimmte Phasen ausführen:
+./pipeline.sh --stages deploy,skills,docs
+```
 
 # Deploy with ai-memory init
 ./deploy-agents.sh /path/to/my-project --ai-memory-init

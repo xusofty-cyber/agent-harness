@@ -82,10 +82,15 @@ agent-harness/
 ├── Multi-Tool Deployment and Configuration Guide.zh.md              # 跨工具部署与配置指南（中文）
 ├── Tools Practical Usage and Skills Panorama Guide.md # Practical usage, token economics & skills panorama (English)
 ├── Tools Practical Usage and Skills Panorama Guide.zh.md     # 各工具实战使用与技能全景指南（中文）
+├── run-pipeline.ps1 / pipeline.ps1  # Windows PowerShell unified pipeline runner
+├── run-pipeline.sh / pipeline.sh   # Linux / macOS Bash unified pipeline runner
 ├── deploy-agents.ps1                # Windows PowerShell one-click deploy & update script
 ├── deploy-agents.sh                 # Linux / macOS Bash one-click deploy & update script
 ├── setup-ai-memory.ps1              # Explicit ai-memory setup for one opted-in project/client
 ├── setup-ai-memory.sh               # Linux / macOS / WSL setup helper
+├── tools/tui.py                     # Terminal UI single/multi select library
+├── tools/sync-skills.py             # External skill synchronization & upstream update checker
+├── tools/doc-impact.py              # Living documentation impact analysis & quality gate
 ├── .ai-memory.toml.example          # Safe-to-copy local opt-in marker example
 ├── skills-lock.json                 # Skill source and partial integrity metadata
 ├── README.md                        # Repository overview (English default)
@@ -96,7 +101,27 @@ agent-harness/
 
 ## Quick Start
 
-### 1. Deploy Harness & Skills to a Project
+### 1. Unified Pipeline One-Click Execution (Recommended)
+
+Run all lifecycle stages in sequence via the unified OS pipeline runner (Deploy rules & bridges → Setup AI memory → Sync external skills → Living documentation impact check):
+
+- **Linux / macOS (Bash)**:
+  ```bash
+  # Interactive wizard:
+  ./pipeline.sh
+  # Unattended full pipeline:
+  ./pipeline.sh --all -y
+  ```
+
+- **Windows (PowerShell)**:
+  ```powershell
+  # Interactive wizard:
+  .\pipeline.ps1
+  # Unattended full pipeline:
+  .\pipeline.ps1 -All -Yes
+  ```
+
+### 2. Standalone Deployment to a Project
 
 - **Windows (PowerShell)**:
   ```powershell

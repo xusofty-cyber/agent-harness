@@ -72,10 +72,15 @@ agent-harness/
 ├── Multi-Tool Deployment and Configuration Guide.md    # Guide de déploiement (Anglais)
 ├── Tools Practical Usage and Skills Panorama Guide.fr.md # Panorama des outils (Français)
 ├── Tools Practical Usage and Skills Panorama Guide.md    # Panorama des outils (Anglais)
+├── run-pipeline.ps1 / pipeline.ps1  # Exécuteur de pipeline unifié Windows PowerShell
+├── run-pipeline.sh / pipeline.sh   # Exécuteur de pipeline unifié Linux / macOS Bash
 ├── deploy-agents.ps1                # Script Windows PowerShell
 ├── deploy-agents.sh                 # Script Linux / macOS Bash
 ├── setup-ai-memory.ps1              # Script de configuration ai-memory (Windows)
 ├── setup-ai-memory.sh               # Script de configuration ai-memory (Unix)
+├── tools/tui.py                     # Bibliothèque TUI de sélection en ligne de commande
+├── tools/sync-skills.py             # Outil de synchronisation des compétences externes
+├── tools/doc-impact.py              # Analyse d'impact et porte de qualité living-doc
 ├── .ai-memory.toml.example          # Exemple de marqueur d'activation locale
 ├── skills-lock.json                 # Métadonnées d'intégrité et sources
 ├── README.md                        # Présentation (English)
@@ -86,7 +91,27 @@ agent-harness/
 
 ## Démarrage rapide
 
-### 1. Déployer les règles et compétences sur un projet
+### 1. Exécution du pipeline unifié en un clic (Recommandé)
+
+Exécutez toutes les étapes du cycle de vie de manière séquentielle via le pipeline unifié :
+
+- **Linux / macOS (Bash)** :
+  ```bash
+  # Mode interactif :
+  ./pipeline.sh
+  # Exécution complète sans surveillance :
+  ./pipeline.sh --all -y
+  ```
+
+- **Windows (PowerShell)** :
+  ```powershell
+  # Mode interactif :
+  .\pipeline.ps1
+  # Exécution complète sans surveillance :
+  .\pipeline.ps1 -All -Yes
+  ```
+
+### 2. Déployer les règles et compétences sur un projet
 
 - **Windows (PowerShell)** :
   ```powershell

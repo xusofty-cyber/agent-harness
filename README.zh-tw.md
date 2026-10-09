@@ -80,10 +80,15 @@ agent-harness/
 ├── Multi-Tool Deployment and Configuration Guide.md       # 跨工具部署與配置指南（英文）
 ├── Tools Practical Usage and Skills Panorama Guide.zh-tw.md # 技能詳解與實戰流轉指南（繁體中文）
 ├── Tools Practical Usage and Skills Panorama Guide.md       # 技能詳解與實戰流轉指南（英文）
+├── run-pipeline.ps1 / pipeline.ps1  # Windows PowerShell 統一流水線執行指令碼
+├── run-pipeline.sh / pipeline.sh   # Linux / macOS Bash 統一流水線執行指令碼
 ├── deploy-agents.ps1                # Windows 一鍵部署與線上更新自動化指令碼
 ├── deploy-agents.sh                 # Linux / macOS 一鍵部署與線上更新自動化指令碼
 ├── setup-ai-memory.ps1              # 單專案/單客戶端顯式安裝輔助指令碼
 ├── setup-ai-memory.sh               # Linux / macOS / WSL 顯式安裝輔助指令碼
+├── tools/tui.py                     # 終端互動式單選/多選組件庫
+├── tools/sync-skills.py             # 外部依賴技能庫同步與上游差異比對工具
+├── tools/doc-impact.py              # 活體文檔影響分析與質檢門禁工具
 ├── .ai-memory.toml.example          # 本地顯式加入標記範例
 ├── skills-lock.json                 # 技能來源及檔案完整性元資料
 ├── README.md                        # 專案總覽（English）
@@ -96,7 +101,27 @@ agent-harness/
 
 ## 快速開始
 
-### 1. 為新專案部署完整規範與技能庫
+### 1. 統一工程流水線一鍵執行（推薦）
+
+透過作業系統對應的原生流水線指令碼，按序貫通全部工程階段（規則與橋接部署 → AI 記憶配置 → 外部技能同步 → 活體文檔質檢）：
+
+- **Linux / macOS 環境 (Bash)**:
+  ```bash
+  # 互動式精靈模式（單選語言、多選階段、選擇執行模式）：
+  ./pipeline.sh
+  # 無人值守一鍵全量流水線：
+  ./pipeline.sh --all -y
+  ```
+
+- **Windows 環境 (PowerShell)**:
+  ```powershell
+  # 互動式精靈模式：
+  .\pipeline.ps1
+  # 無人值守一鍵全量流水線：
+  .\pipeline.ps1 -All -Yes
+  ```
+
+### 2. 為新專案單獨部署規範與技能庫
 
 - **Windows 環境 (PowerShell)**:
   ```powershell
