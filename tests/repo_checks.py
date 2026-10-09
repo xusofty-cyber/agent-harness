@@ -195,6 +195,16 @@ PARITY = [
     ("Comet CLI", "Comet CLI", "optional Comet CLI detection"),
     ("Resolve-TemplateFile", "resolve_template", "multilingual template resolution"),
     ("Prompt-InteractiveWizard", "prompt_interactive_wizard", "interactive terminal wizard"),
+    ("GEMINI.md -> AGENTS.md", "GEMINI.md -> AGENTS.md", "Gemini CLI bridge"),
+    ("QWEN.md -> AGENTS.md", "QWEN.md -> AGENTS.md", "Qwen Code bridge"),
+    ("CODEBUDDY.md -> AGENTS.md", "CODEBUDDY.md -> AGENTS.md", "CodeBuddy bridge"),
+    ("New-RuleDirBridge", "bridge_rule_dir", "rule-directory bridge helper"),
+    (".windsurf/rules", ".windsurf/rules", "Windsurf bridge"),
+    (".clinerules", ".clinerules", "Cline bridge"),
+    (".roo/rules", ".roo/rules", "Roo Code bridge"),
+    (".kiro/steering", ".kiro/steering", "Kiro bridge"),
+    (".continue/rules", ".continue/rules", "Continue.dev bridge"),
+    (".trae/rules", ".trae/rules", "Trae bridge"),
 ]
 ps1 = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
 sh = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")
