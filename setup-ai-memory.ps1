@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param (
     [Parameter(Mandatory = $false)]
     [ValidateSet('claude-code', 'codex', 'antigravity', 'antigravity-ide', 'antigravity-cli')]
@@ -96,6 +96,24 @@ if ($marker -match 'replace-with-') {
 }
 
 $aiMemory = Get-Command ai-memory -ErrorAction SilentlyContinue
+if (-not $aiMemory) {
+    # Check if newly added to User/Machine PATH without parent shell restart
+    $userPathStr = [System.Environment]::GetEnvironmentVariable('PATH', [System.EnvironmentVariableTarget]::User)
+    $machPathStr = [System.Environment]::GetEnvironmentVariable('PATH', [System.EnvironmentVariableTarget]::Machine)
+    $rawList = @('D:\GreenSoft\ai-memory-windows-x86_64')
+    if ($userPathStr) { $rawList += ($userPathStr -split ';') }
+    if ($machPathStr) { $rawList += ($machPathStr -split ';') }
+    $candidatePaths = $rawList | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique
+
+    foreach ($p in $candidatePaths) {
+        $candidateExe = Join-Path $p 'ai-memory.exe'
+        if (Test-Path -LiteralPath $candidateExe) {
+            $env:PATH = "$p;$env:PATH"
+            $aiMemory = Get-Command ai-memory -ErrorAction SilentlyContinue
+            break
+        }
+    }
+}
 if (-not $aiMemory) {
     throw 'ai-memory is not installed in this environment. Install it separately using the upstream guide; this helper never downloads or starts it.'
 }

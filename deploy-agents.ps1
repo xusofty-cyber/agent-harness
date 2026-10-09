@@ -1,4 +1,4 @@
-# ==============================================================================
+﻿# ==============================================================================
 # deploy-agents.ps1
 # Platforms: Windows (PowerShell 5.1 / PowerShell 7+)
 # Purpose: One-click deploy & online update AI Agents Harness spec, rules & skills
@@ -33,7 +33,6 @@ param (
     [Alias("l")]
     [string]$Language = "en",
 
-    [Alias("I")]
     [switch]$Interactive,
 
     [switch]$Pipeline
@@ -444,7 +443,7 @@ function Guide-OptionalCliTools([string]$TargetPath) {
     if (Get-Command ocr -ErrorAction SilentlyContinue) {
         $ocrVer = try { (& ocr --version 2>$null | Select-Object -First 1) } catch { "" }
         $ocrSuffix = if ($ocrVer) { " $ocrVer" } else { "" }
-        Write-Host "  [OK] Open Code Review CLI (ocr) detected$ocrSuffix: Tier A delegation review is available via the open-code-review skill." -ForegroundColor Green
+        Write-Host "  [OK] Open Code Review CLI (ocr) detected${ocrSuffix}: Tier A delegation review is available via the open-code-review skill." -ForegroundColor Green
     } else {
         Write-Host "  Open Code Review CLI (ocr) is optional. The open-code-review skill works without it (Tier B methodology mode); installing enables zero-LLM-cost delegation review."
         if (Confirm-OptionalStep "Install Open Code Review CLI now?") {
@@ -459,7 +458,7 @@ function Guide-OptionalCliTools([string]$TargetPath) {
     if (Get-Command comet -ErrorAction SilentlyContinue) {
         $cometVer = try { (& comet --version 2>$null | Select-Object -First 1) } catch { "" }
         $cometSuffix = if ($cometVer) { " $cometVer" } else { "" }
-        Write-Host "  [OK] Comet CLI detected$cometSuffix: use --comet-init to run comet init in the target project." -ForegroundColor Green
+        Write-Host "  [OK] Comet CLI detected${cometSuffix}: use --comet-init to run comet init in the target project." -ForegroundColor Green
     } else {
         Write-Host "  Comet CLI is optional. The comet skill only provides entry guidance; install to use --comet-init for project init."
         if (Confirm-OptionalStep "Install Comet CLI now?") {

@@ -1,4 +1,4 @@
-# ==============================================================================
+﻿# ==============================================================================
 # run-pipeline.ps1
 # Platforms: Windows (PowerShell)
 # Purpose: Unified pipeline runner for agent-harness:
@@ -151,7 +151,7 @@ function Prompt-MultiSelect([string]$Title, [array]$Items) {
         Write-Host "`n$Title"
         for ($i = 0; $i -lt $Items.Count; $i++) {
             $chk = if ($Items[$i].Checked) { "x" } else { " " }
-            Write-Host "  $($i + 1)) [$chk] $($Items[$i].Label)"
+            Write-Host ("  {0}) [{1}] {2}" -f ($i + 1), $chk, $Items[$i].Label)
         }
         $resp = Read-Host "输入序号多选（空格分隔，回车保持默认）"
         if ([string]::IsNullOrWhiteSpace($resp)) {
@@ -343,7 +343,7 @@ if ($stageDeploy) {
     $summaryNames += $stageName
 
     $deployScript = Join-Path $repoRoot "deploy-agents.ps1"
-    $deployParams = @{ TargetProjectPath = $targetAbs; Lang = $Lang }
+    $deployParams = @{ ProjectPath = $targetAbs; Language = $Lang }
     if ($runDetailMode -eq "detailed") {
         $deployParams["Interactive"] = $true
     }
@@ -372,7 +372,23 @@ if ($stageMemory) {
     $stageName = "AI-Memory 记忆服务 (setup-ai-memory)"
     $summaryNames += $stageName
 
-    if (-not (Get-Command ai-memory -ErrorAction SilentlyContinue)) {
+    $hasAiMemory = Get-Command ai-memory -ErrorAction SilentlyContinue
+    if (-not $hasAiMemory) {
+        $uPath = [System.Environment]::GetEnvironmentVariable('PATH', [System.EnvironmentVariableTarget]::User)
+        $mPath = [System.Environment]::GetEnvironmentVariable('PATH', [System.EnvironmentVariableTarget]::Machine)
+        $candidates = @('D:\GreenSoft\ai-memory-windows-x86_64')
+        if ($uPath) { $candidates += ($uPath -split ';') }
+        if ($mPath) { $candidates += ($mPath -split ';') }
+        foreach ($c in ($candidates | Select-Object -Unique)) {
+            if ($c -and (Test-Path -LiteralPath (Join-Path $c 'ai-memory.exe'))) {
+                $env:PATH = "$c;$env:PATH"
+                $hasAiMemory = Get-Command ai-memory -ErrorAction SilentlyContinue
+                break
+            }
+        }
+    }
+
+    if (-not $hasAiMemory) {
         Write-Host "⚠ 提示: 系统 PATH 中未检测到 'ai-memory' CLI。" -ForegroundColor Yellow
         Write-Host "  ai-memory 属于可选进阶组件。如需跨工具记忆沉淀，请先安装 upstream ai-memory。"
         Write-Host "↷ 跳过本阶段，继续后续流水线。`n" -ForegroundColor Yellow
