@@ -12,3 +12,7 @@ scratch/
 
 # Local ai-memory project opt-in; never commit a machine/project marker by default
 /.ai-memory.toml
+
+# Python bytecode
+__pycache__/
+*.pyc
