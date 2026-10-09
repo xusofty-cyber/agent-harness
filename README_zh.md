@@ -198,9 +198,14 @@ ai-memory 采用安全优先的 Fail-closed 门禁，必须显式声明才激活
 
 ## 文档索引
 
-- 📖 **部署与配置指南**：[`多工具部署配置指南.md`](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [English Version](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md)
-- 📖 **实战与技能全景**：[`各工具实战使用与技能全景指南.md`](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [English Version](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md)
-- 📜 **规则宪法**：[`Global AGENTS.md`](Global%20AGENTS.md) | [`Project AGENTS.md`](Project%20AGENTS.md) | [`Directory AGENTS.md`](Directory%20AGENTS.md)
+- 📖 **部署与配置指南**：
+  - [简体中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [English](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [繁體中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [Français](Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [Deutsch](Multi-Tool%20Deployment%20and%20Configuration%20Guide.de.md)
+- 📖 **实战使用与技能全景**：
+  - [简体中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [繁體中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Français](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
+- 📜 **三级规则架构**：
+  - **全局宪法**：[`Global AGENTS.md`](Global%20AGENTS.md)（简体中文）| [`English`](Global%20AGENTS.en.md) | [`繁體中文`](Global%20AGENTS.zh-tw.md) | [`Français`](Global%20AGENTS.fr.md) | [`Deutsch`](Global%20AGENTS.de.md)
+  - **项目规范**：[`Project AGENTS.md`](Project%20AGENTS.md)（简体中文）| [`English`](Project%20AGENTS.en.md) | [`繁體中文`](Project%20AGENTS.zh-tw.md) | [`Français`](Project%20AGENTS.fr.md) | [`Deutsch`](Project%20AGENTS.de.md)
+  - **目录规则**：[`Directory AGENTS.md`](Directory%20AGENTS.md)（简体中文）| [`English`](Directory%20AGENTS.en.md) | [`繁體中文`](Directory%20AGENTS.zh-tw.md) | [`Français`](Directory%20AGENTS.fr.md) | [`Deutsch`](Directory%20AGENTS.de.md)
 
 ---
 

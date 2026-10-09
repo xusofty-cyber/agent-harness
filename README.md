@@ -198,15 +198,13 @@ When upstream rules or skills are updated, run directly in the repository:
 ## Documentation Index
 
 - 📖 **Deployment & Configuration**:
-  - [Multi-Tool Deployment and Configuration Guide (English)](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md)
-  - [多工具部署配置指南 (中文)](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md)
+  - [English](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [简体中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [繁體中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [Français](Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [Deutsch](Multi-Tool%20Deployment%20and%20Configuration%20Guide.de.md)
 - 📖 **Practical Usage & Skills Panorama**:
-  - [Tools Practical Usage and Skills Panorama Guide (English)](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md)
-  - [各工具实战使用与技能全景指南 (中文)](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md)
+  - [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [简体中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [繁體中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Français](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
 - 📜 **Three-Tier Rules Architecture**:
-  - [`Global AGENTS.md`](Global%20AGENTS.md)
-  - [`Project AGENTS.md`](Project%20AGENTS.md)
-  - [`Directory AGENTS.md`](Directory%20AGENTS.md)
+  - **Global Rules**: [`Global AGENTS.en.md`](Global%20AGENTS.en.md) (EN) | [`简体中文`](Global%20AGENTS.md) | [`繁體中文`](Global%20AGENTS.zh-tw.md) | [`Français`](Global%20AGENTS.fr.md) | [`Deutsch`](Global%20AGENTS.de.md)
+  - **Project Rules**: [`Project AGENTS.en.md`](Project%20AGENTS.en.md) (EN) | [`简体中文`](Project%20AGENTS.md) | [`繁體中文`](Project%20AGENTS.zh-tw.md) | [`Français`](Project%20AGENTS.fr.md) | [`Deutsch`](Project%20AGENTS.de.md)
+  - **Directory Rules**: [`Directory AGENTS.en.md`](Directory%20AGENTS.en.md) (EN) | [`简体中文`](Directory%20AGENTS.md) | [`繁體中文`](Directory%20AGENTS.zh-tw.md) | [`Français`](Directory%20AGENTS.fr.md) | [`Deutsch`](Directory%20AGENTS.de.md)
 
 ---
 

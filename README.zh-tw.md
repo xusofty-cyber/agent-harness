@@ -174,9 +174,14 @@ ai-memory serve --transport http
 
 ## 文件索引
 
-- 📖 **部署與配置指南**：[`多工具部署配置指南.zh-tw.md`](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [簡體中文版](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [English Version](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md)
-- 📖 **實戰與技能全景**：[`各工具實戰使用與技能全景指南.zh-tw.md`](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [簡體中文版](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [English Version](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md)
-- 📜 **規則憲法**：[`Global AGENTS.zh-tw.md`](Global%20AGENTS.zh-tw.md) | [`Project AGENTS.zh-tw.md`](Project%20AGENTS.zh-tw.md) | [`Directory AGENTS.zh-tw.md`](Directory%20AGENTS.zh-tw.md)
+- 📖 **部署與配置指南**：
+  - [繁體中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [English](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [簡體中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [Français](Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [Deutsch](Multi-Tool%20Deployment%20and%20Configuration%20Guide.de.md)
+- 📖 **實戰使用與技能全景**：
+  - [繁體中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [簡體中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [Français](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
+- 📜 **三級規則架構**：
+  - **全域憲法**：[`Global AGENTS.zh-tw.md`](Global%20AGENTS.zh-tw.md)（繁體中文）| [`English`](Global%20AGENTS.en.md) | [`簡體中文`](Global%20AGENTS.md) | [`Français`](Global%20AGENTS.fr.md) | [`Deutsch`](Global%20AGENTS.de.md)
+  - **專案規範**：[`Project AGENTS.zh-tw.md`](Project%20AGENTS.zh-tw.md)（繁體中文）| [`English`](Project%20AGENTS.en.md) | [`簡體中文`](Project%20AGENTS.md) | [`Français`](Project%20AGENTS.fr.md) | [`Deutsch`](Project%20AGENTS.de.md)
+  - **目錄規則**：[`Directory AGENTS.zh-tw.md`](Directory%20AGENTS.zh-tw.md)（繁體中文）| [`English`](Directory%20AGENTS.en.md) | [`簡體中文`](Directory%20AGENTS.md) | [`Français`](Directory%20AGENTS.fr.md) | [`Deutsch`](Directory%20AGENTS.de.md)
 
 ---
 

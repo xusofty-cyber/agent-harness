@@ -121,9 +121,14 @@ ai-memory serve --transport http
 
 ## Index documentaire
 
-- 📖 **Déploiement & Configuration** : [`Multi-Tool Deployment and Configuration Guide (Français)`](Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [English](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md)
-- 📖 **Usage pratique & Panorama des compétences** : [`Tools Practical Usage and Skills Panorama Guide (Français)`](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md)
-- 📜 **Constitution des règles** : [`Global AGENTS.fr.md`](Global%20AGENTS.fr.md) | [`Project AGENTS.fr.md`](Project%20AGENTS.fr.md) | [`Directory AGENTS.fr.md`](Directory%20AGENTS.fr.md)
+- 📖 **Déploiement & Configuration** :
+  - [Français](Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [English](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [简体中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [繁體中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [Deutsch](Multi-Tool%20Deployment%20and%20Configuration%20Guide.de.md)
+- 📖 **Usage pratique & Panorama des compétences** :
+  - [Français](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [简体中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [繁體中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Deutsch](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
+- 📜 **Architecture des règles à trois niveaux** :
+  - **Règles globales** : [`Global AGENTS.fr.md`](Global%20AGENTS.fr.md) (Français) | [`English`](Global%20AGENTS.en.md) | [`简体中文`](Global%20AGENTS.md) | [`繁體中文`](Global%20AGENTS.zh-tw.md) | [`Deutsch`](Global%20AGENTS.de.md)
+  - **Règles de projet** : [`Project AGENTS.fr.md`](Project%20AGENTS.fr.md) (Français) | [`English`](Project%20AGENTS.en.md) | [`简体中文`](Project%20AGENTS.md) | [`繁體中文`](Project%20AGENTS.zh-tw.md) | [`Deutsch`](Project%20AGENTS.de.md)
+  - **Règles de répertoire** : [`Directory AGENTS.fr.md`](Directory%20AGENTS.fr.md) (Français) | [`English`](Directory%20AGENTS.en.md) | [`简体中文`](Directory%20AGENTS.md) | [`繁體中文`](Directory%20AGENTS.zh-tw.md) | [`Deutsch`](Directory%20AGENTS.de.md)
 
 ---
 
