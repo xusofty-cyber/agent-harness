@@ -28,7 +28,10 @@ param (
     [switch]$CometInit,
 
     [Alias("m")]
-    [switch]$AiMemoryInit
+    [switch]$AiMemoryInit,
+
+    [Alias("l")]
+    [string]$Language = "en"
 )
 
 $ErrorActionPreference = "Stop"
@@ -36,23 +39,55 @@ $ErrorActionPreference = "Stop"
 # Script directory
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-# Template file paths
-$ResolvedGlobalTemplate = Join-Path $ScriptDir "Global AGENTS.md"
-if (-not (Test-Path $ResolvedGlobalTemplate)) {
-    $found = Get-ChildItem -Path $ScriptDir -Filter "*Global*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
-    if (-not $found) {
-        $found = Get-ChildItem -Path $ScriptDir -Filter "*全局*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
-    }
-    if ($found) { $ResolvedGlobalTemplate = $found.FullName }
+# Normalize language option
+$NormLang = ($Language.Trim().ToLower() -replace '_', '-')
+$LangSuffix = switch -Regex ($NormLang) {
+    '^(zh|cn|zh-cn|zh-hans)$' { '' }
+    '^(zh-tw|tw|zh-hk|hk|zh-hant)$' { '.zh-tw' }
+    '^(en|en-us|en-gb)$' { '.en' }
+    '^(fr|fr-fr)$' { '.fr' }
+    '^(de|de-de)$' { '.de' }
+    Default { '.en' }
 }
 
-$ResolvedProjectTemplate = Join-Path $ScriptDir "Project AGENTS.md"
-if (-not (Test-Path $ResolvedProjectTemplate)) {
-    $found = Get-ChildItem -Path $ScriptDir -Filter "*Project*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
-    if (-not $found) {
-        $found = Get-ChildItem -Path $ScriptDir -Filter "*项目级*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+function Resolve-TemplateFile([string]$BaseName, [string]$Suffix) {
+    if ($Suffix) {
+        $candidate = Join-Path $ScriptDir "$BaseName$Suffix.md"
+        if (Test-Path $candidate) { return $candidate }
     }
-    if ($found) { $ResolvedProjectTemplate = $found.FullName }
+    $fallback = Join-Path $ScriptDir "$BaseName.md"
+    if (Test-Path $fallback) { return $fallback }
+    return $fallback
+}
+
+# Template file paths
+$ResolvedGlobalTemplate = Resolve-TemplateFile "Global AGENTS" $LangSuffix
+if (-not (Test-Path $ResolvedGlobalTemplate)) {
+    $ResolvedGlobalTemplate = Join-Path $ScriptDir "Global AGENTS.md"
+    if (-not (Test-Path $ResolvedGlobalTemplate)) {
+        $found = Get-ChildItem -Path $ScriptDir -Filter "*Global*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+        if (-not $found) {
+            $found = Get-ChildItem -Path $ScriptDir -Filter "*全局*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+        }
+        if ($found) { $ResolvedGlobalTemplate = $found.FullName }
+    }
+}
+
+$ResolvedProjectTemplate = Resolve-TemplateFile "Project AGENTS" $LangSuffix
+if (-not (Test-Path $ResolvedProjectTemplate)) {
+    $ResolvedProjectTemplate = Join-Path $ScriptDir "Project AGENTS.md"
+    if (-not (Test-Path $ResolvedProjectTemplate)) {
+        $found = Get-ChildItem -Path $ScriptDir -Filter "*Project*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+        if (-not $found) {
+            $found = Get-ChildItem -Path $ScriptDir -Filter "*项目级*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+        }
+        if ($found) { $ResolvedProjectTemplate = $found.FullName }
+    }
+}
+
+$ResolvedDirectoryTemplate = Resolve-TemplateFile "Directory AGENTS" $LangSuffix
+if (-not (Test-Path $ResolvedDirectoryTemplate)) {
+    $ResolvedDirectoryTemplate = Join-Path $ScriptDir "Directory AGENTS.md"
 }
 
 $SourceRulesDir = Join-Path $ScriptDir ".agents\rules"
@@ -68,7 +103,6 @@ function Backup-ManagedPath([string]$Path) {
         Copy-Item -Path $Path -Destination $backupPath -Recurse -Force
     }
 }
-$ResolvedDirectoryTemplate = Join-Path $ScriptDir "Directory AGENTS.md"
 
 function Backup-GlobalRule([string]$Path) {
     $backupBase = "$Path.bak.$(Get-Date -Format yyyyMMddHHmmssfff)"

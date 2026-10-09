@@ -102,15 +102,16 @@ agent-harness/
 
 - **Windows (PowerShell)**:
   ```powershell
-  # Deploy to target project and update current user's global rules
-  .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Global -Initialize -DirectoryPath "packages/core"
+  # Deploy to target project (English default, or choose -Language zh / zh-tw / fr / de)
+  .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Global -Language en -Initialize -DirectoryPath "packages/core"
   .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Check -DirectoryPath "packages/core"
   ```
 
 - **Linux / macOS (Bash)**:
   ```bash
   chmod +x ./deploy-agents.sh
-  ./deploy-agents.sh /path/to/my-project --global --initialize --directory packages/core
+  # Deploy with language selection (English default, or --lang zh / zh-tw / fr / de)
+  ./deploy-agents.sh /path/to/my-project --global --lang en --initialize --directory packages/core
   ./deploy-agents.sh /path/to/my-project --check --directory packages/core
   ```
 

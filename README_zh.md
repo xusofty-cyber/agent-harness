@@ -103,15 +103,16 @@ agent-harness/
 
 - **Windows 环境 (PowerShell)**:
   ```powershell
-  # 部署到指定项目，并同时配置当前用户全局规则
-  .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Global -Initialize -DirectoryPath "packages/core"
+  # 部署到指定项目（默认 en，或指定 -Language zh / zh-tw / fr / de）
+  .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Global -Language zh -Initialize -DirectoryPath "packages/core"
   .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Check -DirectoryPath "packages/core"
   ```
 
 - **Linux / macOS 环境 (Bash)**:
   ```bash
   chmod +x ./deploy-agents.sh
-  ./deploy-agents.sh /path/to/my-project --global --initialize --directory packages/core
+  # 支持多语言模板切换（默认 en，或 --lang zh / zh-tw / fr / de）
+  ./deploy-agents.sh /path/to/my-project --global --lang zh --initialize --directory packages/core
   ./deploy-agents.sh /path/to/my-project --check --directory packages/core
   ```
 

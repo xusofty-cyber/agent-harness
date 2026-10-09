@@ -193,6 +193,7 @@ PreToolUse 钩子是 Claude Code 专属机制，部署脚本不会为其他工�
 |---|---|---|---|
 | `-ProjectPath` | (位置参数 0) | 选填 | 目标项目的相对路径或绝对路径。如果不传且指定了 `-Global`，则只执行全局配置更新。 |
 | `-Global` | `-g` | 选填 | 初始化不存在的全局规则文件；已有文件保持不变。与 `-Update` 同用时，在原文件旁生成 `CLAUDE.template.md` / `AGENTS.template.md` 供人工审阅合并。 |
+| `-Language` | `-l` | 选填 | 指定模板语言 (`en`, `zh`, `zh-tw`, `fr`, `de`；默认 `en`，不传时默认英文模板，可指定为中文或其他语言)。 |
 | `-Update` | `-u` | 选填 | 使用 `git pull --ff-only` 更新模板仓库，自动调用 `tools/sync-skills.py --check` 扫描外部技能上游变动并提供交互式同步选项，将文件同步到目标项目；更新受管理的项目规则、Hook、技能和元数据前按脚本策略备份。已有全局指令文件不覆盖，而是在显式 `-Global -Update` 时生成旁置审阅模板；不会升级全局 CLI。 |
 | `-CometInit` | `-c` | 选填 | 若系统中已安装 `comet` CLI，自动在目标项目根目录下执行 `comet init` 注册客户端生命周期 Hooks。 |
 | `-AiMemoryInit` | `-m` | 选填 | 自动为目标项目生成 `.ai-memory.toml` 配置文件（智能推导 `workspace` 与 `project`），接入跨工具项目记忆 (ai-memory)。 |

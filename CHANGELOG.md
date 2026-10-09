@@ -15,6 +15,12 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   automatically.
 
 ### Added
+- **Multilingual AGENTS templates & deployment language selection**:
+  Added native English (`.en`), Traditional Chinese (`.zh-tw`), French (`.fr`),
+  and German (`.de`) templates for `Global AGENTS.md`, `Project AGENTS.md`, and
+  `Directory AGENTS.md`. `deploy-agents.sh` and `deploy-agents.ps1` now provide
+  `--lang` / `-l` (PowerShell `-Language`) option defaulting to English (`en`),
+  with fallback to existing root default templates.
 - `tools/sync-skills.py`: external skill self-update — `--check` reports
   vendored skills differing from upstream, `--apply` updates files and
   refreshes `computedHash` (SHA256). Manual via CLI, automatic via new

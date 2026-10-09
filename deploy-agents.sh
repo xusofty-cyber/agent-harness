@@ -18,13 +18,14 @@ NC='\033[0m' # No Color
 # Print usage
 usage() {
     echo -e "${CYAN}用法 (Usage):${NC}"
-    echo "  $0 <项目根目录路径> [--global|-g] [--update|-u] [--initialize|-i] [--directory <相对目录>] [--check|-k]"
-    echo "  $0 --global|-g [--update|-u]   # 初始化全局配置；--update 先备份再覆盖已有规则"
+    echo "  $0 <项目根目录路径> [--global|-g] [--update|-u] [--initialize|-i] [--directory <相对目录>] [--check|-k] [--lang <en|zh|zh-tw|fr|de>]"
+    echo "  $0 --global|-g [--update|-u] [--lang <en|zh|zh-tw|fr|de>]   # 初始化全局配置；--update 先备份再覆盖已有规则"
     echo ""
     echo -e "${CYAN}参数说明 (Parameters):${NC}"
     echo "  <项目根目录路径>   目标项目所在的相对路径或绝对路径。"
     echo "  --global, -g       初始化 Claude、Antigravity 2.0/CLI/IDE、Codex 用户全局规则。"
     echo "  --update, -u       更新模板仓库；与 --global 一起使用时，先备份再覆盖全局规则。"
+    echo "  --lang, -l         指定模板语言 (en, zh, zh-tw, fr, de；默认 en)。"
     echo "  --initialize, -i 识别项目事实，生成 AGENTS.md 并列出待确认项。"
     echo "  --directory       与 --initialize 配合，为现有子目录生成目录级 AGENTS.md。"
     echo "  --check, -k       检查项目级规则中的初始化占位项；可搭配 --directory 检查模块规则。"
@@ -32,8 +33,9 @@ usage() {
     echo "  --ai-memory-init, -m 初始化项目 .ai-memory.toml 并接入跨工具记忆 (ai-memory)。"
     echo ""
     echo -e "${CYAN}示例 (Examples):${NC}"
-    echo "  $0 /path/to/my-project"
-    echo "  $0 /path/to/my-project --global --update"
+    echo "  $0 /path/to/my-project --lang en"
+    echo "  $0 /path/to/my-project --lang zh-tw"
+    echo "  $0 /path/to/my-project --global --update --lang fr"
     echo "  $0 /path/to/my-project --comet-init"
     echo "  $0 /path/to/my-project --ai-memory-init"
     echo "  $0 --global --update"
@@ -49,6 +51,7 @@ DO_AI_MEMORY_INIT=false
 DO_INITIALIZE=false
 DO_CHECK=false
 DIRECTORY_PATH=""
+LANG_OPTION="en"
 
 args=("$@")
 arg_index=0
@@ -72,6 +75,11 @@ while [ "$arg_index" -lt "$#" ]; do
             ;;
         --check|-k)
             DO_CHECK=true
+            ;;
+        --lang|-l)
+            arg_index=$((arg_index + 1))
+            if [ "$arg_index" -ge "$#" ]; then echo "[!] --lang requires a language code (e.g. en, zh, zh-tw, fr, de)" >&2; exit 2; fi
+            LANG_OPTION="${args[$arg_index]}"
             ;;
         --directory)
             arg_index=$((arg_index + 1))
@@ -99,18 +107,69 @@ if [ -z "$TARGET_PROJECT_ARG" ] && [ "$DEPLOY_GLOBAL" = false ]; then
     usage
 fi
 
+# Normalize language option
+NORM_LANG="$(echo "$LANG_OPTION" | tr '[:upper:]' '[:lower:]' | tr '_' '-')"
+case "$NORM_LANG" in
+    zh|cn|zh-cn|zh-hans)
+        LANG_SUFFIX=""
+        ;;
+    zh-tw|tw|zh-hk|hk|zh-hant)
+        LANG_SUFFIX=".zh-tw"
+        ;;
+    en|en-us|en-gb)
+        LANG_SUFFIX=".en"
+        ;;
+    fr|fr-fr)
+        LANG_SUFFIX=".fr"
+        ;;
+    de|de-de)
+        LANG_SUFFIX=".de"
+        ;;
+    *)
+        LANG_SUFFIX=".en"
+        ;;
+esac
+
 # Script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-GLOBAL_TEMPLATE="${SCRIPT_DIR}/Global AGENTS.md"
+
+resolve_template() {
+    local base_name="$1"
+    local suffix="$2"
+    local path="${SCRIPT_DIR}/${base_name}${suffix}.md"
+    if [ -n "$suffix" ] && [ -f "$path" ]; then
+        echo "$path"
+        return
+    fi
+    path="${SCRIPT_DIR}/${base_name}.md"
+    if [ -f "$path" ]; then
+        echo "$path"
+        return
+    fi
+    echo "${SCRIPT_DIR}/${base_name}.md"
+}
+
+GLOBAL_TEMPLATE="$(resolve_template "Global AGENTS" "$LANG_SUFFIX")"
 if [ ! -f "${GLOBAL_TEMPLATE}" ]; then
-    GLOBAL_TEMPLATE="${SCRIPT_DIR}/全局 AGENTS.md"
+    GLOBAL_TEMPLATE="${SCRIPT_DIR}/Global AGENTS.md"
+    if [ ! -f "${GLOBAL_TEMPLATE}" ]; then
+        GLOBAL_TEMPLATE="${SCRIPT_DIR}/全局 AGENTS.md"
+    fi
 fi
 
-PROJECT_TEMPLATE="${SCRIPT_DIR}/Project AGENTS.md"
+PROJECT_TEMPLATE="$(resolve_template "Project AGENTS" "$LANG_SUFFIX")"
 if [ ! -f "${PROJECT_TEMPLATE}" ]; then
-    PROJECT_TEMPLATE="${SCRIPT_DIR}/项目级 AGENTS.md"
+    PROJECT_TEMPLATE="${SCRIPT_DIR}/Project AGENTS.md"
+    if [ ! -f "${PROJECT_TEMPLATE}" ]; then
+        PROJECT_TEMPLATE="${SCRIPT_DIR}/项目级 AGENTS.md"
+    fi
 fi
-DIRECTORY_TEMPLATE="${SCRIPT_DIR}/Directory AGENTS.md"
+
+DIRECTORY_TEMPLATE="$(resolve_template "Directory AGENTS" "$LANG_SUFFIX")"
+if [ ! -f "${DIRECTORY_TEMPLATE}" ]; then
+    DIRECTORY_TEMPLATE="${SCRIPT_DIR}/Directory AGENTS.md"
+fi
+
 SOURCE_RULES_DIR="${SCRIPT_DIR}/.agents/rules"
 SOURCE_SKILLS_DIR="${SCRIPT_DIR}/.agents/skills"
 SOURCE_SKILLS_LOCK="${SCRIPT_DIR}/skills-lock.json"
