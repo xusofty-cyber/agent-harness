@@ -186,7 +186,8 @@ function Guide-OptionalCliTools([string]$TargetPath) {
     }
 
     if (Get-Command ocr -ErrorAction SilentlyContinue) {
-        Write-Host "  [OK] Open Code Review CLI (ocr) detected: Tier A delegation review is available via the open-code-review skill." -ForegroundColor Green
+        $ocrVer = try { (& ocr --version 2>$null | Select-Object -First 1) } catch { "" }
+        Write-Host "  [OK] Open Code Review CLI (ocr) detected${ocrVer:+ $ocrVer}: Tier A delegation review is available via the open-code-review skill." -ForegroundColor Green
     } else {
         Write-Host "  Open Code Review CLI (ocr) is optional. The open-code-review skill works without it (Tier B methodology mode); installing enables zero-LLM-cost delegation review."
         if (Confirm-OptionalStep "Install Open Code Review CLI now?") {
@@ -195,6 +196,20 @@ function Guide-OptionalCliTools([string]$TargetPath) {
             else { Write-Host "  [INFO] ocr installed. Delegation mode needs no LLM key; the host agent performs the review." -ForegroundColor Yellow }
         } else {
             Write-Host "  Install command: npm install -g @alibaba-group/open-code-review"
+        }
+    }
+
+    if (Get-Command comet -ErrorAction SilentlyContinue) {
+        $cometVer = try { (& comet --version 2>$null | Select-Object -First 1) } catch { "" }
+        Write-Host "  [OK] Comet CLI detected${cometVer:+ $cometVer}: use --comet-init to run comet init in the target project." -ForegroundColor Green
+    } else {
+        Write-Host "  Comet CLI is optional. The comet skill only provides entry guidance; install to use --comet-init for project init."
+        if (Confirm-OptionalStep "Install Comet CLI now?") {
+            & npm install -g @rpamis/comet
+            if ($LASTEXITCODE -ne 0) { Write-Warning "comet installation failed. Manual command: npm install -g @rpamis/comet" }
+            else { Write-Host "  [INFO] comet installed." -ForegroundColor Yellow }
+        } else {
+            Write-Host "  Install command: npm install -g @rpamis/comet"
         }
     }
 }
@@ -233,6 +248,23 @@ if ($Update) {
     }
 
     Write-Host "  [INFO] Updating this template repository only; global CLIs and the caller's current directory are not modified." -ForegroundColor Gray
+
+    # B. External skill sync (opt-in)
+    $syncScript = Join-Path $ScriptDir "tools/sync-skills.py"
+    if (Test-Path $syncScript) {
+        Write-Host ">>> Checking external skills for upstream updates..." -ForegroundColor Yellow
+        try {
+            & python3 $syncScript --check | Select-Object -First 20 | Write-Host
+            if (Confirm-OptionalStep "Apply upstream updates to external skills?") {
+                & python3 $syncScript --apply | Write-Host
+                Write-Host "  [OK] External skills synced; review git diff before committing." -ForegroundColor Green
+            } else {
+                Write-Host "  [INFO] Skipped skills update. Run manually: python3 tools/sync-skills.py --apply" -ForegroundColor Gray
+            }
+        } catch {
+            Write-Warning "Skills update check failed (possibly network); skipping."
+        }
+    }
 }
 
 # If no ProjectPath is specified and not -Global, show usage

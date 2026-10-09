@@ -1,0 +1,205 @@
+#!/usr/bin/env python3
+"""sync-skills.py — external skill self-update for agents-living.
+
+Checks vendored external skills (sourceType=github in skills-lock.json)
+against their upstream repositories and reports or applies updates.
+
+Usage:
+    python3 tools/sync-skills.py [--check] [--apply] [--skill NAME] [--json]
+
+- --check (default): report which skills differ from upstream (read-only,
+  safe to run in CI).
+- --apply: update outdated skill files in place and refresh computedHash
+  in skills-lock.json. Never touches local-authored skills.
+- --skill NAME: limit to a single skill directory name.
+- --json: machine-readable output.
+
+Upstream fetch uses the GitHub API (default branch auto-detected, cached
+per repo) with raw.githubusercontent fallback. Unauthenticated requests
+are rate-limited to 60/hour; the tool degrades gracefully.
+
+Hash scheme: SHA256 of file bytes (LF-normalized). The legacy computedHash
+values in skills-lock.json predate this scheme and are refreshed on --apply.
+
+Exit codes: 0 always (advisory tool, never blocks). Parse output for gating.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import sys
+import time
+import urllib.request
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+LOCK_PATH = ROOT / "skills-lock.json"
+SKILLS_DIR = ROOT / ".agents" / "skills"
+
+API = "https://api.github.com"
+RAW = "https://raw.githubusercontent.com"
+
+_branch_cache: dict[str, str] = {}
+
+
+def _http_json(url: str) -> dict | None:
+    req = urllib.request.Request(url, headers={
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "agents-living-sync-skills",
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=20) as r:
+            return json.loads(r.read().decode("utf-8"))
+    except Exception:
+        return None
+
+
+def _http_bytes(url: str) -> bytes | None:
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "agents-living-sync-skills",
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return r.read()
+    except Exception:
+        return None
+
+
+def default_branch(repo: str) -> str:
+    """owner/name -> default branch, cached. Falls back to 'main'."""
+    if repo not in _branch_cache:
+        info = _http_json(f"{API}/repos/{repo}")
+        _branch_cache[repo] = (info or {}).get("default_branch", "main")
+        time.sleep(0.3)  # be gentle with rate limits
+    return _branch_cache[repo]
+
+
+def fetch_upstream(repo: str, path: str) -> bytes | None:
+    branch = default_branch(repo)
+    for b in (branch, "main", "master"):
+        data = _http_bytes(f"{RAW}/{repo}/{b}/{path}")
+        if data is not None:
+            return data
+        time.sleep(0.3)
+    return None
+
+
+def sha256_norm(data: bytes) -> str:
+    return hashlib.sha256(data.replace(b"\r\n", b"\n")).hexdigest()
+
+
+def load_lock() -> dict:
+    return json.loads(LOCK_PATH.read_text(encoding="utf-8"))
+
+
+def external_skills(lock: dict, only: str | None = None) -> list[tuple[str, dict]]:
+    """Return (name, meta) for upstream-syncable skills.
+
+    Skippable: local-authored skills, CLI tool entries (have `package`),
+    source-repo meta entries (no resolvable upstream file), and
+    locally-authored wrappers (skillPath under .agents/).
+    """
+    out = []
+    for name, meta in lock.get("skills", {}).items():
+        if only and name != only:
+            continue
+        if meta.get("sourceType") != "github":
+            continue
+        if "package" in meta:
+            continue  # CLI tool entry, not a skill file
+        sp = meta.get("skillPath", "")
+        if not sp.startswith("skills/"):
+            continue  # locally-authored wrapper or meta entry
+        local_file = SKILLS_DIR / name / "SKILL.md"
+        if not local_file.is_file():
+            continue
+        out.append((name, meta))
+    return out
+
+
+def check_skill(name: str, meta: dict) -> dict:
+    repo = meta["source"]
+    rel = meta["skillPath"]  # upstream-relative path
+    local_file = SKILLS_DIR / name / "SKILL.md"
+    result: dict = {"skill": name, "source": repo, "path": rel}
+
+    upstream = fetch_upstream(repo, rel)
+    if upstream is None:
+        result["status"] = "fetch-failed"
+        return result
+
+    local_hash = sha256_norm(local_file.read_bytes())
+    upstream_hash = sha256_norm(upstream)
+    result["local_sha256"] = local_hash[:12]
+    result["upstream_sha256"] = upstream_hash[:12]
+    if local_hash == upstream_hash:
+        result["status"] = "in-sync"
+    else:
+        result["status"] = "outdated"
+        result["upstream_bytes"] = upstream
+    return result
+
+
+def apply_update(name: str, meta: dict, upstream: bytes) -> None:
+    local_file = SKILLS_DIR / name / "SKILL.md"
+    local_file.write_bytes(upstream)
+    lock = load_lock()
+    lock["skills"][name]["computedHash"] = sha256_norm(upstream)
+    LOCK_PATH.write_text(json.dumps(lock, indent=2, ensure_ascii=False) + "\n",
+                         encoding="utf-8")
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description="sync external skills with upstream")
+    ap.add_argument("--check", action="store_true", help="report only (default)")
+    ap.add_argument("--apply", action="store_true", help="update files + lock")
+    ap.add_argument("--skill", default=None, help="limit to one skill")
+    ap.add_argument("--json", action="store_true", help="JSON output")
+    args = ap.parse_args()
+
+    do_apply = args.apply
+    lock = load_lock()
+    skills = external_skills(lock, args.skill)
+    if args.skill and not skills:
+        print(f"Unknown or non-external skill: {args.skill}", file=sys.stderr)
+        return 0
+
+    results = []
+    for name, meta in skills:
+        r = check_skill(name, meta)
+        if do_apply and r.get("status") == "outdated":
+            apply_update(name, meta, r.pop("upstream_bytes"))
+            r["status"] = "updated"
+        else:
+            r.pop("upstream_bytes", None)
+        results.append(r)
+
+    summary = {}
+    for r in results:
+        summary[r["status"]] = summary.get(r["status"], 0) + 1
+
+    if args.json:
+        print(json.dumps({"results": results, "summary": summary},
+                         indent=2, ensure_ascii=False))
+    else:
+        icons = {"in-sync": "🟢", "outdated": "🟡", "updated": "🔵",
+                 "fetch-failed": "⚪", "missing-local": "🔴"}
+        print(f"Checked {len(results)} external skills: " +
+              ", ".join(f"{k}={v}" for k, v in sorted(summary.items())))
+        print()
+        for r in sorted(results, key=lambda x: x["skill"]):
+            icon = icons.get(r["status"], "❓")
+            extra = ""
+            if r["status"] in ("outdated", "updated"):
+                extra = f" ({r['local_sha256']} → {r['upstream_sha256']})"
+            print(f"{icon} {r['skill']}: {r['status']}{extra}")
+        if do_apply and summary.get("updated"):
+            print(f"\nUpdated {summary['updated']} skill(s); "
+                  f"skills-lock.json hashes refreshed. Review the diff "
+                  f"before committing.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
