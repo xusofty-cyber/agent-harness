@@ -139,3 +139,48 @@ test("ignores non-Bash tools", () => {
   assert.equal(res.status, 0);
   assert.equal((res.stderr || "").trim(), "");
 });
+
+// --- Sensitive-path commit advisory (open-code-review Phase 2) ---
+import { mkdirSync } from "node:fs";
+
+function makeRepoWithSensitiveConfig(branch) {
+  const dir = makeRepo(branch);
+  mkdirSync(join(dir, ".agents"), { recursive: true });
+  writeFileSync(
+    join(dir, ".agents", "review-sensitive-paths.json"),
+    JSON.stringify({ patterns: ["**/auth/**", "**/*.key"] })
+  );
+  return dir;
+}
+
+function stageFile(dir, relPath) {
+  const full = join(dir, relPath);
+  mkdirSync(dirname(full), { recursive: true });
+  writeFileSync(full, "test content\n");
+  execFileSync("git", ["add", relPath], { cwd: dir });
+}
+
+test("warns (non-blocking) on commit touching sensitive paths", () => {
+  const dir = makeRepoWithSensitiveConfig("feature/sso");
+  stageFile(dir, "src/auth/login.py");
+  const r = runHook("git commit -m 'sso'", dir);
+  assert.equal(r.exitCode, 0); // advisory only, never blocks
+  assert.match(r.stderr, /敏感路径/);
+  assert.match(r.stderr, /open-code-review/);
+});
+
+test("stays silent on commit with only non-sensitive files", () => {
+  const dir = makeRepoWithSensitiveConfig("feature/ui");
+  stageFile(dir, "src/ui/button.py");
+  const r = runHook("git commit -m 'ui'", dir);
+  assert.equal(r.exitCode, 0);
+  assert.doesNotMatch(r.stderr, /敏感路径/);
+});
+
+test("uses built-in defaults when sensitive-path config is absent", () => {
+  const dir = makeRepo("feature/nodefaults"); // no .agents/review-sensitive-paths.json
+  stageFile(dir, "src/auth/login.py"); // matches built-in **/auth/**
+  const r = runHook("git commit -m 'x'", dir);
+  assert.equal(r.exitCode, 0);
+  assert.match(r.stderr, /敏感路径/);
+});
