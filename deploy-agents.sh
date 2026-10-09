@@ -242,6 +242,21 @@ guide_optional_cli_tools() {
             echo "  后续项目配置命令：cd \"${target}\" && rtk init"
         fi
     fi
+
+    if command -v ocr >/dev/null 2>&1; then
+        echo -e "  ${GREEN}[√] 已检测到 Open Code Review CLI (ocr)：可启用 open-code-review 技能的 Tier A 委托评审。${NC}"
+    else
+        echo "  Open Code Review CLI (ocr) 未安装。open-code-review 技能仍可用（Tier B 方法论模式），安装后可启用零 Token 开销的委托评审。"
+        if prompt_yes_no "现在安装 Open Code Review CLI？"; then
+            if npm install -g @alibaba-group/open-code-review; then
+                echo -e "  ${GREEN}[√] ocr 已安装。委托模式无需配置 LLM Key，由当前 Agent 直接推理。${NC}"
+            else
+                echo "  [!] ocr 安装失败。可手动执行：npm install -g @alibaba-group/open-code-review"
+            fi
+        else
+            echo "  安装命令：npm install -g @alibaba-group/open-code-review"
+        fi
+    fi
 }
 
 init_guidance() {
