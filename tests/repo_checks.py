@@ -191,6 +191,8 @@ PARITY = [
     ("LivingDocScaffold", "living-doc-scaffold", "living documentation directory scaffold"),
     ("Open Code Review CLI", "Open Code Review CLI", "optional OCR CLI detection"),
     ("review-sensitive-paths.json", "review-sensitive-paths.json", "sensitive paths config sync"),
+    ("sync-skills.py", "sync-skills.py", "external skill sync in update flow"),
+    ("Comet CLI", "Comet CLI", "optional Comet CLI detection"),
 ]
 ps1 = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
 sh = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")
