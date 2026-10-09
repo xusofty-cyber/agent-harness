@@ -92,4 +92,12 @@ You: [Fix progress indicators]
 - Show code/tests that prove it works
 - Request clarification
 
+## How to review: use `open-code-review`
+
+This skill decides **when** to review. The **how** lives in the
+`open-code-review` skill — invoke its workflow (Tier A delegation when the
+`ocr` CLI is installed, otherwise the Tier B deterministic methodology)
+instead of inventing an ad-hoc review process. Rule-first, line-anchored,
+coverage-mandated.
+
 See template at: [code-reviewer.md](code-reviewer.md)
