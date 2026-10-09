@@ -38,6 +38,9 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   `Tools Practical Usage and Skills Panorama Guide` pairs.
 
 ### Fixed
+- `deploy-agents.sh`: restored `100755` executable bit in git index.
+- `tools/doc-impact.py`: fixed unverified documents (`last_verified_commit: ""`) falsely reporting as `in-sync`; added directory glob matching support and auto-detection of workspace git root.
+- `living-documentation`: distributed `scripts/doc-impact.py` directly inside skill package so it is bundled to all downstream projects.
 - `setup-ai-memory.sh` / `.ps1`: pass `--no-skills` to
   `ai-memory install-instructions` — this repo curates `cross-tool-memory`
   as its only memory skill; upstream managed skills must not be dropped
