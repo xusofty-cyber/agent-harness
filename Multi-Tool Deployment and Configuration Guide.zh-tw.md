@@ -109,6 +109,16 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 ```text
 [ Execute Deployment Script ]
        │
+       ├─ [終端零參數執行 或 指定 -Interactive / --interactive]
+       │       ▼
+       │  階段 0：互動式步進終端精靈 (TUI Arrow-Key & Checkbox Wizard)
+       │    ├─ [1/5] 單選規則語言 (English / 简体中文 / 繁體中文 / Français / Deutsch)
+       │    ├─ [2/5] 單選部署範圍 (目標專案 / 僅本機全域規則 / 完整部署)
+       │    ├─ [3/5] 錄入目標專案路徑 (預設當前目錄 [.])
+       │    │        (提示: Codex · Antigravity · Zed · OpenCode 等原生讀取 AGENTS.md，無需額外橋接)
+       │    ├─ [4/5] 多選 Agent 工具橋接檔案 (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy)
+       │    └─ [5/5] 多選可選工作流程 (更新模式 / 專案事實掃描初始化 / ai-memory / Comet)
+       │
        ▼
  Phase 1: Template Repository Update (-Update)
    └─ Fast-forward update of this template repository (`git pull --ff-only`); no global CLI upgrade or third-party updater in the caller directory
@@ -167,13 +177,14 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 
 **Usage**:
 ```powershell
-.\deploy-agents.ps1 [[-ProjectPath] <target-path>] [-Global] [-Update] [-CometInit] [-AiMemoryInit]
+.\deploy-agents.ps1 [[-ProjectPath] <target-path>] [-Global] [-Update] [-Interactive] [-CometInit] [-AiMemoryInit] [-Pipeline]
 ```
 
 **Parameters**:
 - `-ProjectPath` (Positional 0): Path to target project. If omitted with `-Global`, only updates user global rules.
 - `-Global` (`-g`): Initializes missing `~/.claude/CLAUDE.md`, `~/.gemini/AGENTS.md`, and Codex `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`). Existing files are preserved without `-Update`.
 - `-Language` (`-l`): Selects template language (`en`, `zh`, `zh-tw`, `fr`, `de`; defaults to `en`).
+- `-Interactive` (`-i`): 啟動逐步互動式終端精靈（單選語言/範圍、多選 Agent 橋接與工作流程選項）。終端零參數執行時預設自動進入。
 - `-Update` (`-u`): Fast-forwards the template repository, automatically invokes `tools/sync-skills.py --check` to scan external skills for upstream updates with interactive confirmation, and syncs files to the target. Combined with `-Global`, it backs up and replaces existing global rule files. Codex's non-empty `$CODEX_HOME/AGENTS.override.md` takes precedence and is updated as the active file. Existing project-managed rules, hooks, skills, and lock metadata follow their documented backup/update behavior. It does not upgrade global CLIs.
 - `-CometInit` (`-c`): Automatically executes `comet init` in the target project if Comet CLI is installed.
 - `-AiMemoryInit` (`-m`): Automatically initializes `.ai-memory.toml` in the target project (inferring `workspace` and `project`) for cross-tool ai-memory integration.
@@ -193,6 +204,9 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 
 **Examples**:
 ```powershell
+# 互動式精靈模式（零參數自動啟動逐步選擇精靈）
+.\deploy-agents.ps1
+
 # Deploy to a new project
 .\deploy-agents.ps1 "D:\Projects\my-project"
 
@@ -220,7 +234,10 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 ### 4.3 Linux / macOS Deployment (`deploy-agents.sh`)
 
 ```bash
-chmod +x ./deploy-agents.sh
+chmod +x ./deploy-agents.sh ./run-pipeline.sh ./pipeline.sh
+
+# 互動式精靈模式（零參數啟動）
+./deploy-agents.sh
 
 # Deploy to project
 ./deploy-agents.sh /path/to/my-project

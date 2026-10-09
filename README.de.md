@@ -31,7 +31,9 @@ Dieses Repository bietet globale, projekt- und verzeichnisbezogene Regelsätze, 
    - **Entscheidungsreview vor Umsetzung**: `option-review` und `cross-tool-memory`;
    - **Professionelle Dokumentenverarbeitung**: `docx`- und `pdf`-Skills.
 
-4. **Ein-Klick-Bereitstellung & Synchronisation (`deploy-agents`)**:
+4. **Ein-Klick-Bereitstellung, interaktiver Assistent & einheitliche Pipeline (`deploy-agents` & `pipeline`)**:
+   - **Schrittweiser interaktiver Terminal-Assistent**: Bei Aufruf ohne Argumente (oder mit `--interactive` / `-Interactive`) startet ein geführter TUI-Assistent (Pfeiltasten, Leertaste zur Mehrfachauswahl, Eingabetaste zur Bestätigung) zur Auswahl von Sprache (`en`, `zh`, `zh-tw`, `fr`, `de`), Bereitstellungsumfang (`project`, `global`, `both`), Projektpfad, 12 Agent-Bridge-Dateien (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy) sowie optionalen Workflows;
+   - **Plattformübergreifender Unified OS Pipeline-Runner** ([`run-pipeline.sh`](run-pipeline.sh) / [`pipeline.sh`](pipeline.sh) & [`run-pipeline.ps1`](run-pipeline.ps1) / [`pipeline.ps1`](pipeline.ps1)): Führt alle 4 Phasen nacheinander aus (Regel- & Bridge-Bereitstellung → ai-memory Gedächtnis → Skill-Synchronisation → Living-Doc-Qualitätsgate), sowohl interaktiv als auch unbeaufsichtigt (`--all -y` / `-All -Yes`);
    - Automatisierte PowerShell- ([`deploy-agents.ps1`](deploy-agents.ps1)) und Bash-Skripte ([`deploy-agents.sh`](deploy-agents.sh)) mit mehrsprachiger Unterstützung (`--lang` / `-Language`);
    - Generierung von `AGENTS.md`, Bridges zu `CLAUDE.md` und GitHub Copilot, sowie Claude Code Hooks;
    - Automatische zeitstempelbasierte Sicherung bei `--global --update`;
@@ -97,7 +99,7 @@ Führen Sie alle Phasen der Toolchain nacheinander über den Pipeline-Runner aus
 
 - **Linux / macOS (Bash)**:
   ```bash
-  # Interaktiver Assistent:
+  # Interaktiver Assistent (schrittweise TUI-Auswahl):
   ./pipeline.sh
   # Vollständige Pipeline ohne Benutzereingriff:
   ./pipeline.sh --all -y
@@ -105,28 +107,37 @@ Führen Sie alle Phasen der Toolchain nacheinander über den Pipeline-Runner aus
 
 - **Windows (PowerShell)**:
   ```powershell
-  # Interaktiver Assistent:
+  # Interaktiver Assistent (schrittweise TUI-Auswahl):
   .\pipeline.ps1
   # Vollständige Pipeline ohne Benutzereingriff:
   .\pipeline.ps1 -All -Yes
   ```
 
-### 2. Regeln und Skills im Projekt bereitstellen
+### 2. Eigenständige Bereitstellung & interaktiver Assistent
 
-- **Windows (PowerShell)**:
+- **Interaktiver Assistent (Aufruf ohne Argumente)**:
+  ```bash
+  # Linux / macOS:
+  ./deploy-agents.sh
+  # Windows:
+  .\deploy-agents.ps1
+  ```
+  *Startet den schrittweisen TUI-Auswahlassistenten für Sprache, Umfang, Projektpfad, Agent-Bridges und Workflows.*
+
+- **Windows Befehlszeile (PowerShell)**:
   ```powershell
   .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Global -Language de -Initialize -DirectoryPath "packages/core"
   .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Check -DirectoryPath "packages/core"
   ```
 
-- **Linux / macOS (Bash)**:
+- **Linux / macOS Befehlszeile (Bash)**:
   ```bash
   chmod +x ./deploy-agents.sh
   ./deploy-agents.sh /path/to/my-project --global --lang de --initialize --directory packages/core
   ./deploy-agents.sh /path/to/my-project --check --directory packages/core
   ```
 
-### 2. Optionales Langzeitgedächtnis (ai-memory)
+### 3. Optionales Langzeitgedächtnis (ai-memory)
 
 ```bash
 cargo install ai-memory
@@ -136,7 +147,7 @@ sed -i 's/replace-with-workspace-name/default/g; s/replace-with-project-name/age
 ai-memory serve --transport http
 ```
 
-### 3. Online-Aktualisierung
+### 4. Online-Aktualisierung
 
 ```bash
 ./deploy-agents.sh . --update

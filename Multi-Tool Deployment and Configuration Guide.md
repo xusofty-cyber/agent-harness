@@ -109,6 +109,16 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 ```text
 [ Execute Deployment Script ]
        │
+       ├─ [Zero arguments in terminal OR with -Interactive / --interactive]
+       │       ▼
+       │  Phase 0: Interactive Step-by-Step Terminal Wizard (TUI Arrow-Key & Checkboxes)
+       │    ├─ [1/5] Select Template Language (English / 简体中文 / 繁體中文 / Français / Deutsch)
+       │    ├─ [2/5] Select Deployment Scope (Target Project only / Global Rules only / Both)
+       │    ├─ [3/5] Enter Target Project Path (defaults to current directory [.])
+       │    │        (Note: Codex, Antigravity, Zed natively read AGENTS.md without bridges)
+       │    ├─ [4/5] Multi-Select Agent Bridge Files (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy)
+       │    └─ [5/5] Multi-Select Optional Workflows (Update mode / Project fact scan / ai-memory / Comet)
+       │
        ▼
  Phase 1: Template Repository Update (-Update)
    └─ Fast-forward update of this template repository (`git pull --ff-only`); no global CLI upgrade or third-party updater in the caller directory
@@ -167,13 +177,14 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 
 **Usage**:
 ```powershell
-.\deploy-agents.ps1 [[-ProjectPath] <target-path>] [-Global] [-Update] [-CometInit] [-AiMemoryInit]
+.\deploy-agents.ps1 [[-ProjectPath] <target-path>] [-Global] [-Update] [-Interactive] [-CometInit] [-AiMemoryInit] [-Pipeline]
 ```
 
 **Parameters**:
 - `-ProjectPath` (Positional 0): Path to target project. If omitted with `-Global`, only updates user global rules.
 - `-Global` (`-g`): Initializes missing `~/.claude/CLAUDE.md`, `~/.gemini/AGENTS.md`, and Codex `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`). Existing files are preserved without `-Update`.
 - `-Language` (`-l`): Selects template language (`en`, `zh`, `zh-tw`, `fr`, `de`; defaults to `en`).
+- `-Interactive` (`-i`): Launches the step-by-step interactive selection wizard (single-select language & scope, multi-select agent bridges and options). Triggered automatically when run with zero arguments in an interactive terminal.
 - `-Update` (`-u`): Fast-forwards the template repository, automatically invokes `tools/sync-skills.py --check` to scan external skills for upstream updates with interactive confirmation, and syncs files to the target. Combined with `-Global`, it backs up and replaces existing global rule files. Codex's non-empty `$CODEX_HOME/AGENTS.override.md` takes precedence and is updated as the active file. Existing project-managed rules, hooks, skills, and lock metadata follow their documented backup/update behavior. It does not upgrade global CLIs.
 - `-CometInit` (`-c`): Automatically executes `comet init` in the target project if Comet CLI is installed.
 - `-AiMemoryInit` (`-m`): Automatically initializes `.ai-memory.toml` in the target project (inferring `workspace` and `project`) for cross-tool ai-memory integration.
@@ -193,6 +204,9 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 
 **Examples**:
 ```powershell
+# Scenario 0: Interactive wizard (zero-argument execution)
+.\deploy-agents.ps1
+
 # Deploy to a new project
 .\deploy-agents.ps1 "D:\Projects\my-project"
 
@@ -220,7 +234,10 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 ### 4.3 Linux / macOS Deployment (`deploy-agents.sh`)
 
 ```bash
-chmod +x ./deploy-agents.sh
+chmod +x ./deploy-agents.sh ./run-pipeline.sh ./pipeline.sh
+
+# Scenario 0: Interactive wizard (zero-argument execution)
+./deploy-agents.sh
 
 # Deploy to project
 ./deploy-agents.sh /path/to/my-project

@@ -172,7 +172,10 @@
      - 阶段 4：活体文档溯源影响分析与门禁质检 (`tools/doc-impact.py`)
    - 交互向导：`./pipeline.sh` (Linux/macOS) 或 `.\pipeline.ps1` (Windows)；
    - 无人值守：`./pipeline.sh --all -y` 或 `.\pipeline.ps1 -All -Yes`。
-5. **一键在线更新集成**：
+5. **终端交互式 TUI 核心组件 (`tools/tui.py`)**：
+   - 提供基于终端原生键盘导航的单选菜单（上下方向键移动光标，Enter 确认）与多选菜单（上下方向键移动光标，空格键切选复选框，Enter 确认提交）；
+   - 内置 TTY 与 ANSI 兼容性自检，当处于非交互管道或无 ANSI 终端时自动优雅降级为带编号文本输入，作为底层交互基座驱动所有部署脚本与维护工具。
+6. **一键在线更新集成**：
    - 当在项目根目录运行更新命令时：
      ```powershell
      # Windows 环境一键拉取最新规则与技能库

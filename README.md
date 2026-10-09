@@ -31,7 +31,9 @@ This repository provides global, project, and directory rule templates, Claude C
    - **Pre-decision review and shared memory**: `option-review` (isolated 5-dimension candidate approach review matrix) and `cross-tool-memory` (project-scoped long-term memory navigation aid);
    - **Professional Document Processing**: `docx` (Word formatting & manipulation) and `pdf` (structured extraction & analysis). Note: `docx` ships its full OOXML validation toolchain (~1.3 MB, mostly XSD schemas), making it the largest skill in the repo — delete the directory from your target project if you never process Word files.
 
-4. **One-Click Deployment & Template Sync (`deploy-agents`)**:
+4. **One-Click Deployment, Interactive Wizard & Unified Pipeline (`deploy-agents` & `pipeline`)**:
+   - **Interactive Step-by-Step Terminal Wizard**: Running scripts without arguments (or with `--interactive` / `-Interactive`) launches a guided TUI wizard (arrow keys to move, spacebar to toggle, enter to confirm) to select template language (`en`, `zh`, `zh-tw`, `fr`, `de`), deployment scope (`project`, `global`, `both`), target project path, and multi-select agent bridge files (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy) plus optional workflows, preventing CLI mistakes;
+   - **Unified OS Pipeline Runner** ([`run-pipeline.sh`](run-pipeline.sh) / [`pipeline.sh`](pipeline.sh) & [`run-pipeline.ps1`](run-pipeline.ps1) / [`pipeline.ps1`](pipeline.ps1)): Orchestrates the entire agent lifecycle in 4 sequential stages (Deploy rules & bridges → Setup AI memory → Sync external skills → Living documentation impact gate) with both interactive wizard and unattended (`--all -y` / `-All -Yes`) modes;
    - PowerShell automation ([`deploy-agents.ps1`](deploy-agents.ps1)) with automatic Directory Junctions for non-admin permission penetration and Bash automation ([`deploy-agents.sh`](deploy-agents.sh));
    - The project script creates `AGENTS.md` when absent, Claude Code and Copilot bridges, and Claude Code hooks; see the support matrix for the actual scope;
    - `--global` configures Claude Code, Antigravity, and Codex global rule files; `--global --update` backs up replaced files;
@@ -107,7 +109,7 @@ Run all lifecycle stages in sequence via the unified OS pipeline runner (Deploy 
 
 - **Linux / macOS (Bash)**:
   ```bash
-  # Interactive wizard:
+  # Interactive wizard (step-by-step TUI selection):
   ./pipeline.sh
   # Unattended full pipeline:
   ./pipeline.sh --all -y
@@ -115,22 +117,31 @@ Run all lifecycle stages in sequence via the unified OS pipeline runner (Deploy 
 
 - **Windows (PowerShell)**:
   ```powershell
-  # Interactive wizard:
+  # Interactive wizard (step-by-step TUI selection):
   .\pipeline.ps1
   # Unattended full pipeline:
   .\pipeline.ps1 -All -Yes
   ```
 
-### 2. Standalone Deployment to a Project
+### 2. Standalone Deployment & Interactive Wizard
 
-- **Windows (PowerShell)**:
+- **Interactive Wizard (Zero-argument execution)**:
+  ```bash
+  # Linux / macOS:
+  ./deploy-agents.sh
+  # Windows:
+  .\deploy-agents.ps1
+  ```
+  *Launches the step-by-step TUI wizard: single-select language, single-select scope, enter path, multi-select agent bridges and optional workflows.*
+
+- **Windows CLI (PowerShell)**:
   ```powershell
   # Deploy to target project (English default, or choose -Language zh / zh-tw / fr / de)
   .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Global -Language en -Initialize -DirectoryPath "packages/core"
   .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Check -DirectoryPath "packages/core"
   ```
 
-- **Linux / macOS (Bash)**:
+- **Linux / macOS CLI (Bash)**:
   ```bash
   chmod +x ./deploy-agents.sh
   # Deploy with language selection (English default, or --lang zh / zh-tw / fr / de)
@@ -138,7 +149,7 @@ Run all lifecycle stages in sequence via the unified OS pipeline runner (Deploy 
   ./deploy-agents.sh /path/to/my-project --check --directory packages/core
   ```
 
-### 2. Optional: Enable Local Cross-Tool Memory (ai-memory)
+### 3. Optional: Enable Local Cross-Tool Memory (ai-memory)
 
 This repository supports seamless sharing of architectural decisions and session context across multiple agents using [ai-memory](https://github.com/akitaonrails/ai-memory) (local-first, zero API keys, zero embedding cost). Detailed deployment workflow:
 

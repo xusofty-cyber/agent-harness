@@ -174,7 +174,10 @@ The installer copies the repository's skill directories into `.agents/skills/`; 
    - Chains the full workflow into a single execution per OS (Deploy → AI Memory → Skills Sync → Living Doc Impact);
    - Interactive wizard: `./pipeline.sh` (Linux/macOS) or `.\pipeline.ps1` (Windows);
    - Unattended automation: `./pipeline.sh --all -y` or `.\pipeline.ps1 -All -Yes`.
-5. **Integrated Online Update Flow**:
+5. **終端互動式 TUI 核心組件 (`tools/tui.py`)**:
+   - 提供基於終端原生鍵盤導航的單選選單（上下方向鍵移動游標，Enter 確認）與多選選單（上下方向鍵移動游標，空白鍵切選複選框，Enter 確認提交）；
+   - 內建 TTY 與 ANSI 相容性自檢，當處於非互動管道或無 ANSI 終端時自動優雅降級為帶編號文字輸入，作為底層互動基座驅動所有部署指令碼與維護工具。
+6. **Integrated Online Update Flow**:
    ```powershell
    # Windows
    .\deploy-agents.ps1 -ProjectPath "." -Update

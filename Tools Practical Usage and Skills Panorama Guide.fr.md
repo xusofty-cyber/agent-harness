@@ -174,7 +174,10 @@ The installer copies the repository's skill directories into `.agents/skills/`; 
    - Enchaîne l'ensemble du cycle de vie en une seule exécution par OS (Déploiement → Mémoire IA → Synchronisation des compétences → Impact Living-Doc) ;
    - Assistant interactif : `./pipeline.sh` (Linux/macOS) ou `.\pipeline.ps1` (Windows) ;
    - Automatisation sans surveillance : `./pipeline.sh --all -y` ou `.\pipeline.ps1 -All -Yes`.
-5. **Integrated Online Update Flow**:
+5. **Composant TUI interactif en terminal (`tools/tui.py`)**:
+   - Fournit des menus interactifs à sélection unique (flèches + Entrée) et à sélection multiple (flèches + espace pour cocher/décocher + Entrée pour valider) ;
+   - Détection intégrée de la compatibilité TTY et ANSI avec repli élégant sur une saisie textuelle numérotée dans les pipelines non interactifs.
+6. **Integrated Online Update Flow**:
    ```powershell
    # Windows
    .\deploy-agents.ps1 -ProjectPath "." -Update

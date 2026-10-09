@@ -32,7 +32,9 @@
    - **事前決策評審與共享記憶**：`option-review`（5 維度多候選方案事前獨立評審與決策矩陣）與 `cross-tool-memory`（跨工具專案長期記憶導航與經驗檢索）。
    - **專業文件處理**：`docx`（Word 專業排版）、`pdf`（結構化擷取與分析）。
 
-4. **一鍵部署與範本同步（`deploy-agents`）**：
+4. **一鍵部署、互動精靈與統一流水線（`deploy-agents` & `pipeline`）**：
+   - **互動式終端逐步選擇精靈**：執行指令碼時不帶任何參數（或顯式指定 `--interactive` / `-Interactive`）將自動拉起精靈（上下方向鍵選擇、空白鍵切選、Enter 確認），引導完成規則範本語言（`en`, `zh`, `zh-tw`, `fr`, `de`）、部署範圍（`project`, `global`, `both`）、目標專案路徑、12 種 Agent 橋接檔案多選（Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy）以及可選工作流程開關，徹底杜絕命令列參數遺漏與拼寫錯誤；
+   - **跨平台統一工程流水線執行器**（[`run-pipeline.sh`](run-pipeline.sh) / [`pipeline.sh`](pipeline.sh) 與 [`run-pipeline.ps1`](run-pipeline.ps1) / [`pipeline.ps1`](pipeline.ps1)）：一鍵按序貫通 4 大工程生命週期階段（規則分發與橋接部署 → AI 跨工具長效記憶配置 → 外部技能同步與雜湊鎖定 → 活體文檔溯源分析與質檢門禁），同時支援互動式自選與全自動無人值守（`--all -y` / `-All -Yes`）模式；
    - Windows PowerShell（[`deploy-agents.ps1`](deploy-agents.ps1)，內建 UTF-8 相容與 Junction 免提權穿透）與 Linux/macOS Bash（[`deploy-agents.sh`](deploy-agents.sh)）；
    - 專案指令碼自動建立 `AGENTS.md`（若不存在）、Claude Code 與 Copilot 橋接，並部署 Claude Code 鉤子；支援多語言切換（`-Language` / `--lang`）；
    - `--global` 配置 Claude Code、Antigravity 與 Codex 全域規則；`--global --update` 覆蓋前自動備份；
@@ -121,16 +123,25 @@ agent-harness/
   .\pipeline.ps1 -All -Yes
   ```
 
-### 2. 為新專案單獨部署規範與技能庫
+### 2. 獨立部署規範與互動式精靈
 
-- **Windows 環境 (PowerShell)**:
+- **互動式精靈（零參數啟動）**:
+  ```bash
+  # Linux / macOS:
+  ./deploy-agents.sh
+  # Windows:
+  .\deploy-agents.ps1
+  ```
+  *自動拉起終端逐步選擇精靈：單選語言、單選部署範圍、輸入專案路徑、多選 Agent 工具橋接與可選工作流程。*
+
+- **Windows 命令列 (PowerShell)**:
   ```powershell
   # 部署到指定專案（預設 en，可指定 -Language zh-tw / zh / fr / de）
   .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Global -Language zh-tw -Initialize -DirectoryPath "packages/core"
   .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Check -DirectoryPath "packages/core"
   ```
 
-- **Linux / macOS 環境 (Bash)**:
+- **Linux / macOS 命令列 (Bash)**:
   ```bash
   chmod +x ./deploy-agents.sh
   # 支援多語言範本切換（預設 en，可選 --lang zh-tw / zh / fr / de）
@@ -138,7 +149,7 @@ agent-harness/
   ./deploy-agents.sh /path/to/my-project --check --directory packages/core
   ```
 
-### 2. 可選：啟用本地跨工具記憶（ai-memory）
+### 3. 可選：啟用本地跨工具記憶（ai-memory）
 
 本專案支援透過 [ai-memory](https://github.com/akitaonrails/ai-memory) 實現多 Agent 間無縫共享架構事實與會話斷點（本地優先，零 API Key，零 Embedding 成本）。
 
