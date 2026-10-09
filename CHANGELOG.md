@@ -6,6 +6,17 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+### Added
+- New `open-code-review` skill (`version: 0.1.0`): deterministic code review
+  methodology adapted from alibaba/open-code-review (Apache-2.0, see
+  `ATTRIBUTION.md`). Three tiers: Tier A `ocr` CLI delegation (zero LLM cost),
+  Tier B built-in methodology when the CLI is absent, Tier C direct mode.
+  Ships rule-first review rules (`security`/`python`/`shell`), a `group-diff.py`
+  bundling helper, and Comet Verify wiring. `requesting-code-review` now
+  delegates the "how" to this skill.
+- `deploy-agents.sh` / `.ps1`: optional Open Code Review CLI (`ocr`) detection
+  in `guide_optional_cli_tools` / `Guide-OptionalCliTools` (no forced install).
+
 ## [0.2.0] - 2026-10-09
 
 ### Added

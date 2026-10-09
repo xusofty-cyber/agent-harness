@@ -74,6 +74,12 @@
       "version": "0.2.0",
       "skillPath": ".agents/skills/living-documentation/SKILL.md"
     },
+    "open-code-review": {
+      "source": "agents-living (authored in-repo)",
+      "sourceType": "local",
+      "version": "0.1.0",
+      "skillPath": ".agents/skills/open-code-review/SKILL.md"
+    },
     "openspec": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
