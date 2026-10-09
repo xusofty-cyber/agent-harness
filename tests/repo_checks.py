@@ -113,6 +113,8 @@ PARITY = [
     ("skills-lock.json", "skills-lock.json", "skills lock metadata"),
     (".claude", ".claude", "Claude Code hooks deployment"),
     ("CometInit", "comet-init", "optional Comet init flag"),
+    ("AiMemoryInit", "ai-memory-init", "optional ai-memory init flag"),
+    (".ai-memory.toml.example", ".ai-memory.toml.example", "ai-memory config template sync"),
 ]
 ps1 = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
 sh = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")

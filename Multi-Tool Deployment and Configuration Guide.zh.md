@@ -165,7 +165,11 @@ PreToolUse 钩子是 Claude Code 专属机制，部署脚本不会为其他工�
    └─ 仅在用户指定该参数时，在目标项目运行 comet init
        │
        ▼
- 阶段 9：检测可选 CLI 并逐项征询
+ 阶段 9：可选的 ai-memory 初始化 (-AiMemoryInit)
+   └─ 仅在用户指定该参数时，生成 .ai-memory.toml 接入跨工具记忆
+       │
+       ▼
+ 阶段 10：检测可选 CLI 并逐项征询
    ├─ 缺少 CodeGraph / Rust Token Killer (RTK) 时询问是否安装
    ├─ 单独询问是否运行 CodeGraph Agent 接线 / 项目索引初始化
    └─ 单独询问是否在项目运行 rtk init；默认跳过，非交互时仅显示命令
@@ -179,7 +183,7 @@ PreToolUse 钩子是 Claude Code 专属机制，部署脚本不会为其他工�
 
 #### 语法格式（Windows）：
 ```powershell
-.\deploy-agents.ps1 [[-ProjectPath] <目标项目路径>] [-Global] [-Update] [-CometInit] [-UpdateSource <URL>]
+.\deploy-agents.ps1 [[-ProjectPath] <目标项目路径>] [-Global] [-Update] [-CometInit] [-AiMemoryInit] [-UpdateSource <URL>]
 ```
 
 #### 参数说明：
@@ -189,6 +193,7 @@ PreToolUse 钩子是 Claude Code 专属机制，部署脚本不会为其他工�
 | `-Global` | `-g` | 选填 | 初始化不存在的全局规则文件；已有文件保持不变。与 `-Update` 同用时，在原文件旁生成 `CLAUDE.template.md` / `AGENTS.template.md` 供人工审阅合并。 |
 | `-Update` | `-u` | 选填 | 使用 `git pull --ff-only` 更新模板仓库，并将文件同步到目标项目；更新受管理的项目规则、Hook、技能和元数据前按脚本策略备份。已有全局指令文件不覆盖，而是在显式 `-Global -Update` 时生成旁置审阅模板；不会升级全局 CLI。 |
 | `-CometInit` | `-c` | 选填 | 若系统中已安装 `comet` CLI，自动在目标项目根目录下执行 `comet init` 注册客户端生命周期 Hooks。 |
+| `-AiMemoryInit` | `-m` | 选填 | 自动为目标项目生成 `.ai-memory.toml` 配置文件（智能推导 `workspace` 与 `project`），接入跨工具项目记忆 (ai-memory)。 |
 | `-UpdateSource` | 无 | 选填 | 指定自定义的技能或规则更新上游源。 |
 
 #### 实战命令示例（Windows）：
@@ -205,7 +210,10 @@ PreToolUse 钩子是 Claude Code 专属机制，部署脚本不会为其他工�
 # 场景 4：部署项目并一并触发 Comet CLI 的终端 Hooks 初始化向导
 .\deploy-agents.ps1 "D:\Projects\my-order-service" -CometInit
 
-# 场景 5：仅更新当前用户的全局规则（不影响任何特定项目）
+# 场景 5：部署项目并初始化 .ai-memory.toml 接入跨工具记忆
+.\deploy-agents.ps1 "D:\Projects\my-order-service" -AiMemoryInit
+
+# 场景 6：仅更新当前用户的全局规则（不影响任何特定项目）
 .\deploy-agents.ps1 -Global -Update
 ```
 
@@ -222,7 +230,7 @@ chmod +x ./deploy-agents.sh
 
 #### 语法格式（Linux/macOS）：
 ```bash
-./deploy-agents.sh [<目标项目路径>] [--global|-g] [--update|-u] [--comet-init]
+./deploy-agents.sh [<目标项目路径>] [--global|-g] [--update|-u] [--comet-init] [--ai-memory-init|-m]
 ```
 
 #### 实战命令示例（Linux/macOS）：
@@ -239,7 +247,10 @@ chmod +x ./deploy-agents.sh
 # 场景 4：部署项目并自动执行 Comet CLI 初始化
 ./deploy-agents.sh /path/to/my-web-app --comet-init
 
-# 场景 5：仅更新当前用户的所有全局规则
+# 场景 5：部署项目并自动初始化 .ai-memory.toml 接入跨工具记忆
+./deploy-agents.sh /path/to/my-web-app --ai-memory-init
+
+# 场景 6：仅更新当前用户的所有全局规则
 ./deploy-agents.sh --global --update
 ```
 
