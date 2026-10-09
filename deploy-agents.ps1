@@ -1039,9 +1039,9 @@ if (Test-Path $SourceSkillsDir) {
         # Copy / Update skill files
         if (-not $isSelfRepo) {
             if ($Update -or (-not (Test-Path $targetSkillPath))) {
-                if ($Update) {
+                if ($Update -and (Test-Path $targetSkillPath)) {
                     Backup-ManagedPath $targetSkillPath
-                    Remove-Item -Path $targetSkillPath -Recurse -Force
+                    Remove-Item -Path $targetSkillPath -Recurse -Force -ErrorAction SilentlyContinue
                 }
                 Copy-Item -Path $_.FullName -Destination $targetSkillPath -Recurse -Force
                 Write-Host "  [OK] Deployed skill: .agents/skills/$skillName" -ForegroundColor Green
