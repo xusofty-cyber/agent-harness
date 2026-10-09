@@ -15,10 +15,14 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   automatically.
 
 ### Added
-- **Multilingual AGENTS templates & deployment language selection**:
+- **Multilingual documentation & AGENTS templates matrix**:
+  Expanded all three core guides (`README`, `Multi-Tool Deployment and Configuration Guide`,
+  and `Tools Practical Usage and Skills Panorama Guide`) with full Traditional Chinese
+  (`.zh-tw.md`), French (`.fr.md`), and German (`.de.md`) counterparts, maintaining
+  header navigation and strict structural parity checked by `tests/repo_checks.py`.
   Added native English (`.en`), Traditional Chinese (`.zh-tw`), French (`.fr`),
   and German (`.de`) templates for `Global AGENTS.md`, `Project AGENTS.md`, and
-  `Directory AGENTS.md`. `deploy-agents.sh` and `deploy-agents.ps1` now provide
+  `Directory AGENTS.md`. `deploy-agents.sh` and `deploy-agents.ps1` provide
   `--lang` / `-l` (PowerShell `-Language`) option defaulting to English (`en`),
   with fallback to existing root default templates.
 - `tools/sync-skills.py`: external skill self-update — `--check` reports

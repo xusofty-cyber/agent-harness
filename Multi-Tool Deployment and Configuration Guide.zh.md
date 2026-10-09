@@ -1,6 +1,6 @@
 # 多工具（Codex / Claude Code / Antigravity 2.0 / CLI / IDE / Zed）AI 研发指令部署与配置指南
 
-> **Language / 语言**: **中文** | [English](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md)
+> **Language / 语言**: [English](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | **简体中文** | [繁體中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [Français](Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [Deutsch](Multi-Tool%20Deployment%20and%20Configuration%20Guide.de.md)
 
 本指南系统阐述如何在 **OpenAI Codex / GitHub Copilot**、**Claude Code**、**Google Antigravity IDE** 以及 **Zed IDE** 中部署并高效协同使用 **三级 AGENTS.md 体系**（全局级、项目级、目录级），并针对“以软件研发为主、兼顾专业文档处理”的实际工程场景提供开箱即用的落地指南与自动化部署方案。
 
@@ -58,7 +58,7 @@
 
 ### 设计目标与核心分工
 
-本项目的目标是把成熟、可复用的工程规则整理成新项目可部署的基线，再由项目维护者填入技术栈、命令和模块边界。全局、项目、目录文件是模板与规则层，不意味着所有工具都会自动发现它们，也不要求所有项目采用同一工作流。受以下实践文章启发： [文章一](https://mp.weixin.qq.com/s/ECw5lXpCw54iPdtn9PYaMw)、[文章二](https://mp.weixin.qq.com/s/OfGmlh8R6PHdvyjoz34Gsg)、[文章三](https://mp.weixin.qq.com/s/zpLbzq2VQuhfOlVWg6QBxg)、[文章四](https://mp.weixin.qq.com/s/IXWMmzH5llxFPlcr0FbqaQ)。
+本项目的目标是把成熟、可复用的工程规则整理成新项目可部署的基线，再由项目维护者填入技术栈、命令和模块边界。全局、项目、目录文件是模板与规则层，不意味着所有工具都会自动发现它们，也不要求所有项目采用同一工作流。
 
 ### 核心分工与优势
 1. **共享基线**：将可复用规则维护为 Markdown 模板，并在支持的工具中使用专属桥接；核对各宿主的发现规则，不假设所有工具都会加载同一文件。

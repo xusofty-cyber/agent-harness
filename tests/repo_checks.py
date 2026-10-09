@@ -224,25 +224,40 @@ orphan_lock = sorted(lock_skills - dir_skills - META_ENTRIES)
 check("lock:no-orphans", not orphan_lock,
       f"lock entries without skill dir: {orphan_lock}")
 
-# --- 6. Bilingual doc pairs: structural parity ---
-# Each EN/ZH guide pair must keep the same ## section count, so the
-# translated structure cannot silently drift from the source.
-BILINGUAL_PAIRS = [
+# --- 6. Multilingual doc pairs: structural parity ---
+# Each translated guide must keep the same ## section count as its source,
+# so the translated structure cannot silently drift from the source.
+MULTILINGUAL_DOC_PAIRS = [
     ("README.md", "README_zh.md"),
+    ("README.md", "README.zh-tw.md"),
+    ("README.md", "README.fr.md"),
+    ("README.md", "README.de.md"),
     ("Multi-Tool Deployment and Configuration Guide.md",
      "Multi-Tool Deployment and Configuration Guide.zh.md"),
+    ("Multi-Tool Deployment and Configuration Guide.md",
+     "Multi-Tool Deployment and Configuration Guide.zh-tw.md"),
+    ("Multi-Tool Deployment and Configuration Guide.md",
+     "Multi-Tool Deployment and Configuration Guide.fr.md"),
+    ("Multi-Tool Deployment and Configuration Guide.md",
+     "Multi-Tool Deployment and Configuration Guide.de.md"),
     ("Tools Practical Usage and Skills Panorama Guide.md",
      "Tools Practical Usage and Skills Panorama Guide.zh.md"),
+    ("Tools Practical Usage and Skills Panorama Guide.md",
+     "Tools Practical Usage and Skills Panorama Guide.zh-tw.md"),
+    ("Tools Practical Usage and Skills Panorama Guide.md",
+     "Tools Practical Usage and Skills Panorama Guide.fr.md"),
+    ("Tools Practical Usage and Skills Panorama Guide.md",
+     "Tools Practical Usage and Skills Panorama Guide.de.md"),
 ]
 
 def h2_count(path):
     return sum(1 for line in (ROOT / path).read_text(encoding="utf-8").splitlines()
                if line.startswith("## "))
 
-for en, zh in BILINGUAL_PAIRS:
-    en_n, zh_n = h2_count(en), h2_count(zh)
-    check(f"bilingual:{en}=={zh}", en_n == zh_n,
-          f"## section count drift: {en_n} vs {zh_n}")
+for src, target in MULTILINGUAL_DOC_PAIRS:
+    src_n, target_n = h2_count(src), h2_count(target)
+    check(f"doc-parity:{src}=={target}", src_n == target_n,
+          f"## section count drift: {src_n} vs {target_n}")
 
 # --- 7. Executable bit on entry-point scripts ---
 # The GitHub contents API resets the exec bit to 100644 on every content push,

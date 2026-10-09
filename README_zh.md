@@ -1,12 +1,10 @@
-# Agents Living
+# Agent Harness
 
-> **Language / 语言**: [English](README.md) | **中文**
+> **Language / 语言**: [English](README.md) | **简体中文** | [繁體中文](README.zh-tw.md) | [Français](README.fr.md) | [Deutsch](README.de.md)
 
 > **可复用的 AI 编程规范模板、Claude Code 安全钩子与多工具部署脚本**
 
 本项目提供全局、项目和目录级规范模板、Claude Code PreToolUse 钩子、技能文件，以及 Windows/Linux/macOS 部署脚本。各工具的规则加载方式和钩子能力不同；请以支持矩阵和部署脚本实际行为为准。钩子属于客户端机制，不是操作系统或服务端安全边界。
-
-设计目标是把成熟、可复用的工程规则沉淀为新项目的起步基线，再由维护者补充项目技术栈、命令和模块边界。三层文件是可裁剪的模板，不要求每个项目使用相同流程。项目最初受以下文章启发：[文章一](https://mp.weixin.qq.com/s/ECw5lXpCw54iPdtn9PYaMw)、[文章二](https://mp.weixin.qq.com/s/OfGmlh8R6PHdvyjoz34Gsg)、[文章三](https://mp.weixin.qq.com/s/zpLbzq2VQuhfOlVWg6QBxg)、[文章四](https://mp.weixin.qq.com/s/IXWMmzH5llxFPlcr0FbqaQ)。
 
 ---
 

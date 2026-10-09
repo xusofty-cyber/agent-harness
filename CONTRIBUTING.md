@@ -2,21 +2,21 @@
 
 > **Language**: English is the source of truth for guides; 中文文档见下方说明。
 
-## Bilingual documentation policy（双语文档政策）
+## Multilingual documentation policy（多语言文档政策）
 
-The long-form guides are maintained in **pairs**:
+The long-form guides are maintained with English as source of truth and supported across multiple languages:
 
-| English (source) | 中文 (translation) |
-|---|---|
-| `README.md` | `README_zh.md` |
-| `Multi-Tool Deployment and Configuration Guide.md` | `Multi-Tool Deployment and Configuration Guide.zh.md` |
-| `Tools Practical Usage and Skills Panorama Guide.md` | `Tools Practical Usage and Skills Panorama Guide.zh.md` |
+| English (source) | 中文 (简体) | 中文 (繁體) | Français | Deutsch |
+|---|---|---|---|---|
+| `README.md` | `README_zh.md` | `README.zh-tw.md` | `README.fr.md` | `README.de.md` |
+| `Multi-Tool Deployment and Configuration Guide.md` | `Multi-Tool Deployment and Configuration Guide.zh.md` | `Multi-Tool Deployment and Configuration Guide.zh-tw.md` | `Multi-Tool Deployment and Configuration Guide.fr.md` | `Multi-Tool Deployment and Configuration Guide.de.md` |
+| `Tools Practical Usage and Skills Panorama Guide.md` | `Tools Practical Usage and Skills Panorama Guide.zh.md` | `Tools Practical Usage and Skills Panorama Guide.zh-tw.md` | `Tools Practical Usage and Skills Panorama Guide.fr.md` | `Tools Practical Usage and Skills Panorama Guide.de.md` |
 
 Rules:
 
-1. **English first**: write or change the English version first, then sync the Chinese translation in the same PR. A PR that changes one side without the other will be sent back.
-2. **Structure parity**: keep the same section structure and heading hierarchy on both sides, so anchors and the table of contents stay aligned. CI enforces `##` section-count parity per pair via `tests/repo_checks.py`; deeper drift is caught in review.
-3. **Filenames**: guides use ASCII filenames; Chinese translations use the `.zh.md` suffix (e.g. `Some Guide.zh.md`). No non-ASCII filenames for new documents.
+1. **English first**: write or change the English version first, then sync the translations in the same PR.
+2. **Structure parity**: keep the same section structure and heading hierarchy across all language variants, so anchors and the table of contents stay aligned. CI enforces `##` section-count parity via `tests/repo_checks.py`.
+3. **Filenames**: guides use ASCII filenames; translations use language code suffixes (`.zh.md`, `.zh-tw.md`, `.fr.md`, `.de.md`).
 
 ## Templates stay generic（模板保持通用）
 

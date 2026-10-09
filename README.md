@@ -1,12 +1,10 @@
-# Agents Living
+# Agent Harness
 
-> **Language / 语言**: **English** | [中文](README_zh.md)
+> **Language / 语言**: **English** | [简体中文](README_zh.md) | [繁體中文](README.zh-tw.md) | [Français](README.fr.md) | [Deutsch](README.de.md)
 
 > **Reusable AI coding-rule templates, Claude Code hooks, and multi-tool deployment scripts**
 
 This repository provides global, project, and directory rule templates, Claude Code PreToolUse hooks, skill files, and Windows/Linux/macOS deployment scripts. Rule loading and hook behavior vary by tool. Hooks are client-side mechanisms, not operating-system or server-side security boundaries.
-
-The goal is to package mature, reusable engineering practices as a baseline for new projects, then let maintainers add the project's stack, commands, and module boundaries. The three rule levels are adaptable templates, not a requirement that every project use the same workflow. The original project was inspired by these articles: [article 1](https://mp.weixin.qq.com/s/ECw5lXpCw54iPdtn9PYaMw), [article 2](https://mp.weixin.qq.com/s/OfGmlh8R6PHdvyjoz34Gsg), [article 3](https://mp.weixin.qq.com/s/zpLbzq2VQuhfOlVWg6QBxg), and [article 4](https://mp.weixin.qq.com/s/IXWMmzH5llxFPlcr0FbqaQ).
 
 ---
 
