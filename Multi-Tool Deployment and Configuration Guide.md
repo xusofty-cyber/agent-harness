@@ -147,6 +147,16 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
        ▼
  Phase 8: Optional Comet CLI Init (-CometInit)
    └─ Runs `comet init` only when explicitly requested
+       │
+       ▼
+ Phase 9: Optional ai-memory Init (-AiMemoryInit)
+   └─ Initializes .ai-memory.toml for cross-tool memory when explicitly requested
+       │
+       ▼
+ Phase 10: Probe Optional CLIs & Interactive Prompts
+   ├─ Offer CodeGraph / Rust Token Killer (RTK) install if missing
+   ├─ Ask whether to wire CodeGraph agents / index project
+   └─ Ask whether to run rtk init; skipped in non-interactive mode
 ```
 
 ---
@@ -155,7 +165,7 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 
 **Usage**:
 ```powershell
-.\deploy-agents.ps1 [[-ProjectPath] <target-path>] [-Global] [-Update] [-CometInit]
+.\deploy-agents.ps1 [[-ProjectPath] <target-path>] [-Global] [-Update] [-CometInit] [-AiMemoryInit]
 ```
 
 **Parameters**:
@@ -163,6 +173,7 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 - `-Global` (`-g`): Initializes missing `~/.claude/CLAUDE.md`, `~/.gemini/AGENTS.md`, and Codex `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`). Existing files are preserved without `-Update`.
 - `-Update` (`-u`): Fast-forwards the template repository and syncs files to the target. Combined with `-Global`, it backs up and replaces existing global rule files. Codex's non-empty `$CODEX_HOME/AGENTS.override.md` takes precedence and is updated as the active file. Existing project-managed rules, hooks, skills, and lock metadata follow their documented backup/update behavior. It does not upgrade global CLIs.
 - `-CometInit` (`-c`): Automatically executes `comet init` in the target project if Comet CLI is installed.
+- `-AiMemoryInit` (`-m`): Automatically initializes `.ai-memory.toml` in the target project (inferring `workspace` and `project`) for cross-tool ai-memory integration.
 
 **Examples**:
 ```powershell
@@ -177,6 +188,9 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 
 # Initialize with Comet terminal hooks
 .\deploy-agents.ps1 "D:\Projects\my-project" -CometInit
+
+# Initialize with cross-tool ai-memory configuration
+.\deploy-agents.ps1 "D:\Projects\my-project" -AiMemoryInit
 
 # Update global rules only
 .\deploy-agents.ps1 -Global -Update
@@ -200,6 +214,9 @@ chmod +x ./deploy-agents.sh
 
 # Deploy with Comet CLI init
 ./deploy-agents.sh /path/to/my-project --comet-init
+
+# Deploy with ai-memory init
+./deploy-agents.sh /path/to/my-project --ai-memory-init
 ```
 
 ---

@@ -7,6 +7,7 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 ## [Unreleased]
 
 ### Added
+- `deploy-agents.sh` and `deploy-agents.ps1`: added `-m` / `--ai-memory-init` (`-AiMemoryInit`) flag to optionally initialize `.ai-memory.toml` for target projects (inferring `workspace` and `project`), and sync `.ai-memory.toml.example` as reference.
 - New local skill `option-review` (`version: 0.1.1`): pre-decision review of
   multiple candidate approaches. Fans out isolated reviewers across five
   dimensions (security, engineering, reversibility, simplicity, cross-tool)
