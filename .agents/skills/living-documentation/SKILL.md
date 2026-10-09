@@ -1,7 +1,7 @@
 ---
 name: living-documentation
 description: Maintain agile living documentation across the development lifecycle (specs, architecture, reference, guides), establish code-doc traceability with Frontmatter metadata, and integrate document gates with Comet workflows.
-version: 0.1.1
+version: 0.2.0
 ---
 
 # Living Documentation & Traceability
@@ -103,3 +103,16 @@ For existing codebases with missing or outdated documentation:
 - **Diagrams First**: Use Mermaid diagrams for architecture topologies, state machines, and sequence calls.
 - **No Boilerplate Prose**: State inputs, outputs, errors, and rationale directly; eliminate filler phrases.
 - **Preserve Decisions**: Document *why* an approach was chosen and what alternatives were rejected.
+
+## 7. Bundled Tooling
+
+`scripts/doc-impact.py` ships with this skill and is deployed to target projects
+alongside it. Use it to automate the traceability workflow from §2:
+
+```text
+python3 .agents/skills/living-documentation/scripts/doc-impact.py [--root DIR] [--changed-files F ...] [--since COMMIT] [--json]
+```
+
+It reports 🔴 must-update / 🟡 review / 🟢 in-sync per document.
+Run it in Comet Verify/Archive phases (see `references/comet-integration.md`);
+a repo-local copy lives at `tools/doc-impact.py` (kept in sync by CI).

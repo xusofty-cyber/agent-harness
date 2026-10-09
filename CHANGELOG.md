@@ -7,6 +7,10 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 ## [Unreleased]
 
 ### Added
+- `living-documentation` skill (`version: 0.2.0`): new §7 documents the bundled
+  `scripts/doc-impact.py` (previously undiscoverable from the skill body).
+- `tests/repo_checks.py`: `doc-impact:sync` check — `tools/doc-impact.py` and
+  the skill-bundled `scripts/doc-impact.py` must stay byte-identical.
 - `tools/doc-impact.py`: living-documentation impact analysis — matches changed
   files against doc `modules` globs, walks `depends_on` upward, and reports
   staleness via `last_verified_commit` (🔴 must-update / 🟡 review / 🟢 in-sync);

@@ -159,6 +159,17 @@ for tier in DOC_TIERS:
               fm.get("status") in DOC_STATUS,
               f"status {fm.get('status')!r} not in {sorted(DOC_STATUS)}")
 
+# --- 3e. doc-impact.py dual-copy sync ---
+# tools/doc-impact.py and the skill-bundled copy must stay identical.
+# (The skill copy deploys to target projects; tools/ is this repo's own copy.)
+_impact_a = ROOT / "tools" / "doc-impact.py"
+_impact_b = (ROOT / ".agents" / "skills" / "living-documentation"
+             / "scripts" / "doc-impact.py")
+check("doc-impact:sync",
+      _impact_a.is_file() and _impact_b.is_file()
+      and _impact_a.read_bytes() == _impact_b.read_bytes(),
+      "tools/doc-impact.py and living-documentation/scripts/doc-impact.py diverged")
+
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
 # its counterpart marker must exist in the other. Markers that exist in
