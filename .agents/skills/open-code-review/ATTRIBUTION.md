@@ -10,7 +10,7 @@ mandate in this skill are adapted from **alibaba/open-code-review**
 - Licensed under the **Apache License, Version 2.0**
   (https://www.apache.org/licenses/LICENSE-2.0)
 - The review rules in `references/rules/` are original works written for this
-  project's language stack (Python / Shell / JavaScript), informed by the
+  project's language stack (Python / Shell / TypeScript / C++), informed by the
   rule categories and design principles of the upstream project. They are not
   verbatim copies of the upstream embedded ruleset.
 

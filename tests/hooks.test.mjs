@@ -184,3 +184,13 @@ test("uses built-in defaults when sensitive-path config is absent", () => {
   assert.equal(r.exitCode, 0);
   assert.match(r.stderr, /敏感路径/);
 });
+
+test("warns on push touching sensitive paths even without upstream tracking branch", () => {
+  const dir = makeRepoWithSensitiveConfig("feature/payment");
+  stageFile(dir, "src/auth/token.py");
+  execFileSync("git", ["commit", "-m", "add token"], { cwd: dir });
+  const r = runHook("git push origin feature/payment", dir);
+  assert.equal(r.exitCode, 0);
+  assert.match(r.stderr, /敏感路径/);
+  assert.match(r.stderr, /open-code-review/);
+});

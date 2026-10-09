@@ -190,6 +190,7 @@ PARITY = [
     (".ai-memory.toml.example", ".ai-memory.toml.example", "ai-memory config template sync"),
     ("LivingDocScaffold", "living-doc-scaffold", "living documentation directory scaffold"),
     ("Open Code Review CLI", "Open Code Review CLI", "optional OCR CLI detection"),
+    ("review-sensitive-paths.json", "review-sensitive-paths.json", "sensitive paths config sync"),
 ]
 ps1 = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
 sh = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")
