@@ -55,12 +55,21 @@ DIRECTORY_PATH=""
 LANG_OPTION="en"
 FORCE_INTERACTIVE=false
 
+# Bridge-file tools (user-selectable in TUI; all default on for non-interactive runs)
 TOOL_CLAUDE=true
-TOOL_CODEX=true
-TOOL_ANTIGRAVITY=true
 TOOL_COPILOT=true
 TOOL_CURSOR=true
-TOOL_ZED=true
+TOOL_GEMINI=true
+TOOL_WINDSURF=true
+TOOL_CLINE=true
+TOOL_ROO=true
+TOOL_QWEN=true
+TOOL_KIRO=true
+TOOL_CONTINUE=true
+TOOL_TRAE=true
+TOOL_CODEBUDDY=true
+# Native AGENTS.md readers — no bridge needed, always "supported":
+# Codex, Antigravity, Zed, OpenCode, Aider, Qoder, Pi
 
 args=("$@")
 arg_index=0
@@ -134,8 +143,11 @@ prompt_select() {
             echo "$((i+1))) ${labels[$i]}"
         done
         read -r -p "选择 [1-$count]: " resp
-        local idx=$(( ${resp:-1} - 1 ))
-        SELECTED_VALUE="${values[$idx]:-${values[0]}}"
+        local idx=0
+        if [[ "$resp" =~ ^[0-9]+$ ]] && [ "$resp" -ge 1 ] && [ "$resp" -le "$count" ]; then
+            idx=$((resp - 1))
+        fi
+        SELECTED_VALUE="${values[$idx]}"
         return
     fi
 
@@ -225,9 +237,11 @@ prompt_multiselect() {
             done
         else
             for num in $resp; do
-                local idx=$((num-1))
-                if [ "$idx" -ge 0 ] && [ "$idx" -lt "$count" ]; then
-                    SELECTED_VALUES+=("${values[$idx]}")
+                if [[ "$num" =~ ^[0-9]+$ ]]; then
+                    local idx=$((num-1))
+                    if [ "$idx" -ge 0 ] && [ "$idx" -lt "$count" ]; then
+                        SELECTED_VALUES+=("${values[$idx]}")
+                    fi
                 fi
             done
         fi
@@ -331,29 +345,50 @@ prompt_interactive_wizard() {
         read -r -p "项目路径 (默认当前目录 [.]) [Project Path]: " input_path
         TARGET_PROJECT_ARG="${input_path:-.}"
 
-        prompt_multiselect "[4/5] 选择要配置的 Agent 工具 (Select Agent Tools to configure):" \
-            "Claude Code (CLAUDE.md 桥接、安全拦截钩子与设置)" "claude" 1 \
-            "OpenAI Codex / CLI (AGENTS.md)" "codex" 1 \
-            "Google Antigravity (AGENTS.md / GEMINI.md 兼容入口)" "antigravity" 1 \
-            "GitHub Copilot (.github/copilot-instructions.md 桥接)" "copilot" 1 \
-            "Cursor (.cursorrules 规则桥接)" "cursor" 1 \
-            "Zed IDE (AGENTS.md)" "zed" 1
+        echo -e "\n${CYAN}以下工具原生读取 AGENTS.md，无需桥接文件（自动支持）:${NC}"
+        echo -e "  ${GREEN}✓${NC} Codex · Antigravity · Zed · OpenCode · Aider · Qoder · Pi"
+
+        prompt_multiselect "[4/5] 选择要创建桥接文件的 Agent 工具 (Select tools for bridge files):" \
+            "Claude Code (CLAUDE.md 桥接 + 安全钩子)" "claude" 1 \
+            "GitHub Copilot (.github/copilot-instructions.md)" "copilot" 1 \
+            "Cursor (.cursorrules)" "cursor" 1 \
+            "Gemini CLI (GEMINI.md)" "gemini" 1 \
+            "Windsurf (.windsurf/rules/)" "windsurf" 0 \
+            "Cline (.clinerules/)" "cline" 0 \
+            "Roo Code (.roo/rules/)" "roo" 0 \
+            "Qwen Code (QWEN.md)" "qwen" 0 \
+            "Kiro (.kiro/steering/)" "kiro" 0 \
+            "Continue.dev (.continue/rules/)" "continue" 0 \
+            "Trae (.trae/rules/)" "trae" 0 \
+            "CodeBuddy (CODEBUDDY.md)" "codebuddy" 0
 
         TOOL_CLAUDE=false
-        TOOL_CODEX=false
-        TOOL_ANTIGRAVITY=false
         TOOL_COPILOT=false
         TOOL_CURSOR=false
-        TOOL_ZED=false
+        TOOL_GEMINI=false
+        TOOL_WINDSURF=false
+        TOOL_CLINE=false
+        TOOL_ROO=false
+        TOOL_QWEN=false
+        TOOL_KIRO=false
+        TOOL_CONTINUE=false
+        TOOL_TRAE=false
+        TOOL_CODEBUDDY=false
 
         for t in "${SELECTED_VALUES[@]}"; do
             case "$t" in
                 claude) TOOL_CLAUDE=true ;;
-                codex) TOOL_CODEX=true ;;
-                antigravity) TOOL_ANTIGRAVITY=true ;;
                 copilot) TOOL_COPILOT=true ;;
                 cursor) TOOL_CURSOR=true ;;
-                zed) TOOL_ZED=true ;;
+                gemini) TOOL_GEMINI=true ;;
+                windsurf) TOOL_WINDSURF=true ;;
+                cline) TOOL_CLINE=true ;;
+                roo) TOOL_ROO=true ;;
+                qwen) TOOL_QWEN=true ;;
+                kiro) TOOL_KIRO=true ;;
+                continue) TOOL_CONTINUE=true ;;
+                trae) TOOL_TRAE=true ;;
+                codebuddy) TOOL_CODEBUDDY=true ;;
             esac
         done
     fi
@@ -963,7 +998,80 @@ if [ "$TOOL_CURSOR" = true ]; then
     fi
 fi
 
-# Note: no Zed-specific configuration is created.
+# Gemini CLI bridge (GEMINI.md -> AGENTS.md)
+if [ "$TOOL_GEMINI" = true ]; then
+    TARGET_GEMINI="${TARGET_PROJECT_DIR}/GEMINI.md"
+    if [ ! -e "${TARGET_GEMINI}" ]; then
+        ln -sf "AGENTS.md" "${TARGET_GEMINI}"
+        echo -e "  ${GREEN}[√] 已建立软链接: GEMINI.md -> AGENTS.md${NC}"
+    else
+        echo "  [i] 目标项目已存在 GEMINI.md，跳过。"
+    fi
+fi
+
+# Qwen Code bridge (QWEN.md -> AGENTS.md)
+if [ "$TOOL_QWEN" = true ]; then
+    TARGET_QWEN="${TARGET_PROJECT_DIR}/QWEN.md"
+    if [ ! -e "${TARGET_QWEN}" ]; then
+        ln -sf "AGENTS.md" "${TARGET_QWEN}"
+        echo -e "  ${GREEN}[√] 已建立软链接: QWEN.md -> AGENTS.md${NC}"
+    else
+        echo "  [i] 目标项目已存在 QWEN.md，跳过。"
+    fi
+fi
+
+# CodeBuddy bridge (CODEBUDDY.md -> AGENTS.md)
+if [ "$TOOL_CODEBUDDY" = true ]; then
+    TARGET_CODEBUDDY="${TARGET_PROJECT_DIR}/CODEBUDDY.md"
+    if [ ! -e "${TARGET_CODEBUDDY}" ]; then
+        ln -sf "AGENTS.md" "${TARGET_CODEBUDDY}"
+        echo -e "  ${GREEN}[√] 已建立软链接: CODEBUDDY.md -> AGENTS.md${NC}"
+    else
+        echo "  [i] 目标项目已存在 CODEBUDDY.md，跳过。"
+    fi
+fi
+
+# Rule-directory bridges: symlink ../../AGENTS.md into the tool's rules dir,
+# falling back to a pointer file when symlinks are unavailable.
+bridge_rule_dir() {
+    local tool_name="$1" dir_rel="$2" file_name="$3"
+    local target_dir="${TARGET_PROJECT_DIR}/${dir_rel}"
+    mkdir -p "${target_dir}"
+    local target_file="${target_dir}/${file_name}"
+    if [ ! -e "${target_file}" ]; then
+        ln -sf "../../AGENTS.md" "${target_file}" 2>/dev/null || echo "@AGENTS.md" > "${target_file}"
+        echo -e "  ${GREEN}[√] 已建立 ${tool_name} 规则桥接: ${dir_rel}/${file_name} -> AGENTS.md${NC}"
+    else
+        echo "  [i] 目标项目已存在 ${dir_rel}/${file_name}，跳过。"
+    fi
+}
+
+if [ "$TOOL_WINDSURF" = true ]; then
+    bridge_rule_dir "Windsurf" ".windsurf/rules" "agent-harness.md"
+fi
+
+if [ "$TOOL_CLINE" = true ]; then
+    bridge_rule_dir "Cline" ".clinerules" "agent-harness.md"
+fi
+
+if [ "$TOOL_ROO" = true ]; then
+    bridge_rule_dir "Roo Code" ".roo/rules" "agent-harness.md"
+fi
+
+if [ "$TOOL_KIRO" = true ]; then
+    bridge_rule_dir "Kiro" ".kiro/steering" "agent-harness.md"
+fi
+
+if [ "$TOOL_CONTINUE" = true ]; then
+    bridge_rule_dir "Continue.dev" ".continue/rules" "agent-harness.md"
+fi
+
+if [ "$TOOL_TRAE" = true ]; then
+    bridge_rule_dir "Trae" ".trae/rules" "agent-harness.md"
+fi
+
+# Note: Codex, Antigravity, Zed, OpenCode, Aider, Qoder, Pi read AGENTS.md
+# natively — no bridge files needed.
 
 # Claude Code PreToolUse Security Hooks (.claude/settings.json + .claude/hooks/)
 if [ "$TOOL_CLAUDE" = true ] && [ -f "${SOURCE_CLAUDE_SETTINGS}" ]; then

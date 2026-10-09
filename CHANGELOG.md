@@ -15,6 +15,15 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   automatically.
 
 ### Added
+- **9 new agent-tool bridges** (both deploy scripts, TUI-selectable):
+  Gemini CLI (`GEMINI.md`), Qwen Code (`QWEN.md`), CodeBuddy (`CODEBUDDY.md`),
+  Windsurf (`.windsurf/rules/`), Cline (`.clinerules/`), Roo Code (`.roo/rules/`),
+  Kiro (`.kiro/steering/`), Continue.dev (`.continue/rules/`), Trae (`.trae/rules/`).
+  Rule-directory bridges symlink `../../AGENTS.md` with `@AGENTS.md` pointer fallback.
+- **Native-reader notice**: OpenCode, Aider, Qoder and Pi read `AGENTS.md`
+  natively (zero config) — listed as auto-supported in the wizard alongside
+  Codex, Antigravity and Zed. Total: 19 tools covered (12 bridge + 7 native).
+
 - **Interactive TUI step-by-step wizards**: Added interactive terminal selection wizards
   (↑↓ arrow navigation, space toggle, enter confirm, with automatic non-TTY numbered fallbacks)
   across `deploy-agents.sh`, `deploy-agents.ps1`, `setup-ai-memory.sh`, `setup-ai-memory.ps1`,
@@ -49,6 +58,17 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 - `open-code-review/scripts/group-diff.py`: enhanced cross-directory implementation<->test pairing (e.g. `tests/...` <-> `src/...`) and expanded noise patterns for binary/build artifacts.
 - Documentation sync: updated skill directory count from 41 to 42 across READMEs and Panorama Guides; added code review row to Section 2.6/2.5 dispatching matrices.
 - `open-code-review`: added C/C++ (`cpp.md`) and TypeScript/JavaScript (`typescript.md`) rulebooks under `references/rules/`.
+
+- **TUI input validation**: `prompt_select`/`prompt_multiselect` non-TTY fallbacks
+  in `deploy-agents.sh` now reject non-numeric input (previously a stray string
+  silently selected the last option via bash arithmetic). Aligned with the
+  PowerShell `TryParse` behavior.
+- **TUI tool selection honesty**: the wizard's agent-tool multiselect no longer
+  lists Codex/Antigravity/Zed as configurable — they read `AGENTS.md` natively.
+  The wizard now shows native readers as auto-supported and only asks about
+  tools that actually need bridge files.
+- **Shared TUI module**: extracted the duplicated `tui_select` from
+  `tools/sync-skills.py` and `tools/doc-impact.py` into `tools/tui.py`.
 
 ## [0.2.1] - 2026-10-09
 
