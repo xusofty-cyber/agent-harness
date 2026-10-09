@@ -1,18 +1,18 @@
 # SESSION_STATE.md — 会话断点
 
 > **最后更新**：2026-10-09
-> **任务**：多语言 AGENTS 模板与部署语言选项、全景/部署核心文档多语言套件建设、文档启发描述清理及全 README 索引完善
+> **任务**：全套部署与运维脚本交互式向导升级（TUI 单选语言/范围、多选 Agent 工具与集成，免参数防漏）
 
-## 当前状态（已闭环并推送远端）
+## 当前状态（待确认合并）
 
-- **分支**：`main`（已同步远端 `origin/main`，最新提交 `774e985`）。
+- **分支**：`feat/interactive-step-wizards`（基于 `main` 检出）。
 - **完成项**：
-  - 三级 AGENTS 模板多语言版（EN / 繁中 / 法语 / 德语）就绪；部署脚本（`deploy-agents.sh` / `.ps1`）新增 `--lang` / `-Language` 支持及降级保护。
-  - 三套核心文档多语言套件（`README`、`Multi-Tool Deployment and Configuration Guide`、`Tools Practical Usage and Skills Panorama Guide`）完整支持 EN、简中、繁中、法语、德语，全部通过 `##` 结构对称性自动化校验。
-  - 彻底清理 `README_zh.md` 及全库中关于外部启发文章的描述与链接。
-  - 全语言版本 `README` 文档索引（Documentation Index）完成 5 种语言完整交叉链接升级。
-- **CI & 测试**：`python3 tests/repo_checks.py`、`node tests/hooks.test.mjs`、`python3 tests/sync_skills_test.py` 全数通过。
-- **远端推送**：已全量合入 `main` 并推送到 `git@github.com:xusofty-cyber/agent-harness.git`。
+  - `deploy-agents.sh` / `.ps1`：实现 `prompt_interactive_wizard` / `Prompt-InteractiveWizard`，支持上下方向键、空格勾选、回车确认的 TUI 体验（单选语言、单选部署范围、多选 Agent 工具、多选集成功能），支持 Cursor 规则桥接，并与现有命令行参数全面兼容。
+  - `setup-ai-memory.sh` / `.ps1`：实现多 Agent 工具多选向导（Claude Code、Codex、Antigravity IDE、Antigravity CLI），支持一次性批量配置。
+  - `tools/sync-skills.py`：实现单选操作（Check/Apply）、单选范围（全部/指定技能）、单选格式（文本/JSON）的交互式向导。
+  - `tools/doc-impact.py`（及同步至 living-documentation 技能内部副本）：实现检测范围单选、项目目录输入与输出格式单选向导。
+  - `tests/repo_checks.py`：增加 `Prompt-InteractiveWizard` 跨平台部署脚本 Parity 检查。
+- **CI & 测试**：`python3 tests/repo_checks.py`、`node tests/hooks.test.mjs`、`python3 tests/sync_skills_test.py` 全数绿灯。
 
 ## 历史记录（2026-10-08 前）
 

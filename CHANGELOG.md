@@ -15,6 +15,12 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   automatically.
 
 ### Added
+- **Interactive TUI step-by-step wizards**: Added interactive terminal selection wizards
+  (↑↓ arrow navigation, space toggle, enter confirm, with automatic non-TTY numbered fallbacks)
+  across `deploy-agents.sh`, `deploy-agents.ps1`, `setup-ai-memory.sh`, `setup-ai-memory.ps1`,
+  `tools/sync-skills.py`, and `tools/doc-impact.py`. Supports single-choice language/scope selection,
+  multi-choice agent tools configuration (Claude Code, Codex, Antigravity, GitHub Copilot, Cursor, Zed),
+  and optional workflow integrations, avoiding parameter omissions while keeping full CLI flag compatibility.
 - **Multilingual documentation & AGENTS templates matrix**:
   Expanded all three core guides (`README`, `Multi-Tool Deployment and Configuration Guide`,
   and `Tools Practical Usage and Skills Panorama Guide`) with full Traditional Chinese

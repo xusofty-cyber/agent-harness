@@ -26,6 +26,7 @@ usage() {
     echo "  --global, -g       初始化 Claude、Antigravity 2.0/CLI/IDE、Codex 用户全局规则。"
     echo "  --update, -u       更新模板仓库；与 --global 一起使用时，先备份再覆盖全局规则。"
     echo "  --lang, -l         指定模板语言 (en, zh, zh-tw, fr, de；默认 en)。"
+    echo "  --interactive, -I  启动逐步交互式选择向导（单选语言/范围、多选 Agent 工具与选项）。"
     echo "  --initialize, -i 识别项目事实，生成 AGENTS.md 并列出待确认项。"
     echo "  --directory       与 --initialize 配合，为现有子目录生成目录级 AGENTS.md。"
     echo "  --check, -k       检查项目级规则中的初始化占位项；可搭配 --directory 检查模块规则。"
@@ -52,6 +53,14 @@ DO_INITIALIZE=false
 DO_CHECK=false
 DIRECTORY_PATH=""
 LANG_OPTION="en"
+FORCE_INTERACTIVE=false
+
+TOOL_CLAUDE=true
+TOOL_CODEX=true
+TOOL_ANTIGRAVITY=true
+TOOL_COPILOT=true
+TOOL_CURSOR=true
+TOOL_ZED=true
 
 args=("$@")
 arg_index=0
@@ -75,6 +84,9 @@ while [ "$arg_index" -lt "$#" ]; do
             ;;
         --check|-k)
             DO_CHECK=true
+            ;;
+        --interactive|-I)
+            FORCE_INTERACTIVE=true
             ;;
         --lang|-l)
             arg_index=$((arg_index + 1))
@@ -101,6 +113,272 @@ done
 if [ -n "$DIRECTORY_PATH" ] && [ "$DO_INITIALIZE" != true ] && [ "$DO_CHECK" != true ]; then echo "[!] --directory requires --initialize or --check" >&2; exit 2; fi
 if { [ "$DO_INITIALIZE" = true ] || [ "$DO_CHECK" = true ]; } && [ -z "$TARGET_PROJECT_ARG" ]; then echo "[!] --initialize/--check requires a project path" >&2; exit 2; fi
 if [ "$DO_CHECK" = true ] && [ "$DEPLOY_GLOBAL" = true ]; then echo "[!] --check cannot be combined with --global" >&2; exit 2; fi
+
+prompt_select() {
+    local title="$1"
+    shift
+    local -a labels=()
+    local -a values=()
+    while [[ $# -gt 0 ]]; do
+        labels+=("$1")
+        values+=("$2")
+        shift 2
+    done
+
+    local count=${#labels[@]}
+    local cur=0
+
+    if [ ! -t 0 ]; then
+        echo "$title"
+        for i in "${!labels[@]}"; do
+            echo "$((i+1))) ${labels[$i]}"
+        done
+        read -r -p "选择 [1-$count]: " resp
+        local idx=$(( ${resp:-1} - 1 ))
+        SELECTED_VALUE="${values[$idx]:-${values[0]}}"
+        return
+    fi
+
+    local old_stty
+    old_stty="$(stty -g 2>/dev/null || true)"
+    trap 'stty "$old_stty" 2>/dev/null; printf "\033[?25h\n"; exit 1' INT TERM
+
+    stty -echo -icanon min 1 time 0 2>/dev/null || true
+    printf "\033[?25l"
+
+    echo -e "\n$title"
+    echo -e "\033[2m↑↓ move, enter confirm\033[0m"
+
+    while true; do
+        for i in "${!labels[@]}"; do
+            local pointer="  "
+            local symbol="\033[90m○\033[0m "
+            if [ "$i" -eq "$cur" ]; then
+                pointer="\033[36m> \033[0m"
+                symbol="\033[36m●\033[0m "
+            fi
+            echo -e "${pointer}${symbol}${labels[$i]}"
+        done
+
+        IFS= read -rsn1 key
+        if [[ "$key" == $'\x1b' ]]; then
+            read -rsn2 -t 0.1 rest || true
+            key+="$rest"
+        fi
+
+        case "$key" in
+            $'\x1b[A'|[kK])
+                cur=$(( (cur - 1 + count) % count ))
+                ;;
+            $'\x1b[B'|[jJ])
+                cur=$(( (cur + 1) % count ))
+                ;;
+            ''|$'\n')
+                break
+                ;;
+            [qQ])
+                stty "$old_stty" 2>/dev/null
+                printf "\033[?25h\n"
+                echo "已取消 (Aborted)."
+                exit 1
+                ;;
+        esac
+
+        printf "\033[%dA" "$count"
+    done
+
+    stty "$old_stty" 2>/dev/null
+    printf "\033[?25h\n"
+    trap - INT TERM
+
+    SELECTED_VALUE="${values[$cur]}"
+}
+
+prompt_multiselect() {
+    local title="$1"
+    shift
+    local -a labels=()
+    local -a values=()
+    local -a checked=()
+    while [[ $# -gt 0 ]]; do
+        labels+=("$1")
+        values+=("$2")
+        checked+=("$3")
+        shift 3
+    done
+
+    local count=${#labels[@]}
+    local cur=0
+
+    if [ ! -t 0 ]; then
+        echo "$title"
+        for i in "${!labels[@]}"; do
+            local mark=" "
+            if [ "${checked[$i]}" -eq 1 ]; then mark="x"; fi
+            echo "$((i+1))) [$mark] ${labels[$i]}"
+        done
+        read -r -p "输入数字序号切换（空格分隔，回车确认默认）: " resp
+        SELECTED_VALUES=()
+        if [ -z "$resp" ]; then
+            for i in "${!values[@]}"; do
+                if [ "${checked[$i]}" -eq 1 ]; then SELECTED_VALUES+=("${values[$i]}"); fi
+            done
+        else
+            for num in $resp; do
+                local idx=$((num-1))
+                if [ "$idx" -ge 0 ] && [ "$idx" -lt "$count" ]; then
+                    SELECTED_VALUES+=("${values[$idx]}")
+                fi
+            done
+        fi
+        return
+    fi
+
+    local old_stty
+    old_stty="$(stty -g 2>/dev/null || true)"
+    trap 'stty "$old_stty" 2>/dev/null; printf "\033[?25h\n"; exit 1' INT TERM
+
+    stty -echo -icanon min 1 time 0 2>/dev/null || true
+    printf "\033[?25l"
+
+    echo -e "\n$title"
+    echo -e "\033[2m↑↓ move, space select, enter confirm\033[0m"
+
+    while true; do
+        for i in "${!labels[@]}"; do
+            local pointer="  "
+            if [ "$i" -eq "$cur" ]; then
+                pointer="\033[36m> \033[0m"
+            fi
+            local box="\033[90m◯\033[0m "
+            if [ "${checked[$i]}" -eq 1 ]; then
+                box="\033[32m◉\033[0m "
+            fi
+            echo -e "${pointer}${box}${labels[$i]}"
+        done
+
+        IFS= read -rsn1 key
+        if [[ "$key" == $'\x1b' ]]; then
+            read -rsn2 -t 0.1 rest || true
+            key+="$rest"
+        fi
+
+        case "$key" in
+            $'\x1b[A'|[kK])
+                cur=$(( (cur - 1 + count) % count ))
+                ;;
+            $'\x1b[B'|[jJ])
+                cur=$(( (cur + 1) % count ))
+                ;;
+            ' ')
+                if [ "${checked[$cur]}" -eq 1 ]; then
+                    checked[$cur]=0
+                else
+                    checked[$cur]=1
+                fi
+                ;;
+            ''|$'\n')
+                break
+                ;;
+            [qQ])
+                stty "$old_stty" 2>/dev/null
+                printf "\033[?25h\n"
+                echo "已取消 (Aborted)."
+                exit 1
+                ;;
+        esac
+
+        printf "\033[%dA" "$count"
+    done
+
+    stty "$old_stty" 2>/dev/null
+    printf "\033[?25h\n"
+    trap - INT TERM
+
+    SELECTED_VALUES=()
+    for i in "${!values[@]}"; do
+        if [ "${checked[$i]}" -eq 1 ]; then
+            SELECTED_VALUES+=("${values[$i]}")
+        fi
+    done
+}
+
+prompt_interactive_wizard() {
+    echo -e "\n${CYAN}==================================================${NC}"
+    echo -e "${CYAN} 🤖 AI Agent Harness 交互式部署向导 (Deployment Wizard)${NC}"
+    echo -e "${CYAN}==================================================${NC}"
+
+    prompt_select "[1/5] 选择规则模板语言 (Select Template Language):" \
+        "English (en)" "en" \
+        "简体中文 (Simplified Chinese, zh)" "zh" \
+        "繁體中文 (Traditional Chinese, zh-tw)" "zh-tw" \
+        "Français (French, fr)" "fr" \
+        "Deutsch (German, de)" "de"
+    LANG_OPTION="$SELECTED_VALUE"
+
+    prompt_select "[2/5] 选择部署范围 (Select Deployment Scope):" \
+        "目标项目部署 (Target Project only)" "project" \
+        "仅本机全局规则 (Global Rules only: Claude/Antigravity/Codex)" "global" \
+        "完整部署 (Both Project & Global Rules)" "both"
+    local scope="$SELECTED_VALUE"
+
+    if [ "$scope" = "global" ] || [ "$scope" = "both" ]; then
+        DEPLOY_GLOBAL=true
+    fi
+
+    if [ "$scope" = "project" ] || [ "$scope" = "both" ]; then
+        echo -e "\n${CYAN}[3/5] 输入目标项目目录路径 (Enter Project Path):${NC}"
+        read -r -p "项目路径 (默认当前目录 [.]) [Project Path]: " input_path
+        TARGET_PROJECT_ARG="${input_path:-.}"
+
+        prompt_multiselect "[4/5] 选择要配置的 Agent 工具 (Select Agent Tools to configure):" \
+            "Claude Code (CLAUDE.md 桥接、安全拦截钩子与设置)" "claude" 1 \
+            "OpenAI Codex / CLI (AGENTS.md)" "codex" 1 \
+            "Google Antigravity (AGENTS.md / GEMINI.md 兼容入口)" "antigravity" 1 \
+            "GitHub Copilot (.github/copilot-instructions.md 桥接)" "copilot" 1 \
+            "Cursor (.cursorrules 规则桥接)" "cursor" 1 \
+            "Zed IDE (AGENTS.md)" "zed" 1
+
+        TOOL_CLAUDE=false
+        TOOL_CODEX=false
+        TOOL_ANTIGRAVITY=false
+        TOOL_COPILOT=false
+        TOOL_CURSOR=false
+        TOOL_ZED=false
+
+        for t in "${SELECTED_VALUES[@]}"; do
+            case "$t" in
+                claude) TOOL_CLAUDE=true ;;
+                codex) TOOL_CODEX=true ;;
+                antigravity) TOOL_ANTIGRAVITY=true ;;
+                copilot) TOOL_COPILOT=true ;;
+                cursor) TOOL_CURSOR=true ;;
+                zed) TOOL_ZED=true ;;
+            esac
+        done
+    fi
+
+    prompt_multiselect "[5/5] 可选功能与执行模式 (Optional workflows & execution mode):" \
+        "更新模式 (Update mode: 备份并更新已有规则与外部技能库)" "update" 0 \
+        "项目事实初始化 (Initialize: 自动扫描技术栈并生成 AGENTS.md)" "init" 0 \
+        "启用跨工具长期记忆 (AI Memory: 初始化 .ai-memory.toml)" "aimem" 0 \
+        "启用 Comet CLI 工作流 (Comet: 初始化 comet 状态机)" "comet" 0
+
+    for opt in "${SELECTED_VALUES[@]}"; do
+        case "$opt" in
+            update) DO_UPDATE=true ;;
+            init) DO_INITIALIZE=true ;;
+            aimem) DO_AI_MEMORY_INIT=true ;;
+            comet) DO_COMET_INIT=true ;;
+        esac
+    done
+
+    echo -e "\n${GREEN}✔ 配置完成，正在执行部署...${NC}\n"
+}
+
+if [ "$FORCE_INTERACTIVE" = true ] || { [ -z "$TARGET_PROJECT_ARG" ] && [ "$DEPLOY_GLOBAL" = false ] && [ -t 0 ]; }; then
+    prompt_interactive_wizard
+fi
 
 if [ -z "$TARGET_PROJECT_ARG" ] && [ "$DEPLOY_GLOBAL" = false ]; then
     echo -e "${RED}[错误] 请指定目标项目路径，或者使用 --global 仅更新全局配置。${NC}\n"
@@ -649,31 +927,46 @@ if [ "$DO_INITIALIZE" = true ]; then
     fi
 fi
 
-# Claude Code bridge (CLAUDE.md -> AGENTS.md)
-TARGET_CLAUDE="${TARGET_PROJECT_DIR}/CLAUDE.md"
-if [ ! -e "${TARGET_CLAUDE}" ]; then
-    ln -sf "AGENTS.md" "${TARGET_CLAUDE}"
-    echo -e "  ${GREEN}[√] 已建立软链接: CLAUDE.md -> AGENTS.md${NC}"
-else
-    echo "  [i] 目标项目已存在 CLAUDE.md，跳过。"
+if [ "$TOOL_CLAUDE" = true ]; then
+    # Claude Code bridge (CLAUDE.md -> AGENTS.md)
+    TARGET_CLAUDE="${TARGET_PROJECT_DIR}/CLAUDE.md"
+    if [ ! -e "${TARGET_CLAUDE}" ]; then
+        ln -sf "AGENTS.md" "${TARGET_CLAUDE}"
+        echo -e "  ${GREEN}[√] 已建立软链接: CLAUDE.md -> AGENTS.md${NC}"
+    else
+        echo "  [i] 目标项目已存在 CLAUDE.md，跳过。"
+    fi
 fi
 
-# GitHub Copilot bridge (.github/copilot-instructions.md -> AGENTS.md)
-TARGET_GITHUB_DIR="${TARGET_PROJECT_DIR}/.github"
-TARGET_COPILOT="${TARGET_GITHUB_DIR}/copilot-instructions.md"
-mkdir -p "${TARGET_GITHUB_DIR}"
+if [ "$TOOL_COPILOT" = true ]; then
+    # GitHub Copilot bridge (.github/copilot-instructions.md -> AGENTS.md)
+    TARGET_GITHUB_DIR="${TARGET_PROJECT_DIR}/.github"
+    TARGET_COPILOT="${TARGET_GITHUB_DIR}/copilot-instructions.md"
+    mkdir -p "${TARGET_GITHUB_DIR}"
 
-if [ ! -e "${TARGET_COPILOT}" ]; then
-    ln -sf "../AGENTS.md" "${TARGET_COPILOT}"
-    echo -e "  ${GREEN}[√] 已建立软链接: .github/copilot-instructions.md -> AGENTS.md${NC}"
-else
-    echo "  [i] 目标项目已存在 copilot-instructions.md，跳过。"
+    if [ ! -e "${TARGET_COPILOT}" ]; then
+        ln -sf "../AGENTS.md" "${TARGET_COPILOT}"
+        echo -e "  ${GREEN}[√] 已建立软链接: .github/copilot-instructions.md -> AGENTS.md${NC}"
+    else
+        echo "  [i] 目标项目已存在 copilot-instructions.md，跳过。"
+    fi
+fi
+
+# Cursor bridge (.cursorrules -> AGENTS.md)
+if [ "$TOOL_CURSOR" = true ]; then
+    TARGET_CURSOR="${TARGET_PROJECT_DIR}/.cursorrules"
+    if [ ! -e "${TARGET_CURSOR}" ]; then
+        ln -sf "AGENTS.md" "${TARGET_CURSOR}" 2>/dev/null || echo "@AGENTS.md" > "${TARGET_CURSOR}"
+        echo -e "  ${GREEN}[√] 已建立 Cursor 规则桥接: .cursorrules -> AGENTS.md${NC}"
+    else
+        echo "  [i] 目标项目已存在 .cursorrules，跳过。"
+    fi
 fi
 
 # Note: no Zed-specific configuration is created.
 
 # Claude Code PreToolUse Security Hooks (.claude/settings.json + .claude/hooks/)
-if [ -f "${SOURCE_CLAUDE_SETTINGS}" ]; then
+if [ "$TOOL_CLAUDE" = true ] && [ -f "${SOURCE_CLAUDE_SETTINGS}" ]; then
     mkdir -p "${TARGET_PROJECT_DIR}/.claude"
     TARGET_CLAUDE_SETTINGS="${TARGET_PROJECT_DIR}/.claude/settings.json"
     if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_CLAUDE_SETTINGS}" ]; then

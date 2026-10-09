@@ -194,6 +194,7 @@ PARITY = [
     ("sync-skills.py", "sync-skills.py", "external skill sync in update flow"),
     ("Comet CLI", "Comet CLI", "optional Comet CLI detection"),
     ("Resolve-TemplateFile", "resolve_template", "multilingual template resolution"),
+    ("Prompt-InteractiveWizard", "prompt_interactive_wizard", "interactive terminal wizard"),
 ]
 ps1 = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
 sh = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")

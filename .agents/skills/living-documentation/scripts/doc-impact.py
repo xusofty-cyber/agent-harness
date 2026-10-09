@@ -229,13 +229,149 @@ def render_text(report: dict) -> str:
     return "\n".join(lines)
 
 
+def tui_select(title: str, options: list[tuple[str, any]]) -> any:
+    """Renders single-select interactive TUI or falls back to numbered prompt."""
+    if not sys.stdin.isatty():
+        print(title)
+        for i, (label, _) in enumerate(options, 1):
+            print(f"{i}) {label}")
+        try:
+            choice = input(f"Select [1-{len(options)}]: ").strip()
+            idx = int(choice) - 1
+            if 0 <= idx < len(options):
+                return options[idx][1]
+        except Exception:
+            pass
+        return options[0][1]
+
+    cur = 0
+    count = len(options)
+    print(f"\n\033[36m{title}\033[0m")
+    print("\033[2m↑↓ move, enter confirm\033[0m")
+
+    sys.stdout.write("\033[?25l")
+    sys.stdout.flush()
+
+    try:
+        if sys.platform != "win32":
+            import termios
+            import tty
+            fd = sys.stdin.fileno()
+            old_settings = termios.tcgetattr(fd)
+            try:
+                tty.setcbreak(fd)
+                while True:
+                    for i, (label, _) in enumerate(options):
+                        if i == cur:
+                            sys.stdout.write(f"\033[36m> ● {label}\033[0m\n")
+                        else:
+                            sys.stdout.write(f"  \033[90m○\033[0m {label}\n")
+                    sys.stdout.flush()
+
+                    ch = sys.stdin.read(1)
+                    if ch == "\x1b":
+                        seq = sys.stdin.read(2)
+                        if seq == "[A":
+                            cur = (cur - 1 + count) % count
+                        elif seq == "[B":
+                            cur = (cur + 1) % count
+                    elif ch in ("k", "K"):
+                        cur = (cur - 1 + count) % count
+                    elif ch in ("j", "J"):
+                        cur = (cur + 1) % count
+                    elif ch in ("\r", "\n"):
+                        break
+                    elif ch in ("q", "Q"):
+                        sys.exit(0)
+
+                    sys.stdout.write(f"\033[{count}A")
+                    sys.stdout.flush()
+            finally:
+                termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        else:
+            import msvcrt
+            while True:
+                for i, (label, _) in enumerate(options):
+                    if i == cur:
+                        sys.stdout.write(f"> ● {label}\n")
+                    else:
+                        sys.stdout.write(f"  ○ {label}\n")
+                sys.stdout.flush()
+
+                key = msvcrt.getch()
+                if key in (b"\x00", b"\xe0"):
+                    code = msvcrt.getch()
+                    if code == b"H":
+                        cur = (cur - 1 + count) % count
+                    elif code == b"P":
+                        cur = (cur + 1) % count
+                elif key in (b"\r", b"\n"):
+                    break
+                elif key in (b"q", b"Q"):
+                    sys.exit(0)
+
+                sys.stdout.write(f"\033[{count}A")
+                sys.stdout.flush()
+    except Exception:
+        pass
+    finally:
+        sys.stdout.write("\033[?25h\n")
+        sys.stdout.flush()
+
+    return options[cur][1]
+
+
+def prompt_interactive_wizard() -> tuple[str | None, str | None, list[str] | None, bool]:
+    """Returns (root, since, changed_files, is_json)."""
+    print("\n\033[36m==================================================")
+    print(" 📑 doc-impact: 活体文档影响分析向导 (Living Doc Impact)")
+    print("==================================================\033[0m")
+
+    mode = tui_select("[1/3] 选择影响分析检测范围 (Select Analysis Mode):", [
+        ("工作区当前变更 (Working tree changes: HEAD + untracked)", "working-tree"),
+        ("自特定 Commit / 分支对比 (Since commit or branch)", "since"),
+        ("指定具体变更文件列表 (Explicit file list)", "files"),
+    ])
+
+    since = None
+    changed_files_list = None
+    if mode == "since":
+        since = input("\n输入对比基线 Commit/分支 (例: HEAD~1, origin/main) [Default: HEAD~1]: ").strip() or "HEAD~1"
+    elif mode == "files":
+        raw = input("\n输入文件路径列表（空格分隔）: ").strip()
+        if raw:
+            changed_files_list = raw.split()
+
+    print("\n[2/3] 目标项目根目录 (Target Project Root):")
+    root_input = input("项目根目录路径 (默认自动识别当前项目 [.]) [Root DIR]: ").strip() or None
+
+    fmt = tui_select("[3/3] 选择输出格式 (Select Output Format):", [
+        ("人类可读控制台报告 (Human-readable text report)", "text"),
+        ("JSON 格式 (Machine-readable JSON)", "json"),
+    ])
+    is_json = (fmt == "json")
+
+    return root_input, since, changed_files_list, is_json
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="living-documentation impact analysis")
     ap.add_argument("--root", default=None, help="Root directory of target project")
     ap.add_argument("--changed-files", nargs="*", default=None, help="Explicit list of changed files")
     ap.add_argument("--since", default=None, help="Compare changes since commit/ref")
     ap.add_argument("--json", action="store_true", help="Output machine-readable JSON")
+    ap.add_argument("--interactive", "-i", action="store_true", help="Launch interactive step wizard")
     args = ap.parse_args()
+
+    if args.interactive or (len(sys.argv) == 1 and sys.stdin.isatty()):
+        root_opt, since_opt, files_opt, json_opt = prompt_interactive_wizard()
+        if root_opt:
+            args.root = root_opt
+        if since_opt:
+            args.since = since_opt
+        if files_opt:
+            args.changed_files = files_opt
+        args.json = json_opt
 
     root = resolve_root(args.root)
     files = changed_files(root, args.since, args.changed_files)

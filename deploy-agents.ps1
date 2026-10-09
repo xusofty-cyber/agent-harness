@@ -31,13 +31,203 @@ param (
     [switch]$AiMemoryInit,
 
     [Alias("l")]
-    [string]$Language = "en"
+    [string]$Language = "en",
+
+    [Alias("I")]
+    [switch]$Interactive
 )
+
+$ToolClaude = $true
+$ToolCodex = $true
+$ToolAntigravity = $true
+$ToolCopilot = $true
+$ToolCursor = $true
+$ToolZed = $true
 
 $ErrorActionPreference = "Stop"
 
 # Script directory
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+function Prompt-SingleSelect([string]$Title, [array]$Options) {
+    if ([Console]::IsInputRedirected) {
+        Write-Host "`n$Title"
+        for ($i = 0; $i -lt $Options.Count; $i++) {
+            Write-Host "$($i + 1)) $($Options[$i].Label)"
+        }
+        $resp = Read-Host "选择 [1-$($Options.Count)]"
+        $idx = 0
+        if ([int]::TryParse($resp, [ref]$idx) -and $idx -ge 1 -and $idx -le $Options.Count) {
+            return $Options[$idx - 1].Value
+        }
+        return $Options[0].Value
+    }
+
+    $cur = 0
+    $count = $Options.Count
+    Write-Host "`n$Title" -ForegroundColor Cyan
+    Write-Host "↑↓ move, enter confirm" -ForegroundColor DarkGray
+
+    while ($true) {
+        for ($i = 0; $i -lt $count; $i++) {
+            $pointer = if ($i -eq $cur) { "> " } else { "  " }
+            $sym = if ($i -eq $cur) { "● " } else { "○ " }
+            $fg = if ($i -eq $cur) { "Cyan" } else { "Gray" }
+            Write-Host "$pointer$sym$($Options[$i].Label)" -ForegroundColor $fg
+        }
+
+        $key = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        if ($key.VirtualKeyCode -eq 38) { # Up
+            $cur = ($cur - 1 + $count) % $count
+        } elseif ($key.VirtualKeyCode -eq 40) { # Down
+            $cur = ($cur + 1) % $count
+        } elseif ($key.VirtualKeyCode -eq 13) { # Enter
+            break
+        } elseif ($key.Character -eq 'q') {
+            Write-Host "已取消 (Aborted)."
+            exit 1
+        }
+
+        try {
+            $pos = $host.UI.RawUI.CursorPosition
+            $pos.Y = [Math]::Max(0, $pos.Y - $count)
+            $pos.X = 0
+            $host.UI.RawUI.CursorPosition = $pos
+        } catch {}
+    }
+    return $Options[$cur].Value
+}
+
+function Prompt-MultiSelect([string]$Title, [array]$Items) {
+    if ([Console]::IsInputRedirected) {
+        Write-Host "`n$Title"
+        for ($i = 0; $i -lt $Items.Count; $i++) {
+            $mark = if ($Items[$i].Checked) { "x" } else { " " }
+            Write-Host "$($i + 1)) [$mark] $($Items[$i].Label)"
+        }
+        $resp = Read-Host "输入数字序号切换（空格分隔，回车确认默认）"
+        if ([string]::IsNullOrWhiteSpace($resp)) {
+            return ($Items | Where-Object { $_.Checked } | ForEach-Object { $_.Value })
+        }
+        $selected = @()
+        foreach ($num in ($resp -split '\s+')) {
+            $idx = 0
+            if ([int]::TryParse($num, [ref]$idx)) {
+                $idx = $idx - 1
+                if ($idx -ge 0 -and $idx -lt $Items.Count) {
+                    $selected += $Items[$idx].Value
+                }
+            }
+        }
+        return $selected
+    }
+
+    $cur = 0
+    $count = $Items.Count
+    Write-Host "`n$Title" -ForegroundColor Cyan
+    Write-Host "↑↓ move, space select, enter confirm" -ForegroundColor DarkGray
+
+    while ($true) {
+        for ($i = 0; $i -lt $count; $i++) {
+            $pointer = if ($i -eq $cur) { "> " } else { "  " }
+            $box = if ($Items[$i].Checked) { "◉ " } else { "◯ " }
+            $fg = if ($i -eq $cur) { "Cyan" } elseif ($Items[$i].Checked) { "Green" } else { "Gray" }
+            Write-Host "$pointer$box$($Items[$i].Label)" -ForegroundColor $fg
+        }
+
+        $key = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        if ($key.VirtualKeyCode -eq 38) { # Up
+            $cur = ($cur - 1 + $count) % $count
+        } elseif ($key.VirtualKeyCode -eq 40) { # Down
+            $cur = ($cur + 1) % $count
+        } elseif ($key.VirtualKeyCode -eq 32) { # Space
+            $Items[$cur].Checked = -not $Items[$cur].Checked
+        } elseif ($key.VirtualKeyCode -eq 13) { # Enter
+            break
+        } elseif ($key.Character -eq 'q') {
+            Write-Host "已取消 (Aborted)."
+            exit 1
+        }
+
+        try {
+            $pos = $host.UI.RawUI.CursorPosition
+            $pos.Y = [Math]::Max(0, $pos.Y - $count)
+            $pos.X = 0
+            $host.UI.RawUI.CursorPosition = $pos
+        } catch {}
+    }
+    return ($Items | Where-Object { $_.Checked } | ForEach-Object { $_.Value })
+}
+
+function Prompt-InteractiveWizard {
+    Write-Host "`n==================================================" -ForegroundColor Cyan
+    Write-Host " 🤖 AI Agent Harness 交互式部署向导 (Deployment Wizard)" -ForegroundColor Cyan
+    Write-Host "==================================================" -ForegroundColor Cyan
+
+    $langOptions = @(
+        @{ Label = "English (en)"; Value = "en" },
+        @{ Label = "简体中文 (Simplified Chinese, zh)"; Value = "zh" },
+        @{ Label = "繁體中文 (Traditional Chinese, zh-tw)"; Value = "zh-tw" },
+        @{ Label = "Français (French, fr)"; Value = "fr" },
+        @{ Label = "Deutsch (German, de)"; Value = "de" }
+    )
+    $script:Language = Prompt-SingleSelect "[1/5] 选择规则模板语言 (Select Template Language):" $langOptions
+
+    $scopeOptions = @(
+        @{ Label = "目标项目部署 (Target Project only)"; Value = "project" },
+        @{ Label = "仅本机全局规则 (Global Rules only: Claude/Antigravity/Codex)"; Value = "global" },
+        @{ Label = "完整部署 (Both Project & Global Rules)"; Value = "both" }
+    )
+    $scope = Prompt-SingleSelect "[2/5] 选择部署范围 (Select Deployment Scope):" $scopeOptions
+
+    if ($scope -eq "global" -or $scope -eq "both") {
+        $script:Global = $true
+    }
+
+    if ($scope -eq "project" -or $scope -eq "both") {
+        Write-Host "`n[3/5] 输入目标项目目录路径 (Enter Project Path):" -ForegroundColor Cyan
+        $inPath = Read-Host "项目路径 (默认当前目录 [.]) [Project Path]"
+        if ([string]::IsNullOrWhiteSpace($inPath)) { $inPath = "." }
+        $script:ProjectPath = $inPath
+
+        $toolOptions = @(
+            @{ Label = "Claude Code (CLAUDE.md 桥接、安全拦截钩子与设置)"; Value = "claude"; Checked = $true },
+            @{ Label = "OpenAI Codex / CLI (AGENTS.md)"; Value = "codex"; Checked = $true },
+            @{ Label = "Google Antigravity (AGENTS.md / GEMINI.md 兼容入口)"; Value = "antigravity"; Checked = $true },
+            @{ Label = "GitHub Copilot (.github/copilot-instructions.md 桥接)"; Value = "copilot"; Checked = $true },
+            @{ Label = "Cursor (.cursorrules 规则桥接)"; Value = "cursor"; Checked = $true },
+            @{ Label = "Zed IDE (AGENTS.md)"; Value = "zed"; Checked = $true }
+        )
+        $selectedTools = Prompt-MultiSelect "[4/5] 选择要配置的 Agent 工具 (Select Agent Tools to configure):" $toolOptions
+
+        $script:ToolClaude = $selectedTools -contains "claude"
+        $script:ToolCodex = $selectedTools -contains "codex"
+        $script:ToolAntigravity = $selectedTools -contains "antigravity"
+        $script:ToolCopilot = $selectedTools -contains "copilot"
+        $script:ToolCursor = $selectedTools -contains "cursor"
+        $script:ToolZed = $selectedTools -contains "zed"
+    }
+
+    $optOptions = @(
+        @{ Label = "更新模式 (Update mode: 备份并更新已有规则与外部技能库)"; Value = "update"; Checked = $false },
+        @{ Label = "项目事实初始化 (Initialize: 自动扫描技术栈并生成 AGENTS.md)"; Value = "init"; Checked = $false },
+        @{ Label = "启用跨工具长期记忆 (AI Memory: 初始化 .ai-memory.toml)"; Value = "aimem"; Checked = $false },
+        @{ Label = "启用 Comet CLI 工作流 (Comet: 初始化 comet 状态机)"; Value = "comet"; Checked = $false }
+    )
+    $selectedOpts = Prompt-MultiSelect "[5/5] 可选功能与执行模式 (Optional workflows & execution mode):" $optOptions
+
+    if ($selectedOpts -contains "update") { $script:Update = $true }
+    if ($selectedOpts -contains "init") { $script:Initialize = $true }
+    if ($selectedOpts -contains "aimem") { $script:AiMemoryInit = $true }
+    if ($selectedOpts -contains "comet") { $script:CometInit = $true }
+
+    Write-Host "`n✔ 配置完成，正在执行部署...`n" -ForegroundColor Green
+}
+
+$isInteractive = $Interactive -or (-not $ProjectPath -and -not $Global -and (-not [Console]::IsInputRedirected))
+if ($isInteractive) {
+    Prompt-InteractiveWizard
+}
 
 # Normalize language option
 $NormLang = ($Language.Trim().ToLower() -replace '_', '-')
@@ -594,41 +784,61 @@ if ($Initialize) {
 }
 
 # Bridge for Claude Code (CLAUDE.md)
-$TargetClaudeFile = Join-Path $ResolvedProjectPath "CLAUDE.md"
-if (-not (Test-Path $TargetClaudeFile)) {
-    try {
-        New-Item -ItemType SymbolicLink -Path $TargetClaudeFile -Target "AGENTS.md" -ErrorAction Stop | Out-Null
-        Write-Host "  [OK] Created symlink: CLAUDE.md -> AGENTS.md" -ForegroundColor Green
-    } catch {
-        Set-Content -Path $TargetClaudeFile -Value "@AGENTS.md`n" -Encoding UTF8
-        Write-Host "  [OK] Created reference file: CLAUDE.md (@AGENTS.md)" -ForegroundColor Green
+if ($ToolClaude) {
+    $TargetClaudeFile = Join-Path $ResolvedProjectPath "CLAUDE.md"
+    if (-not (Test-Path $TargetClaudeFile)) {
+        try {
+            New-Item -ItemType SymbolicLink -Path $TargetClaudeFile -Target "AGENTS.md" -ErrorAction Stop | Out-Null
+            Write-Host "  [OK] Created symlink: CLAUDE.md -> AGENTS.md" -ForegroundColor Green
+        } catch {
+            Set-Content -Path $TargetClaudeFile -Value "@AGENTS.md`n" -Encoding UTF8
+            Write-Host "  [OK] Created reference file: CLAUDE.md (@AGENTS.md)" -ForegroundColor Green
+        }
+    } else {
+        Write-Host "  [INFO] CLAUDE.md already exists, keeping existing file." -ForegroundColor Gray
     }
-} else {
-    Write-Host "  [INFO] CLAUDE.md already exists, keeping existing file." -ForegroundColor Gray
 }
 
 # Bridge for GitHub Copilot (.github/copilot-instructions.md)
-$TargetGithubDir = Join-Path $ResolvedProjectPath ".github"
-$TargetCopilotFile = Join-Path $TargetGithubDir "copilot-instructions.md"
-if (-not (Test-Path $TargetGithubDir)) {
-    New-Item -ItemType Directory -Path $TargetGithubDir -Force | Out-Null
-}
-if (-not (Test-Path $TargetCopilotFile)) {
-    try {
-        New-Item -ItemType SymbolicLink -Path $TargetCopilotFile -Target "..\AGENTS.md" -ErrorAction Stop | Out-Null
-        Write-Host "  [OK] Created symlink: .github/copilot-instructions.md -> AGENTS.md" -ForegroundColor Green
-    } catch {
-        Copy-Item -Path $TargetAgentsFile -Destination $TargetCopilotFile -Force
-        Write-Host "  [OK] Created file: .github/copilot-instructions.md" -ForegroundColor Green
+if ($ToolCopilot) {
+    $TargetGithubDir = Join-Path $ResolvedProjectPath ".github"
+    $TargetCopilotFile = Join-Path $TargetGithubDir "copilot-instructions.md"
+    if (-not (Test-Path $TargetGithubDir)) {
+        New-Item -ItemType Directory -Path $TargetGithubDir -Force | Out-Null
     }
-} else {
-    Write-Host "  [INFO] copilot-instructions.md already exists, keeping existing file." -ForegroundColor Gray
+    if (-not (Test-Path $TargetCopilotFile)) {
+        try {
+            New-Item -ItemType SymbolicLink -Path $TargetCopilotFile -Target "..\AGENTS.md" -ErrorAction Stop | Out-Null
+            Write-Host "  [OK] Created symlink: .github/copilot-instructions.md -> AGENTS.md" -ForegroundColor Green
+        } catch {
+            Copy-Item -Path $TargetAgentsFile -Destination $TargetCopilotFile -Force
+            Write-Host "  [OK] Created file: .github/copilot-instructions.md" -ForegroundColor Green
+        }
+    } else {
+        Write-Host "  [INFO] copilot-instructions.md already exists, keeping existing file." -ForegroundColor Gray
+    }
+}
+
+# Bridge for Cursor (.cursorrules)
+if ($ToolCursor) {
+    $TargetCursorFile = Join-Path $ResolvedProjectPath ".cursorrules"
+    if (-not (Test-Path $TargetCursorFile)) {
+        try {
+            New-Item -ItemType SymbolicLink -Path $TargetCursorFile -Target "AGENTS.md" -ErrorAction Stop | Out-Null
+            Write-Host "  [OK] Created symlink: .cursorrules -> AGENTS.md" -ForegroundColor Green
+        } catch {
+            Set-Content -Path $TargetCursorFile -Value "@AGENTS.md`n" -Encoding UTF8
+            Write-Host "  [OK] Created reference file: .cursorrules (@AGENTS.md)" -ForegroundColor Green
+        }
+    } else {
+        Write-Host "  [INFO] .cursorrules already exists, keeping existing file." -ForegroundColor Gray
+    }
 }
 
 # Note: no Zed-specific configuration is created.
 
 # Deploy Claude Code PreToolUse Security Hooks (.claude/settings.json + .claude/hooks/)
-if (Test-Path $SourceClaudeSettings) {
+if ($ToolClaude -and (Test-Path $SourceClaudeSettings)) {
     $TargetClaudeDir = Join-Path $ResolvedProjectPath ".claude"
     if (-not (Test-Path $TargetClaudeDir)) {
         New-Item -ItemType Directory -Path $TargetClaudeDir -Force | Out-Null
