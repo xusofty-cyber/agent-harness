@@ -123,6 +123,7 @@
 - **`using-git-worktrees`**：利用 Git Worktree 实现物理工作区强隔离。
 - **`finishing-a-development-branch`**：开发分支收尾、审查与合并决策。
 - **`requesting-code-review`**：提交前自我代码审查与要求人工评审。
+- **`open-code-review`**：确定性代码评审——规则先行、行号锚定、全量覆盖。`ocr` CLI 已装走 Tier A 委托，否则走 Tier B 方法论。
 - **`receiving-code-review`**：技术性接收人类评审意见并求证，拒绝盲目顺从。
 - **`writing-skills`**：技能编写与校验框架。
 - **`diagnosing-superpowers`**：会话偏航排查与质量审计。

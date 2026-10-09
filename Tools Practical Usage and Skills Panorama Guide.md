@@ -132,6 +132,7 @@ The installer copies the repository's skill directories into `.agents/skills/`; 
 - **`using-git-worktrees`**: Isolated physical workspaces.
 - **`finishing-a-development-branch`**: Merge and integration decisions.
 - **`requesting-code-review`**: Pre-merge review verification.
+- **`open-code-review`**: Deterministic code review — rule-first, line-anchored, coverage-mandated. Tier A via `ocr` CLI delegation, Tier B methodology without it.
 - **`receiving-code-review`**: Technical evaluation of human review comments.
 - **`writing-skills`**: Skill creator and validator.
 - **`diagnosing-superpowers`**: Audits session drift or cost.

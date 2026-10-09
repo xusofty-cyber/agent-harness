@@ -183,6 +183,19 @@ function Guide-OptionalCliTools([string]$TargetPath) {
             Write-Host "  Later: run 'rtk init' from the project directory."
         }
     }
+
+    if (Get-Command ocr -ErrorAction SilentlyContinue) {
+        Write-Host "  [OK] Open Code Review CLI (ocr) detected: Tier A delegation review is available via the open-code-review skill." -ForegroundColor Green
+    } else {
+        Write-Host "  Open Code Review CLI (ocr) is optional. The open-code-review skill works without it (Tier B methodology mode); installing enables zero-LLM-cost delegation review."
+        if (Confirm-OptionalStep "Install Open Code Review CLI now?") {
+            & npm install -g @alibaba-group/open-code-review
+            if ($LASTEXITCODE -ne 0) { Write-Warning "ocr installation failed. Manual command: npm install -g @alibaba-group/open-code-review" }
+            else { Write-Host "  [INFO] ocr installed. Delegation mode needs no LLM key; the host agent performs the review." -ForegroundColor Yellow }
+        } else {
+            Write-Host "  Install command: npm install -g @alibaba-group/open-code-review"
+        }
+    }
 }
 
 # ==============================================================================
