@@ -6,6 +6,8 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-09
+
 ### Added
 - `living-documentation` skill (`version: 0.2.0`): new §7 documents the bundled
   `scripts/doc-impact.py` (previously undiscoverable from the skill body).
