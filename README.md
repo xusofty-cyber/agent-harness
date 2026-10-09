@@ -64,7 +64,7 @@ Use `-Initialize` / `--initialize` during deployment to create guidance with loc
 ## Directory Structure
 
 ```text
-agents-living/
+agent-harness/
 ├── .agents/
 │   ├── rules/                       # Modular sub-rules (loaded on-demand)
 │   │   ├── engineering-spec.md      # SDD specification-first, TDD verification gate
@@ -146,13 +146,13 @@ ai-memory enforces a safe, fail-closed policy requiring an explicit opt-in marke
   Copy-Item .ai-memory.toml.example .ai-memory.toml
   (Get-Content .ai-memory.toml) `
       -replace 'replace-with-workspace-name', 'default' `
-      -replace 'replace-with-project-name', 'agents-living' |
+      -replace 'replace-with-project-name', 'agent-harness' |
       Set-Content .ai-memory.toml
   ```
 - **Linux / macOS (Bash)**:
   ```bash
   cp .ai-memory.toml.example .ai-memory.toml
-  sed -i 's/replace-with-workspace-name/default/g; s/replace-with-project-name/agents-living/g' .ai-memory.toml
+  sed -i 's/replace-with-workspace-name/default/g; s/replace-with-project-name/agent-harness/g' .ai-memory.toml
   ```
 
 #### Step 3: Run the client setup helper
