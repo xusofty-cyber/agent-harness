@@ -170,9 +170,10 @@ PreToolUse 钩子是 Claude Code 专属机制，部署脚本不会为其他工�
        │
        ▼
  阶段 10：检测可选 CLI 并逐项征询
-   ├─ 缺少 CodeGraph / Rust Token Killer (RTK) 时询问是否安装
+   ├─ 缺少 CodeGraph / Rust Token Killer (RTK) / Open Code Review (ocr) 时询问是否安装
    ├─ 单独询问是否运行 CodeGraph Agent 接线 / 项目索引初始化
-   └─ 单独询问是否在项目运行 rtk init；默认跳过，非交互时仅显示命令
+   ├─ 单独询问是否在项目运行 rtk init；默认跳过，非交互时仅显示命令
+   └─ 检测/安装 ocr 可启用 open-code-review 的 Tier A 委托评审；不安装仍支持 Tier B
 ```
 
 ---

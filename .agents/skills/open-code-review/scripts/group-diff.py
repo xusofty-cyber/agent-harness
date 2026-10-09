@@ -21,8 +21,10 @@ from pathlib import Path
 NOISE_PATTERNS = (
     r"(^|/)package-lock\.json$", r"(^|/)yarn\.lock$", r"(^|/)pnpm-lock\.yaml$",
     r"(^|/)poetry\.lock$", r"(^|/)Cargo\.lock$", r"(^|/)go\.sum$",
-    r"(^|/)(dist|build|out)/", r"\.min\.js$", r"\.bundle\.js$",
-    r"\.(png|jpe?g|gif|ico|woff2?|ttf|pdf|zip|tar\.gz)$",
+    r"(^|/)(dist|build|out)/", r"\.min\.(js|css)$", r"\.bundle\.js$", r"\.map$",
+    r"\.(png|jpe?g|gif|ico|woff2?|ttf|eot|pdf|zip|tar\.gz)$",
+    r"\.(o|obj|so|dylib|dll|exe|a|lib)$",
+    r"(^|/)(CMakeCache\.txt|CMakeFiles/)",
     r"(^|/)(vendor|node_modules)/", r"\.pb\.go$", r"_generated\.py$",
 )
 
@@ -71,26 +73,74 @@ def is_noise(path: str) -> str | None:
 
 
 def test_partner(path: str, files: set[str]) -> str | None:
-    """Find the implementation<->test partner for a path."""
+    """Find the implementation<->test partner for a path across directories."""
     p = Path(path)
     stem = p.stem
     parent = p.parent.as_posix()
-    candidates = []
+
+    is_test = False
+    base = stem
     if stem.startswith("test_"):
         base = stem[5:]
-        candidates = [f"{parent}/{base}{p.suffix}".lstrip("./"),
-                      f"{parent}/src/{base}{p.suffix}".lstrip("./")]
-    elif stem.endswith("_test") or stem.endswith(".test") or stem.endswith(".spec"):
+        is_test = True
+    elif stem.endswith(("_test", ".test", ".spec")):
         base = re.sub(r"(_test|\.test|\.spec)$", "", stem)
-        candidates = [f"{parent}/{base}{p.suffix}".lstrip("./")]
+        is_test = True
+    elif any(part in ("tests", "test", "__tests__", "spec") for part in p.parts):
+        is_test = True
+
+    local_candidates: list[str] = []
+    if is_test:
+        local_candidates.extend([
+            f"{parent}/{base}{p.suffix}".lstrip("./"),
+            f"{parent}/src/{base}{p.suffix}".lstrip("./"),
+        ])
+        # Cross-directory matching: tests/... -> src/... or root
+        rel_to_test = re.sub(r"^(tests|test|__tests__|spec)/?(unit/|integration/)?", "", path)
+        rel_p = Path(rel_to_test)
+        rel_base_stem = re.sub(r"^(test_)|(_test|\.test|\.spec)$", "", rel_p.stem)
+        rel_dir = rel_p.parent.as_posix()
+        for prefix in ("", "src/", "lib/"):
+            cand = f"{prefix}{rel_dir}/{rel_base_stem}{p.suffix}".replace("//", "/").lstrip("./")
+            local_candidates.append(cand)
+            cand_root = f"{prefix}{rel_base_stem}{p.suffix}".lstrip("./")
+            local_candidates.append(cand_root)
     else:
-        candidates = [f"{parent}/test_{stem}{p.suffix}".lstrip("./"),
-                      f"{parent}/{stem}_test{p.suffix}".lstrip("./"),
-                      f"{parent}/{stem}.test{p.suffix}".lstrip("./"),
-                      f"{parent}/{stem}.spec{p.suffix}".lstrip("./")]
-    for c in candidates:
+        local_candidates.extend([
+            f"{parent}/test_{stem}{p.suffix}".lstrip("./"),
+            f"{parent}/{stem}_test{p.suffix}".lstrip("./"),
+            f"{parent}/{stem}.test{p.suffix}".lstrip("./"),
+            f"{parent}/{stem}.spec{p.suffix}".lstrip("./"),
+        ])
+        for tdir in ("tests", "test", "__tests__"):
+            local_candidates.extend([
+                f"{tdir}/test_{stem}{p.suffix}".lstrip("./"),
+                f"{tdir}/{stem}_test{p.suffix}".lstrip("./"),
+                f"{tdir}/{stem}.test{p.suffix}".lstrip("./"),
+                f"{tdir}/{parent}/test_{stem}{p.suffix}".lstrip("./"),
+                f"{tdir}/{re.sub(r'^(src|lib)/?', '', parent)}/test_{stem}{p.suffix}".lstrip("./"),
+            ])
+
+    for c in local_candidates:
         if c in files and c != path:
             return c
+
+    # Fallback: scan across all files for matching base stem and suffix
+    for other in sorted(files):
+        if other == path:
+            continue
+        op = Path(other)
+        if op.suffix != p.suffix:
+            continue
+        if is_test:
+            if op.stem == base:
+                return other
+        else:
+            ostem = op.stem
+            o_base = ostem[5:] if ostem.startswith("test_") else re.sub(r"(_test|\.test|\.spec)$", "", ostem)
+            if o_base == stem:
+                return other
+
     return None
 
 

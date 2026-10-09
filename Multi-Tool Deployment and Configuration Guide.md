@@ -154,9 +154,10 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
        │
        ▼
  Phase 10: Probe Optional CLIs & Interactive Prompts
-   ├─ Offer CodeGraph / Rust Token Killer (RTK) install if missing
+   ├─ Offer CodeGraph / Rust Token Killer (RTK) / Open Code Review (ocr) install if missing
    ├─ Ask whether to wire CodeGraph agents / index project
-   └─ Ask whether to run rtk init; skipped in non-interactive mode
+   ├─ Ask whether to run rtk init; skipped in non-interactive mode
+   └─ Installing ocr enables Tier A delegation review; Tier B works offline without it
 ```
 
 ---

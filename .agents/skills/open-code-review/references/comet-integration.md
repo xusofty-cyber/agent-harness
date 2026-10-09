@@ -7,7 +7,7 @@ alongside the existing gates.
 
 ```text
 1. Run unit/functional tests (existing)
-2. Run `python3 tools/doc-impact.py` — no 🔴 must-update remains (existing)
+2. Run `python3 .agents/skills/living-documentation/scripts/doc-impact.py` (or `tools/doc-impact.py`) — no 🔴 must-update remains (existing)
 3. Code review gate (new):
    - If `ocr` CLI is installed: `ocr delegate preview --format json`,
      then follow the open-code-review skill Tier A workflow.

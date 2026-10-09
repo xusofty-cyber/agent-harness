@@ -162,6 +162,7 @@ function stagedFiles() {
     return execSync("git diff --cached --name-only", {
       encoding: "utf-8",
       timeout: 5000,
+      stdio: ["pipe", "pipe", "ignore"],
     })
       .split("\n")
       .map((l) => l.trim())
@@ -177,12 +178,40 @@ function pushedFiles() {
     return execSync("git diff --name-only @{u}...HEAD", {
       encoding: "utf-8",
       timeout: 5000,
+      stdio: ["pipe", "pipe", "ignore"],
     })
       .split("\n")
       .map((l) => l.trim())
       .filter(Boolean);
   } catch {
-    return [];
+    // If no upstream tracking branch (@{u}), fall back to default branch comparison
+    for (const base of ["origin/main", "origin/master", "main", "master"]) {
+      try {
+        return execSync(`git diff --name-only ${base}...HEAD`, {
+          encoding: "utf-8",
+          timeout: 5000,
+          stdio: ["pipe", "pipe", "ignore"],
+        })
+          .split("\n")
+          .map((l) => l.trim())
+          .filter(Boolean);
+      } catch {
+        // try next base
+      }
+    }
+    // Last resort: files in current HEAD commit
+    try {
+      return execSync("git show -m --name-only --pretty=format: HEAD", {
+        encoding: "utf-8",
+        timeout: 5000,
+        stdio: ["pipe", "pipe", "ignore"],
+      })
+        .split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean);
+    } catch {
+      return [];
+    }
   }
 }
 

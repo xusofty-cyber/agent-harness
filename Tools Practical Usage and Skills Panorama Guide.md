@@ -10,7 +10,7 @@ This guide provides a comprehensive handbook for software engineering and techni
 
 1. [Core Architecture & Tool Matrix (Who Manages What)](#1-core-architecture--tool-matrix-who-manages-what)
 2. [Skills & Ecosystem Tools Inventory](#2-skills--ecosystem-tools-inventory)
-   - 2.1 41 Integrated Native Skills Categorized
+   - 2.1 42 Integrated Native Skills Categorized
    - 2.2 Skill Source Metadata & Template Sync (`skills-lock.json` + `deploy-agents`)
    - 2.3 Optional Harness CLI Tools
    - 2.4 Token Economics of Skills (Why 40+ Skills Do NOT Blow Up Context)
@@ -93,7 +93,7 @@ The deployment scripts write paths; check each host's current documentation and 
 
 ## 2. Skills & Ecosystem Tools Inventory
 
-### 2.1 41 Integrated Native Skills Categorized
+### 2.1 42 Integrated Native Skills Categorized
 
 The installer copies the repository's skill directories into `.agents/skills/`; actual discovery depends on the host tool and its configuration.
 
@@ -204,6 +204,7 @@ Skill discovery and context costs depend on the host agent and its configuration
 | **Token Conservation** | `caveman` | Only when the host loads the Skill or plugin | Be concise while preserving necessary context, technical accuracy, and safety details |
 | **Document Processing** | `docx` / `pdf` | Mentions `.docx` or `.pdf` | Professional formatting without running code test suites |
 | **Living Docs & Traceability** | [`engineering-spec.md`](.agents/rules/engineering-spec.md) + `living-documentation` | `/living-documentation` / sync trace docs | Maintain 4-tier docs (specs/architecture/reference/guides) via L0/L1/L2 impact thresholds and frontmatter traceability |
+| **Code Review & Quality Gate** | `open-code-review` + `requesting-code-review` | Before merge or after task completion | Rule-first, line-anchored, coverage-mandated; Tier A delegation if `ocr` CLI exists, otherwise Tier B methodology |
 | **Task Completion** | `verification-before-completion` | End of task | Present physical command execution evidence |
 
 ---

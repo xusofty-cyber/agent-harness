@@ -116,6 +116,7 @@ SOURCE_SKILLS_DIR="${SCRIPT_DIR}/.agents/skills"
 SOURCE_SKILLS_LOCK="${SCRIPT_DIR}/skills-lock.json"
 SOURCE_CLAUDE_SETTINGS="${SCRIPT_DIR}/.claude/settings.json"
 SOURCE_AI_MEMORY_EXAMPLE="${SCRIPT_DIR}/.ai-memory.toml.example"
+SOURCE_REVIEW_SENSITIVE_PATHS="${SCRIPT_DIR}/.agents/review-sensitive-paths.json"
 
 # Back up managed target paths before an explicit update replaces them.
 backup_path() {
@@ -623,6 +624,17 @@ if [ -d "${SOURCE_RULES_DIR}" ]; then
             fi
         fi
     done
+fi
+
+# Review sensitive paths config (.agents/review-sensitive-paths.json)
+if [ -f "${SOURCE_REVIEW_SENSITIVE_PATHS}" ]; then
+    TARGET_SENSITIVE_PATHS="${TARGET_PROJECT_DIR}/.agents/review-sensitive-paths.json"
+    mkdir -p "${TARGET_PROJECT_DIR}/.agents"
+    if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_SENSITIVE_PATHS}" ]; then
+        if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_SENSITIVE_PATHS}"; fi
+        cp -f "${SOURCE_REVIEW_SENSITIVE_PATHS}" "${TARGET_SENSITIVE_PATHS}"
+        echo -e "  ${GREEN}[√] 已同步审查敏感路径配置: .agents/review-sensitive-paths.json${NC}"
+    fi
 fi
 
 # ==============================================================================

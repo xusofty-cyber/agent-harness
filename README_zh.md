@@ -24,7 +24,7 @@
    - 永久硬拦截（`exit 2`）：受保护分支（`develop`/`master`/`main`/`release*`）直改提交、`git push --force`、删除受保护远端分支、受保护分支 rebase；
    - 部分命令会硬拒绝，其他情况只是非阻断警告；正则检查不能覆盖所有命令形式，也不能替代 Git 服务端分支保护。
 
-3. **41 个可复用技能目录（[`.agents/skills/`](.agents/skills/)）**：
+3. **42 个可复用技能目录（[`.agents/skills/`](.agents/skills/)）**：
    - **Comet 集成说明**：引导检查已安装版本和项目配置；此技能本身不实现 Comet 状态机或阶段守卫。
    - **活体文档与代码追溯**：`living-documentation`（四阶文档体系：specs/architecture/reference/guides，Frontmatter 代码双向追溯关联，L0/L1/L2 变更门禁与文档演进）。
    - **规范驱动开发（SDD）**：`openspec` 全套 16 个技能（提案、变更应用、验证、主文档同步、归档）。
@@ -70,7 +70,7 @@ agents-living/
 │   │   ├── git-workflow.md          # Git 授权模型、受保护分支强隔离、提交规范
 │   │   ├── security-boundary.md     # 八大高风险操作防呆矩阵、凭证零泄露
 │   │   └── token-discipline.md      # 读拿说三道闸门、上下文防漏与日志截断
-│   └── skills/                      # 41 个原生工程技能库（Comet, OpenSpec, Superpowers...）
+│   └── skills/                      # 42 个原生工程技能库（Comet, OpenSpec, Superpowers...）
 ├── .claude/
 │   ├── settings.json                # Claude Code PreToolUse 安全拦截配置
 │   └── hooks/                       # 安全钩子脚本（Node.js，读取 stdin JSON）
@@ -81,7 +81,7 @@ agents-living/
 ├── Directory AGENTS.md              # Monorepo / 子模块边界隔离微型补丁
 ├── Multi-Tool Deployment and Configuration Guide.zh.md              # 跨工具适配原理、安全钩子与部署更新专著（中文）
 ├── Multi-Tool Deployment and Configuration Guide.md # 英文版部署配置指南
-├── Tools Practical Usage and Skills Panorama Guide.zh.md     # 41 个技能详解、Token 经济学与实战流转（中文）
+├── Tools Practical Usage and Skills Panorama Guide.zh.md     # 42 个技能详解、Token 经济学与实战流转（中文）
 ├── Tools Practical Usage and Skills Panorama Guide.md # 英文版技能实战指南
 ├── deploy-agents.ps1                # Windows 一键部署与在线更新自动化脚本
 ├── deploy-agents.sh                 # Linux / macOS 一键部署与在线更新自动化脚本
