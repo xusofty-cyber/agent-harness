@@ -82,6 +82,7 @@ agent-harness/
 ├── Multi-Tool Deployment and Configuration Guide.zh.md              # 跨工具适配原理、安全钩子与部署更新专著（中文）
 ├── Multi-Tool Deployment and Configuration Guide.md # 英文版部署配置指南
 ├── Tools Practical Usage and Skills Panorama Guide.zh.md     # 42 个技能详解、Token 经济学与实战流转（中文）
+├── Skills Usage Guide.zh.md                       # 各 skill 触发方式与使用时机说明（中文）
 ├── Tools Practical Usage and Skills Panorama Guide.md # 英文版技能实战指南
 ├── run-pipeline.ps1 / pipeline.ps1  # Windows PowerShell 统一流水线执行脚本
 ├── run-pipeline.sh / pipeline.sh   # Linux / macOS Bash 统一流水线执行脚本
