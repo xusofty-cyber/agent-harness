@@ -46,6 +46,14 @@ param (
     [switch]$ApplySkills,
 
     [Parameter(Mandatory = $false)]
+    [Alias('g')]
+    [switch]$Global,
+
+    [Parameter(Mandatory = $false)]
+    [Alias('u')]
+    [switch]$Update,
+
+    [Parameter(Mandatory = $false)]
     [Alias('y', 'NonInteractive')]
     [switch]$Yes,
 
@@ -73,9 +81,11 @@ if ($Help) {
     Write-Host "配置选项 (Configuration):" -ForegroundColor Cyan
     Write-Host "  -Project, -p <路径>    目标项目根目录 (默认: 当前目录 .)"
     Write-Host "  -Lang, -l <语言>       规则模板语言 (en, zh, zh-tw, fr, de；默认: zh)"
+    Write-Host "  -Global, -g            部署/更新本机各工具全局规则 (~/.gemini, ~/.codex, ~/.claude)"
+    Write-Host "  -Update, -u            覆盖更新已有全局规则并备份；同时更新外部 skills"
     Write-Host "  -CheckOnly, -k         只读检查模式 (技能仅检查差异、文档仅分析影响)"
     Write-Host "  -ApplySkills           在技能同步阶段主动拉取并应用上游更新"
-    Write-Host "  -Yes, -y               非交互/无人值守执行 (直接使用推荐配置)"
+    Write-Host "  -Yes, -y               非交互/无人值守执行 (直接使用推荐配置，不弹窗确认)"
     Write-Host "  -Interactive, -I       强制启用交互式逐步选择向导"
     Write-Host "  -Help, -h              显示本帮助信息`n"
     exit 0
@@ -311,7 +321,56 @@ if (-not $stageDeploy -and -not $stageMemory -and -not $stageSkills -and -not $s
 }
 
 $targetAbs = Resolve-Path $Project -ErrorAction SilentlyContinue
-if (-not $targetAbs) { $targetAbs = $Project } else { $targetAbs = $targetAbs.Path }
+if (-not $targetAbs) { $targetAbs = (Get-Item -Path $Project -ErrorAction SilentlyContinue).FullName }
+if (-not $targetAbs) { $targetAbs = $Project }
+if ($targetAbs -is [System.Management.Automation.PathInfo]) { $targetAbs = $targetAbs.Path }
+
+# Pre-flight review: when user passed parameters like -Global / -Update / -All but NOT -Yes
+$runGlobal = $Global.IsPresent
+$runUpdate = $Update.IsPresent
+$runApplySkills = $ApplySkills.IsPresent -or $runUpdate
+
+if (-not $Yes.IsPresent -and (-not [Console]::IsInputRedirected -or $Interactive.IsPresent)) {
+    if ($explicit) {
+        Write-Host "`n================================================================" -ForegroundColor Cyan
+        Write-Host "  🚀 Agent Harness 流水线执行前配置确认 (Pre-flight Review)   " -ForegroundColor Cyan
+        Write-Host "================================================================" -ForegroundColor Cyan
+        Write-Host "检测到执行参数。请确认是否需要同步处理全局规则与外部技能库：" -ForegroundColor Yellow
+
+        $globalChoice = Prompt-Select "[1/2] 本机全局各 Agent 工具规则处理 (Global Rules Sync):" @(
+            @{ Label = if ($runGlobal) { "● 确认: 部署/覆盖更新全局规则 (~/.gemini, ~/.codex, ~/.claude)" } else { "○ 跳过: 仅更新当前项目工程，不改动本机全局规则" }; Value = if ($runGlobal) { "sync" } else { "skip" } },
+            @{ Label = if (-not $runGlobal) { "● 确认: 部署/覆盖更新全局规则 (~/.gemini, ~/.codex, ~/.claude)" } else { "○ 跳过: 仅更新当前项目工程，不改动本机全局规则" }; Value = if (-not $runGlobal) { "sync" } else { "skip" } }
+        )
+        if ($globalChoice -eq "sync") {
+            $runGlobal = $true
+            $runUpdate = $true
+        } else {
+            $runGlobal = $false
+        }
+
+        $skillChoice = Prompt-Select "[2/2] 外部开源技能库处理 (External Skills Sync):" @(
+            @{ Label = if ($runApplySkills) { "● 确认: 在线拉取 GitHub 上游更新并应用到本地技能库 (--apply)" } else { "○ 仅检查: 仅对比校验版本差异，不覆写技能文件 (--check)" }; Value = if ($runApplySkills) { "apply" } else { "check" } },
+            @{ Label = if (-not $runApplySkills) { "● 确认: 在线拉取 GitHub 上游更新并应用到本地技能库 (--apply)" } else { "○ 仅检查: 仅对比校验版本差异，不覆写技能文件 (--check)" }; Value = if (-not $runApplySkills) { "apply" } else { "check" } }
+        )
+        $runApplySkills = ($skillChoice -eq "apply")
+    } else {
+        # Inside wizard mode without explicit params
+        $globalChoice = Prompt-Select "[4/5] 是否同步部署/更新本机全局规则 (Global Rules: ~/.gemini, ~/.codex, ~/.claude)？" @(
+            @{ Label = "跳过全局规则 (Skip: 仅在当前项目工程内生效)"; Value = "skip" },
+            @{ Label = "同步更新全局规则 (Sync: 备份并更新各工具全局 AGENTS.md / CLAUDE.md)"; Value = "sync" }
+        )
+        if ($globalChoice -eq "sync") {
+            $runGlobal = $true
+            $runUpdate = $true
+        }
+
+        $skillChoice = Prompt-Select "[5/5] 外部技能库处理模式 (External Skills Sync):" @(
+            @{ Label = "安全检查模式 (Check only: 仅对比差异，不覆盖文件)"; Value = "check" },
+            @{ Label = "在线同步更新 (Apply: 自动拉取上游更新并应用)"; Value = "apply" }
+        )
+        $runApplySkills = ($skillChoice -eq "apply")
+    }
+}
 
 Write-Host "`n▶ 开始执行 Agent Harness 工程流水线" -ForegroundColor Cyan
 Write-Host "  目标工程: $targetAbs" -ForegroundColor Green
@@ -344,6 +403,8 @@ if ($stageDeploy) {
 
     $deployScript = Join-Path $repoRoot "deploy-agents.ps1"
     $deployParams = @{ ProjectPath = $targetAbs; Language = $Lang }
+    if ($runGlobal) { $deployParams["Global"] = $true }
+    if ($runUpdate) { $deployParams["Update"] = $true }
     if ($runDetailMode -eq "detailed") {
         $deployParams["Interactive"] = $true
     }
@@ -466,7 +527,7 @@ if ($stageSkills) {
                 & $pythonCmd $syncScript @syncArgs
             } else {
                 if (-not $CheckOnly.IsPresent) {
-                    $syncArgs += if ($ApplySkills.IsPresent) { "--apply" } else { "--check" }
+                    $syncArgs += if ($runApplySkills) { "--apply" } else { "--check" }
                 } else {
                     $syncArgs += "--check"
                 }

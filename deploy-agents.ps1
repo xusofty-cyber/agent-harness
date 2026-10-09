@@ -774,6 +774,8 @@ Write-Host "==================================================" -ForegroundColor
 Write-Host " Target Project: $ResolvedProjectPath" -ForegroundColor Cyan
 Write-Host "==================================================" -ForegroundColor Cyan
 
+$isSelfRepo = ($ResolvedProjectPath.TrimEnd('\', '/') -eq $ScriptDir.TrimEnd('\', '/'))
+
 # ==============================================================================
 # 3. Deploy / Update Project-level AGENTS.md & Bridges
 # ==============================================================================
@@ -951,12 +953,14 @@ if ($ToolClaude -and (Test-Path $SourceClaudeSettings)) {
         New-Item -ItemType Directory -Path $TargetClaudeDir -Force | Out-Null
     }
     $TargetClaudeSettings = Join-Path $TargetClaudeDir "settings.json"
-    if ($Update -or (-not (Test-Path $TargetClaudeSettings))) {
-        if ($Update) { Backup-ManagedPath $TargetClaudeSettings }
-        Copy-Item -Path $SourceClaudeSettings -Destination $TargetClaudeSettings -Force
-        Write-Host "  [OK] Deployed Claude Code security hooks: .claude/settings.json" -ForegroundColor Green
-    } else {
-        Write-Host "  [INFO] .claude/settings.json already exists, keeping existing file." -ForegroundColor Gray
+    if ((Resolve-Path -LiteralPath $SourceClaudeSettings -ErrorAction SilentlyContinue).Path -ne (Resolve-Path -LiteralPath $TargetClaudeSettings -ErrorAction SilentlyContinue).Path) {
+        if ($Update -or (-not (Test-Path $TargetClaudeSettings))) {
+            if ($Update) { Backup-ManagedPath $TargetClaudeSettings }
+            Copy-Item -Path $SourceClaudeSettings -Destination $TargetClaudeSettings -Force
+            Write-Host "  [OK] Deployed Claude Code security hooks: .claude/settings.json" -ForegroundColor Green
+        } else {
+            Write-Host "  [INFO] .claude/settings.json already exists, keeping existing file." -ForegroundColor Gray
+        }
     }
     # Deploy hook scripts (.claude/hooks/)
     $SourceHooksDir = Join-Path $ScriptDir ".claude\hooks"
@@ -965,11 +969,13 @@ if ($ToolClaude -and (Test-Path $SourceClaudeSettings)) {
         if (-not (Test-Path $TargetHooksDir)) {
             New-Item -ItemType Directory -Path $TargetHooksDir -Force | Out-Null
         }
-        Get-ChildItem -Path $SourceHooksDir -File | ForEach-Object {
-            $targetHook = Join-Path $TargetHooksDir $_.Name
-            if ($Update -or (-not (Test-Path $targetHook))) {
-                if ($Update) { Backup-ManagedPath $targetHook }
-                Copy-Item -Path $_.FullName -Destination $targetHook -Force
+        if (-not $isSelfRepo) {
+            Get-ChildItem -Path $SourceHooksDir -File | ForEach-Object {
+                $targetHook = Join-Path $TargetHooksDir $_.Name
+                if ($Update -or (-not (Test-Path $targetHook))) {
+                    if ($Update) { Backup-ManagedPath $targetHook }
+                    Copy-Item -Path $_.FullName -Destination $targetHook -Force
+                }
             }
         }
         Write-Host "  [OK] Deployed hook scripts: .claude/hooks/" -ForegroundColor Green
@@ -980,7 +986,7 @@ if ($ToolClaude -and (Test-Path $SourceClaudeSettings)) {
 # 4. Deploy / Update Sub-rules (.agents/rules/)
 # ==============================================================================
 $TargetRulesDir = Join-Path $ResolvedProjectPath ".agents\rules"
-if (Test-Path $SourceRulesDir) {
+if ((Test-Path $SourceRulesDir) -and (-not $isSelfRepo)) {
     if (-not (Test-Path $TargetRulesDir)) {
         New-Item -ItemType Directory -Path $TargetRulesDir -Force | Out-Null
     }
@@ -995,7 +1001,7 @@ if (Test-Path $SourceRulesDir) {
 }
 
 # Deploy review-sensitive-paths.json
-if (Test-Path $SourceReviewSensitivePaths) {
+if ((Test-Path $SourceReviewSensitivePaths) -and (-not $isSelfRepo)) {
     $TargetAgentsDir = Join-Path $ResolvedProjectPath ".agents"
     if (-not (Test-Path $TargetAgentsDir)) {
         New-Item -ItemType Directory -Path $TargetAgentsDir -Force | Out-Null
@@ -1029,15 +1035,17 @@ if (Test-Path $SourceSkillsDir) {
         $targetSkillPath = Join-Path $TargetSkillsDir $skillName
         
         # Copy / Update skill files
-        if ($Update -or (-not (Test-Path $targetSkillPath))) {
-            if ($Update) {
-                Backup-ManagedPath $targetSkillPath
-                Remove-Item -Path $targetSkillPath -Recurse -Force
+        if (-not $isSelfRepo) {
+            if ($Update -or (-not (Test-Path $targetSkillPath))) {
+                if ($Update) {
+                    Backup-ManagedPath $targetSkillPath
+                    Remove-Item -Path $targetSkillPath -Recurse -Force
+                }
+                Copy-Item -Path $_.FullName -Destination $targetSkillPath -Recurse -Force
+                Write-Host "  [OK] Deployed skill: .agents/skills/$skillName" -ForegroundColor Green
+            } else {
+                Write-Host "  [INFO] Skill .agents/skills/$skillName already exists." -ForegroundColor Gray
             }
-            Copy-Item -Path $_.FullName -Destination $targetSkillPath -Recurse -Force
-            Write-Host "  [OK] Deployed skill: .agents/skills/$skillName" -ForegroundColor Green
-        } else {
-            Write-Host "  [INFO] Skill .agents/skills/$skillName already exists." -ForegroundColor Gray
         }
 
         # Create Claude Code junction / symlink
@@ -1056,7 +1064,7 @@ if (Test-Path $SourceSkillsDir) {
 }
 
 # Deploy skills-lock.json
-if (Test-Path $SourceSkillsLock) {
+if ((Test-Path $SourceSkillsLock) -and (-not $isSelfRepo)) {
     $targetSkillsLock = Join-Path $ResolvedProjectPath "skills-lock.json"
     if ($Update -or (-not (Test-Path $targetSkillsLock))) {
         if ($Update) { Backup-ManagedPath $targetSkillsLock }
@@ -1066,7 +1074,7 @@ if (Test-Path $SourceSkillsLock) {
 }
 
 # Sync .ai-memory.toml.example
-if (Test-Path $SourceAiMemoryExample) {
+if ((Test-Path $SourceAiMemoryExample) -and (-not $isSelfRepo)) {
     $targetAiMemoryExample = Join-Path $ResolvedProjectPath ".ai-memory.toml.example"
     $targetAiMemory = Join-Path $ResolvedProjectPath ".ai-memory.toml"
     if ((-not (Test-Path $targetAiMemory)) -and (-not (Test-Path $targetAiMemoryExample))) {

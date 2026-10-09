@@ -45,9 +45,11 @@ usage() {
     echo -e "${CYAN}配置选项 (Configuration):${NC}"
     echo "  -p, --project <路径>    目标项目根目录 (默认: 当前目录 .)"
     echo "  -l, --lang <语言>       规则模板语言 (en, zh, zh-tw, fr, de；默认: zh)"
+    echo "  -g, --global            部署/更新本机各工具全局规则 (~/.gemini, ~/.codex, ~/.claude)"
+    echo "  -u, --update            覆盖更新已有全局规则并备份；同时更新外部 skills"
     echo "  -k, --check-only        只读检查模式 (技能仅检查差异、文档仅分析影响)"
     echo "  --apply-skills          在技能同步阶段主动拉取并应用上游更新"
-    echo "  -y, --yes               非交互/无人值守执行 (直接使用默认/推荐配置)"
+    echo "  -y, --yes               非交互/无人值守执行 (直接使用推荐配置，不弹窗确认)"
     echo "  --interactive, -I       强制启用交互式逐步选择向导"
     echo "  -h, --help              显示本帮助信息"
     echo ""
@@ -275,6 +277,8 @@ PROJECT_DIR="."
 LANG_OPTION="zh"
 CHECK_ONLY=false
 APPLY_SKILLS=false
+RUN_GLOBAL=false
+RUN_UPDATE=false
 NON_INTERACTIVE=false
 FORCE_INTERACTIVE=false
 EXPLICIT_STAGES=false
@@ -311,6 +315,8 @@ while [[ $# -gt 0 ]]; do
         --docs) STAGE_DOCS=true; EXPLICIT_STAGES=true; shift ;;
         -p|--project) PROJECT_DIR="$2"; shift 2 ;;
         -l|--lang) LANG_OPTION="$2"; shift 2 ;;
+        -g|--global) RUN_GLOBAL=true; shift ;;
+        -u|--update) RUN_UPDATE=true; shift ;;
         -k|--check-only) CHECK_ONLY=true; shift ;;
         --apply-skills) APPLY_SKILLS=true; shift ;;
         -y|--yes|--non-interactive) NON_INTERACTIVE=true; shift ;;
@@ -401,6 +407,67 @@ if [ "$STAGE_DEPLOY" = false ] && [ "$STAGE_MEMORY" = false ] && [ "$STAGE_SKILL
     STAGE_DOCS=true
 fi
 
+# Pre-flight review: when user passed parameters like -g / -u / -a but NOT -y
+RUN_APPLY_SKILLS=false
+if [ "$APPLY_SKILLS" = true ] || [ "$RUN_UPDATE" = true ]; then
+    RUN_APPLY_SKILLS=true
+fi
+
+if [ "$NON_INTERACTIVE" = false ] && { [ -t 0 ] || [ "$FORCE_INTERACTIVE" = true ]; }; then
+    if [ "$EXPLICIT_STAGES" = true ]; then
+        echo -e "\n${CYAN}================================================================${NC}"
+        echo -e "${CYAN}  🚀 Agent Harness 流水线执行前配置确认 (Pre-flight Review)   ${NC}"
+        echo -e "${CYAN}================================================================${NC}"
+        echo -e "${YELLOW}检测到执行参数。请确认是否需要同步处理全局规则与外部技能库：${NC}"
+
+        if [ "$RUN_GLOBAL" = true ]; then
+            prompt_select "[1/2] 本机全局各 Agent 工具规则处理 (Global Rules Sync):" \
+                "● 确认: 部署/覆盖更新全局规则 (~/.gemini, ~/.codex, ~/.claude)" "sync" \
+                "○ 跳过: 仅更新当前项目工程，不改动本机全局规则" "skip"
+        else
+            prompt_select "[1/2] 本机全局各 Agent 工具规则处理 (Global Rules Sync):" \
+                "○ 跳过: 仅更新当前项目工程，不改动本机全局规则" "skip" \
+                "● 确认: 部署/覆盖更新全局规则 (~/.gemini, ~/.codex, ~/.claude)" "sync"
+        fi
+        if [ "$SELECTED_VALUE" = "sync" ]; then
+            RUN_GLOBAL=true
+            RUN_UPDATE=true
+        else
+            RUN_GLOBAL=false
+        fi
+
+        if [ "$RUN_APPLY_SKILLS" = true ]; then
+            prompt_select "[2/2] 外部开源技能库处理 (External Skills Sync):" \
+                "● 确认: 在线拉取 GitHub 上游更新并应用到本地技能库 (--apply)" "apply" \
+                "○ 仅检查: 仅对比校验版本差异，不覆写技能文件 (--check)" "check"
+        else
+            prompt_select "[2/2] 外部开源技能库处理 (External Skills Sync):" \
+                "○ 仅检查: 仅对比校验版本差异，不覆写技能文件 (--check)" "check" \
+                "● 确认: 在线拉取 GitHub 上游更新并应用到本地技能库 (--apply)" "apply"
+        fi
+        if [ "$SELECTED_VALUE" = "apply" ]; then
+            RUN_APPLY_SKILLS=true
+        else
+            RUN_APPLY_SKILLS=false
+        fi
+    else
+        prompt_select "[4/5] 是否同步部署/更新本机全局规则 (Global Rules: ~/.gemini, ~/.codex, ~/.claude)？" \
+            "跳过全局规则 (Skip: 仅在当前项目工程内生效)" "skip" \
+            "同步更新全局规则 (Sync: 备份并更新各工具全局 AGENTS.md / CLAUDE.md)" "sync"
+        if [ "$SELECTED_VALUE" = "sync" ]; then
+            RUN_GLOBAL=true
+            RUN_UPDATE=true
+        fi
+
+        prompt_select "[5/5] 外部技能库处理模式 (External Skills Sync):" \
+            "安全检查模式 (Check only: 仅对比差异，不覆盖文件)" "check" \
+            "在线同步更新 (Apply: 自动拉取上游更新并应用)" "apply"
+        if [ "$SELECTED_VALUE" = "apply" ]; then
+            RUN_APPLY_SKILLS=true
+        fi
+    fi
+fi
+
 # Resolve absolute target path
 TARGET_ABS="$(cd "$PROJECT_DIR" 2>/dev/null && pwd || echo "$PROJECT_DIR")"
 
@@ -435,6 +502,12 @@ if [ "$STAGE_DEPLOY" = true ]; then
     SUMMARY_NAMES+=("$STAGE_NAME")
     
     deploy_cmd=("$REPO_ROOT/deploy-agents.sh" "$TARGET_ABS" "--lang" "$LANG_OPTION")
+    if [ "$RUN_GLOBAL" = true ]; then
+        deploy_cmd+=("--global")
+    fi
+    if [ "$RUN_UPDATE" = true ]; then
+        deploy_cmd+=("--update")
+    fi
     if [ "$RUN_DETAIL_MODE" = "detailed" ]; then
         deploy_cmd+=("--interactive")
     fi
@@ -547,7 +620,7 @@ if [ "$STAGE_SKILLS" = true ]; then
         else
             if [ "$CHECK_ONLY" = true ]; then
                 skills_cmd+=("--check")
-            elif [ "$APPLY_SKILLS" = true ]; then
+            elif [ "$RUN_APPLY_SKILLS" = true ]; then
                 skills_cmd+=("--apply")
             else
                 skills_cmd+=("--check")
