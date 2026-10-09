@@ -10,7 +10,7 @@ This guide provides a comprehensive handbook for software engineering and techni
 
 1. [Core Architecture & Tool Matrix (Who Manages What)](#1-core-architecture--tool-matrix-who-manages-what)
 2. [Skills & Ecosystem Tools Inventory](#2-skills--ecosystem-tools-inventory)
-   - 2.1 40+ Integrated Native Skills Categorized
+   - 2.1 41 Integrated Native Skills Categorized
    - 2.2 Skill Source Metadata & Template Sync (`skills-lock.json` + `deploy-agents`)
    - 2.3 Optional Harness CLI Tools
    - 2.4 Token Economics of Skills (Why 40+ Skills Do NOT Blow Up Context)
@@ -93,7 +93,7 @@ The deployment scripts write paths; check each host's current documentation and 
 
 ## 2. Skills & Ecosystem Tools Inventory
 
-### 2.1 40+ Integrated Native Skills Categorized
+### 2.1 41 Integrated Native Skills Categorized
 
 The installer copies the repository's skill directories into `.agents/skills/`; actual discovery depends on the host tool and its configuration.
 
@@ -148,9 +148,10 @@ The installer copies the repository's skill directories into `.agents/skills/`; 
 - **`docx`**: Word document generation, editing, and styling.
 - **`pdf`**: PDF text/table extraction and processing.
 
-#### 7. Pre-Decision Review & Cross-Tool Memory (In-Repo Skills)
+#### 7. Pre-Decision Review, Cross-Tool Memory & Living Documentation (In-Repo Skills)
 - **`cross-tool-memory`**: Cross-tool project-scoped memory navigation and recall aid (pairs with local ai-memory backend).
 - **`option-review`**: Pre-decision multi-option review generating an isolated 5-dimension decision matrix.
+- **`living-documentation`**: 4-tier living documentation suite (specs/architecture/reference/guides) with frontmatter-based code-doc bidirectional traceability, supporting L0/L1/L2 change impact thresholds.
 
 ---
 
@@ -201,6 +202,7 @@ Skill discovery and context costs depend on the host agent and its configuration
 | **Long Terminal Output** | optional `rtk` | Only when installed and its agent hook is configured | Otherwise use native concise flags; keep required validation and preserve relevant logs |
 | **Token Conservation** | `caveman` | Only when the host loads the Skill or plugin | Be concise while preserving necessary context, technical accuracy, and safety details |
 | **Document Processing** | `docx` / `pdf` | Mentions `.docx` or `.pdf` | Professional formatting without running code test suites |
+| **Living Docs & Traceability** | [`engineering-spec.md`](.agents/rules/engineering-spec.md) + `living-documentation` | `/living-documentation` / sync trace docs | Maintain 4-tier docs (specs/architecture/reference/guides) via L0/L1/L2 impact thresholds and frontmatter traceability |
 | **Task Completion** | `verification-before-completion` | End of task | Present physical command execution evidence |
 
 ---
