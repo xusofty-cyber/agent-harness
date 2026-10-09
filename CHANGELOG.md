@@ -7,10 +7,17 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 ## [Unreleased]
 
 ### Added
-- New local skill `living-documentation` (`version: 0.1.0`): 4-tier living documentation suite (`docs/{specs,architecture,reference,guides}`) with YAML frontmatter-based code-doc bidirectional traceability (`modules`, `depends_on`), L0/L1/L2 change impact thresholds, and deep integration with Comet change lifecycle (Open/Build/Verify/Archive) and OpenSpec workflows.
+- `tools/doc-impact.py`: living-documentation impact analysis — matches changed
+  files against doc `modules` globs, walks `depends_on` upward, and reports
+  staleness via `last_verified_commit` (🔴 must-update / 🟡 review / 🟢 in-sync);
+  advisory only, wired into comet Verify/Archive gates.
+- `tests/repo_checks.py`: `doc-frontmatter` check — `docs/{specs,architecture,
+  reference,guides,adr}/` markdown files must declare valid traceability
+  frontmatter (`id`/`type`/`status`/`modules`), with `type` matching its tier.
+- New local skill `living-documentation` (`version: 0.1.1`): 4-tier living documentation suite (`docs/{specs,architecture,reference,guides}`) with YAML frontmatter-based code-doc bidirectional traceability (`modules`, `depends_on`), L0/L1/L2 change impact thresholds, and deep integration with Comet change lifecycle (Open/Build/Verify/Archive) and OpenSpec workflows.
 - Four production-grade templates under `.agents/skills/living-documentation/templates/`: `srs.template.md`, `architecture.template.md`, `reference.template.md`, and `guide.template.md`.
 - Two reference guides under `.agents/skills/living-documentation/references/`: `comet-integration.md` and `traceability-matrix.md`.
-- `deploy-agents.sh` and `deploy-agents.ps1`: initialized 4-tier living documentation scaffold (`docs/{specs,architecture,reference,guides}`) on deployment; added `LivingDocScaffold` parity check in `tests/repo_checks.py`.
+- `deploy-agents.sh` and `deploy-agents.ps1`: initialized living documentation scaffold (`docs/{specs,architecture,reference,guides,adr}`) on deployment; added `LivingDocScaffold` parity check in `tests/repo_checks.py`.
 - Updated `Project AGENTS.md` and `.agents/rules/engineering-spec.md` with living documentation and code-doc traceability gates.
 - `deploy-agents.sh` and `deploy-agents.ps1`: added `-m` / `--ai-memory-init` (`-AiMemoryInit`) flag to optionally initialize `.ai-memory.toml` for target projects (inferring `workspace` and `project`), and sync `.ai-memory.toml.example` as reference.
 - New local skill `option-review` (`version: 0.1.1`): pre-decision review of

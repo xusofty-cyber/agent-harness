@@ -97,6 +97,68 @@ check("version:matches-changelog",
       bool(cl_headings) and version_file == cl_headings[0],
       f"VERSION={version_file!r} vs CHANGELOG newest={cl_headings[0] if cl_headings else None!r}")
 
+# --- 3d. Living-doc frontmatter ---
+# docs/{specs,architecture,reference,guides,adr}/ .md files must declare
+# valid traceability frontmatter: id / type / status / modules (non-empty).
+# type must match the containing tier directory. Missing tier dirs are skipped
+# (scaffold is created by deploy scripts in target projects, not in this repo).
+DOC_TIERS = ("specs", "architecture", "reference", "guides", "adr")
+DOC_TYPES = {"specs", "architecture", "reference", "guide", "adr"}
+DOC_STATUS = {"draft", "active", "deprecated"}
+TIER_TYPE = {"specs": "specs", "architecture": "architecture",
+             "reference": "reference", "guides": "guide", "adr": "adr"}
+
+def _parse_simple_frontmatter(text):
+    """Minimal YAML-subset parser for flat key: value, key: [a, b],
+    and multi-line list fields."""
+    m = re.match(r"^---\n(.*?)\n---\n", text, re.DOTALL)
+    if not m:
+        return None
+    fields = {}
+    current_list_key = None
+    for line in m.group(1).splitlines():
+        item = re.match(r"^\s+-\s+(.*)$", line)
+        if item and current_list_key:
+            fields[current_list_key].append(item.group(1).strip().strip("\"'"))
+            continue
+        current_list_key = None
+        km = re.match(r"^([A-Za-z_]+):\s*(.*)$", line)
+        if km:
+            key, val = km.group(1), km.group(2).strip()
+            if val == "":
+                fields[key] = []
+                current_list_key = key
+            elif val.startswith("[") and val.endswith("]"):
+                fields[key] = [v.strip().strip("\"'") for v in val[1:-1].split(",") if v.strip()]
+            else:
+                fields[key] = val.strip("\"'")
+    return fields
+
+for tier in DOC_TIERS:
+    tier_dir = ROOT / "docs" / tier
+    if not tier_dir.is_dir():
+        continue
+    for f in sorted(tier_dir.rglob("*.md")):
+        rel = f.relative_to(ROOT).as_posix()
+        fm = _parse_simple_frontmatter(f.read_text(encoding="utf-8-sig"))
+        check(f"doc:{rel}:frontmatter", fm is not None,
+              "missing YAML frontmatter block")
+        if fm is None:
+            continue
+        for field in ("id", "type", "status", "modules"):
+            check(f"doc:{rel}:{field}",
+                  bool(fm.get(field)),
+                  f"frontmatter must define non-empty {field}:")
+        check(f"doc:{rel}:type-valid",
+              fm.get("type") in DOC_TYPES,
+              f"type {fm.get('type')!r} not in {sorted(DOC_TYPES)}")
+        check(f"doc:{rel}:type-tier-match",
+              fm.get("type") == TIER_TYPE[tier],
+              f"type {fm.get('type')!r} != tier {tier!r} (expected {TIER_TYPE[tier]!r})")
+        check(f"doc:{rel}:status-valid",
+              fm.get("status") in DOC_STATUS,
+              f"status {fm.get('status')!r} not in {sorted(DOC_STATUS)}")
+
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
 # its counterpart marker must exist in the other. Markers that exist in
