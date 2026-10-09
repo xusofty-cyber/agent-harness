@@ -6,7 +6,7 @@ matches changed files against each document's `modules` globs, walks
 `depends_on` upward, and reports staleness via `last_verified_commit`.
 
 Usage:
-    python3 tools/doc-impact.py [--root DIR] [--changed-files F ...] [--since COMMIT] [--json]
+    python3 doc-impact.py [--root DIR] [--changed-files F ...] [--since COMMIT] [--json]
 
 - Default changed set: `git diff --name-only HEAD` + untracked files.
 - --since COMMIT: use `git diff --name-only COMMIT..HEAD` instead.
