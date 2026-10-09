@@ -1,6 +1,6 @@
 # docs/internal — 仓库自身的开发运维记录
 
-本目录存放 **agents-living 仓库自身的**开发过程记录（双轨状态记忆的 dogfood 实例），
+本目录存放 **agent-harness 仓库自身的**开发过程记录（双轨状态记忆的 dogfood 实例），
 **不是**随模板分发的内容，`deploy-agents.*` 也不会拷贝它们。
 
 - `PROJECT_CONTEXT.md` —— 本仓库的项目全景与演进编年史
