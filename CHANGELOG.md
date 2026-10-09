@@ -7,6 +7,13 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 ## [Unreleased]
 
 ### Added
+- Claude Code hook: sensitive-path commit/push advisory (open-code-review
+  Phase 2). `.claude/hooks/guard.mjs` now warns (non-blocking, exit 0) when
+  `git commit`/`git push` touches files matching
+  `.agents/review-sensitive-paths.json` patterns (built-in defaults cover
+  `auth/`/`crypto/`/`security/`/`payment/`/credentials/etc.), suggesting the
+  `open-code-review` skill before proceeding. Deterministic only — zero LLM
+  calls inside the hook.
 - New `open-code-review` skill (`version: 0.1.0`): deterministic code review
   methodology adapted from alibaba/open-code-review (Apache-2.0, see
   `ATTRIBUTION.md`). Three tiers: Tier A `ocr` CLI delegation (zero LLM cost),

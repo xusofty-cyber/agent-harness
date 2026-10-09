@@ -79,6 +79,113 @@ function isProtectedBranch(branch) {
   return false;
 }
 
+// === Sensitive-path review advisory (open-code-review Phase 2) ===
+// When committing/pushing files under sensitive paths, emit a non-blocking
+// warning suggesting the open-code-review skill. Deterministic only —
+// no LLM calls inside the hook.
+import { readFileSync, existsSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+function getRepoRoot() {
+  try {
+    return execSync("git rev-parse --show-toplevel", {
+      encoding: "utf-8",
+      timeout: 5000,
+    }).trim();
+  } catch {
+    // Fallback: assume standard layout (.claude/hooks/ two levels below root)
+    return join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+  }
+}
+
+// Default sensitive patterns (used when .agents/review-sensitive-paths.json
+// is absent — e.g. in projects deployed without it). Projects can override
+// by creating that file.
+const DEFAULT_SENSITIVE_PATTERNS = [
+  "**/auth/**",
+  "**/crypto/**",
+  "**/security/**",
+  "**/payment/**",
+  "**/billing/**",
+  "**/*.key",
+  "**/*.pem",
+  "**/*.p12",
+  "**/*.pfx",
+  "**/secrets/**",
+  "**/credentials/**",
+  "**/.env*",
+  "**/migrations/**",
+];
+
+function loadSensitivePatterns() {
+  try {
+    const cfgPath = join(getRepoRoot(), ".agents", "review-sensitive-paths.json");
+    if (!existsSync(cfgPath)) return DEFAULT_SENSITIVE_PATTERNS;
+    const cfg = JSON.parse(readFileSync(cfgPath, "utf-8"));
+    return Array.isArray(cfg.patterns) && cfg.patterns.length > 0
+      ? cfg.patterns
+      : DEFAULT_SENSITIVE_PATTERNS;
+  } catch {
+    return DEFAULT_SENSITIVE_PATTERNS;
+  }
+}
+
+function globToRegExp(glob) {
+  // Supports ** (any chars incl /) and * (any chars except /).
+  // A leading "**/" also matches zero directories (repo-root files).
+  let re = "";
+  let i = 0;
+  while (i < glob.length) {
+    if (glob.startsWith("**/", i)) {
+      re += "(.*/)?";
+      i += 3;
+    } else if (glob.startsWith("**", i)) {
+      re += ".*";
+      i += 2;
+    } else if (glob[i] === "*") {
+      re += "[^/]*";
+      i += 1;
+    } else if ("+?^${}()|[]\\.".includes(glob[i])) {
+      re += "\\" + glob[i];
+      i += 1;
+    } else {
+      re += glob[i];
+      i += 1;
+    }
+  }
+  return new RegExp("^" + re + "$");
+}
+
+function stagedFiles() {
+  try {
+    return execSync("git diff --cached --name-only", {
+      encoding: "utf-8",
+      timeout: 5000,
+    })
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function pushedFiles() {
+  // Files that would be pushed: local HEAD vs upstream
+  try {
+    return execSync("git diff --name-only @{u}...HEAD", {
+      encoding: "utf-8",
+      timeout: 5000,
+    })
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 // ============================================================
 // HARD BLOCKS (exit 2 — unconditionally denied)
 // ============================================================
@@ -191,6 +298,28 @@ if (
   warn(
     `删除临时远程分支——必须经人类明确授权并确认已合并。`
   );
+}
+
+// 10. Sensitive-path commit/push advisory (open-code-review)
+// Non-blocking: suggest the open-code-review skill when staged/pushed
+// files match sensitive-path patterns. Deterministic only.
+if (/\bgit\s+(commit|push)\b/.test(command)) {
+  const patterns = loadSensitivePatterns();
+  if (patterns.length > 0) {
+    const isPush = /\bgit\s+push\b/.test(command);
+    const files = isPush ? pushedFiles() : stagedFiles();
+    const regexes = patterns.map(globToRegExp);
+    const hits = files.filter((f) => regexes.some((re) => re.test(f)));
+    if (hits.length > 0) {
+      const shown = hits.slice(0, 5).join(", ");
+      const more = hits.length > 5 ? ` 等共 ${hits.length} 个文件` : "";
+      warn(
+        `本次 ${isPush ? "push" : "commit"} 触及敏感路径（${shown}${more}）——` +
+          `建议先运行 open-code-review skill（Tier A 委托 / Tier B 方法论）做一次确定性代码评审，` +
+          `确认无 Critical/High 问题后再继续。`
+      );
+    }
+  }
 }
 
 // If nothing matched or only warnings, allow
