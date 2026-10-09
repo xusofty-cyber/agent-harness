@@ -406,13 +406,13 @@ Ponytail Skill 提供一套实现前决策阶梯。先读懂问题和现有代�
   Copy-Item .ai-memory.toml.example .ai-memory.toml
   (Get-Content .ai-memory.toml) `
       -replace 'replace-with-workspace-name', 'default' `
-      -replace 'replace-with-project-name', 'agents-living' |
+      -replace 'replace-with-project-name', 'agent-harness' |
       Set-Content .ai-memory.toml
   ```
 - **Linux / macOS (Bash)**:
   ```bash
   cp .ai-memory.toml.example .ai-memory.toml
-  sed -i 's/replace-with-workspace-name/default/g; s/replace-with-project-name/agents-living/g' .ai-memory.toml
+  sed -i 's/replace-with-workspace-name/default/g; s/replace-with-project-name/agent-harness/g' .ai-memory.toml
   ```
 
 ##### 3. 运行客户端配置脚本

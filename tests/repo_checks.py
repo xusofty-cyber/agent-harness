@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""tests/repo_checks.py — static repository checks for agents-living CI.
+"""tests/repo_checks.py — static repository checks for agent-harness CI.
 
 Run: `python3 tests/repo_checks.py` (exit 0 = all pass)
 

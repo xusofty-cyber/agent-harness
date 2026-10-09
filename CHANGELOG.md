@@ -6,6 +6,14 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+### Changed
+- **Project renamed `agents-living` → `agent-harness`**: 27 references updated
+  across 13 files (READMEs, guides, AGENTS.md, CONTRIBUTING.md, skills-lock.json
+  source fields, tool docstrings/User-Agents, CI config). Dated historical
+  notes in `docs/internal/` intentionally unchanged. GitHub repo rename
+  (`xusofty-cyber/agent-harness`) to be done via Settings; old URLs redirect
+  automatically.
+
 ### Added
 - `tools/sync-skills.py`: external skill self-update — `--check` reports
   vendored skills differing from upstream, `--apply` updates files and

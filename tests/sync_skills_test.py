@@ -36,7 +36,7 @@ class TestExternalSkillsFilter(unittest.TestCase):
         return {"skills": {
             "ext-ok": {"sourceType": "github", "source": "o/r",
                        "skillPath": "skills/x/SKILL.md"},
-            "local": {"sourceType": "local", "source": "agents-living",
+            "local": {"sourceType": "local", "source": "agent-harness",
                       "skillPath": ".agents/skills/local/SKILL.md"},
             "cli": {"sourceType": "github", "source": "o/c",
                     "package": "@o/c"},

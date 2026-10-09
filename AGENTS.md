@@ -1,6 +1,6 @@
-# AGENTS.md — agents-living (this repository)
+# AGENTS.md — agent-harness (this repository)
 
-> This file describes **the agents-living repository itself** for tools that
+> This file describes **the agent-harness repository itself** for tools that
 > auto-load a root `AGENTS.md` (Antigravity, Codex, Zed). The *distributable
 > rule templates* live in `Global AGENTS.md`, `Project AGENTS.md`,
 > `Directory AGENTS.md` and `.agents/rules/` — this file is not one of them.

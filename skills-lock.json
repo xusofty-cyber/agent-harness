@@ -27,7 +27,7 @@
       "repository": "https://github.com/rpamis/comet"
     },
     "cross-tool-memory": {
-      "source": "agents-living (authored in-repo)",
+      "source": "agent-harness (authored in-repo)",
       "sourceType": "local",
       "version": "0.1.0",
       "skillPath": ".agents/skills/cross-tool-memory/SKILL.md"
@@ -69,13 +69,13 @@
       "computedHash": "4f571e7befb8b0946d9d7770232c818812412e9ab1dfb811f847edfba1fc6275"
     },
     "living-documentation": {
-      "source": "agents-living (authored in-repo)",
+      "source": "agent-harness (authored in-repo)",
       "sourceType": "local",
       "version": "0.2.0",
       "skillPath": ".agents/skills/living-documentation/SKILL.md"
     },
     "open-code-review": {
-      "source": "agents-living (authored in-repo)",
+      "source": "agent-harness (authored in-repo)",
       "sourceType": "local",
       "version": "0.1.0",
       "skillPath": ".agents/skills/open-code-review/SKILL.md"
@@ -159,7 +159,7 @@
       "computedHash": "993a6b7dc13cea98068c983d9317dcaedc42aeeab6917d0971eac3e834d6adb5"
     },
     "option-review": {
-      "source": "agents-living (authored in-repo)",
+      "source": "agent-harness (authored in-repo)",
       "sourceType": "local",
       "version": "0.1.1",
       "skillPath": ".agents/skills/option-review/SKILL.md"

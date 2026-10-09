@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""sync-skills.py — external skill self-update for agents-living.
+"""sync-skills.py — external skill self-update for agent-harness.
 
 Checks vendored external skills (sourceType=github in skills-lock.json)
 against their upstream repositories and reports or applies updates.
@@ -46,7 +46,7 @@ _branch_cache: dict[str, str] = {}
 def _http_json(url: str) -> dict | None:
     req = urllib.request.Request(url, headers={
         "Accept": "application/vnd.github+json",
-        "User-Agent": "agents-living-sync-skills",
+        "User-Agent": "agent-harness-sync-skills",
     })
     try:
         with urllib.request.urlopen(req, timeout=20) as r:
@@ -57,7 +57,7 @@ def _http_json(url: str) -> dict | None:
 
 def _http_bytes(url: str) -> bytes | None:
     req = urllib.request.Request(url, headers={
-        "User-Agent": "agents-living-sync-skills",
+        "User-Agent": "agent-harness-sync-skills",
     })
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
