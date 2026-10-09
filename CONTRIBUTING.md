@@ -1,4 +1,4 @@
-# Contributing to agents-living
+# Contributing to agent-harness
 
 > **Language**: English is the source of truth for guides; 中文文档见下方说明。
 

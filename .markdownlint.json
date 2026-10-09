@@ -1,5 +1,5 @@
 {
-  // markdownlint config for agents-living.
+  // markdownlint config for agent-harness.
   // Philosophy: catch structural breakage (broken anchors, fenced blocks
   // without language, bare URLs, duplicate headings), not prose style.
   // Chinese punctuation, compact tables, setext/emphasis headings and
