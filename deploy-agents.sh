@@ -905,9 +905,27 @@ if { [ "$DO_INITIALIZE" = true ] || [ "$DO_CHECK" = true ]; } && [ -n "$DIRECTOR
     DIRECTORY_ROOT="$(cd "${TARGET_PROJECT_DIR}/${DIRECTORY_PATH}" 2>/dev/null && pwd -P)" || { echo "[!] Directory does not exist: $DIRECTORY_PATH" >&2; exit 1; }
     PROJECT_ROOT_REAL="$(cd "$TARGET_PROJECT_DIR" && pwd -P)"
     case "$DIRECTORY_ROOT" in "$PROJECT_ROOT_REAL"/*) ;; *) echo "[!] --directory resolves outside the project" >&2; exit 2 ;; esac
-    if [ -f "${DIRECTORY_ROOT}/AGENTS.md" ] && [ -e "${DIRECTORY_ROOT}/AGENTS.generated.md" ]; then echo "[!] Existing generated directory guidance would be overwritten." >&2; exit 1; fi
+    if [ -f "${DIRECTORY_ROOT}/AGENTS.md" ] && [ -e "${DIRECTORY_ROOT}/AGENTS.generated.md" ]; then
+        if [ "$DO_UPDATE" = true ]; then
+            OVERWRITE_DIR_GENERATED=true
+        elif [ -t 0 ] && prompt_yes_no "已存在目录级 AGENTS.generated.md，是否备份并重新生成？"; then
+            OVERWRITE_DIR_GENERATED=true
+        else
+            echo "[!] Existing generated directory guidance would be overwritten: ${DIRECTORY_ROOT}/AGENTS.generated.md (use --update to backup and regenerate)" >&2
+            exit 1
+        fi
+    fi
 fi
-if [ "$DO_INITIALIZE" = true ] && [ -f "${TARGET_PROJECT_DIR}/AGENTS.md" ] && [ -e "${TARGET_PROJECT_DIR}/AGENTS.generated.md" ]; then echo "[!] Existing generated project guidance would be overwritten." >&2; exit 1; fi
+if [ "$DO_INITIALIZE" = true ] && [ -f "${TARGET_PROJECT_DIR}/AGENTS.md" ] && [ -e "${TARGET_PROJECT_DIR}/AGENTS.generated.md" ]; then
+    if [ "$DO_UPDATE" = true ]; then
+        OVERWRITE_PROJECT_GENERATED=true
+    elif [ -t 0 ] && prompt_yes_no "已存在 AGENTS.generated.md，是否备份并重新生成？"; then
+        OVERWRITE_PROJECT_GENERATED=true
+    else
+        echo "[!] Existing generated project guidance would be overwritten: ${TARGET_PROJECT_DIR}/AGENTS.generated.md (use --update to backup and regenerate)" >&2
+        exit 1
+    fi
+fi
 if [ "$DO_CHECK" = true ]; then
     check_failed=false
     checked_count=0
@@ -954,7 +972,13 @@ fi
 if [ "$DO_INITIALIZE" = true ]; then
     PROJECT_OUTPUT="$TARGET_AGENTS"
     if [ "$HAD_PROJECT_AGENTS" = true ]; then PROJECT_OUTPUT="${TARGET_PROJECT_DIR}/AGENTS.generated.md"; fi
-    if [ "$HAD_PROJECT_AGENTS" = true ] && [ -e "$PROJECT_OUTPUT" ]; then echo "[!] Refusing to overwrite existing generated guidance: $PROJECT_OUTPUT" >&2; exit 1; fi
+    if [ "$HAD_PROJECT_AGENTS" = true ] && [ -e "$PROJECT_OUTPUT" ]; then
+        if [ "$DO_UPDATE" = true ] || [ "${OVERWRITE_PROJECT_GENERATED:-false}" = true ]; then
+            backup_path "$PROJECT_OUTPUT"
+        else
+            echo "[!] Refusing to overwrite existing generated guidance: $PROJECT_OUTPUT" >&2; exit 1
+        fi
+    fi
     init_guidance "$PROJECT_TEMPLATE" "$PROJECT_OUTPUT" project "$TARGET_PROJECT_DIR"
 
     if [ -n "$DIRECTORY_PATH" ]; then
@@ -962,7 +986,13 @@ if [ "$DO_INITIALIZE" = true ]; then
         DIRECTORY_AGENTS="${DIRECTORY_ROOT}/AGENTS.md"
         DIRECTORY_OUTPUT="$DIRECTORY_AGENTS"
         if [ -f "$DIRECTORY_AGENTS" ]; then DIRECTORY_OUTPUT="${DIRECTORY_ROOT}/AGENTS.generated.md"; fi
-        if [ -f "$DIRECTORY_AGENTS" ] && [ -e "$DIRECTORY_OUTPUT" ]; then echo "[!] Refusing to overwrite existing generated guidance: $DIRECTORY_OUTPUT" >&2; exit 1; fi
+        if [ -f "$DIRECTORY_AGENTS" ] && [ -e "$DIRECTORY_OUTPUT" ]; then
+            if [ "$DO_UPDATE" = true ] || [ "${OVERWRITE_DIR_GENERATED:-false}" = true ]; then
+                backup_path "$DIRECTORY_OUTPUT"
+            else
+                echo "[!] Refusing to overwrite existing generated guidance: $DIRECTORY_OUTPUT" >&2; exit 1
+            fi
+        fi
         init_guidance "$DIRECTORY_TEMPLATE" "$DIRECTORY_OUTPUT" directory "$DIRECTORY_ROOT"
     fi
 fi

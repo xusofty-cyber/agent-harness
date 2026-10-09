@@ -749,11 +749,27 @@ if (($Initialize -or $Check) -and $DirectoryPath) {
     }
     if (-not (Test-Path -LiteralPath $ResolvedDirectoryTemplate -PathType Leaf)) { throw "Directory template not found: $ResolvedDirectoryTemplate" }
 }
+$overwriteProjectGenerated = $false
+$overwriteDirectoryGenerated = $false
 if ($Initialize -and (Test-Path -LiteralPath (Join-Path $ResolvedProjectPath 'AGENTS.md') -PathType Leaf) -and (Test-Path -LiteralPath (Join-Path $ResolvedProjectPath 'AGENTS.generated.md'))) {
-    throw "Refusing to overwrite existing generated project guidance: $(Join-Path $ResolvedProjectPath 'AGENTS.generated.md')"
+    $existingGen = Join-Path $ResolvedProjectPath 'AGENTS.generated.md'
+    if ($Update) {
+        $overwriteProjectGenerated = $true
+    } elseif (-not [Console]::IsInputRedirected -and (Prompt-YesNo "已存在 AGENTS.generated.md，是否备份并重新生成？ [Backup and regenerate $existingGen?]")) {
+        $overwriteProjectGenerated = $true
+    } else {
+        throw "Refusing to overwrite existing generated project guidance: $existingGen (use -Update to backup and regenerate)"
+    }
 }
 if ($Initialize -and $DirectoryPath -and (Test-Path -LiteralPath (Join-Path $directoryRoot 'AGENTS.md') -PathType Leaf) -and (Test-Path -LiteralPath (Join-Path $directoryRoot 'AGENTS.generated.md'))) {
-    throw "Refusing to overwrite existing generated directory guidance: $(Join-Path $directoryRoot 'AGENTS.generated.md')"
+    $existingDirGen = Join-Path $directoryRoot 'AGENTS.generated.md'
+    if ($Update) {
+        $overwriteDirectoryGenerated = $true
+    } elseif (-not [Console]::IsInputRedirected -and (Prompt-YesNo "已存在目录级 AGENTS.generated.md，是否备份并重新生成？ [Backup and regenerate $existingDirGen?]")) {
+        $overwriteDirectoryGenerated = $true
+    } else {
+        throw "Refusing to overwrite existing generated directory guidance: $existingDirGen (use -Update to backup and regenerate)"
+    }
 }
 if ($Check) {
     $checkFiles = @((Join-Path $ResolvedProjectPath 'AGENTS.md'), (Join-Path $ResolvedProjectPath 'AGENTS.generated.md'))
@@ -800,7 +816,13 @@ if (-not (Test-Path $TargetAgentsFile)) {
 
 if ($Initialize) {
     $projectOutput = if ($HadProjectAgents) { Join-Path $ResolvedProjectPath "AGENTS.generated.md" } else { $TargetAgentsFile }
-    if ($HadProjectAgents -and (Test-Path -LiteralPath $projectOutput)) { throw "Refusing to overwrite existing generated guidance: $projectOutput" }
+    if ($HadProjectAgents -and (Test-Path -LiteralPath $projectOutput)) {
+        if ($Update -or $overwriteProjectGenerated) {
+            Backup-ManagedPath $projectOutput
+        } else {
+            throw "Refusing to overwrite existing generated guidance: $projectOutput"
+        }
+    }
     Initialize-AgentInstructions $ResolvedProjectTemplate $projectOutput 'project' $ResolvedProjectPath
 
     if ($DirectoryPath) {
@@ -813,7 +835,13 @@ if ($Initialize) {
         $directoryAgents = Join-Path $directoryRoot 'AGENTS.md'
         $hadDirectoryAgents = Test-Path -LiteralPath $directoryAgents -PathType Leaf
         $directoryOutput = if ($hadDirectoryAgents) { Join-Path $directoryRoot 'AGENTS.generated.md' } else { $directoryAgents }
-        if ($hadDirectoryAgents -and (Test-Path -LiteralPath $directoryOutput)) { throw "Refusing to overwrite existing generated guidance: $directoryOutput" }
+        if ($hadDirectoryAgents -and (Test-Path -LiteralPath $directoryOutput)) {
+            if ($Update -or $overwriteDirectoryGenerated) {
+                Backup-ManagedPath $directoryOutput
+            } else {
+                throw "Refusing to overwrite existing generated guidance: $directoryOutput"
+            }
+        }
         Initialize-AgentInstructions $ResolvedDirectoryTemplate $directoryOutput 'directory' $directoryRoot
     }
 }
