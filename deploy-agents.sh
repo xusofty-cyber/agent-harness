@@ -31,7 +31,8 @@ usage() {
     echo "  --directory       与 --initialize 配合，为现有子目录生成目录级 AGENTS.md。"
     echo "  --check, -k       检查项目级规则中的初始化占位项；可搭配 --directory 检查模块规则。"
     echo "  --comet-init       若系统中已安装 comet CLI，自动在目标项目中运行 comet init。"
-    echo "  --ai-memory-init, -m 初始化项目 .ai-memory.toml 并接入跨工具记忆 (ai-memory)。"
+    echo "  --ai-memory-init, -m 初始化项目 .ai-memory.toml 并接入跨工具记忆 (ai-memory)。
+  --pipeline         启动统一流水线 (Pipeline: 规则部署 + AI记忆 + 技能同步 + 文档质检)。"
     echo ""
     echo -e "${CYAN}示例 (Examples):${NC}"
     echo "  $0 /path/to/my-project --lang en"
@@ -96,6 +97,10 @@ while [ "$arg_index" -lt "$#" ]; do
             ;;
         --interactive|-I)
             FORCE_INTERACTIVE=true
+            ;;
+        --pipeline)
+            SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+            exec "$SCRIPT_DIR/run-pipeline.sh" "${args[@]:$((arg_index + 1))}"
             ;;
         --lang|-l)
             arg_index=$((arg_index + 1))

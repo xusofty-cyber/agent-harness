@@ -34,7 +34,9 @@ param (
     [string]$Language = "en",
 
     [Alias("I")]
-    [switch]$Interactive
+    [switch]$Interactive,
+
+    [switch]$Pipeline
 )
 
 $ToolClaude = $true
@@ -56,6 +58,11 @@ $ErrorActionPreference = "Stop"
 
 # Script directory
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+if ($Pipeline) {
+    & (Join-Path $ScriptDir "run-pipeline.ps1") @args
+    exit 0
+}
 
 function Prompt-SingleSelect([string]$Title, [array]$Options) {
     if ([Console]::IsInputRedirected) {
