@@ -1,5 +1,5 @@
 # ==============================================================================
-# CI for agents-living
+# CI for agent-harness
 # Triggers on pushes to the long-lived branches and on all pull requests.
 #
 # Jobs:
