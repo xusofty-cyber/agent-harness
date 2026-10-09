@@ -245,7 +245,8 @@ guide_optional_cli_tools() {
     fi
 
     if command -v ocr >/dev/null 2>&1; then
-        echo -e "  ${GREEN}[√] 已检测到 Open Code Review CLI (ocr)：可启用 open-code-review 技能的 Tier A 委托评审。${NC}"
+        _ocr_ver=$(ocr --version 2>/dev/null | head -1)
+        echo -e "  ${GREEN}[√] 已检测到 Open Code Review CLI (ocr)${_ocr_ver:+ ${_ocr_ver}}：可启用 open-code-review 技能的 Tier A 委托评审。${NC}"
     else
         echo "  Open Code Review CLI (ocr) 未安装。open-code-review 技能仍可用（Tier B 方法论模式），安装后可启用零 Token 开销的委托评审。"
         if prompt_yes_no "现在安装 Open Code Review CLI？"; then
@@ -256,6 +257,22 @@ guide_optional_cli_tools() {
             fi
         else
             echo "  安装命令：npm install -g @alibaba-group/open-code-review"
+        fi
+    fi
+
+    if command -v comet >/dev/null 2>&1; then
+        _comet_ver=$(comet --version 2>/dev/null | head -1)
+        echo -e "  ${GREEN}[√] 已检测到 Comet CLI${_comet_ver:+ ${_comet_ver}}：可用 --comet-init 在目标项目运行 comet init。${NC}"
+    else
+        echo "  Comet CLI 未安装。Comet 工作流 skill 仅提供入口指引，不实现状态机；安装后可用 --comet-init 初始化项目。"
+        if prompt_yes_no "现在安装 Comet CLI？"; then
+            if npm install -g @rpamis/comet; then
+                echo -e "  ${GREEN}[√] comet 已安装。${NC}"
+            else
+                echo "  [!] comet 安装失败。可手动执行：npm install -g @rpamis/comet"
+            fi
+        else
+            echo "  安装命令：npm install -g @rpamis/comet"
         fi
     fi
 }
@@ -443,6 +460,21 @@ if [ "$DO_UPDATE" = true ]; then
     fi
 
     echo -e "  ${NC}[i] 仅更新本模板仓库；不会升级全局 CLI，也不会在当前目录运行第三方技能更新器。${NC}"
+
+    # B. External skill sync (opt-in)
+    if [ -f "${SCRIPT_DIR}/tools/sync-skills.py" ]; then
+        echo -e "${YELLOW}>>> 检查外部 Skills 上游更新...${NC}"
+        if python3 "${SCRIPT_DIR}/tools/sync-skills.py" --check 2>/dev/null | head -20; then
+            if prompt_yes_no "是否应用外部 Skills 的上游更新？"; then
+                python3 "${SCRIPT_DIR}/tools/sync-skills.py" --apply
+                echo -e "  ${GREEN}[√] 外部 Skills 已同步，请检查 git diff 后提交。${NC}"
+            else
+                echo "  [i] 跳过 Skills 更新。可手动运行: python3 tools/sync-skills.py --apply"
+            fi
+        else
+            echo -e "  ${YELLOW}[!] Skills 更新检查失败（可能是网络问题），跳过。${NC}"
+        fi
+    fi
 fi
 
 # ==============================================================================

@@ -6,13 +6,22 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+### Added
+- `tools/sync-skills.py`: external skill self-update — `--check` reports
+  vendored skills differing from upstream, `--apply` updates files and
+  refreshes `computedHash` (SHA256). Manual via CLI, automatic via new
+  weekly GitHub Action (`.github/workflows/skill-update-check.yml`) that
+  opens a `skill-update` issue when updates are available. Deploy `-Update`
+  now offers skill sync (opt-in).
+- `deploy-agents.sh` / `.ps1` `guide_optional_cli_tools`: added Comet CLI
+  detection + install prompt, and version display for detected CLIs
+  (codegraph/rtk/ocr/comet).
+
 ### Fixed
 - `deploy-agents.sh` / `deploy-agents.ps1`: sync `.agents/review-sensitive-paths.json` to deployed projects and track in PARITY table.
 - `.claude/hooks/guard.mjs`: fallback `pushedFiles` to compare against default remote branches or HEAD commit when branch has no upstream tracking branch (`@{u}`), suppressing git error stderr leakage.
 - `open-code-review/scripts/group-diff.py`: enhanced cross-directory implementation<->test pairing (e.g. `tests/...` <-> `src/...`) and expanded noise patterns for binary/build artifacts.
 - Documentation sync: updated skill directory count from 41 to 42 across READMEs and Panorama Guides; added code review row to Section 2.6/2.5 dispatching matrices.
-
-### Added
 - `open-code-review`: added C/C++ (`cpp.md`) and TypeScript/JavaScript (`typescript.md`) rulebooks under `references/rules/`.
 
 ## [0.2.1] - 2026-10-09
