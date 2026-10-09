@@ -11,7 +11,7 @@ This guide provides a comprehensive handbook for software engineering and techni
 1. [Core Architecture & Tool Matrix (Who Manages What)](#1-core-architecture--tool-matrix-who-manages-what)
 2. [Skills & Ecosystem Tools Inventory](#2-skills--ecosystem-tools-inventory)
    - 2.1 42 Integrated Native Skills Categorized
-   - 2.2 Skill Source Metadata & Template Sync (`skills-lock.json` + `deploy-agents`)
+   - 2.2 Version Locking, Online Updates & Skill Sync (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
    - 2.3 Optional Harness CLI Tools
    - 2.4 Token Economics of Skills (Why 40+ Skills Do NOT Blow Up Context)
    - 2.5 Engineering Skills & Rules Dispatching Matrix
@@ -156,11 +156,17 @@ The installer copies the repository's skill directories into `.agents/skills/`; 
 
 ---
 
-### 2.2 Version Locking & Online Updates (`skills-lock.json` + `deploy-agents`)
+### 2.2 Version Locking, Online Updates & Skill Sync (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
 
 1. **`skills-lock.json`**:
-   - Records upstream sources and integrity hashes for some files; this is not a complete commit lock for every skill.
-2. **One-Click Online Update**:
+   - Records upstream sources and LF-normalized SHA256 integrity hashes for vendored external skills;
+   - Distinguishes locally-authored core skills (`sourceType: local`) from external upstream skills (`sourceType: github`).
+2. **External Skill Upstream Sync (`tools/sync-skills.py`)**:
+   - Built-in updater for vendored external skills;
+   - **Check mode**: `python3 tools/sync-skills.py --check` (read-only, compares local and upstream `SKILL.md` hashes, reports 🟢 in-sync / 🟡 outdated);
+   - **Apply mode**: `python3 tools/sync-skills.py --apply` (updates outdated `SKILL.md` files in-place and refreshes lock hashes; locally-authored skills are strictly protected);
+   - Supports `--skill <name>` for targeted updates and `--json` for automation.
+3. **Integrated Online Update Flow**:
    ```powershell
    # Windows
    .\deploy-agents.ps1 -ProjectPath "." -Update
@@ -168,19 +174,19 @@ The installer copies the repository's skill directories into `.agents/skills/`; 
    # Linux / macOS
    ./deploy-agents.sh . --update
    ```
-   - The deployment scripts fast-forward the template repository, then copy its managed files; overwritten managed targets receive `.bak.<timestamp>` backups;
-   - The lock file is copied as metadata. The script does not resolve or download every skill by its locked hash.
+   - The deployment scripts fast-forward the template repository, prompt to check/apply external skill updates, and sync managed files to target projects with `.bak.<timestamp>` backups.
 
 ---
 
 ### 2.3 Optional Harness CLI Tools
 
 Skill availability depends on the host tool and its configuration. Terminal-level CLI tools are optional:
-- **Comet CLI**: install only if the project needs Comet; use the current version documentation for supported commands and configuration;
-- **CodeGraph CLI**: macOS/Linux: `curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.sh | sh`; Windows PowerShell: `irm https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.ps1 | iex`. Then run `codegraph install` to wire supported agents and `codegraph init` in the project. Queries use configured MCP tools; do not assume a `codegraph explore` CLI command.
-- **RTK (Rust Token Killer) CLI**: macOS/Linux: `curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh`; Windows: `winget install rtk-ai.rtk`. Verify with `rtk gain` because the `rtk` command name is shared by unrelated tools. Run `rtk init` in the project to configure a supported agent hook.
+- **Comet CLI**: install via `npm install -g @rpamis/comet`; provides native/classic workflow execution and `--comet-init` initialization.
+- **CodeGraph CLI**: macOS/Linux: `curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.sh | sh`; Windows PowerShell: `irm https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.ps1 | iex`. Run `codegraph install` to wire agents and `codegraph init` in the project.
+- **RTK (Rust Token Killer) CLI**: macOS/Linux: `curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh`; Windows: `winget install rtk-ai.rtk`. Verify with `rtk gain`. Run `rtk init` in the project to configure agent hooks.
+- **Open Code Review (OCR) CLI**: install via `npm install -g @alibaba-group/open-code-review`; enables Tier A zero-LLM-cost delegation review via the `open-code-review` skill.
 
-The project deployment scripts detect CodeGraph/RTK and ask before installing or applying project/agent setup. Default answer is No; non-interactive runs print follow-up commands.
+The deployment scripts automatically detect these optional CLIs during initial setup and guide installation where appropriate.
 
 ---
 

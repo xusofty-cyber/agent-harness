@@ -154,10 +154,11 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
        │
        ▼
  Phase 10: Probe Optional CLIs & Interactive Prompts
-   ├─ Offer CodeGraph / Rust Token Killer (RTK) / Open Code Review (ocr) install if missing
+   ├─ Offer CodeGraph / RTK / Open Code Review (ocr) / Comet install if missing
    ├─ Ask whether to wire CodeGraph agents / index project
    ├─ Ask whether to run rtk init; skipped in non-interactive mode
-   └─ Installing ocr enables Tier A delegation review; Tier B works offline without it
+   ├─ Installing ocr enables Tier A delegation review; Tier B works offline without it
+   └─ Installing Comet CLI enables subsequent workflow initialization via --comet-init
 ```
 
 ---
@@ -172,7 +173,7 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 **Parameters**:
 - `-ProjectPath` (Positional 0): Path to target project. If omitted with `-Global`, only updates user global rules.
 - `-Global` (`-g`): Initializes missing `~/.claude/CLAUDE.md`, `~/.gemini/AGENTS.md`, and Codex `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`). Existing files are preserved without `-Update`.
-- `-Update` (`-u`): Fast-forwards the template repository and syncs files to the target. Combined with `-Global`, it backs up and replaces existing global rule files. Codex's non-empty `$CODEX_HOME/AGENTS.override.md` takes precedence and is updated as the active file. Existing project-managed rules, hooks, skills, and lock metadata follow their documented backup/update behavior. It does not upgrade global CLIs.
+- `-Update` (`-u`): Fast-forwards the template repository, automatically invokes `tools/sync-skills.py --check` to scan external skills for upstream updates with interactive confirmation, and syncs files to the target. Combined with `-Global`, it backs up and replaces existing global rule files. Codex's non-empty `$CODEX_HOME/AGENTS.override.md` takes precedence and is updated as the active file. Existing project-managed rules, hooks, skills, and lock metadata follow their documented backup/update behavior. It does not upgrade global CLIs.
 - `-CometInit` (`-c`): Automatically executes `comet init` in the target project if Comet CLI is installed.
 - `-AiMemoryInit` (`-m`): Automatically initializes `.ai-memory.toml` in the target project (inferring `workspace` and `project`) for cross-tool ai-memory integration.
 
