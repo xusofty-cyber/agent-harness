@@ -11,7 +11,7 @@
 1. [核心架构与工具矩阵全景（谁管什么）](#一-核心架构与工具矩阵全景谁管什么)
 2. [技能（Skills）与生态工具安装清单](#二-技能skills与生态工具安装清单)
    - 2.1 开箱即用 / 42 原生技能分类全景清单
-   - 2.2 版本锁与在线更新机制 (`skills-lock.json` + `deploy-agents`)
+   - 2.2 技能来源元数据与在线更新机制 (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
    - 2.3 Harness 核心工程扩展工具（按需选用）
    - 2.4 平台安装与配置文件位置速查表
    - 2.5 技能底层运行机制与 Token 经济学（为什么装 40+ 技能不耗 Token？）
@@ -147,15 +147,21 @@
 
 ---
 
-### 2.2 技能来源元数据与模板同步 (`skills-lock.json` + `deploy-agents`)
+### 2.2 技能来源元数据与在线更新机制 (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
 
-仓库提供技能来源/完整性元数据和模板同步脚本；当前脚本不按锁定哈希下载上游技能，也不保证各项目已安装副本一致：
+仓库提供技能来源与完整性元数据管理、项目在线同步及外部技能上游版本检查机制：
 
 1. **`skills-lock.json`**：
-   - 记录技能来源及部分文件的完整性哈希；具体字段取决于上游条目，不能等同于完整的 commit 锁定清单；
+   - 记录外部技能来源（如 GitHub 仓库地址、上游文件相对路径）及规范化 SHA256 完整性哈希；
+   - 区分标记本地原创自研技能（`sourceType: local`）与外部依赖技能（`sourceType: github`）；
    - 位于代码库根目录，随项目版本控制一起追踪。
-2. **一键在线更新**：
-   - 当官方技能库发布新版本或修补 Bug 时，只需在项目根目录运行：
+2. **外部技能上游自更新 (`tools/sync-skills.py`)**：
+   - 针对外部依赖的技能，内置自动同步探测脚本；
+   - **检查模式**：`python3 tools/sync-skills.py --check`（只读，比对 LF 标准化 SHA256，报告 🟢 in-sync / 🟡 outdated 状态）；
+   - **应用模式**：`python3 tools/sync-skills.py --apply`（原地更新过期技能的 `SKILL.md`，并刷新 `skills-lock.json` 中的哈希；本地原创技能严格受保护不被覆盖）；
+   - **定向更新**：支持通过 `--skill <name>` 限制特定技能，支持 `--json` 输出结构化报表。
+3. **一键在线更新集成**：
+   - 当在项目根目录运行更新命令时：
      ```powershell
      # Windows 环境一键拉取最新规则与技能库
      .\deploy-agents.ps1 -ProjectPath "." -Update
@@ -163,8 +169,8 @@
      # Linux / macOS 环境一键更新
      ./deploy-agents.sh "." --update
      ```
-   - 脚本通过 `git pull --ff-only` 更新模板仓库，再将管理文件复制到目标项目；它不会运行第三方技能更新器或升级全局 CLI；
-   - 更新会备份被替换的规则、Hook、技能目录和版本元数据。已有根目录 `AGENTS.md` 保持原样，并在更新时生成 `AGENTS.template.md`。
+   - 脚本通过 `git pull --ff-only` 更新模板仓库，自动检测外部技能的上游更新并提供交互式同步选项；
+   - 更新会备份被替换的规则、Hook、技能目录和版本元数据（生成 `.bak.<timestamp>`）。已有根目录 `AGENTS.md` 保持原样，并在更新时生成 `AGENTS.template.md`。
 
 ---
 
@@ -194,6 +200,11 @@
 - **本仓库已提供**：Skill 使用说明，不包含 RTK CLI，也不会自动拦截或重写命令。
 - **安装**：macOS/Linux 可使用官方安装命令 `curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh`；Windows 可用 `winget install rtk-ai.rtk`。
 - **验证与接线**：运行 `rtk gain` 确认安装的是 Rust Token Killer（存在同名的其他工具）；再在项目根目录运行 `rtk init` 配置支持的 Agent Hook。项目部署脚本会先检测 CLI；缺失时询问是否安装，Hook 初始化单独询问。`rtk init --global` 会改全局配置，需按需单独选择。
+
+#### 4. Open Code Review CLI（可选）
+- **本仓库已提供**：`open-code-review` 技能内置 Tier B 确定性代码评审方法论（`group-diff.py` + 本地规则库），无需 CLI 即可离线运行。
+- **安装**：全局执行 `npm install -g @alibaba-group/open-code-review`。
+- **作用**：安装后激活 Tier A 委托评审模式，利用上游确定性分片与规则匹配，由当前 Host Agent 直接推理，无需单独配置大模型 API Key。部署脚本会自动检测其可用性。
 
 ---
 
