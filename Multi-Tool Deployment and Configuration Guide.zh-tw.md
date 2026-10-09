@@ -109,6 +109,16 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 ```text
 [ Execute Deployment Script ]
        │
+       ├─ [終端零參數執行 或 指定 -Interactive / --interactive]
+       │       ▼
+       │  階段 0：互動式步進終端精靈 (TUI Arrow-Key & Checkbox Wizard)
+       │    ├─ [1/5] 單選規則語言 (English / 简体中文 / 繁體中文 / Français / Deutsch)
+       │    ├─ [2/5] 單選部署範圍 (目標專案 / 僅本機全域規則 / 完整部署)
+       │    ├─ [3/5] 錄入目標專案路徑 (預設當前目錄 [.])
+       │    │        (提示: Codex · Antigravity · Zed · OpenCode 等原生讀取 AGENTS.md，無需額外橋接)
+       │    ├─ [4/5] 多選 Agent 工具橋接檔案 (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy)
+       │    └─ [5/5] 多選可選工作流程 (更新模式 / 專案事實掃描初始化 / ai-memory / Comet)
+       │
        ▼
  Phase 1: Template Repository Update (-Update)
    └─ Fast-forward update of this template repository (`git pull --ff-only`); no global CLI upgrade or third-party updater in the caller directory
@@ -167,19 +177,36 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 
 **Usage**:
 ```powershell
-.\deploy-agents.ps1 [[-ProjectPath] <target-path>] [-Global] [-Update] [-CometInit] [-AiMemoryInit]
+.\deploy-agents.ps1 [[-ProjectPath] <target-path>] [-Global] [-Update] [-Interactive] [-CometInit] [-AiMemoryInit] [-Pipeline]
 ```
 
 **Parameters**:
 - `-ProjectPath` (Positional 0): Path to target project. If omitted with `-Global`, only updates user global rules.
 - `-Global` (`-g`): Initializes missing `~/.claude/CLAUDE.md`, `~/.gemini/AGENTS.md`, and Codex `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`). Existing files are preserved without `-Update`.
 - `-Language` (`-l`): Selects template language (`en`, `zh`, `zh-tw`, `fr`, `de`; defaults to `en`).
+- `-Interactive` (`-i`): 啟動逐步互動式終端精靈（單選語言/範圍、多選 Agent 橋接與工作流程選項）。終端零參數執行時預設自動進入。
 - `-Update` (`-u`): Fast-forwards the template repository, automatically invokes `tools/sync-skills.py --check` to scan external skills for upstream updates with interactive confirmation, and syncs files to the target. Combined with `-Global`, it backs up and replaces existing global rule files. Codex's non-empty `$CODEX_HOME/AGENTS.override.md` takes precedence and is updated as the active file. Existing project-managed rules, hooks, skills, and lock metadata follow their documented backup/update behavior. It does not upgrade global CLIs.
 - `-CometInit` (`-c`): Automatically executes `comet init` in the target project if Comet CLI is installed.
 - `-AiMemoryInit` (`-m`): Automatically initializes `.ai-memory.toml` in the target project (inferring `workspace` and `project`) for cross-tool ai-memory integration.
+- `-Pipeline`: 直接將任務調度移交至統一流水線執行指令碼 ([`run-pipeline.ps1`](run-pipeline.ps1) / [`pipeline.ps1`](pipeline.ps1))。
+
+**統一工程流水線（Windows 原生執行）**:
+```powershell
+# 互動式精靈模式（單選語言、多選階段、選擇細化模式）：
+.\pipeline.ps1
+
+# 無人值守一鍵全量流水線（全階段按序貫通）：
+.\pipeline.ps1 -All -Yes
+
+# 指定部分階段執行：
+.\pipeline.ps1 -Stages "deploy,skills,docs"
+```
 
 **Examples**:
 ```powershell
+# 互動式精靈模式（零參數自動啟動逐步選擇精靈）
+.\deploy-agents.ps1
+
 # Deploy to a new project
 .\deploy-agents.ps1 "D:\Projects\my-project"
 
@@ -195,6 +222,9 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 # Initialize with cross-tool ai-memory configuration
 .\deploy-agents.ps1 "D:\Projects\my-project" -AiMemoryInit
 
+# Launch unified pipeline directly
+.\deploy-agents.ps1 -Pipeline
+
 # Update global rules only
 .\deploy-agents.ps1 -Global -Update
 ```
@@ -204,7 +234,10 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 ### 4.3 Linux / macOS Deployment (`deploy-agents.sh`)
 
 ```bash
-chmod +x ./deploy-agents.sh
+chmod +x ./deploy-agents.sh ./run-pipeline.sh ./pipeline.sh
+
+# 互動式精靈模式（零參數啟動）
+./deploy-agents.sh
 
 # Deploy to project
 ./deploy-agents.sh /path/to/my-project
@@ -217,6 +250,22 @@ chmod +x ./deploy-agents.sh
 
 # Deploy with Comet CLI init
 ./deploy-agents.sh /path/to/my-project --comet-init
+
+# Launch unified pipeline directly
+./deploy-agents.sh --pipeline
+```
+
+**統一工程流水線（Linux / macOS 原生執行）**:
+```bash
+# 互動式逐步選擇精靈：
+./pipeline.sh
+
+# 無人值守一鍵全量流水線：
+./pipeline.sh --all -y
+
+# 指定階段組合執行：
+./pipeline.sh --stages deploy,skills,docs
+```
 
 # Deploy with ai-memory init
 ./deploy-agents.sh /path/to/my-project --ai-memory-init

@@ -32,7 +32,9 @@
    - **事前决策评审与共享记忆**：`option-review`（5 维度多候选方案事前独立评审与决策矩阵）与 `cross-tool-memory`（跨工具项目长期记忆导航与经验检索）。
    - **专业文档处理**：`docx`（Word 专业排版）、`pdf`（结构化抽取与分析）。
 
-4. **一键部署与模板同步（`deploy-agents`）**：
+4. **一键部署、交互向导与统一流水线（`deploy-agents` & `pipeline`）**：
+   - **交互式终端逐步选择向导**：执行脚本时不带任何参数（或显式指定 `--interactive` / `-Interactive`）将自动拉起向导（上下方向键选择、空格键切选、Enter 确认），引导完成规则模板语言（`en`, `zh`, `zh-tw`, `fr`, `de`）、部署范围（`project`, `global`, `both`）、目标项目路径、12 种 Agent 桥接文件多选（Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy）以及可选工作流开关，彻底杜绝命令行参数遗漏与拼写错误；
+   - **跨平台统一工程流水线执行器**（[`run-pipeline.sh`](run-pipeline.sh) / [`pipeline.sh`](pipeline.sh) 与 [`run-pipeline.ps1`](run-pipeline.ps1) / [`pipeline.ps1`](pipeline.ps1)）：一键按序贯通 4 大工程生命周期阶段（规则分发与桥接部署 → AI 跨工具长效记忆配置 → 外部技能同步与哈希锁定 → 活体文档溯源分析与质检门禁），同时支持交互式自选与全自动无人值守（`--all -y` / `-All -Yes`）模式；
    - Windows PowerShell（[`deploy-agents.ps1`](deploy-agents.ps1)，内置 UTF-8 兼容与 Junction 权限免提权穿透）与 Linux/macOS Bash（[`deploy-agents.sh`](deploy-agents.sh)）；
    - 项目脚本创建 `AGENTS.md`（若不存在）、Claude Code 与 Copilot 桥接，并部署 Claude Code Hook；其他工具的具体加载行为以支持矩阵为准；
    - `--global` 配置 Claude Code、Antigravity 与 Codex 全局规则；`--global --update` 覆盖前备份；
@@ -81,10 +83,15 @@ agent-harness/
 ├── Multi-Tool Deployment and Configuration Guide.md # 英文版部署配置指南
 ├── Tools Practical Usage and Skills Panorama Guide.zh.md     # 42 个技能详解、Token 经济学与实战流转（中文）
 ├── Tools Practical Usage and Skills Panorama Guide.md # 英文版技能实战指南
+├── run-pipeline.ps1 / pipeline.ps1  # Windows PowerShell 统一流水线执行脚本
+├── run-pipeline.sh / pipeline.sh   # Linux / macOS Bash 统一流水线执行脚本
 ├── deploy-agents.ps1                # Windows 一键部署与在线更新自动化脚本
 ├── deploy-agents.sh                 # Linux / macOS 一键部署与在线更新自动化脚本
 ├── setup-ai-memory.ps1              # 单项目/单客户端显式安装辅助脚本
 ├── setup-ai-memory.sh               # Linux / macOS / WSL 显式安装辅助脚本
+├── tools/tui.py                     # 终端交互式单选/多选组件库
+├── tools/sync-skills.py             # 外部依赖技能库同步与上游差异比对工具
+├── tools/doc-impact.py              # 活体文档影响分析与质检门禁工具
 ├── .ai-memory.toml.example          # 本地显式加入标记示例
 ├── skills-lock.json                 # 技能来源及部分文件完整性元数据
 ├── README.md                        # 项目总览（English）
@@ -97,16 +104,45 @@ agent-harness/
 
 ## 快速开始
 
-### 1. 为新项目部署完整规范与技能库
+### 1. 统一工程流水线一键执行（推荐）
+
+通过操作系统对应的原生流水线脚本，按序贯通全部工程阶段（规则与桥接部署 → AI 记忆配置 → 外部技能同步 → 活体文档质检）：
+
+- **Linux / macOS 环境 (Bash)**:
+  ```bash
+  # 交互式向导模式（单选语言、多选阶段、选择执行模式）：
+  ./pipeline.sh
+  # 无人值守一键全量流水线：
+  ./pipeline.sh --all -y
+  ```
 
 - **Windows 环境 (PowerShell)**:
+  ```powershell
+  # 交互式向导模式：
+  .\pipeline.ps1
+  # 无人值守一键全量流水线：
+  .\pipeline.ps1 -All -Yes
+  ```
+
+### 2. 独立部署规范与交互式向导
+
+- **交互式向导（零参数启动）**:
+  ```bash
+  # Linux / macOS:
+  ./deploy-agents.sh
+  # Windows:
+  .\deploy-agents.ps1
+  ```
+  *自动拉起终端逐步选择向导：单选语言、单选部署范围、输入项目路径、多选 Agent 工具桥接与可选工作流。*
+
+- **Windows 命令行 (PowerShell)**:
   ```powershell
   # 部署到指定项目（默认 en，或指定 -Language zh / zh-tw / fr / de）
   .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Global -Language zh -Initialize -DirectoryPath "packages/core"
   .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Check -DirectoryPath "packages/core"
   ```
 
-- **Linux / macOS 环境 (Bash)**:
+- **Linux / macOS 命令行 (Bash)**:
   ```bash
   chmod +x ./deploy-agents.sh
   # 支持多语言模板切换（默认 en，或 --lang zh / zh-tw / fr / de）
@@ -114,7 +150,7 @@ agent-harness/
   ./deploy-agents.sh /path/to/my-project --check --directory packages/core
   ```
 
-### 2. 可选：启用本地跨工具记忆（ai-memory）
+### 3. 可选：启用本地跨工具记忆（ai-memory）
 
 本仓库支持通过 [ai-memory](https://github.com/akitaonrails/ai-memory) 实现多 Agent 间无缝共享架构事实与会话断点（本地优先，零 API Key，零 Embedding 成本）。详细部署流程如下：
 

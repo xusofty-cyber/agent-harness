@@ -109,6 +109,16 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 ```text
 [ Execute Deployment Script ]
        │
+       ├─ [Aufruf ohne Argumente im Terminal ODER mit -Interactive / --interactive]
+       │       ▼
+       │  Phase 0: Schrittweiser interaktiver Terminal-Assistent (TUI Pfeiltasten & Checkboxen)
+       │    ├─ [1/5] Vorlagensprache wählen (English / 简体中文 / 繁體中文 / Français / Deutsch)
+       │    ├─ [2/5] Bereitstellungsumfang wählen (Nur Zielprojekt / Nur globale Regeln / Beides)
+       │    ├─ [3/5] Zielprojektpfad eingeben (Standard: aktuelles Verzeichnis [.])
+       │    │        (Hinweis: Codex, Antigravity, Zed lesen AGENTS.md nativ ohne Bridges)
+       │    ├─ [4/5] Agent-Bridge-Dateien mehrfach auswählen (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy)
+       │    └─ [5/5] Optionale Workflows auswählen (Update-Modus / Faktenprüfung / ai-memory / Comet)
+       │
        ▼
  Phase 1: Template Repository Update (-Update)
    └─ Fast-forward update of this template repository (`git pull --ff-only`); no global CLI upgrade or third-party updater in the caller directory
@@ -167,19 +177,36 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 
 **Usage**:
 ```powershell
-.\deploy-agents.ps1 [[-ProjectPath] <target-path>] [-Global] [-Update] [-CometInit] [-AiMemoryInit]
+.\deploy-agents.ps1 [[-ProjectPath] <target-path>] [-Global] [-Update] [-Interactive] [-CometInit] [-AiMemoryInit] [-Pipeline]
 ```
 
 **Parameters**:
 - `-ProjectPath` (Positional 0): Path to target project. If omitted with `-Global`, only updates user global rules.
 - `-Global` (`-g`): Initializes missing `~/.claude/CLAUDE.md`, `~/.gemini/AGENTS.md`, and Codex `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`). Existing files are preserved without `-Update`.
 - `-Language` (`-l`): Selects template language (`en`, `zh`, `zh-tw`, `fr`, `de`; defaults to `en`).
+- `-Interactive` (`-i`): Startet den schrittweisen interaktiven Terminal-Assistenten (Sprache, Umfang, Agent-Bridges und Workflows). Startet im Terminal ohne Argumente automatisch.
 - `-Update` (`-u`): Fast-forwards the template repository, automatically invokes `tools/sync-skills.py --check` to scan external skills for upstream updates with interactive confirmation, and syncs files to the target. Combined with `-Global`, it backs up and replaces existing global rule files. Codex's non-empty `$CODEX_HOME/AGENTS.override.md` takes precedence and is updated as the active file. Existing project-managed rules, hooks, skills, and lock metadata follow their documented backup/update behavior. It does not upgrade global CLIs.
 - `-CometInit` (`-c`): Automatically executes `comet init` in the target project if Comet CLI is installed.
 - `-AiMemoryInit` (`-m`): Automatically initializes `.ai-memory.toml` in the target project (inferring `workspace` and `project`) for cross-tool ai-memory integration.
+- `-Pipeline`: Delegiert die Ausführung direkt an den Unified Pipeline-Runner ([`run-pipeline.ps1`](run-pipeline.ps1) / [`pipeline.ps1`](pipeline.ps1)).
+
+**Unified Pipeline-Runner (Windows)**:
+```powershell
+# Interaktiver Schritt-für-Schritt-Assistent (Sprache, Projekt, Phasen, Modus):
+.\pipeline.ps1
+
+# Vollständige Pipeline ohne Benutzereingriff:
+.\pipeline.ps1 -All -Yes
+
+# Bestimmte Phasen ausführen:
+.\pipeline.ps1 -Stages "deploy,skills,docs"
+```
 
 **Examples**:
 ```powershell
+# Interaktiver Assistent (Aufruf ohne Argumente)
+.\deploy-agents.ps1
+
 # Deploy to a new project
 .\deploy-agents.ps1 "D:\Projects\my-project"
 
@@ -195,6 +222,9 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 # Initialize with cross-tool ai-memory configuration
 .\deploy-agents.ps1 "D:\Projects\my-project" -AiMemoryInit
 
+# Launch unified pipeline directly
+.\deploy-agents.ps1 -Pipeline
+
 # Update global rules only
 .\deploy-agents.ps1 -Global -Update
 ```
@@ -204,7 +234,10 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 ### 4.3 Linux / macOS Deployment (`deploy-agents.sh`)
 
 ```bash
-chmod +x ./deploy-agents.sh
+chmod +x ./deploy-agents.sh ./run-pipeline.sh ./pipeline.sh
+
+# Interaktiver Assistent (Aufruf ohne Argumente)
+./deploy-agents.sh
 
 # Deploy to project
 ./deploy-agents.sh /path/to/my-project
@@ -217,6 +250,22 @@ chmod +x ./deploy-agents.sh
 
 # Deploy with Comet CLI init
 ./deploy-agents.sh /path/to/my-project --comet-init
+
+# Launch unified pipeline directly
+./deploy-agents.sh --pipeline
+```
+
+**Unified Pipeline-Runner (Linux / macOS)**:
+```bash
+# Interaktiver Assistent:
+./pipeline.sh
+
+# Vollständige Pipeline ohne Benutzereingriff:
+./pipeline.sh --all -y
+
+# Bestimmte Phasen ausführen:
+./pipeline.sh --stages deploy,skills,docs
+```
 
 # Deploy with ai-memory init
 ./deploy-agents.sh /path/to/my-project --ai-memory-init

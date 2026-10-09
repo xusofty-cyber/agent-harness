@@ -31,7 +31,9 @@ Ce dépôt fournit des modèles de règles aux niveaux global, projet et répert
    - **Revue avant décision & mémoire partagée** : `option-review` et `cross-tool-memory` ;
    - **Documents professionnels** : compétences `docx` et `pdf`.
 
-4. **Déploiement en un clic & synchronisation (`deploy-agents`)** :
+4. **Déploiement en un clic, assistant interactif & pipeline unifié (`deploy-agents` & `pipeline`)** :
+   - **Assistant terminal interactif étape par étape** : L'exécution sans argument (ou avec `--interactive` / `-Interactive`) lance un assistant guidé (navigation par flèches, sélection multiple par espace, validation Entrée) pour choisir la langue (`en`, `zh`, `zh-tw`, `fr`, `de`), la portée (`project`, `global`, `both`), le chemin du projet et sélectionner parmi 12 ponts d'outils (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy) ainsi que les workflows optionnels ;
+   - **Exécuteur de pipeline d'OS unifié** ([`run-pipeline.sh`](run-pipeline.sh) / [`pipeline.sh`](pipeline.sh) & [`run-pipeline.ps1`](run-pipeline.ps1) / [`pipeline.ps1`](pipeline.ps1)) : Orchestre les 4 étapes du cycle de vie en séquence (Déploiement des règles et ponts → Mémoire IA partagée → Synchronisation des compétences → Porte de qualité living-doc), avec mode interactif ou sans surveillance (`--all -y` / `-All -Yes`) ;
    - Scripts automatisés pour PowerShell ([`deploy-agents.ps1`](deploy-agents.ps1)) et Bash ([`deploy-agents.sh`](deploy-agents.sh)) avec support multilingue (`--lang` / `-Language`) ;
    - Génération de `AGENTS.md`, ponts vers `CLAUDE.md` et Copilot, et crochets Claude Code ;
    - Sauvegarde préalable avec horodatage lors de `--global --update` ;
@@ -72,10 +74,15 @@ agent-harness/
 ├── Multi-Tool Deployment and Configuration Guide.md    # Guide de déploiement (Anglais)
 ├── Tools Practical Usage and Skills Panorama Guide.fr.md # Panorama des outils (Français)
 ├── Tools Practical Usage and Skills Panorama Guide.md    # Panorama des outils (Anglais)
+├── run-pipeline.ps1 / pipeline.ps1  # Exécuteur de pipeline unifié Windows PowerShell
+├── run-pipeline.sh / pipeline.sh   # Exécuteur de pipeline unifié Linux / macOS Bash
 ├── deploy-agents.ps1                # Script Windows PowerShell
 ├── deploy-agents.sh                 # Script Linux / macOS Bash
 ├── setup-ai-memory.ps1              # Script de configuration ai-memory (Windows)
 ├── setup-ai-memory.sh               # Script de configuration ai-memory (Unix)
+├── tools/tui.py                     # Bibliothèque TUI de sélection en ligne de commande
+├── tools/sync-skills.py             # Outil de synchronisation des compétences externes
+├── tools/doc-impact.py              # Analyse d'impact et porte de qualité living-doc
 ├── .ai-memory.toml.example          # Exemple de marqueur d'activation locale
 ├── skills-lock.json                 # Métadonnées d'intégrité et sources
 ├── README.md                        # Présentation (English)
@@ -86,22 +93,51 @@ agent-harness/
 
 ## Démarrage rapide
 
-### 1. Déployer les règles et compétences sur un projet
+### 1. Exécution du pipeline unifié en un clic (Recommandé)
+
+Exécutez toutes les étapes du cycle de vie de manière séquentielle via le pipeline unifié :
+
+- **Linux / macOS (Bash)** :
+  ```bash
+  # Mode interactif (assistant guidé par étapes) :
+  ./pipeline.sh
+  # Exécution complète sans surveillance :
+  ./pipeline.sh --all -y
+  ```
 
 - **Windows (PowerShell)** :
+  ```powershell
+  # Mode interactif (assistant guidé par étapes) :
+  .\pipeline.ps1
+  # Exécution complète sans surveillance :
+  .\pipeline.ps1 -All -Yes
+  ```
+
+### 2. Déploiement autonome & assistant interactif
+
+- **Assistant interactif (Lancement sans argument)** :
+  ```bash
+  # Linux / macOS :
+  ./deploy-agents.sh
+  # Windows :
+  .\deploy-agents.ps1
+  ```
+  *Lance l'assistant pas à pas : choix de langue, portée, chemin cible, ponts d'outils et workflows optionnels.*
+
+- **Ligne de commande Windows (PowerShell)** :
   ```powershell
   .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Global -Language fr -Initialize -DirectoryPath "packages/core"
   .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Check -DirectoryPath "packages/core"
   ```
 
-- **Linux / macOS (Bash)** :
+- **Ligne de commande Linux / macOS (Bash)** :
   ```bash
   chmod +x ./deploy-agents.sh
   ./deploy-agents.sh /path/to/my-project --global --lang fr --initialize --directory packages/core
   ./deploy-agents.sh /path/to/my-project --check --directory packages/core
   ```
 
-### 2. Mémoire partagée optionnelle (ai-memory)
+### 3. Mémoire partagée optionnelle (ai-memory)
 
 ```bash
 cargo install ai-memory
@@ -111,7 +147,7 @@ sed -i 's/replace-with-workspace-name/default/g; s/replace-with-project-name/age
 ai-memory serve --transport http
 ```
 
-### 3. Mise à jour en ligne
+### 4. Mise à jour en ligne
 
 ```bash
 ./deploy-agents.sh . --update

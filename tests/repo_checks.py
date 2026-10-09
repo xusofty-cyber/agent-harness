@@ -205,6 +205,7 @@ PARITY = [
     (".kiro/steering", ".kiro/steering", "Kiro bridge"),
     (".continue/rules", ".continue/rules", "Continue.dev bridge"),
     (".trae/rules", ".trae/rules", "Trae bridge"),
+    ("Pipeline", "run-pipeline", "pipeline runner integration"),
 ]
 ps1 = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
 sh = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")
@@ -275,7 +276,7 @@ for src, target in MULTILINGUAL_DOC_PAIRS:
 # so this guard catches the regression in CI. If it fails, run locally:
 #   git update-index --chmod=+x deploy-agents.sh setup-ai-memory.sh
 import subprocess
-EXEC_SCRIPTS = ["deploy-agents.sh", "setup-ai-memory.sh"]
+EXEC_SCRIPTS = ["deploy-agents.sh", "setup-ai-memory.sh", "run-pipeline.sh", "pipeline.sh"]
 try:
     ls = subprocess.run(["git", "ls-files", "-s", "--", *EXEC_SCRIPTS],
                         capture_output=True, text=True, cwd=ROOT, check=True).stdout

@@ -165,8 +165,19 @@ The installer copies the repository's skill directories into `.agents/skills/`; 
    - Built-in updater for vendored external skills;
    - **Check mode**: `python3 tools/sync-skills.py --check` (read-only, compares local and upstream `SKILL.md` hashes, reports 🟢 in-sync / 🟡 outdated);
    - **Apply mode**: `python3 tools/sync-skills.py --apply` (updates outdated `SKILL.md` files in-place and refreshes lock hashes; locally-authored skills are strictly protected);
+   - Interaktive Terminal-Benutzeroberfläche via `tools/tui.py` ohne Argumente;
    - Supports `--skill <name>` for targeted updates and `--json` for automation.
-3. **Integrated Online Update Flow**:
+3. **Living Documentation Impact Analysis (`tools/doc-impact.py`)**:
+   - Analysiert Codeänderungen im Hinblick auf Living-Documentation-Traceability (`docs/{specs,architecture,reference,guides,adr}/`);
+   - Unterstützt Arbeitsverzeichnis-Prüfung, Commit-Baselines (`--since`), explizite Dateilisten und interaktiven Assistenten (`--interactive`).
+4. **Unified Pipeline Runner (`pipeline.sh` / `pipeline.ps1`)**:
+   - Verkettet alle Toolchain-Phasen in einem einzigen Lauf pro Betriebssystem (Deploy → AI Memory → Skills Sync → Living Doc Impact);
+   - Interaktiver Assistent: `./pipeline.sh` (Linux/macOS) oder `.\pipeline.ps1` (Windows);
+   - Automatisierung ohne Benutzereingriff: `./pipeline.sh --all -y` oder `.\pipeline.ps1 -All -Yes`.
+5. **Interaktive Terminal-TUI-Komponente (`tools/tui.py`)**:
+   - Bietet tastaturgesteuerte Menüs für Einzelauswahl (Pfeiltasten + Enter) und Mehrfachauswahl (Pfeiltasten + Leertaste zum Umschalten von Checkboxen + Enter zum Bestätigen);
+   - Integrierte TTY- und ANSI-Erkennung mit sauberem Fallback auf nummerierte Texteingabe in nicht-interaktiven Pipelines.
+6. **Integrated Online Update Flow**:
    ```powershell
    # Windows
    .\deploy-agents.ps1 -ProjectPath "." -Update
@@ -434,9 +445,16 @@ Read `tasks/lessons.md` when it is relevant to the task.
 ```
 
 ### Reference Documentation:
+- Unified Pipeline Runners:
+  - Windows: [`run-pipeline.ps1`](run-pipeline.ps1) / [`pipeline.ps1`](pipeline.ps1)
+  - Linux / macOS: [`run-pipeline.sh`](run-pipeline.sh) / [`pipeline.sh`](pipeline.sh)
 - One-Click Deployment Scripts:
   - Windows: [`deploy-agents.ps1`](deploy-agents.ps1)
   - Linux / macOS: [`deploy-agents.sh`](deploy-agents.sh)
+- Maintenance Tools:
+  - Terminal UI Library: [`tools/tui.py`](tools/tui.py)
+  - Skill Sync Tool: [`tools/sync-skills.py`](tools/sync-skills.py)
+  - Living Doc Impact Gate: [`tools/doc-impact.py`](tools/doc-impact.py)
 - Deployment & Configuration Guide:
   - [Multi-Tool Deployment and Configuration Guide (English)](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md)
   - [多工具部署配置指南 (中文)](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md)
