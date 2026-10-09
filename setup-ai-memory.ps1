@@ -2,7 +2,7 @@
 param (
     [Parameter(Mandatory = $false)]
     [ValidateSet('claude-code', 'codex', 'antigravity', 'antigravity-ide', 'antigravity-cli')]
-    [string]$Agent
+    [string[]]$Agent
 )
 
 $ErrorActionPreference = 'Stop'
