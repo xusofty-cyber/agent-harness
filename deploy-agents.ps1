@@ -585,11 +585,13 @@ function Get-InitSuggestions([string]$Root, [string]$Scope) {
     $values = @{}
     if ($Scope -eq "project") {
         $values["PROJECT_NAME"] = Split-Path -Leaf $Root.TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
-        if (Get-Command git -ErrorAction SilentlyContinue) {
-            $remote = (& git -C $Root remote get-url origin 2>$null | Select-Object -First 1)
-            if ($LASTEXITCODE -eq 0 -and $remote -and $remote -notmatch '://[^/]*@') { $values["REPOSITORY_URL"] = $remote.Trim() }
-            $branch = (& git -C $Root symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>$null | Select-Object -First 1)
-            if ($LASTEXITCODE -eq 0 -and $branch -match '^origin/(.+)$') { $values["DEFAULT_BRANCH"] = $Matches[1] }
+        if ((Get-Command git -ErrorAction SilentlyContinue) -and (Test-Path -LiteralPath (Join-Path $Root '.git'))) {
+            try {
+                $remote = (& git -C $Root remote get-url origin 2>$null | Select-Object -First 1)
+                if ($LASTEXITCODE -eq 0 -and $remote -and $remote -notmatch '://[^/]*@') { $values["REPOSITORY_URL"] = $remote.Trim() }
+                $branch = (& git -C $Root symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>$null | Select-Object -First 1)
+                if ($LASTEXITCODE -eq 0 -and $branch -match '^origin/(.+)$') { $values["DEFAULT_BRANCH"] = $Matches[1] }
+            } catch {}
         }
         $manifests = @(
             @{ File = 'package.json'; Name = 'JavaScript/TypeScript (package.json; runtime version to confirm)' },
