@@ -742,7 +742,7 @@ if ($CometInit) {
 }
 
 # ==============================================================================
-# 9. Optional ai-memory Init (-AiMemoryInit)
+# 10. Optional ai-memory Init (-AiMemoryInit)
 # ==============================================================================
 $aiMemoryCli = Get-Command "ai-memory" -ErrorAction SilentlyContinue
 if ($AiMemoryInit) {

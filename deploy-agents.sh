@@ -716,7 +716,7 @@ done
 echo -e "  ${GREEN}[√] 已就绪四阶文档骨架目录: docs/{specs,architecture,reference,guides}${NC}"
 
 # ==============================================================================
-# 8. Optional Comet CLI Init (--comet-init)
+# 9. Optional Comet CLI Init (--comet-init)
 # ==============================================================================
 if [ "$DO_COMET_INIT" = true ]; then
     if command -v comet >/dev/null 2>&1; then
@@ -729,7 +729,7 @@ if [ "$DO_COMET_INIT" = true ]; then
 fi
 
 # ==============================================================================
-# 9. Optional ai-memory Init (--ai-memory-init)
+# 10. Optional ai-memory Init (--ai-memory-init)
 # ==============================================================================
 if [ "$DO_AI_MEMORY_INIT" = true ]; then
     TARGET_AI_MEMORY="${TARGET_PROJECT_DIR}/.ai-memory.toml"
