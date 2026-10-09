@@ -85,6 +85,7 @@
 - **隐私与安全**：不保存凭证、私钥、原始个人数据、完整对话/工具日志或不必要的个人信息；共享仓库不保存用户私人偏好。
 - **可选长期记忆**：跨工具记忆仅使用本地 ai-memory 方案；默认不部署、不启动，也不要求 API Key。需要自动采集时，先按《多工具部署配置指南》显式安装原生 hooks/MCP，并创建本机忽略的 `.ai-memory.toml`；未启用或服务不可用时继续依靠本仓库 Markdown，不得阻塞任务。记忆只辅助导航，必须用当前代码、规范和证据复核。
 - **共享记忆技能**：涉及跨会话延续、长期项目决策、研究或文档/设计方案时，按需使用 `.agents/skills/cross-tool-memory/SKILL.md`；不保存完整对话、凭证或未经核实的结论。
+- **活体文档与代码追溯**：项目长期技术文档统一维护于 `docs/` 下（需求 `docs/specs/`、架构 `docs/architecture/`、接口与配置参考 `docs/reference/`、用户操作指南 `docs/guides/`）。各文档头部 Frontmatter 声明 `modules`（关联代码路径）与 `depends_on`。在开发或使用 `/comet` 流程时，按启发式阈值（新增模块、改动 2+ 接口或关键配置）同步更新对应文档，保证代码与文档双向追溯；详见 `.agents/skills/living-documentation/SKILL.md`。
 ## 目录级规则索引
 
 当项目为 Monorepo 或存在高隔离独立子模块时，仅在必要子目录下按需创建 `AGENTS.md`：

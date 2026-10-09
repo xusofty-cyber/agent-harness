@@ -68,6 +68,12 @@
       "skillPath": "skills/finishing-a-development-branch/SKILL.md",
       "computedHash": "4f571e7befb8b0946d9d7770232c818812412e9ab1dfb811f847edfba1fc6275"
     },
+    "living-documentation": {
+      "source": "agents-living (authored in-repo)",
+      "sourceType": "local",
+      "version": "0.1.0",
+      "skillPath": ".agents/skills/living-documentation/SKILL.md"
+    },
     "openspec": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",

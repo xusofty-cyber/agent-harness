@@ -115,6 +115,7 @@ PARITY = [
     ("CometInit", "comet-init", "optional Comet init flag"),
     ("AiMemoryInit", "ai-memory-init", "optional ai-memory init flag"),
     (".ai-memory.toml.example", ".ai-memory.toml.example", "ai-memory config template sync"),
+    ("LivingDocScaffold", "living-doc-scaffold", "living documentation directory scaffold"),
 ]
 ps1 = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
 sh = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")

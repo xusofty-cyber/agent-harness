@@ -10,7 +10,7 @@
 
 1. [核心架构与工具矩阵全景（谁管什么）](#一-核心架构与工具矩阵全景谁管什么)
 2. [技能（Skills）与生态工具安装清单](#二-技能skills与生态工具安装清单)
-   - 2.1 开箱即用 / 40+ 原生技能分类全景清单
+   - 2.1 开箱即用 / 41 原生技能分类全景清单
    - 2.2 版本锁与在线更新机制 (`skills-lock.json` + `deploy-agents`)
    - 2.3 Harness 核心工程扩展工具（按需选用）
    - 2.4 平台安装与配置文件位置速查表
@@ -82,11 +82,11 @@
 
 ## 二、 技能（Skills）与生态工具安装清单
 
-### 2.1 开箱即用 / 40+ 原生技能分类全景清单
+### 2.1 开箱即用 / 41 原生技能分类全景清单
 
 通过执行自动化部署脚本 [`deploy-agents.ps1`](deploy-agents.ps1)（Windows）或 [`deploy-agents.sh`](deploy-agents.sh)（Linux/macOS）后，全套技能库会自动部署至目标项目的 `.agents/skills/`，并无缝接线至 `.claude/skills/`。
 
-整套技能库包含 **40 个专业工程技能**，按功能领域归类如下：
+整套技能库包含 **41 个专业工程技能**，按功能领域归类如下：
 
 #### 1. Comet 工作流
 - **`comet`**：Comet CLI 按版本提供 Native/Classic 工作流。本仓库只提供入口指引，不实现 Comet 的状态机或阶段守卫；使用前检查项目配置和 CLI 版本。
@@ -139,9 +139,10 @@
 - **`docx`**：Word（.docx / .dotx）专业文档生成、排版、样式与内容抽取。
 - **`pdf`**：PDF 结构化文本抽取、表格分析、页面拆分合并与 OCR。
 
-#### 7. 方案评审与跨工具记忆（自研核心技能）
+#### 7. 方案评审、跨工具记忆与活体文档（自研核心技能）
 - **`cross-tool-memory`**：跨工具项目长期记忆导航与经验检索（与本地 ai-memory 后端配合使用）。
 - **`option-review`**：多候选技术方案事前独立评审与决策矩阵生成（5 维度并行分析，防止单一偏向）。
+- **`living-documentation`**：四阶活体文档体系（specs/architecture/reference/guides）与 Frontmatter 代码双向追溯关联，支持 L0/L1/L2 变更门禁与文档演进。
 
 ---
 
@@ -239,6 +240,7 @@ Skill 文件的存在不代表宿主自动加载。实际上下文成本和 CLI 
 | **超长输出 / 测试跑批** | [`token-discipline.md`](.agents/rules/token-discipline.md) + `rtk` | RTK Hook 配置后才会改写支持的命令；否则使用原生命令参数 | 保留必要验证，长日志可重定向到本地文件 |
 | **Token 告急 / 精简输出** | [`Global AGENTS.md`](Global%20AGENTS.md) + `caveman` | `/caveman` 或 `进入 caveman 模式` / `说人话` | 在宿主加载 Skill 时可简化表达，同时保留必要背景、技术精度和安全说明 |
 | **Word / PDF 专业文档** | `docx` / `pdf` | 直接提及 `.docx`、`.pdf` 或 `导出规范文档` | 遵循专业排版规范，自动处理表格对齐、样式维护与内容抽取，不乱跑单测 |
+| **文档创建 / 架构与追溯同步** | [`engineering-spec.md`](.agents/rules/engineering-spec.md) + `living-documentation` | `/living-documentation` / `更新追溯文档` / 需求架构归档 | 依据 L0/L1/L2 阈值同步四阶文档（specs/architecture/reference/guides），维护 Frontmatter 代码与文档双向追溯引用 |
 | **任务收尾 / 完工声明** | `verification-before-completion` | 任务收尾阶段自动触发 | 未出示真实可复现的验证依据（测试输出片段或运行结果）前，绝不可声称任务完成 |
 
 ---
