@@ -6,6 +6,8 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-09
+
 ### Added
 - Claude Code hook: sensitive-path commit/push advisory (open-code-review
   Phase 2). `.claude/hooks/guard.mjs` now warns (non-blocking, exit 0) when
