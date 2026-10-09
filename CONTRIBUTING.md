@@ -56,7 +56,9 @@ Vendored skills (openspec, superpowers, …) are versioned upstream — do not
 add a local `version:` to them. Bump a skill's version when its behavior
 changes (patch: wording/threshold tweaks; minor: new trigger scenarios;
 major: incompatible behavior change). A skill version bump does not force a
-repository version bump.
+repository version bump. Template changes under a skill's `templates/`
+count as behavior changes: field/section restructuring → minor bump,
+wording/example tweaks → patch bump; combined with body changes, bump once.
 
 ### Release process
 
