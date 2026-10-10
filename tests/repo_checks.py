@@ -261,6 +261,8 @@ MULTILINGUAL_DOC_PAIRS = [
      "Tools Practical Usage and Skills Panorama Guide.fr.md"),
     ("Tools Practical Usage and Skills Panorama Guide.md",
      "Tools Practical Usage and Skills Panorama Guide.de.md"),
+    ("Skills Usage Guide.md",
+     "Skills Usage Guide.zh.md"),
 ]
 
 def h2_count(path):
