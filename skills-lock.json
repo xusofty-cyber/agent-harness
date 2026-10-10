@@ -72,7 +72,7 @@
       "sourceType": "local",
       "version": "0.1.0",
       "skillPath": ".agents/skills/engineering-docs/SKILL.md",
-      "computedHash": "ea20a9f1dadb81a1f2a3f6e79211f42eb37fb0b457dda0532a4bfd57365b716b",
+      "computedHash": "05370adfa24ac01c8675180aba07751b27b69c113db11f458713227065a5a91c",
       "domain": "local"
     },
     "executing-plans": {

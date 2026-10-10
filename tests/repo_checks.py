@@ -247,6 +247,11 @@ for tnum, edoc_dir in sorted(edoc_paths.items()):
 # templates/comet.config.yaml must be valid YAML and have required top-level keys.
 try:
     import yaml
+    _yaml_available = True
+except ImportError:
+    _yaml_available = False
+
+if _yaml_available:
     comet_cfg_path = ROOT / "templates" / "comet.config.yaml"
     check("comet-cfg:file-exists", comet_cfg_path.is_file(), "templates/comet.config.yaml missing")
     if comet_cfg_path.is_file():
@@ -255,8 +260,9 @@ try:
         if isinstance(cfg_data, dict):
             for req_key in ("schema", "default_workflow", "workflows"):
                 check(f"comet-cfg:key-{req_key}", req_key in cfg_data, f"missing {req_key} in comet.config.yaml")
-except ImportError:
-    pass
+else:
+    # Never silently skip: CI installs pyyaml, but local runs may not have it.
+    print("  [warn] comet-cfg: PyYAML not installed, validation skipped (pip install pyyaml)")
 
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
