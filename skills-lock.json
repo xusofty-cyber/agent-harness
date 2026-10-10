@@ -5,13 +5,13 @@
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/brainstorming/SKILL.md",
-      "computedHash": "fef7f05d17a88e6b498f24d1b2081880a4666a664cc49881f56527808f26fbd6"
+      "computedHash": "6ee10d1481b8a2580d5336ff66c5c08acc9d4b251b13bbc3bfd31be99c261d43"
     },
     "caveman": {
       "source": "JuliusBrussee/caveman",
       "sourceType": "github",
       "skillPath": "skills/caveman/SKILL.md",
-      "computedHash": "e9192d111aa44ea90bd214d5aa2b4f640195b0717faedd881e4b3927da9d88e2"
+      "computedHash": "415d43518f2b1a9498c15a445d4657117b129ee5e81b19454ce348439cc6672b"
     },
     "codegraph": {
       "source": "colbymchenry/codegraph",
@@ -90,25 +90,25 @@
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": "skills/openspec-apply-change/SKILL.md",
-      "computedHash": "aa6fabc8d4ad0745d276c58da0c4f2ee41b85f8c86138fcf9980eb07f064613f"
+      "computedHash": "40fc0655ae650213a130f376eed1475527d6c65cdc32973754449776a3227152"
     },
     "openspec-archive-change": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": "skills/openspec-archive-change/SKILL.md",
-      "computedHash": "8a517634f0802a3379df43b5a12efdc4b2ce9fca2c2526ea9bd148aacb9e0077"
+      "computedHash": "b080e65449e9895fb63964c811168943bf99cb131a378b6a9937ed519ae4d37f"
     },
     "openspec-bulk-archive-change": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": "skills/openspec-bulk-archive-change/SKILL.md",
-      "computedHash": "c7a1b052112712926a8e8e702195956ff49e886fd2613bfbe656a59ea482b827"
+      "computedHash": "cf2d41a55e4edc805ae9da48b418c8da3055e0ffd4824070a501b3dd840a5484"
     },
     "openspec-continue-change": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": "skills/openspec-continue-change/SKILL.md",
-      "computedHash": "eddb50b5caf377676d82d17d584eed751b24d80a92bab9280d255be8c9d90fb8"
+      "computedHash": "ff4739969b00b2b4569ddb258de3f8401628f155fe26d4da8ff6ecad4b1ff2ec"
     },
     "openspec-explore": {
       "source": "Fission-AI/OpenSpec",
@@ -156,7 +156,7 @@
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": "skills/openspec-verify-change/SKILL.md",
-      "computedHash": "993a6b7dc13cea98068c983d9317dcaedc42aeeab6917d0971eac3e834d6adb5"
+      "computedHash": "76a04af7b5926b6b3266627f26b42df58d8a4084712a686b4aa658114212358c"
     },
     "option-review": {
       "source": "agent-harness (authored in-repo)",
@@ -174,7 +174,7 @@
       "source": "DietrichGebert/ponytail",
       "sourceType": "github",
       "skillPath": "skills/ponytail/SKILL.md",
-      "computedHash": "9e8d05cbbaf6dc38f0cffc924c09b3cbe76d94ba4ba0d09bde803da2f8c6b5a0"
+      "computedHash": "ba68ff26239c3c3b05b2a9a47ee0d9a6b93a69639a2555ec87a5d44bffaf2f0c"
     },
     "receiving-code-review": {
       "source": "obra/superpowers",
@@ -192,7 +192,7 @@
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/requesting-code-review/SKILL.md",
-      "computedHash": "2abaeac1de432c76abda0ca7ba618901d2e94f8817b3650f9c523acea2d224f5"
+      "computedHash": "2180e14a448e9410bec88e6646a2d1f0ce7fdd58de27388c1e052e929679d2bc"
     },
     "rtk": {
       "source": "rtk-ai/rtk",
@@ -217,7 +217,7 @@
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/systematic-debugging/SKILL.md",
-      "computedHash": "3589907ee34dc8b1b7223a33fac98ab841a9e42f9960ab4433a832f0c6f00be0"
+      "computedHash": "51c6435d98c83c42c96ba7c35725a0b2c376cd487fb1a4e6bd0ddbe7e33ef202"
     },
     "test-driven-development": {
       "source": "obra/superpowers",
@@ -259,7 +259,7 @@
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/writing-plans/SKILL.md",
-      "computedHash": "cc8517a6bc569a0633b585649291688217b8a65d547c2ac5fa0923e56ecffa8c"
+      "computedHash": "a6c67c1900064347c2a329990dd3c555657c51c3ec53b259a08aa01a2c26139a"
     },
     "writing-skills": {
       "source": "obra/superpowers",

@@ -52,7 +52,7 @@ Dispatch a `general-purpose` subagent, filling the template at [code-reviewer.md
 
 You: Let me request code review before proceeding.
 
-BASE_SHA=$(git log --oneline | grep "Task 1" | head -1 | awk '{print $1}')
+BASE_SHA=$(git log --oneline | grep "Task 1" | head -1 | cut -d' ' -f1)
 HEAD_SHA=$(git rev-parse HEAD)
 
 [Dispatch code reviewer subagent]
@@ -91,13 +91,5 @@ You: [Fix progress indicators]
 - Push back with technical reasoning
 - Show code/tests that prove it works
 - Request clarification
-
-## How to review: use `open-code-review`
-
-This skill decides **when** to review. The **how** lives in the
-`open-code-review` skill — invoke its workflow (Tier A delegation when the
-`ocr` CLI is installed, otherwise the Tier B deterministic methodology)
-instead of inventing an ad-hoc review process. Rule-first, line-anchored,
-coverage-mandated.
 
 See template at: [code-reviewer.md](code-reviewer.md)

@@ -25,7 +25,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "codegraph prompt-hook"
+            "command": "codegraph.cmd prompt-hook"
           }
         ]
       }
@@ -41,7 +41,8 @@
       "mcp__codegraph__codegraph_impact",
       "mcp__codegraph__codegraph_files",
       "mcp__codegraph__codegraph_status",
-      "mcp__codegraph__*"
+      "mcp__codegraph__*",
+      "mcp__codegraph__codegraph_context"
     ]
   }
 }
