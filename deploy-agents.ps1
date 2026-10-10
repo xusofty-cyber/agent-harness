@@ -1200,18 +1200,18 @@ if (-not (Test-Path $TargetOpenSpecChanges)) {
 }
 
 # ==============================================================================
-# 8. Initialize Living Documentation Scaffold (docs/{specs,architecture,reference,guides,adr})
+# 8. Initialize Living Documentation Scaffold (docs/{specs,architecture,reference,guides,management,tests,adr})
 # ==============================================================================
 # LivingDocScaffold
 $TargetDocsBase = Join-Path $ResolvedProjectPath "docs"
-$docSubdirs = @("specs", "architecture", "reference", "guides", "adr")
+$docSubdirs = @("specs", "architecture", "reference", "guides", "management", "tests", "adr")
 foreach ($sub in $docSubdirs) {
     $dirPath = Join-Path $TargetDocsBase $sub
     if (-not (Test-Path $dirPath)) {
         New-Item -ItemType Directory -Path $dirPath -Force | Out-Null
     }
 }
-Write-Host "  [OK] Initialized living documentation scaffold: docs/{specs,architecture,reference,guides,adr}" -ForegroundColor Green
+Write-Host "  [OK] Initialized living documentation scaffold: docs/{specs,architecture,reference,guides,management,tests,adr}" -ForegroundColor Green
 
 # ==============================================================================
 # 9. Optional Comet CLI Init (-CometInit) & Configuration Scaffold
