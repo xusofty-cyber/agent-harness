@@ -281,7 +281,7 @@ RUN_GLOBAL=false
 RUN_UPDATE=false
 NON_INTERACTIVE=false
 FORCE_INTERACTIVE=false
-EXPLICIT_STAGES=false
+EXPLICIT_CONFIG=false
 RUN_DETAIL_MODE="quick" # quick or detailed
 
 # Parse arguments
@@ -292,11 +292,11 @@ while [[ $# -gt 0 ]]; do
             STAGE_MEMORY=true
             STAGE_SKILLS=true
             STAGE_DOCS=true
-            EXPLICIT_STAGES=true
+            EXPLICIT_CONFIG=true
             shift
             ;;
         -s|--stages)
-            EXPLICIT_STAGES=true
+            EXPLICIT_CONFIG=true
             IFS=',' read -ra STAGES_ARR <<< "$2"
             for s in "${STAGES_ARR[@]}"; do
                 case "$s" in
@@ -309,16 +309,16 @@ while [[ $# -gt 0 ]]; do
             done
             shift 2
             ;;
-        --deploy) STAGE_DEPLOY=true; EXPLICIT_STAGES=true; shift ;;
-        --memory) STAGE_MEMORY=true; EXPLICIT_STAGES=true; shift ;;
-        --skills) STAGE_SKILLS=true; EXPLICIT_STAGES=true; shift ;;
-        --docs) STAGE_DOCS=true; EXPLICIT_STAGES=true; shift ;;
+        --deploy) STAGE_DEPLOY=true; EXPLICIT_CONFIG=true; shift ;;
+        --memory) STAGE_MEMORY=true; EXPLICIT_CONFIG=true; shift ;;
+        --skills) STAGE_SKILLS=true; EXPLICIT_CONFIG=true; shift ;;
+        --docs) STAGE_DOCS=true; EXPLICIT_CONFIG=true; shift ;;
         -p|--project) PROJECT_DIR="$2"; shift 2 ;;
         -l|--lang) LANG_OPTION="$2"; shift 2 ;;
-        -g|--global) RUN_GLOBAL=true; shift ;;
-        -u|--update) RUN_UPDATE=true; shift ;;
-        -k|--check-only) CHECK_ONLY=true; shift ;;
-        --apply-skills) APPLY_SKILLS=true; shift ;;
+        -g|--global) RUN_GLOBAL=true; EXPLICIT_CONFIG=true; shift ;;
+        -u|--update) RUN_UPDATE=true; EXPLICIT_CONFIG=true; shift ;;
+        -k|--check-only) CHECK_ONLY=true; EXPLICIT_CONFIG=true; shift ;;
+        --apply-skills) APPLY_SKILLS=true; EXPLICIT_CONFIG=true; shift ;;
         -y|--yes|--non-interactive) NON_INTERACTIVE=true; shift ;;
         -I|--interactive) FORCE_INTERACTIVE=true; shift ;;
         -h|--help) usage ;;
@@ -334,13 +334,19 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# If no stages explicitly specified and running in interactive terminal (or forced)
-if [ "$EXPLICIT_STAGES" = false ] && { [ -t 0 ] || [ "$FORCE_INTERACTIVE" = true ]; } && [ "$NON_INTERACTIVE" = false ]; then
+# Pre-flight review flags computation
+RUN_APPLY_SKILLS=false
+if [ "$APPLY_SKILLS" = true ] || [ "$RUN_UPDATE" = true ]; then
+    RUN_APPLY_SKILLS=true
+fi
+
+# Interactive 6-step wizard when executed without explicit stage/config flags
+if [ "$EXPLICIT_CONFIG" = false ] && [ "$NON_INTERACTIVE" = false ]; then
     echo -e "\n${CYAN}================================================================${NC}"
     echo -e "${CYAN}  🚀 Agent Harness 统一工程流水线向导 (Unified Pipeline Runner)  ${NC}"
     echo -e "${CYAN}================================================================${NC}"
 
-    prompt_select "[1/4] 选择规则与文档语言 (Select Language):" \
+    prompt_select "[1/6] 选择规则与文档语言 (Select Language):" \
         "简体中文 (Simplified Chinese, zh)" "zh" \
         "English (en)" "en" \
         "繁體中文 (Traditional Chinese, zh-tw)" "zh-tw" \
@@ -348,11 +354,11 @@ if [ "$EXPLICIT_STAGES" = false ] && { [ -t 0 ] || [ "$FORCE_INTERACTIVE" = true
         "Deutsch (German, de)" "de"
     LANG_OPTION="$SELECTED_VALUE"
 
-    echo -e "\n${CYAN}[2/4] 目标工程根目录 (Target Project Path):${NC}"
+    echo -e "\n${CYAN}[2/6] 目标工程根目录 (Target Project Path):${NC}"
     read -r -p "请输入工程路径 [默认: 当前目录 .]: " input_proj
     PROJECT_DIR="${input_proj:-.}"
 
-    prompt_select "[3/4] 选择流水线执行模式 (Select Pipeline Mode):" \
+    prompt_select "[3/6] 选择流水线执行流程 (Select Pipeline Flow & Stages):" \
         "一键全量流水线 (Run Full Pipeline: 规则部署 -> AI记忆 -> 技能同步 -> 文档质检)" "all" \
         "自定义阶段组合 (Custom Stages: 自选执行部分阶段)" "custom" \
         "仅规则与 Agent 桥接部署 (Deploy Rules & Bridges only)" "only-deploy" \
@@ -393,10 +399,68 @@ if [ "$EXPLICIT_STAGES" = false ] && { [ -t 0 ] || [ "$FORCE_INTERACTIVE" = true
         only-docs) STAGE_DOCS=true ;;
     esac
 
-    prompt_select "[4/4] 选择执行交互细化程度 (Execution Detail):" \
+    prompt_select "[4/6] 选择执行交互细化程度 (Execution Detail):" \
         "极速推荐配置 (Quick Run: 自动使用最佳实践一键贯通流水线)" "quick" \
         "逐步向导配置 (Interactive: 依次打开各工具阶段的详细选项向导)" "detailed"
     RUN_DETAIL_MODE="$SELECTED_VALUE"
+
+    prompt_select "[5/6] 是否同步部署/更新本机全局规则 (Global Rules: ~/.gemini, ~/.codex, ~/.claude)？" \
+        "跳过全局规则 (Skip: 仅在当前项目工程内生效)" "skip" \
+        "同步更新全局规则 (Sync: 备份并更新各工具全局 AGENTS.md / CLAUDE.md)" "sync"
+    if [ "$SELECTED_VALUE" = "sync" ]; then
+        RUN_GLOBAL=true
+        RUN_UPDATE=true
+    else
+        RUN_GLOBAL=false
+    fi
+
+    prompt_select "[6/6] 外部技能库同步与更新处理 (External Skills Sync):" \
+        "安全检查模式 (Check only: 仅对比差异，不覆盖文件)" "check" \
+        "在线同步更新 (Apply: 自动拉取上游更新并应用)" "apply"
+    if [ "$SELECTED_VALUE" = "apply" ]; then
+        RUN_APPLY_SKILLS=true
+    else
+        RUN_APPLY_SKILLS=false
+    fi
+fi
+
+# Pre-flight review: when user passed explicit CLI parameters but NOT -y
+if [ "$EXPLICIT_CONFIG" = true ] && [ "$NON_INTERACTIVE" = false ]; then
+    echo -e "\n${CYAN}================================================================${NC}"
+    echo -e "${CYAN}  🚀 Agent Harness 流水线执行前配置确认 (Pre-flight Review)   ${NC}"
+    echo -e "${CYAN}================================================================${NC}"
+    echo -e "${YELLOW}检测到执行参数。请确认是否需要同步处理全局规则与外部技能库：${NC}"
+
+    if [ "$RUN_GLOBAL" = true ]; then
+        prompt_select "[1/2] 本机全局各 Agent 工具规则处理 (Global Rules Sync):" \
+            "● 确认: 部署/覆盖更新全局规则 (~/.gemini, ~/.codex, ~/.claude)" "sync" \
+            "○ 跳过: 仅更新当前项目工程，不改动本机全局规则" "skip"
+    else
+        prompt_select "[1/2] 本机全局各 Agent 工具规则处理 (Global Rules Sync):" \
+            "○ 跳过: 仅更新当前项目工程，不改动本机全局规则" "skip" \
+            "● 确认: 部署/覆盖更新全局规则 (~/.gemini, ~/.codex, ~/.claude)" "sync"
+    fi
+    if [ "$SELECTED_VALUE" = "sync" ]; then
+        RUN_GLOBAL=true
+        RUN_UPDATE=true
+    else
+        RUN_GLOBAL=false
+    fi
+
+    if [ "$RUN_APPLY_SKILLS" = true ]; then
+        prompt_select "[2/2] 外部开源技能库处理 (External Skills Sync):" \
+            "● 确认: 在线拉取 GitHub 上游更新并应用到本地技能库 (--apply)" "apply" \
+            "○ 仅检查: 仅对比校验版本差异，不覆写技能文件 (--check)" "check"
+    else
+        prompt_select "[2/2] 外部开源技能库处理 (External Skills Sync):" \
+            "○ 仅检查: 仅对比校验版本差异，不覆写技能文件 (--check)" "check" \
+            "● 确认: 在线拉取 GitHub 上游更新并应用到本地技能库 (--apply)" "apply"
+    fi
+    if [ "$SELECTED_VALUE" = "apply" ]; then
+        RUN_APPLY_SKILLS=true
+    else
+        RUN_APPLY_SKILLS=false
+    fi
 fi
 
 # Fallback: if still no stage selected, default to all stages
@@ -405,67 +469,6 @@ if [ "$STAGE_DEPLOY" = false ] && [ "$STAGE_MEMORY" = false ] && [ "$STAGE_SKILL
     STAGE_MEMORY=true
     STAGE_SKILLS=true
     STAGE_DOCS=true
-fi
-
-# Pre-flight review: when user passed parameters like -g / -u / -a but NOT -y
-RUN_APPLY_SKILLS=false
-if [ "$APPLY_SKILLS" = true ] || [ "$RUN_UPDATE" = true ]; then
-    RUN_APPLY_SKILLS=true
-fi
-
-if [ "$NON_INTERACTIVE" = false ] && { [ -t 0 ] || [ "$FORCE_INTERACTIVE" = true ]; }; then
-    if [ "$EXPLICIT_STAGES" = true ]; then
-        echo -e "\n${CYAN}================================================================${NC}"
-        echo -e "${CYAN}  🚀 Agent Harness 流水线执行前配置确认 (Pre-flight Review)   ${NC}"
-        echo -e "${CYAN}================================================================${NC}"
-        echo -e "${YELLOW}检测到执行参数。请确认是否需要同步处理全局规则与外部技能库：${NC}"
-
-        if [ "$RUN_GLOBAL" = true ]; then
-            prompt_select "[1/2] 本机全局各 Agent 工具规则处理 (Global Rules Sync):" \
-                "● 确认: 部署/覆盖更新全局规则 (~/.gemini, ~/.codex, ~/.claude)" "sync" \
-                "○ 跳过: 仅更新当前项目工程，不改动本机全局规则" "skip"
-        else
-            prompt_select "[1/2] 本机全局各 Agent 工具规则处理 (Global Rules Sync):" \
-                "○ 跳过: 仅更新当前项目工程，不改动本机全局规则" "skip" \
-                "● 确认: 部署/覆盖更新全局规则 (~/.gemini, ~/.codex, ~/.claude)" "sync"
-        fi
-        if [ "$SELECTED_VALUE" = "sync" ]; then
-            RUN_GLOBAL=true
-            RUN_UPDATE=true
-        else
-            RUN_GLOBAL=false
-        fi
-
-        if [ "$RUN_APPLY_SKILLS" = true ]; then
-            prompt_select "[2/2] 外部开源技能库处理 (External Skills Sync):" \
-                "● 确认: 在线拉取 GitHub 上游更新并应用到本地技能库 (--apply)" "apply" \
-                "○ 仅检查: 仅对比校验版本差异，不覆写技能文件 (--check)" "check"
-        else
-            prompt_select "[2/2] 外部开源技能库处理 (External Skills Sync):" \
-                "○ 仅检查: 仅对比校验版本差异，不覆写技能文件 (--check)" "check" \
-                "● 确认: 在线拉取 GitHub 上游更新并应用到本地技能库 (--apply)" "apply"
-        fi
-        if [ "$SELECTED_VALUE" = "apply" ]; then
-            RUN_APPLY_SKILLS=true
-        else
-            RUN_APPLY_SKILLS=false
-        fi
-    else
-        prompt_select "[4/5] 是否同步部署/更新本机全局规则 (Global Rules: ~/.gemini, ~/.codex, ~/.claude)？" \
-            "跳过全局规则 (Skip: 仅在当前项目工程内生效)" "skip" \
-            "同步更新全局规则 (Sync: 备份并更新各工具全局 AGENTS.md / CLAUDE.md)" "sync"
-        if [ "$SELECTED_VALUE" = "sync" ]; then
-            RUN_GLOBAL=true
-            RUN_UPDATE=true
-        fi
-
-        prompt_select "[5/5] 外部技能库处理模式 (External Skills Sync):" \
-            "安全检查模式 (Check only: 仅对比差异，不覆盖文件)" "check" \
-            "在线同步更新 (Apply: 自动拉取上游更新并应用)" "apply"
-        if [ "$SELECTED_VALUE" = "apply" ]; then
-            RUN_APPLY_SKILLS=true
-        fi
-    fi
 fi
 
 # Resolve absolute target path
@@ -618,10 +621,12 @@ if [ "$STAGE_SKILLS" = true ]; then
         if [ "$RUN_DETAIL_MODE" = "detailed" ] && [ -t 0 ]; then
             "${skills_cmd[@]}" || true
         else
-            if [ "$CHECK_ONLY" = true ]; then
-                skills_cmd+=("--check")
-            elif [ "$RUN_APPLY_SKILLS" = true ]; then
-                skills_cmd+=("--apply")
+            if [ "$CHECK_ONLY" != true ]; then
+                if [ "$RUN_APPLY_SKILLS" = true ]; then
+                    skills_cmd+=("--apply")
+                else
+                    skills_cmd+=("--check")
+                fi
             else
                 skills_cmd+=("--check")
             fi

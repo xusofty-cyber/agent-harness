@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 # run-pipeline.ps1
 # Platforms: Windows (PowerShell)
 # Purpose: Unified pipeline runner for agent-harness:
@@ -230,7 +230,7 @@ $stageMemory = $Memory.IsPresent
 $stageSkills = $Skills.IsPresent
 $stageDocs   = $Docs.IsPresent
 
-$explicit = $All.IsPresent -or $Deploy.IsPresent -or $Memory.IsPresent -or $Skills.IsPresent -or $Docs.IsPresent -or ($Stages -and $Stages.Count -gt 0)
+$explicit = $All.IsPresent -or $Deploy.IsPresent -or $Memory.IsPresent -or $Skills.IsPresent -or $Docs.IsPresent -or ($Stages -and $Stages.Count -gt 0) -or $Global.IsPresent -or $Update.IsPresent -or $ApplySkills.IsPresent -or $CheckOnly.IsPresent
 
 if ($All.IsPresent) {
     $stageDeploy = $true
@@ -256,14 +256,17 @@ if ($Stages) {
 }
 
 $runDetailMode = "quick"
+$runGlobal = $Global.IsPresent
+$runUpdate = $Update.IsPresent
+$runApplySkills = $ApplySkills.IsPresent -or $runUpdate
 
-# If no stages chosen and in interactive console
+# Interactive 6-step wizard when executed without explicit stage/config flags
 if (-not $explicit -and -not $Yes.IsPresent -and (-not [Console]::IsInputRedirected -or $Interactive.IsPresent)) {
     Write-Host "`n================================================================" -ForegroundColor Cyan
     Write-Host "  🚀 Agent Harness 统一工程流水线向导 (Unified Pipeline Runner)  " -ForegroundColor Cyan
     Write-Host "================================================================" -ForegroundColor Cyan
 
-    $Lang = Prompt-Select "[1/4] 选择规则与文档语言 (Select Language):" @(
+    $Lang = Prompt-Select "[1/6] 选择规则与文档语言 (Select Language):" @(
         @{ Label = "简体中文 (Simplified Chinese, zh)"; Value = "zh" },
         @{ Label = "English (en)"; Value = "en" },
         @{ Label = "繁體中文 (Traditional Chinese, zh-tw)"; Value = "zh-tw" },
@@ -271,11 +274,11 @@ if (-not $explicit -and -not $Yes.IsPresent -and (-not [Console]::IsInputRedirec
         @{ Label = "Deutsch (German, de)"; Value = "de" }
     )
 
-    Write-Host "`n[2/4] 目标工程根目录 (Target Project Path):" -ForegroundColor Cyan
+    Write-Host "`n[2/6] 目标工程根目录 (Target Project Path):" -ForegroundColor Cyan
     $inputProj = Read-Host "请输入工程路径 [默认: 当前目录 .]"
     if (-not [string]::IsNullOrWhiteSpace($inputProj)) { $Project = $inputProj }
 
-    $pipeMode = Prompt-Select "[3/4] 选择流水线执行模式 (Select Pipeline Mode):" @(
+    $pipeMode = Prompt-Select "[3/6] 选择流水线执行流程 (Select Pipeline Flow & Stages):" @(
         @{ Label = "一键全量流水线 (Run Full Pipeline: 规则部署 -> AI记忆 -> 技能同步 -> 文档质检)"; Value = "all" },
         @{ Label = "自定义阶段组合 (Custom Stages: 自选执行部分阶段)"; Value = "custom" },
         @{ Label = "仅规则与 Agent 桥接部署 (Deploy Rules & Bridges only)"; Value = "only-deploy" },
@@ -306,10 +309,52 @@ if (-not $explicit -and -not $Yes.IsPresent -and (-not [Console]::IsInputRedirec
         "only-docs"   { $stageDocs   = $true }
     }
 
-    $runDetailMode = Prompt-Select "[4/4] 选择执行交互细化程度 (Execution Detail):" @(
+    $runDetailMode = Prompt-Select "[4/6] 选择执行交互细化程度 (Execution Detail):" @(
         @{ Label = "极速推荐配置 (Quick Run: 自动使用最佳实践一键贯通流水线)"; Value = "quick" },
         @{ Label = "逐步向导配置 (Interactive: 依次打开各工具阶段的详细选项向导)"; Value = "detailed" }
     )
+
+    $globalChoice = Prompt-Select "[5/6] 是否同步部署/更新本机全局规则 (Global Rules: ~/.gemini, ~/.codex, ~/.claude)？" @(
+        @{ Label = "跳过全局规则 (Skip: 仅在当前项目工程内生效)"; Value = "skip" },
+        @{ Label = "同步更新全局规则 (Sync: 备份并更新各工具全局 AGENTS.md / CLAUDE.md)"; Value = "sync" }
+    )
+    if ($globalChoice -eq "sync") {
+        $runGlobal = $true
+        $runUpdate = $true
+    } else {
+        $runGlobal = $false
+    }
+
+    $skillChoice = Prompt-Select "[6/6] 外部技能库同步与更新处理 (External Skills Sync):" @(
+        @{ Label = "安全检查模式 (Check only: 仅对比差异，不覆盖文件)"; Value = "check" },
+        @{ Label = "在线同步更新 (Apply: 自动拉取上游更新并应用)"; Value = "apply" }
+    )
+    $runApplySkills = ($skillChoice -eq "apply")
+}
+
+# Pre-flight review: when user passed explicit CLI parameters but NOT -Yes
+if ($explicit -and -not $Yes.IsPresent -and (-not [Console]::IsInputRedirected -or $Interactive.IsPresent)) {
+    Write-Host "`n================================================================" -ForegroundColor Cyan
+    Write-Host "  🚀 Agent Harness 流水线执行前配置确认 (Pre-flight Review)   " -ForegroundColor Cyan
+    Write-Host "================================================================" -ForegroundColor Cyan
+    Write-Host "检测到执行参数。请确认是否需要同步处理全局规则与外部技能库：" -ForegroundColor Yellow
+
+    $globalChoice = Prompt-Select "[1/2] 本机全局各 Agent 工具规则处理 (Global Rules Sync):" @(
+        @{ Label = if ($runGlobal) { "● 确认: 部署/覆盖更新全局规则 (~/.gemini, ~/.codex, ~/.claude)" } else { "○ 跳过: 仅更新当前项目工程，不改动本机全局规则" }; Value = if ($runGlobal) { "sync" } else { "skip" } },
+        @{ Label = if (-not $runGlobal) { "● 确认: 部署/覆盖更新全局规则 (~/.gemini, ~/.codex, ~/.claude)" } else { "○ 跳过: 仅更新当前项目工程，不改动本机全局规则" }; Value = if (-not $runGlobal) { "sync" } else { "skip" } }
+    )
+    if ($globalChoice -eq "sync") {
+        $runGlobal = $true
+        $runUpdate = $true
+    } else {
+        $runGlobal = $false
+    }
+
+    $skillChoice = Prompt-Select "[2/2] 外部开源技能库处理 (External Skills Sync):" @(
+        @{ Label = if ($runApplySkills) { "● 确认: 在线拉取 GitHub 上游更新并应用到本地技能库 (--apply)" } else { "○ 仅检查: 仅对比校验版本差异，不覆写技能文件 (--check)" }; Value = if ($runApplySkills) { "apply" } else { "check" } },
+        @{ Label = if (-not $runApplySkills) { "● 确认: 在线拉取 GitHub 上游更新并应用到本地技能库 (--apply)" } else { "○ 仅检查: 仅对比校验版本差异，不覆写技能文件 (--check)" }; Value = if (-not $runApplySkills) { "apply" } else { "check" } }
+    )
+    $runApplySkills = ($skillChoice -eq "apply")
 }
 
 # Fallback default
@@ -324,53 +369,6 @@ $targetAbs = Resolve-Path $Project -ErrorAction SilentlyContinue
 if (-not $targetAbs) { $targetAbs = (Get-Item -Path $Project -ErrorAction SilentlyContinue).FullName }
 if (-not $targetAbs) { $targetAbs = $Project }
 if ($targetAbs -is [System.Management.Automation.PathInfo]) { $targetAbs = $targetAbs.Path }
-
-# Pre-flight review: when user passed parameters like -Global / -Update / -All but NOT -Yes
-$runGlobal = $Global.IsPresent
-$runUpdate = $Update.IsPresent
-$runApplySkills = $ApplySkills.IsPresent -or $runUpdate
-
-if (-not $Yes.IsPresent -and (-not [Console]::IsInputRedirected -or $Interactive.IsPresent)) {
-    if ($explicit) {
-        Write-Host "`n================================================================" -ForegroundColor Cyan
-        Write-Host "  🚀 Agent Harness 流水线执行前配置确认 (Pre-flight Review)   " -ForegroundColor Cyan
-        Write-Host "================================================================" -ForegroundColor Cyan
-        Write-Host "检测到执行参数。请确认是否需要同步处理全局规则与外部技能库：" -ForegroundColor Yellow
-
-        $globalChoice = Prompt-Select "[1/2] 本机全局各 Agent 工具规则处理 (Global Rules Sync):" @(
-            @{ Label = if ($runGlobal) { "● 确认: 部署/覆盖更新全局规则 (~/.gemini, ~/.codex, ~/.claude)" } else { "○ 跳过: 仅更新当前项目工程，不改动本机全局规则" }; Value = if ($runGlobal) { "sync" } else { "skip" } },
-            @{ Label = if (-not $runGlobal) { "● 确认: 部署/覆盖更新全局规则 (~/.gemini, ~/.codex, ~/.claude)" } else { "○ 跳过: 仅更新当前项目工程，不改动本机全局规则" }; Value = if (-not $runGlobal) { "sync" } else { "skip" } }
-        )
-        if ($globalChoice -eq "sync") {
-            $runGlobal = $true
-            $runUpdate = $true
-        } else {
-            $runGlobal = $false
-        }
-
-        $skillChoice = Prompt-Select "[2/2] 外部开源技能库处理 (External Skills Sync):" @(
-            @{ Label = if ($runApplySkills) { "● 确认: 在线拉取 GitHub 上游更新并应用到本地技能库 (--apply)" } else { "○ 仅检查: 仅对比校验版本差异，不覆写技能文件 (--check)" }; Value = if ($runApplySkills) { "apply" } else { "check" } },
-            @{ Label = if (-not $runApplySkills) { "● 确认: 在线拉取 GitHub 上游更新并应用到本地技能库 (--apply)" } else { "○ 仅检查: 仅对比校验版本差异，不覆写技能文件 (--check)" }; Value = if (-not $runApplySkills) { "apply" } else { "check" } }
-        )
-        $runApplySkills = ($skillChoice -eq "apply")
-    } else {
-        # Inside wizard mode without explicit params
-        $globalChoice = Prompt-Select "[4/5] 是否同步部署/更新本机全局规则 (Global Rules: ~/.gemini, ~/.codex, ~/.claude)？" @(
-            @{ Label = "跳过全局规则 (Skip: 仅在当前项目工程内生效)"; Value = "skip" },
-            @{ Label = "同步更新全局规则 (Sync: 备份并更新各工具全局 AGENTS.md / CLAUDE.md)"; Value = "sync" }
-        )
-        if ($globalChoice -eq "sync") {
-            $runGlobal = $true
-            $runUpdate = $true
-        }
-
-        $skillChoice = Prompt-Select "[5/5] 外部技能库处理模式 (External Skills Sync):" @(
-            @{ Label = "安全检查模式 (Check only: 仅对比差异，不覆盖文件)"; Value = "check" },
-            @{ Label = "在线同步更新 (Apply: 自动拉取上游更新并应用)"; Value = "apply" }
-        )
-        $runApplySkills = ($skillChoice -eq "apply")
-    }
-}
 
 Write-Host "`n▶ 开始执行 Agent Harness 工程流水线" -ForegroundColor Cyan
 Write-Host "  目标工程: $targetAbs" -ForegroundColor Green
