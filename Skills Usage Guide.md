@@ -32,6 +32,10 @@ If Claude doesn't pick up a skill when you expect it, just name it explicitly.
 > | `document` | 2 | Document processing (docx, pdf) |
 > | `integration` | 2 | External tool integrations (comet, codegraph) |
 > | `utility` | 3 | Single-purpose utilities (caveman, ponytail, rtk) |
+>
+> **Note on counts**: `skills-lock.json` has 45 entries but this catalog lists 43 skills.
+> The 2 extra entries (`openspec`, `superpowers`) are source-repo meta entries —
+> provenance placeholders for the upstream families, not installable skills.
 
 ### 1. Workflow & Process Control
 

@@ -19,6 +19,22 @@ Si Claude ne charge pas une compétence comme prévu, nommez-la simplement de ma
 
 ## Catalogue des compétences par catégorie
 
+> **Domaines de skills** (espaces de noms pour chargement ciblé) : chaque skill appartient à un domaine,
+> enregistré dans `skills-lock.json` et vérifié par la CI. Pour les agents à besoin partiel, charger par domaine plutôt que le catalogue complet.
+>
+> | Domaine | Skills | Objet |
+> |---|---|---|
+> | `openspec` | 17 | Famille du workflow OpenSpec |
+> | `superpowers` | 16 | Famille méthodologique obra/superpowers |
+> | `local` | 5 | Créés dans le repo (engineering-docs, living-documentation, open-code-review, option-review, cross-tool-memory) |
+> | `document` | 2 | Traitement documentaire (docx, pdf) |
+> | `integration` | 2 | Intégrations d'outils externes (comet, codegraph) |
+> | `utility` | 3 | Utilitaires à usage unique (caveman, ponytail, rtk) |
+>
+> **Note sur les comptes** : `skills-lock.json` contient 45 entrées mais ce catalogue liste 43 skills.
+> Les 2 entrées supplémentaires (`openspec`, `superpowers`) sont des méta-entrées des dépôts sources —
+> des marqueurs de provenance, pas des skills installables.
+
 ### 1. Contrôle des flux et processus
 
 | Compétence | Déclencheur | Commande | Description | Quand l'utiliser |
@@ -36,6 +52,10 @@ Si Claude ne charge pas une compétence comme prévu, nommez-la simplement de ma
 | `openspec-bulk-archive-change` | Auto | — | Archive plusieurs modifications terminées à la fois. | Nettoyage par lots. |
 | `openspec-ff-change` | Auto | — | Avance rapide pour contourner la création d'artefacts. | Pour sauter le cérémonial et passer directement à l'implémentation. |
 | `openspec-onboard` | Hybride | — | Intégration guidée au flux de travail OpenSpec. | Première utilisation d'OpenSpec : "onboard me to openspec". |
+| `draft-openspec-docs` | Hybride | — | Mode collaboratif de rédaction pour la documentation OpenSpec. | Lors de la rédaction de pages de documentation OpenSpec. |
+| `write-openspec-docs` | Hybride | — | Mode rédaction OpenSpec avec guide de style. | Lors de l'écriture de documentation utilisateur OpenSpec. |
+| `verify-openspec-docs` | Hybride | — | Vérifie la documentation OpenSpec avec un contexte frais. | Lors de la validation des affirmations de la documentation OpenSpec. |
+| `release-openspec` | Hybride | — | Audite le travail fusionné pour les versions OpenSpec. | Lors d'une version OpenSpec. |
 | `living-documentation` | Hybride | — | Maintient spécifications/architecture/références/guides avec traçabilité. | En continu. S'active pour les tâches de documentation ; dites "update living docs" pour forcer. |
 
 ### 2. Qualité du code et revue
