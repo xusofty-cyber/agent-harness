@@ -37,6 +37,10 @@ If Claude doesn't pick up a skill when you expect it, just name it explicitly.
 | `openspec-bulk-archive-change` | Auto | — | Archives multiple completed changes. | Batch cleanup. |
 | `openspec-ff-change` | Auto | — | Fast-forwards through artifact creation. | When you want to skip ceremony and get to implementation. |
 | `openspec-onboard` | Hybrid | — | Guided walkthrough of the OpenSpec workflow. | First time using OpenSpec: "onboard me to openspec". |
+| `draft-openspec-docs` | Hybrid | — | Collaborative page-drafting for OpenSpec docs. | When drafting OpenSpec documentation pages. |
+| `write-openspec-docs` | Hybrid | — | OpenSpec docs-writing mode with house style. | When writing OpenSpec user docs. |
+| `verify-openspec-docs` | Hybrid | — | Fact-checks OpenSpec docs with fresh-context subagent. | When validating OpenSpec documentation claims. |
+| `release-openspec` | Hybrid | — | Audits merged work for OpenSpec releases. | When cutting an OpenSpec release. |
 | `living-documentation` | Hybrid | — | Maintains specs/architecture/reference/guides with traceability. | Ongoing. Auto-activates for doc tasks; say "update living docs" to force. |
 
 ### 2. Code Quality & Review

@@ -1,7 +1,7 @@
 ---
 id: TASK-XXX
 title: "[模块/系统名称] 项目任务书"
-type: specs
+type: management
 status: draft
 modules:
   - "src/your_module/**"

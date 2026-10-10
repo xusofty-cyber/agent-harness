@@ -1,16 +1,18 @@
 ---
 name: living-documentation
-description: Maintain agile living documentation across the development lifecycle (specs, architecture, reference, guides), establish code-doc traceability with Frontmatter metadata, and integrate document gates with Comet workflows.
+description: Maintain agile living documentation across the development lifecycle (specs, architecture, reference, guides, management, tests), establish code-doc traceability with Frontmatter metadata, and integrate document gates with Comet workflows.
 version: 0.2.0
 ---
 
 # Living Documentation & Traceability
 
-Maintain documentation as an active, traceable engineering artifact rather than write-once-and-forget prose. This skill defines the four-tier document model, code-documentation traceability metadata, heuristic change thresholds, and tight lifecycle integration with `/comet`.
+Maintain documentation as an active, traceable engineering artifact rather than write-once-and-forget prose. This skill defines the six-tier document model, code-documentation traceability metadata, heuristic change thresholds, and tight lifecycle integration with `/comet`.
 
-## 1. The Four-Tier Document Model
+## 1. The Six-Tier Document Model
 
-Organize project documentation under `docs/` according to Diátaxis and agile engineering practice:
+Organize project documentation under `docs/` according to Diátaxis and agile engineering practice.
+Tiers 1-4 cover the system itself; tiers 5-6 cover project governance and verification
+(two orthogonal concerns of the enterprise lifecycle):
 
 | Tier | Directory | Document Type (`type`) | Focus & Audience | Template |
 | :--- | :--- | :--- | :--- | :--- |
@@ -18,6 +20,8 @@ Organize project documentation under `docs/` according to Diátaxis and agile en
 | **2. 概要架构** | `docs/architecture/` | `architecture` | 系统全景、模块拓扑、分层交互与数据流向（轻量 arc42 概要） | `templates/architecture.template.md` |
 | **3. 详细设计** | `docs/reference/` | `reference` | 接口协议、报文格式、配置字典（如 `system.ini` 释义）与核心类定义 | `templates/reference.template.md` |
 | **4. 用户指引** | `docs/guides/` | `guide` | 部署运维、环境准备、操作步骤与常见排障手册（How-To / Manual） | `templates/guide.template.md` |
+| **5. 项目管理** | `docs/management/` | `management` | 立项文档、项目计划、进展/总结报告、会议纪要（描述项目而非系统） | `engineering-docs` 模板 01-03、11-12 |
+| **6. 测试验证** | `docs/tests/` | `tests` | 测试计划、测试报告、测试用例（描述验证而非系统） | `engineering-docs` 模板 13-14 |
 
 > 重大架构选型与权衡记录单独存放于 `docs/adr/`（Architecture Decision Records）。
 
@@ -31,7 +35,7 @@ Every living document under `docs/` MUST declare metadata in its YAML frontmatte
 ---
 id: ARCH-001-NRSEC
 title: 密码安全服务系统架构与通信设计
-type: architecture          # specs | architecture | reference | guide | adr
+type: architecture          # specs | architecture | reference | guide | management | tests | adr
 status: active              # draft | active | deprecated
 modules:                    # 关联的代码模块或路径（支持相对根目录 Glob）
   - apps/nrsecServer/**
@@ -91,7 +95,7 @@ See `references/comet-integration.md` for phase-by-phase details.
 
 For existing codebases with missing or outdated documentation:
 1. **Module Inventory**: Inspect directories, build scripts (`make_arm.sh`, `Makefile`, `CMakeLists.txt`), and configuration files (`system.ini`).
-2. **Scaffold Structure**: Create standard directories under `docs/` (`specs/`, `architecture/`, `reference/`, `guides/`).
+2. **Scaffold Structure**: Create standard directories under `docs/` (`specs/`, `architecture/`, `reference/`, `guides/`, `management/`, `tests/`).
 3. **Generate Overview**: Reverse-engineer system topology into `docs/architecture/overview.md`.
 4. **Extract Reference**: Generate dictionary for configuration keys and exported APIs into `docs/reference/`.
 5. **Bind Modules**: Add `modules: [...]` frontmatter linking existing source directories.

@@ -61,9 +61,9 @@ Comet 是面向软件工程的智能体工作流执行引擎与评估框架（`@
 | Comet 阶段 | 活体文档对应层级 | 推荐调用的 `engineering-docs` 模板 |
 | :--- | :--- | :--- |
 | **Open / Shape** | `docs/specs/` (需求层) | `04-user-requirements.md` (URS), `05-product-spec.md` (PRD), `06-srs.md` (SRS) |
-| **Design** | `docs/architecture/` (架构层) | `07-solution-design.md`, `08-hld.md` (HLD), `09-lld.md` (LLD), `10-interface-spec.md` |
-| **Build** | `docs/reference/` (参考层) | `10-interface-spec.md` (接口/DB定义), `11-project-plan.md`, `12-project-report.md` |
-| **Verify** | `docs/reference/` (参考层) | `13-test-plan.md` (测试计划), `14-test-report.md` (测试报告/用例) |
+| **Design** | `docs/architecture/` (架构层) + `docs/reference/` (详细设计层) | `07-solution-design.md`, `08-hld.md` (HLD) → architecture；`09-lld.md` (LLD), `10-interface-spec.md` → reference |
+| **Build** | `docs/management/` (管理层) + `docs/reference/` (参考层) | `10-interface-spec.md` (接口/DB定义) → reference；`11-project-plan.md`, `12-project-report.md` → management |
+| **Verify** | `docs/tests/` (测试层) | `13-test-plan.md` (测试计划), `14-test-report.md` (测试报告/用例) |
 | **Archive** | `docs/guides/` (指南层) | `15-delivery-docs.md` (交付版本说明/用户手册) |
 
 > 模板最顶部均已原生内置标准 YAML Frontmatter（`id`, `title`, `type`, `status`, `modules`, `depends_on`），与 `tools/doc-impact.py` 双向关联分析完全兼容。
@@ -80,6 +80,9 @@ Comet 是面向软件工程的智能体工作流执行引擎与评估框架（`@
 ---
 
 ## 5. 核心 CLI 命令速查
+
+> **安全提示**：确保 `comet` 来自可信安装源（`npm install -g @rpamis/comet`），
+> 警惕 PATH 劫持——不要运行来源不明的 `comet` 二进制。
 
 当环境中已安装 `comet` CLI 时，可调用以下指令协同：
 - `comet status`：查看活跃 Change、当前阶段及下一步推荐；

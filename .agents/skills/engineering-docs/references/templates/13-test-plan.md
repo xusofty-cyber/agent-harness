@@ -1,7 +1,7 @@
 ---
 id: TEST-PLAN-XXX
 title: "[模块/系统名称] 软件测试计划"
-type: reference
+type: tests
 status: draft
 modules:
   - "src/your_module/**"
@@ -44,7 +44,7 @@ last_verified_commit: HEAD
 
 ## 5. 测试用例设计 / Test Design
 
-<!-- 用例设计方法、覆盖率要求。 -->
+<!-- 用例设计方法、覆盖率要求。 格式：用表格：| 用例编号 | 覆盖需求 | 前置条件 | 步骤 | 预期结果 |。 -->
 
 [测试用例设计内容]
 
@@ -56,7 +56,7 @@ last_verified_commit: HEAD
 
 ## 7. 出入口准则 / Entry/Exit Criteria
 
-<!-- 开始/结束测试的条件。 -->
+<!-- 开始/结束测试的条件。 格式：用 checklist 列表。 -->
 
 [出入口准则内容]
 
