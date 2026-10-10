@@ -130,6 +130,15 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 - **i18n sync**: DE/FR/ZH-TW guides gain 4 openspec-docs skills + domain table +
   meta-entry note; EN/ZH gain meta-entry note.
 
+- **Six-tier migration completion** (from external audit):
+  - `gen_templates.py`: metadata updated to 6-tier (regeneration no longer
+    reverts types/paths); verified generator output matches all 15 templates.
+  - `deploy-agents.sh/.ps1`: scaffold now creates all 7 tier dirs
+    (added `management`, `tests`); new `deploy-scaffold:*` CI checks enforce parity.
+  - Template `depends_on` paths fixed (02/03→management, 12→management,
+    14/15→tests); new `depends_on-tier` CI validation.
+  - `fetch-word-template.sh` added to exec-bit patrol.
+
 ### Fixed
 - **Markdownlint CI blocker (P0)**: Unified heading in all 15 engineering document templates from dual H1s to single bilingual `# {title_cn} / {title_en}` (MD025) and added language identifier to `SKILL.md` decision tree fenced code block (MD040), eliminating 31 markdownlint errors in CI.
 - **Traceability path alignment (P1-1)**: Converged recommended document output paths in `engineering-docs/SKILL.md` and `comet/SKILL.md` to the standard 4-tier living-doc hierarchy (`docs/{specs,architecture,reference,guides}/`), ensuring all generated docs are discovered by `doc-impact.py`.
