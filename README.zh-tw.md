@@ -22,9 +22,9 @@
    - 永久硬攔截（`exit 2`）：受保護分支（`develop`/`master`/`main`/`release*`）直接提交、`git push --force`、刪除受保護遠端分支、受保護分支 rebase；
    - 部分命令會直接拒絕，其他情況提供非阻斷警告；正則檢查無法涵蓋所有命令變形，亦無法取代 Git 伺服器端分支保護。
 
-3. **42 個可複用技能目錄（[`.agents/skills/`](.agents/skills/)）**：
+3. **43 個可複用技能目錄（[`.agents/skills/`](.agents/skills/)）**：
    - **Comet 整合指引**：引導檢查已安裝版本與專案配置；此技能本身不實作 Comet 狀態機或階段守衛。
-   - **活體文件與程式碼追溯**：`living-documentation`（四階文件體系：specs/architecture/reference/guides，Frontmatter 雙向追溯關聯，L0/L1/L2 變更門禁與文件演進）。
+   - **活體文件與工程文件規範**：`living-documentation`（四階文件體系：specs/architecture/reference/guides，Frontmatter 雙向追溯關聯，L0/L1/L2 變更門禁與文件演進）與 `engineering-docs`（31 種研發文件類型，15 個中英雙語門禁範本，確保各 Agent 階段輸出格式一致）。
    - **規範驅動開發（SDD）**：`openspec` 全套 16 個技能（提案、變更應用、驗證、主規格同步、歸檔）。
    - **測試驅動開發（TDD）**：`superpowers` 全套 15 個技能（TDD 紅綠循環、系統性排障、完工驗證證據門、工作區隔離）。
    - **實現與檢索指引**：`ponytail`（極簡實作決策階梯）與 `codegraph`（CodeGraph 可選整合指引；CLI/MCP 需單獨安裝配置）。
@@ -70,7 +70,7 @@ agent-harness/
 │   │   ├── git-workflow.md          # Git 授權模型、受保護分支強隔離、提交規範
 │   │   ├── security-boundary.md     # 八大高風險操作防呆矩陣、憑證零洩漏
 │   │   └── token-discipline.md      # 讀拿說三道閘門、上下文防漏與日誌截斷
-│   └── skills/                      # 42 個原生工程技能庫（Comet, OpenSpec, Superpowers...）
+│   └── skills/                      # 43 個原生工程技能庫（Comet, OpenSpec, Superpowers...）
 ├── .claude/
 │   ├── settings.json                # Claude Code PreToolUse 安全攔截配置
 │   └── hooks/                       # 安全攔截鉤子指令碼（Node.js，讀取 stdin JSON）

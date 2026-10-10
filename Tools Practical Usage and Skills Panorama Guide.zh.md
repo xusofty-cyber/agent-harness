@@ -10,7 +10,7 @@
 
 1. [核心架构与工具矩阵全景（谁管什么）](#一-核心架构与工具矩阵全景谁管什么)
 2. [技能（Skills）与生态工具安装清单](#二-技能skills与生态工具安装清单)
-   - 2.1 开箱即用 / 42 原生技能分类全景清单
+   - 2.1 开箱即用 / 43 原生技能分类全景清单
    - 2.2 技能来源元数据与在线更新机制 (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
    - 2.3 Harness 核心工程扩展工具（按需选用）
    - 2.4 平台安装与配置文件位置速查表
@@ -144,6 +144,7 @@
 - **`cross-tool-memory`**：跨工具项目长期记忆导航与经验检索（与本地 ai-memory 后端配合使用）。
 - **`option-review`**：多候选技术方案事前独立评审与决策矩阵生成（5 维度并行分析，防止单一偏向）。
 - **`living-documentation`**：四阶活体文档体系（specs/architecture/reference/guides）与 Frontmatter 代码双向追溯关联，支持 L0/L1/L2 变更门禁与文档演进。
+- **`engineering-docs`**：研发全生命周期工程文档规范（31 种文档类型，15 个中英双语门禁模板），确保多 Agent 工具各阶段输出格式绝对一致，并与 Comet/活体文档无缝衔接。
 
 ---
 
@@ -268,6 +269,7 @@ Skill 文件的存在不代表宿主自动加载。实际上下文成本和 CLI 
 | **Token 告急 / 精简输出** | [`Global AGENTS.md`](Global%20AGENTS.md) + `caveman` | `/caveman` 或 `进入 caveman 模式` / `说人话` | 在宿主加载 Skill 时可简化表达，同时保留必要背景、技术精度和安全说明 |
 | **Word / PDF 专业文档** | `docx` / `pdf` | 直接提及 `.docx`、`.pdf` 或 `导出规范文档` | 遵循专业排版规范，自动处理表格对齐、样式维护与内容抽取，不乱跑单测 |
 | **文档创建 / 架构与追溯同步** | [`engineering-spec.md`](.agents/rules/engineering-spec.md) + `living-documentation` | `/living-documentation` / `更新追溯文档` / 需求架构归档 | 依据 L0/L1/L2 阈值同步四阶文档（specs/architecture/reference/guides），维护 Frontmatter 代码与文档双向追溯引用 |
+| **研发阶段文档 / 统一门禁模板** | [`engineering-spec.md`](.agents/rules/engineering-spec.md) + `engineering-docs` | `/engineering-docs` / `输出SRS/HLD/接口文档` / 交付各阶段规范文档 | 使用 15 个中英双语阶段门禁模板（覆盖立项到交付 31 种文档），统一各 AI Agent 输出格式，无缝衔接 Comet 阶段产物与活体文档 |
 | **代码评审 / 合并前质量门禁** | `open-code-review` + `requesting-code-review` | 完成功能或合并前 | 规则先行、行号锚定、全量覆盖；`ocr` CLI 已装走 Tier A 委托，否则走 Tier B 方法论 |
 | **任务收尾 / 完工声明** | `verification-before-completion` | 任务收尾阶段自动触发 | 未出示真实可复现的验证依据（测试输出片段或运行结果）前，绝不可声称任务完成 |
 
@@ -277,7 +279,7 @@ Skill 文件的存在不代表宿主自动加载。实际上下文成本和 CLI 
 
 ### 3.1 Comet：版本化工作流入口
 
-Comet 是独立版本的工作流工具。使用前检查项目 `.comet/config.yaml` 与 CLI 版本，并按该版本支持的 Native 或 Classic 工作流执行。此仓库中的 Comet Skill 仅引导检查和使用，不创建虚构的状态文件，也不提供自动阶段拦截。未安装或未配置 Comet 时，按项目已有流程或任务需要制定计划。
+Comet 是独立版本的工作流工具。使用前检查项目 `.comet/config.yaml` 与 CLI 版本，并按该版本支持的 Native 或 Classic 工作流执行。此仓库中的 Comet Skill 仅引导检查和使用，不创建虚构的状态文件，也不提供自动阶段拦截。未安装或未配置 Comet 时，按项目已有流程或任务需要制定计划。与 `engineering-docs` 配合使用时，各阶段（Open、Design、Build、Verify、Archive）均可采用对应的阶段门禁模板输出格式一致的工程文档。
 
 ```text
 /comet 为订单模块新增按日期范围批量导出接口

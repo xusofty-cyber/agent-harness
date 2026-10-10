@@ -1,5 +1,9 @@
-# Claude local runtime generated skills junction/symlink directory
+# Claude & Comet local runtime generated artifacts
 .claude/skills/
+.comet/
+
+# Backup files generated during deployment
+*.bak-*
 
 # OS and system files
 .DS_Store

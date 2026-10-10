@@ -2,7 +2,7 @@
 
 > **Language / 语言**: [English](Skills%20Usage%20Guide.md) | [简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | **Français** | [Deutsch](Skills%20Usage%20Guide.de.md)
 
-Fonctionnement pratique des 42 compétences intégrées : lesquelles se déclenchent automatiquement, lesquelles nécessitent une invocation explicite et quand les utiliser.
+Fonctionnement pratique des 43 compétences intégrées : lesquelles se déclenchent automatiquement, lesquelles nécessitent une invocation explicite et quand les utiliser.
 
 ## Mécanismes de déclenchement des compétences
 
@@ -86,6 +86,13 @@ Si Claude ne charge pas une compétence comme prévu, nommez-la simplement de ma
 |---|---|---|---|---|
 | `writing-skills` | Auto | — | Guide la création, l'édition et la vérification de compétences. | Lors de la création ou modification de compétences dans `.agents/skills/`. |
 | `diagnosing-superpowers` | Auto | — | Diagnostique les anomalies dans le flux de travail superpowers. | Lorsque Claude ignore les plans ou répète des tâches. Dites "diagnostique ce qui ne va pas". |
+
+
+### 7. Documentation d'ingénierie
+
+| Compétence | Déclencheur | Commande | Description | Quand l'utiliser |
+|---|---|---|---|---|
+| `engineering-docs` | Hybride | — | 15 modèles bilingues couvrant 31 types de documents de R&D (proposition → exigences → conception → test → livraison). Inclut des spécifications de rendu pour garantir un format uniforme. | Pour rédiger tout document officiel de R&D. Dites "rédige un PRD" / "rédige la conception générale" pour activer le bon modèle. |
 
 ## Configuration de la mémoire de projet
 

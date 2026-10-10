@@ -2,7 +2,7 @@
 
 > **Language / 语言**: [English](Skills%20Usage%20Guide.md) | [简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Français](Skills%20Usage%20Guide.fr.md) | **Deutsch**
 
-Wie die 42 gebündelten Skills in der Praxis funktionieren: welche automatisch auslösen, welche explizit aufgerufen werden und wann man welche einsetzt.
+Wie die 43 gebündelten Skills in der Praxis funktionieren: welche automatisch auslösen, welche explizit aufgerufen werden und wann man welche einsetzt.
 
 ## Funktionsweise der Skill-Trigger
 
@@ -86,6 +86,13 @@ Wenn Claude einen Skill nicht wie erwartet lädt, benennen Sie ihn einfach expli
 |---|---|---|---|---|
 | `writing-skills` | Auto | — | Leitet die Erstellung, Bearbeitung und Verifizierung von Skills an. | Beim Erstellen oder Ändern von Skills in `.agents/skills/`. |
 | `diagnosing-superpowers` | Auto | — | Diagnostiziert Fehler im Superpowers-Workflow. | Wenn Claude Pläne ignoriert oder Arbeiten wiederholt. Sagen Sie "diagnostiziere, was schiefgelaufen ist". |
+
+
+### 7. Engineering-Dokumentation
+
+| Skill | Trigger | Befehl | Funktion | Wann einsetzen |
+|---|---|---|---|---|
+| `engineering-docs` | Hybrid | — | 15 zweisprachige Vorlagen für 31 F&E-Dokumenttypen (Projektantrag → Anforderungen → Entwurf → Test → Übergabe). Inklusive Rendering-Spezifikation für einheitliche Formatierung. | Beim Verfassen formeller F&E-Dokumente. Sagen Sie „erstelle ein PRD“ / „schreibe einen Grobentwurf“, um die passende Vorlage zu aktivieren. |
 
 ## Projektgedächtnis-Einrichtung
 

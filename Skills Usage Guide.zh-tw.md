@@ -2,7 +2,7 @@
 
 > **Language / 语言**: [English](Skills%20Usage%20Guide.md) | [简体中文](Skills%20Usage%20Guide.zh.md) | **繁體中文** | [Français](Skills%20Usage%20Guide.fr.md) | [Deutsch](Skills%20Usage%20Guide.de.md)
 
-42 個內建 skill 在實戰中如何運作：哪些自動觸發、哪些需要顯式調用，以及各自的使用時機。
+43 個內建 skill 在實戰中如何運作：哪些自動觸發、哪些需要顯式調用，以及各自的使用時機。
 
 ## Skill 觸發機制
 
@@ -86,6 +86,13 @@ Claude Code 透過兩種方式決定載入 skill：
 |---|---|---|---|---|
 | `writing-skills` | 自動 | — | 指導 skill 的建立/編輯/驗證。 | 在 `.agents/skills/` 下建立或修改 skill 時。 |
 | `diagnosing-superpowers` | 自動 | — | 診斷 superpowers 工作流出錯的原因。 | Claude 忽視計畫、重複工作、表現異常時。說「診斷哪裡出問題了」。 |
+
+
+### 7. 工程文件
+
+| Skill | 觸發 | 命令 | 作用 | 使用時機 |
+|---|---|---|---|---|
+| `engineering-docs` | 混合 | — | 15 個中英雙語範本，涵蓋 31 種研發文件（立項→需求→設計→測試→交付）。含渲染規範（標題字號/字型/段落），確保輸出一致。 | 撰寫任何正式研發文件時。說「寫一份 PRD」/「寫概要設計」即自動選用範本。 |
 
 ## 專案記憶設定
 

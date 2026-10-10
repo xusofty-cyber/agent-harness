@@ -16,13 +16,13 @@ Comet is an independently versioned workflow tool. This skill is an entry-point 
 4. If Comet is not installed/configured, explain that this repository's Markdown skill alone does not provide CLI enforcement. Continue with the user's requested workflow or use the project's configured planning/spec process.
 5. Do not run `comet init`, `comet update`, or archive/publish actions unless the user requested the corresponding project change.
 
-## Living Documentation Integration
+## Living Documentation & Engineering Docs Integration
 
 When executing Comet workflows (Classic Open -> Design -> Build -> Verify -> Archive, or Native):
-1. **Open / Requirements**: Cross-reference or initialize requirements under `docs/specs/` (SRS/PRD) for major changes.
-2. **Design**: Document the architectural topology and declare module dependencies in `docs/architecture/` with Frontmatter (`modules`, `depends_on`). Output a Document Impact Matrix.
-3. **Build**: Keep detailed API specs and configuration dictionaries in `docs/reference/` synchronized when code changes hit L1/L2 thresholds (such as 2+ interfaces, new modules, or config keys).
-4. **Verify**: Include code-documentation consistency in the verification checklist before advancing.
-5. **Archive**: Extract user-facing deployment and operational instructions into `docs/guides/` and update document verification commit hashes. Refer to the `living-documentation` skill for templates and guidelines.
+1. **Open / Requirements**: Cross-reference or initialize requirements under `docs/specs/` using `engineering-docs` templates (`04-user-requirements.md`, `05-product-spec.md`, `06-srs.md`).
+2. **Design**: Document architectural topology and module dependencies in `docs/architecture/` using `engineering-docs` templates (`07-solution-design.md`, `08-hld.md`, `09-lld.md`, `10-interface-spec.md`) with YAML Frontmatter (`modules`, `depends_on`). Output a Document Impact Matrix.
+3. **Build**: Keep detailed API/DB specs in `docs/reference/` (`10-interface-spec.md`) and project plans/reports in `docs/management/` (`11-project-plan.md`, `12-project-report.md`) synchronized when code changes hit L1/L2 thresholds (such as 2+ interfaces, new modules, or config keys).
+4. **Verify**: Use test plan and test report templates (`13-test-plan.md`, `14-test-report.md`) under `docs/reference/` or `docs/tests/`, and include code-documentation consistency in the verification checklist before advancing.
+5. **Archive**: Extract user-facing deployment instructions and user manuals into `docs/guides/` using `15-delivery-docs.md`, and update document verification commit hashes. Refer to `living-documentation` and `engineering-docs` skills for templates and rendering guidelines.
 
 Consult current upstream documentation for version-specific behavior: <https://github.com/rpamis/comet>.

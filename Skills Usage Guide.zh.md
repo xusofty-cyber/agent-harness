@@ -2,7 +2,7 @@
 
 > **Language / 语言**: [English](Skills%20Usage%20Guide.md) | **简体中文** | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Français](Skills%20Usage%20Guide.fr.md) | [Deutsch](Skills%20Usage%20Guide.de.md)
 
-42 个内置 skill 在实际中如何工作：哪些自动触发、哪些需要显式调用，以及每个的使用时机。
+43 个内置 skill 在实际中如何工作：哪些自动触发、哪些需要显式调用，以及每个的使用时机。
 
 ## Skill 触发机制
 

@@ -10,7 +10,7 @@ This guide provides a comprehensive handbook for software engineering and techni
 
 1. [Core Architecture & Tool Matrix (Who Manages What)](#1-core-architecture--tool-matrix-who-manages-what)
 2. [Skills & Ecosystem Tools Inventory](#2-skills--ecosystem-tools-inventory)
-   - 2.1 42 Integrated Native Skills Categorized
+   - 2.1 43 Integrated Native Skills Categorized
    - 2.2 Version Locking, Online Updates & Skill Sync (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
    - 2.3 Optional Harness CLI Tools
    - 2.4 Token Economics of Skills (Why 40+ Skills Do NOT Blow Up Context)
@@ -93,7 +93,7 @@ The deployment scripts write paths; check each host's current documentation and 
 
 ## 2. Skills & Ecosystem Tools Inventory
 
-### 2.1 42 Integrated Native Skills Categorized
+### 2.1 43 Integrated Native Skills Categorized
 
 The installer copies the repository's skill directories into `.agents/skills/`; actual discovery depends on the host tool and its configuration.
 
@@ -153,6 +153,7 @@ The installer copies the repository's skill directories into `.agents/skills/`; 
 - **`cross-tool-memory`**: Cross-tool project-scoped memory navigation and recall aid (pairs with local ai-memory backend).
 - **`option-review`**: Pre-decision multi-option review generating an isolated 5-dimension decision matrix.
 - **`living-documentation`**: 4-tier living documentation suite (specs/architecture/reference/guides) with frontmatter-based code-doc bidirectional traceability, supporting L0/L1/L2 change impact thresholds.
+- **`engineering-docs`**: R&D lifecycle document templates (31 document types, 15 bilingual phase-gate templates) ensuring consistent output across AI agents and seamless integration with Comet phase gates and living documentation.
 
 ---
 
@@ -221,6 +222,7 @@ Skill discovery and context costs depend on the host agent and its configuration
 | **Token Conservation** | `caveman` | Only when the host loads the Skill or plugin | Be concise while preserving necessary context, technical accuracy, and safety details |
 | **Document Processing** | `docx` / `pdf` | Mentions `.docx` or `.pdf` | Professional formatting without running code test suites |
 | **Living Docs & Traceability** | [`engineering-spec.md`](.agents/rules/engineering-spec.md) + `living-documentation` | `/living-documentation` / sync trace docs | Maintain 4-tier docs (specs/architecture/reference/guides) via L0/L1/L2 impact thresholds and frontmatter traceability |
+| **Phase Gate Docs / Templates** | [`engineering-spec.md`](.agents/rules/engineering-spec.md) + `engineering-docs` | `/engineering-docs` / SRS/HLD/spec requests | Standardize AI agent outputs across phases using 15 bilingual phase-gate templates, connecting Comet artifacts with living documentation |
 | **Code Review & Quality Gate** | `open-code-review` + `requesting-code-review` | Before merge or after task completion | Rule-first, line-anchored, coverage-mandated; Tier A delegation if `ocr` CLI exists, otherwise Tier B methodology |
 | **Task Completion** | `verification-before-completion` | End of task | Present physical command execution evidence |
 
@@ -230,7 +232,7 @@ Skill discovery and context costs depend on the host agent and its configuration
 
 ### 3.1 Comet: Versioned workflow entry point
 
-Comet is an independently versioned workflow tool. Check the project's `.comet/config.yaml` and installed CLI version, then follow the Native or Classic workflow supported by that version. This repository's Comet skill is an entry-point guide; it does not create Comet state files or enforce phase guards. If Comet is not installed or configured, use the project's existing process or make a task-appropriate plan.
+Comet is an independently versioned workflow tool. Check the project's `.comet/config.yaml` and installed CLI version, then follow the Native or Classic workflow supported by that version. This repository's Comet skill is an entry-point guide; it does not create Comet state files or enforce phase guards. If Comet is not installed or configured, use the project's existing process or make a task-appropriate plan. When paired with `engineering-docs`, each phase (Open, Design, Build, Verify, Archive) uses standardized gate templates for consistent deliverables.
 
 ```text
 /comet Add date-range filtered CSV export for the order service

@@ -21,6 +21,14 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   default ANSI/GBK code page 936.
 
 ### Added
+- **`engineering-docs` native skill & Comet workflow deep integration**:
+  Introduced the `engineering-docs` skill (v0.1.0) providing 15 bilingual phase-gate templates
+  covering 31 R&D document types from project initiation to delivery. Seamlessly connects
+  with `/comet` workflow phases (Open -> 04/05/06 requirements specs, Design -> 07/08/09/10
+  architecture and interface specs, Build -> 10/11/12 implementation and reports, Verify ->
+  13/14 test plans and reports, Archive -> 15 delivery docs) and enforces YAML Frontmatter
+  traceability with `living-documentation` (`doc-impact.py`). Synced skill counts (43 native skills)
+  across all 5 languages in READMEs, Skills Usage Guides, and Panorama Guides.
 - **9 new agent-tool bridges** (both deploy scripts, TUI-selectable):
   Gemini CLI (`GEMINI.md`), Qwen Code (`QWEN.md`), CodeBuddy (`CODEBUDDY.md`),
   Windsurf (`.windsurf/rules/`), Cline (`.clinerules/`), Roo Code (`.roo/rules/`),

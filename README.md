@@ -21,16 +21,16 @@ This repository provides global, project, and directory rule templates, Claude C
    - Some command patterns are hard-blocked while other cases emit non-blocking warnings;
    - Regex inspection cannot cover every command form and does not replace server-side branch protection.
 
-3. **42 Reusable Skill Directories ([`.agents/skills/`](.agents/skills/))**:
+3. **43 Reusable Skill Directories ([`.agents/skills/`](.agents/skills/))**:
    - **Comet integration guide**: checks the installed version and project configuration; this skill does not implement Comet's state machine or phase guards;
-   - **Living Documentation & Traceability**: `living-documentation` (4-tier doc model: specs/architecture/reference/guides, frontmatter-based code-doc bidirectional traceability, L0/L1/L2 impact maintenance);
+   - **Living Documentation & Engineering Docs**: `living-documentation` (4-tier doc model: specs/architecture/reference/guides, frontmatter-based code-doc bidirectional traceability, L0/L1/L2 impact maintenance) and `engineering-docs` (15 bilingual phase-gate templates covering 31 R&D document types for cross-agent consistency);
    - **Spec-Driven Development (SDD)**: Full 16-skill `openspec` suite (proposal, apply changes, verify, sync specs, archive, explore);
    - **Test-Driven Development (TDD)**: Full 15-skill `superpowers` suite (red-green cycle, systematic root-cause debugging, physical verification evidence gate, git worktrees);
    - **Implementation and retrieval guidance**: `ponytail` (minimal-solution ladder) and `codegraph` (optional CodeGraph integration guide; CLI/MCP setup is separate);
    - **Output and communication guidance**: `rtk` (optional Rust Token Killer CLI guide; command-rewrite hooks require setup) and `caveman` (concise-response Skill);
    - **Pre-decision review and shared memory**: `option-review` (isolated 5-dimension candidate approach review matrix) and `cross-tool-memory` (project-scoped long-term memory navigation aid);
    - **Professional Document Processing**: `docx` (Word formatting & manipulation) and `pdf` (structured extraction & analysis). Note: `docx` ships its full OOXML validation toolchain (~1.3 MB, mostly XSD schemas), making it the largest skill in the repo — delete the directory from your target project if you never process Word files;
-   - **Skills Usage & Trigger Guide**: For trigger modes (auto/explicit/hybrid), categorization, and project memory setup of all 42 skills, see [`Skills Usage Guide.md`](Skills%20Usage%20Guide.md) ([简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Français](Skills%20Usage%20Guide.fr.md) | [Deutsch](Skills%20Usage%20Guide.de.md)).
+   - **Skills Usage & Trigger Guide**: For trigger modes (auto/explicit/hybrid), categorization, and project memory setup of all 43 skills, see [`Skills Usage Guide.md`](Skills%20Usage%20Guide.md) ([简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Français](Skills%20Usage%20Guide.fr.md) | [Deutsch](Skills%20Usage%20Guide.de.md)).
 
 4. **One-Click Deployment, Interactive Wizard & Unified Pipeline (`deploy-agents` & `pipeline`)**:
    - **Interactive Step-by-Step Terminal Wizard**: Running scripts without arguments (or with `--interactive` / `-Interactive`) launches a guided TUI wizard (arrow keys to move, spacebar to toggle, enter to confirm) to select template language (`en`, `zh`, `zh-tw`, `fr`, `de`), deployment scope (`project`, `global`, `both`), target project path, and multi-select agent bridge files (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy) plus optional workflows, preventing CLI mistakes;
@@ -72,7 +72,7 @@ agent-harness/
 │   │   ├── git-workflow.md          # Git authorization model, protected branch isolation
 │   │   ├── security-boundary.md     # 8 High-risk operations protection matrix
 │   │   └── token-discipline.md      # Read/fetch/speak gates, log truncation
-│   └── skills/                      # 42 Native engineering skills (Comet, OpenSpec, Superpowers...)
+│   └── skills/                      # 43 Native engineering skills (Comet, OpenSpec, Superpowers...)
 ├── .claude/
 │   ├── settings.json                # Claude Code PreToolUse security interceptor config
 │   └── hooks/                       # Security hook scripts (Node.js, reads stdin JSON)

@@ -21,16 +21,16 @@ Ce dépôt fournit des modèles de règles aux niveaux global, projet et répert
    - Scripts de garde Node.js traitant les entrées JSON sur stdin pour un blocage strict (`exit 2`) ;
    - Blocages permanents : commit direct sur branche protégée (`develop`/`master`/`main`/`release*`), `git push --force`, suppression de branche distante protégée, rebase sur branche protégée.
 
-3. **42 compétences réutilisables ([`.agents/skills/`](.agents/skills/))** :
+3. **43 compétences réutilisables ([`.agents/skills/`](.agents/skills/))** :
    - **Guide Comet** : point d'entrée pour les flux Comet ;
-   - **Documentation vivante & Traçabilité** : `living-documentation` (modèle à 4 niveaux, traçabilité bidirectionnelle code-doc, seuils d'impact L0/L1/L2) ;
+   - **Documentation vivante & Modèles de documentation technique** : `living-documentation` (modèle à 4 niveaux, traçabilité bidirectionnelle code-doc, seuils d'impact L0/L1/L2) et `engineering-docs` (15 modèles bilingues de portes de phase couvrant 31 types de documents de R&D) ;
    - **Spec-Driven Development (SDD)** : suite de 16 compétences `openspec` ;
    - **Test-Driven Development (TDD)** : suite de 15 compétences `superpowers` ;
    - **Orientation implémentation** : `ponytail` (échelle de solution minimale) et `codegraph` (graphe de code via MCP) ;
    - **Sortie et communication** : `rtk` (troncature et limitation de tokens) et `caveman` (mode ultra-concis) ;
    - **Revue avant décision & mémoire partagée** : `option-review` et `cross-tool-memory` ;
    - **Documents professionnels** : compétences `docx` et `pdf` ;
-   - **Guide d'utilisation et déclenchement des compétences** : Pour les modes de déclenchement (auto/explicite/hybride), la catégorisation et la mémoire de projet, voir [`Skills Usage Guide.fr.md`](Skills%20Usage%20Guide.fr.md) ([English](Skills%20Usage%20Guide.md) | [简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Deutsch](Skills%20Usage%20Guide.de.md)).
+   - **Guide d'utilisation et déclenchement des compétences** : Pour les modes de déclenchement (auto/explicite/hybride), la catégorisation et la mémoire de projet de l'ensemble des 43 compétences, voir [`Skills Usage Guide.fr.md`](Skills%20Usage%20Guide.fr.md) ([English](Skills%20Usage%20Guide.md) | [简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Deutsch](Skills%20Usage%20Guide.de.md)).
 
 4. **Déploiement en un clic, assistant interactif & pipeline unifié (`deploy-agents` & `pipeline`)** :
    - **Assistant terminal interactif étape par étape** : L'exécution sans argument (ou avec `--interactive` / `-Interactive`) lance un assistant guidé (navigation par flèches, sélection multiple par espace, validation Entrée) pour choisir la langue (`en`, `zh`, `zh-tw`, `fr`, `de`), la portée (`project`, `global`, `both`), le chemin du projet et sélectionner parmi 12 ponts d'outils (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy) ainsi que les workflows optionnels ;
@@ -64,7 +64,7 @@ Ce dépôt fournit des modèles de règles aux niveaux global, projet et répert
 agent-harness/
 ├── .agents/
 │   ├── rules/                       # Sous-règles d'ingénierie modulaires
-│   └── skills/                      # 42 compétences d'ingénierie
+│   └── skills/                      # 43 compétences d'ingénierie
 ├── .claude/
 │   ├── settings.json                # Configuration PreToolUse Claude Code
 │   └── hooks/                       # Scripts de garde et interception

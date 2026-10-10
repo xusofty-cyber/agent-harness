@@ -45,10 +45,12 @@ license: MIT
 
 ## 工作流
 
-1. **识别**：从上面的决策树找到对应模板。
+1. **识别**：从上面的决策树找到对应模板，并参照下表确定在 `docs/` 中的推荐路径。
 2. **加载**：读取 `references/templates/<nn>-*.md`。
 3. **访谈**：向用户提问填补 `[占位符]`；未知项标 `TODO: <说明>`，**绝不编造**。
-4. **生成**：按模板章节输出，遵循 `references/rendering-spec.md` 的格式规范。
+4. **追溯与生成**：
+   - 按模板章节输出，严格遵循 `references/rendering-spec.md` 的格式规范（章节编号 `1.` `1.1`、表格标题置顶等）。
+   - 若输出到 `docs/{specs,architecture,reference,guides,adr}/` 活体文档四阶目录，在文档最顶部附带 YAML Frontmatter（声明 `id`, `title`, `type`, `status`, `modules`），以便 `doc-impact.py` 自动分析代码与文档的关联影响。
 
 ## 需求纪律（writing docs 时强制）
 
@@ -74,30 +76,31 @@ license: MIT
 
 ## 与其他 skill 的关系
 
-| Skill | 职责 | 边界 |
+| Skill | 职责 | 边界与协同 |
 |---|---|---|
-| `living-documentation` | 文档生命周期管理（四阶模型） | 不管具体模板内容 |
-| `openspec-*` | Spec 驱动开发流程 | 不管传统 PRD/SRS/SAD 格式 |
-| `engineering-docs`（本） | 31 种文档的内容模板 | 不管流程，只管"写什么章节" |
+| `living-documentation` | 文档生命周期管理（四阶模型与变更门禁） | 负责目录划分与代码追溯；具体章节内容采用本模板库 |
+| `comet` | 研发工作流驱动（Open→Design→Build→Verify→Archive） | 驱动状态机流转；各阶段产出的正式文档格式采用本模板库 |
+| `openspec-*` | Spec 驱动敏捷变更流程 | 轻量迭代方案；不管传统 PRD/SRS/SAD 格式 |
+| `engineering-docs`（本） | 31 种文档的内容模板与渲染规范 | 专注于"写什么章节"与"排版格式一致"，为各工作流提供统一内容底座 |
 
-## 模板一览
+## 模板一览与目录 / Comet 阶段映射
 
-| # | 模板 | 阶段 | 覆盖文档数 |
-|---|---|---|---|
-| 01 | project-proposal | 立项 | 2 |
-| 02 | project-approval | 立项 | 3 |
-| 03 | project-task-book | 立项 | 2 |
-| 04 | user-requirements | 需求 | 1 |
-| 05 | product-spec | 需求 | 1 |
-| 06 | srs | 需求 | 2 |
-| 07 | solution-design | 设计 | 1 |
-| 08 | hld | 设计 | 1 |
-| 09 | lld | 设计 | 1 |
-| 10 | interface-spec | 设计 | 2 |
-| 11 | project-plan | 管理 | 1 |
-| 12 | project-report | 管理 | 5 |
-| 13 | test-plan | 测试 | 2 |
-| 14 | test-report | 测试 | 5 |
-| 15 | delivery-docs | 交付 | 2 |
+| # | 模板 | 阶段 | Comet 对应阶段 | 推荐存储路径 | 覆盖文档数 |
+|---|---|---|---|---|---|
+| 01 | project-proposal | 立项 | — | `docs/management/` | 2 |
+| 02 | project-approval | 立项 | — | `docs/management/` | 3 |
+| 03 | project-task-book | 立项 | — | `docs/management/` | 2 |
+| 04 | user-requirements | 需求 | Open | `docs/specs/` | 1 |
+| 05 | product-spec | 需求 | Open | `docs/specs/` | 1 |
+| 06 | srs | 需求 | Open | `docs/specs/` | 2 |
+| 07 | solution-design | 设计 | Design | `docs/architecture/` | 1 |
+| 08 | hld | 设计 | Design | `docs/architecture/` | 1 |
+| 09 | lld | 设计 | Design | `docs/architecture/` | 1 |
+| 10 | interface-spec | 设计 | Design / Build | `docs/reference/` | 2 |
+| 11 | project-plan | 管理 | Build | `docs/management/` | 1 |
+| 12 | project-report | 管理 | Build | `docs/management/` | 5 |
+| 13 | test-plan | 测试 | Verify | `docs/reference/` 或 `docs/tests/` | 2 |
+| 14 | test-report | 测试 | Verify | `docs/reference/` 或 `docs/tests/` | 5 |
+| 15 | delivery-docs | 交付 | Archive | `docs/guides/` | 2 |
 
-共 15 个模板，覆盖 31 种文档。
+共 15 个模板，覆盖 31 种文档。无论使用哪种 AI Agent 工具，均输出相同章节结构与排版格式。

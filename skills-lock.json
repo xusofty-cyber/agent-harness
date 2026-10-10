@@ -5,7 +5,7 @@
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/brainstorming/SKILL.md",
-      "computedHash": "6ee10d1481b8a2580d5336ff66c5c08acc9d4b251b13bbc3bfd31be99c261d43"
+      "computedHash": "fc6339f0e5b48c63279bd4f6c6340db55301b69ccc37a13e1e52bd5b3062746c"
     },
     "caveman": {
       "source": "JuliusBrussee/caveman",
@@ -27,7 +27,7 @@
       "repository": "https://github.com/rpamis/comet"
     },
     "cross-tool-memory": {
-      "source": "agent-harness (authored in-repo)",
+      "source": "./agent-harness (authored in-repo)",
       "sourceType": "local",
       "version": "0.1.0",
       "skillPath": ".agents/skills/cross-tool-memory/SKILL.md"
@@ -56,11 +56,17 @@
       "skillPath": ".agents/skills/draft-openspec-docs/SKILL.md",
       "computedHash": "a952bf77f543aaadf2f4297da818e5ff9e66d676f6f657a100b2c78ac07e179f"
     },
+    "engineering-docs": {
+      "source": "./agent-harness (authored in-repo)",
+      "sourceType": "local",
+      "version": "0.1.0",
+      "skillPath": ".agents/skills/engineering-docs/SKILL.md"
+    },
     "executing-plans": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/executing-plans/SKILL.md",
-      "computedHash": "94e9cac359a40652ba8986bd418911bf0331e3aad9c3233740f39594d0d56340"
+      "computedHash": "ebf526e8565d02852f57f473bfb97c1baf142d4afe97dc6d169e966514382963"
     },
     "finishing-a-development-branch": {
       "source": "obra/superpowers",
@@ -69,13 +75,13 @@
       "computedHash": "4f571e7befb8b0946d9d7770232c818812412e9ab1dfb811f847edfba1fc6275"
     },
     "living-documentation": {
-      "source": "agent-harness (authored in-repo)",
+      "source": "./agent-harness (authored in-repo)",
       "sourceType": "local",
       "version": "0.2.0",
       "skillPath": ".agents/skills/living-documentation/SKILL.md"
     },
     "open-code-review": {
-      "source": "agent-harness (authored in-repo)",
+      "source": "./agent-harness (authored in-repo)",
       "sourceType": "local",
       "version": "0.1.0",
       "skillPath": ".agents/skills/open-code-review/SKILL.md"
@@ -159,7 +165,7 @@
       "computedHash": "76a04af7b5926b6b3266627f26b42df58d8a4084712a686b4aa658114212358c"
     },
     "option-review": {
-      "source": "agent-harness (authored in-repo)",
+      "source": "./agent-harness (authored in-repo)",
       "sourceType": "local",
       "version": "0.1.1",
       "skillPath": ".agents/skills/option-review/SKILL.md"
@@ -192,7 +198,7 @@
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/requesting-code-review/SKILL.md",
-      "computedHash": "2180e14a448e9410bec88e6646a2d1f0ce7fdd58de27388c1e052e929679d2bc"
+      "computedHash": "b095ac8c980339436b41de9989328f3f288f2e2a70452df28452bbeb6531d604"
     },
     "rtk": {
       "source": "rtk-ai/rtk",
@@ -205,7 +211,7 @@
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/subagent-driven-development/SKILL.md",
-      "computedHash": "aacfc60b54e36c583bcc0746ba0d92cb8eb648728e4882e1d67b913ba7218536"
+      "computedHash": "71259c008c49ff734e64c61045f1aa235b9aa99642a9aca9398beb775f6c59c5"
     },
     "superpowers": {
       "source": "obra/superpowers",
@@ -217,7 +223,7 @@
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/systematic-debugging/SKILL.md",
-      "computedHash": "51c6435d98c83c42c96ba7c35725a0b2c376cd487fb1a4e6bd0ddbe7e33ef202"
+      "computedHash": "276fb0aadb002ab930cc2a56de89e16995a2e3e70b33587652bf0a5fb123148d"
     },
     "test-driven-development": {
       "source": "obra/superpowers",
@@ -259,19 +265,13 @@
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/writing-plans/SKILL.md",
-      "computedHash": "a6c67c1900064347c2a329990dd3c555657c51c3ec53b259a08aa01a2c26139a"
+      "computedHash": "c2647b5bf067be353a893e5a39a632cbbeb7ad81e61fa5ae227ece5490029073"
     },
     "writing-skills": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/writing-skills/SKILL.md",
-      "computedHash": "7a13d9b3fd40e886c97f4b467ccc0f5edce03d606ea0dedc72d568d6e813e206"
-    },
-    "engineering-docs": {
-      "source": "agent-harness (authored in-repo)",
-      "sourceType": "local",
-      "version": "0.1.0",
-      "skillPath": ".agents/skills/engineering-docs/SKILL.md"
+      "computedHash": "f06bbb471439736c838e89a57a2a371bcc687931ba878901d97373194e212ea9"
     }
   }
 }
