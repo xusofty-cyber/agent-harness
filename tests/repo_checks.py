@@ -85,6 +85,17 @@ for name in sorted(local_skills):
           lock_data["skills"][name].get("version") == ver,
           f"lock version {lock_data['skills'][name].get('version')!r} != frontmatter {ver!r}")
 
+# --- 3b2. Every skill must have a provenance identifier ---
+# Local skills: semver `version` (enforced above). External skills: `computedHash`
+# serves as the content identifier. No skill may exist without provenance.
+# (META_ENTRIES are source-repo placeholders, not real skills.)
+for name, meta in sorted(lock_data.get("skills", {}).items()):
+    if name in ("openspec", "superpowers"):  # source-repo meta entries, not real skills
+        continue
+    has_provenance = bool(meta.get("version")) or bool(meta.get("computedHash"))
+    check(f"provenance:{name}", has_provenance,
+          f"skill {name} has neither version nor computedHash in lock")
+
 # --- 3c. VERSION file consistency ---
 # VERSION must equal the newest ## [x.y.z] heading in CHANGELOG.md.
 # (Tag consistency is verified manually at release time; CI checkouts
