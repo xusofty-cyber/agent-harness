@@ -10,7 +10,7 @@ TEMPLATES = [
     ("01-project-proposal.md", "项目立项建议书", "Project Proposal",
      "项目立项建议书 / 立项论证报告", "立项 Initiation",
      "项目立项建议书、立项论证报告",
-     "PROP-XXX", "specs", [],
+     "PROP-XXX", "management", [],
      [
          ("项目背景", "Background", "项目提出的背景、政策依据、市场或业务驱动因素。"),
          ("问题与机会", "Problem & Opportunity", "当前存在的问题、痛点，立项要抓住的机会。"),
@@ -25,7 +25,7 @@ TEMPLATES = [
     ("02-project-approval.md", "项目立项审批文件", "Project Approval Documents",
      "立项评审报告 / 立项审批报告 / 会签评审表", "立项 Initiation",
      "项目立项评审报告、项目立项审批报告、会签评审表",
-     "APPR-XXX", "specs", ["docs/specs/PROP-XXX.md"],
+     "APPR-XXX", "management", ["docs/management/PROP-XXX.md"],
      [
          ("评审基本信息", "Review Info", "评审时间、地点、主持人、参会人员、评审对象。"),
          ("评审材料清单", "Materials Reviewed", "本次评审所依据的材料列表。"),
@@ -37,7 +37,7 @@ TEMPLATES = [
     ("03-project-task-book.md", "项目任务书", "Project Task Book",
      "项目任务书 / 项目工作任务书", "立项 Initiation",
      "项目任务书、项目工作任务书",
-     "TASK-XXX", "specs", ["docs/specs/APPR-XXX.md"],
+     "TASK-XXX", "management", ["docs/management/APPR-XXX.md"],
      [
          ("任务背景", "Background", "任务来源、上级要求或立项依据。"),
          ("任务目标", "Objectives", "要达成的目标，量化、可验收。"),
@@ -117,7 +117,7 @@ TEMPLATES = [
     ("09-lld.md", "软件详细设计说明书", "Low-Level Design (LLD)",
      "软件详细设计说明书", "设计 Design",
      "软件详细设计说明书",
-     "LLD-XXX", "architecture", ["docs/architecture/HLD-XXX.md"],
+     "LLD-XXX", "reference", ["docs/architecture/HLD-XXX.md"],
      [
          ("概述", "Overview", "目的、范围、引用 HLD 章节。"),
          ("模块划分", "Module Breakdown", "模块列表、职责、对应 HLD 子系统。"),
@@ -141,7 +141,7 @@ TEMPLATES = [
     ("11-project-plan.md", "项目计划", "Project Plan",
      "项目计划", "管理 Management",
      "项目计划",
-     "PLAN-XXX", "guide", ["docs/specs/SRS-XXX.md"],
+     "PLAN-XXX", "management", ["docs/specs/SRS-XXX.md"],
      [
          ("项目目标", "Objectives", "范围、成功标准。"),
          ("工作分解", "WBS", "工作包列表、编号、负责人。"),
@@ -154,7 +154,7 @@ TEMPLATES = [
     ("12-project-report.md", "项目报告", "Project Report",
      "项目进展报告 / 项目总结报告 / 试运行报告 / 评审报告 / 会议纪要", "管理 Management",
      "项目进展报告、项目总结报告、试运行报告、评审报告、会议纪要",
-     "REP-XXX", "guide", ["docs/guides/PLAN-XXX.md"],
+     "REP-XXX", "management", ["docs/management/PLAN-XXX.md"],
      [
          ("基本信息", "Basic Info", "报告类型、报告期、编写人、日期。"),
          ("总体状态", "Status Overview", "🟢/🟡/🔴 总体状态一句话。"),
@@ -167,7 +167,7 @@ TEMPLATES = [
     ("13-test-plan.md", "软件测试计划", "Software Test Plan",
      "软件集成测试计划 / 软件系统测试计划", "测试 Testing",
      "软件集成测试计划、软件系统测试计划",
-     "TEST-PLAN-XXX", "reference", ["docs/specs/SRS-XXX.md"],
+     "TEST-PLAN-XXX", "tests", ["docs/specs/SRS-XXX.md"],
      [
          ("测试目标", "Objectives", "测试要验证什么。"),
          ("测试范围", "Scope", "测试/不测试的功能列表。"),
@@ -181,7 +181,7 @@ TEMPLATES = [
     ("14-test-report.md", "软件测试报告", "Software Test Report",
      "软件单元测试报告 / 集成测试报告 / 系统测试报告 / 性能测试报告 / 软件测试用例", "测试 Testing",
      "软件单元测试报告、软件集成测试报告、软件系统测试报告、软件性能测试报告、软件测试用例",
-     "TEST-REP-XXX", "reference", ["docs/reference/TEST-PLAN-XXX.md"],
+     "TEST-REP-XXX", "tests", ["docs/tests/TEST-PLAN-XXX.md"],
      [
          ("测试概述", "Overview", "测试对象版本、测试时间、测试人员。"),
          ("测试环境", "Environment", "实际测试环境描述。"),
@@ -194,7 +194,7 @@ TEMPLATES = [
     ("15-delivery-docs.md", "软件交付文档", "Software Delivery Documents",
      "软件版本说明 / 软件用户手册", "交付 Delivery",
      "软件版本说明、软件用户手册",
-     "GUIDE-DELIVERY-XXX", "guide", ["docs/reference/TEST-REP-XXX.md"],
+     "GUIDE-DELIVERY-XXX", "guide", ["docs/tests/TEST-REP-XXX.md"],
      [
          ("版本信息", "Version Info", "版本号、发布日期、适用范围。"),
          ("更新内容", "Changelog", "新增/优化/修复列表。"),

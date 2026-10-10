@@ -6,7 +6,7 @@ status: draft
 modules:
   - "src/your_module/**"
 depends_on:
-  - "docs/specs/PROP-XXX.md"
+  - "docs/management/PROP-XXX.md"
 version: 0.1.0
 last_verified_commit: HEAD
 ---
