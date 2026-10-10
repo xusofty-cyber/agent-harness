@@ -14,6 +14,12 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   (`xusofty-cyber/agent-harness`) to be done via Settings; old URLs redirect
   automatically.
 
+### Fixed
+- **Windows PowerShell BOM encoding**: Saved all PowerShell scripts (`run-pipeline.ps1`,
+  `pipeline.ps1`, `deploy-agents.ps1`) with UTF-8 BOM (`utf-8-sig`) to prevent
+  Windows PowerShell 5.1 from misinterpreting Chinese characters and quotes under
+  default ANSI/GBK code page 936.
+
 ### Added
 - **9 new agent-tool bridges** (both deploy scripts, TUI-selectable):
   Gemini CLI (`GEMINI.md`), Qwen Code (`QWEN.md`), CodeBuddy (`CODEBUDDY.md`),
