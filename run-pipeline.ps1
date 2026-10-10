@@ -1,4 +1,4 @@
-# ==============================================================================
+﻿# ==============================================================================
 # run-pipeline.ps1
 # Platforms: Windows (PowerShell)
 # Purpose: Unified pipeline runner for agent-harness:
