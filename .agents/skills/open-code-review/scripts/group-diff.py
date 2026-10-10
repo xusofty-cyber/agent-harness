@@ -32,6 +32,7 @@ NOISE_PATTERNS = (
 def _sh(cmd: list[str], cwd: Path) -> str:
     try:
         return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True,
+                              encoding="utf-8", errors="replace",
                               timeout=30).stdout.strip()
     except Exception:
         return ""
@@ -43,6 +44,7 @@ def resolve_root(explicit: str | None) -> Path:
     try:
         out = subprocess.run(["git", "rev-parse", "--show-toplevel"],
                              capture_output=True, text=True,
+                             encoding="utf-8", errors="replace",
                              timeout=5).stdout.strip()
         if out and Path(out).is_dir():
             return Path(out).resolve()

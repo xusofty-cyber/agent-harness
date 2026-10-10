@@ -453,6 +453,8 @@ function Guide-OptionalCliTools([string]$TargetPath) {
         }
     }
 
+    $npmCmd = if (Get-Command npm.cmd -ErrorAction SilentlyContinue) { "npm.cmd" } else { "npm" }
+
     if (Get-Command ocr -ErrorAction SilentlyContinue) {
         $ocrVer = try { (& ocr --version 2>$null | Select-Object -First 1) } catch { "" }
         $ocrSuffix = if ($ocrVer) { " $ocrVer" } else { "" }
@@ -460,7 +462,7 @@ function Guide-OptionalCliTools([string]$TargetPath) {
     } else {
         Write-Host "  Open Code Review CLI (ocr) is optional. The open-code-review skill works without it (Tier B methodology mode); installing enables zero-LLM-cost delegation review."
         if (Confirm-OptionalStep "Install Open Code Review CLI now?") {
-            & npm install -g @alibaba-group/open-code-review
+            & $npmCmd install -g @alibaba-group/open-code-review
             if ($LASTEXITCODE -ne 0) { Write-Warning "ocr installation failed. Manual command: npm install -g @alibaba-group/open-code-review" }
             else { Write-Host "  [INFO] ocr installed. Delegation mode needs no LLM key; the host agent performs the review." -ForegroundColor Yellow }
         } else {
@@ -475,7 +477,7 @@ function Guide-OptionalCliTools([string]$TargetPath) {
     } else {
         Write-Host "  Comet CLI is optional. The comet skill only provides entry guidance; install to use --comet-init for project init."
         if (Confirm-OptionalStep "Install Comet CLI now?") {
-            & npm install -g @rpamis/comet
+            & $npmCmd install -g @rpamis/comet
             if ($LASTEXITCODE -ne 0) { Write-Warning "comet installation failed. Manual command: npm install -g @rpamis/comet" }
             else { Write-Host "  [INFO] comet installed." -ForegroundColor Yellow }
         } else {

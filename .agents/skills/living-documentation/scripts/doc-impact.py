@@ -33,6 +33,7 @@ DOC_TIERS = ("specs", "architecture", "reference", "guides", "adr")
 def _sh(cmd: list[str], cwd: Path) -> str:
     try:
         return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True,
+                              encoding="utf-8", errors="replace",
                               timeout=30).stdout.strip()
     except Exception:
         return ""
@@ -46,7 +47,9 @@ def resolve_root(explicit: str | None) -> Path:
     # Try finding git toplevel from cwd
     try:
         git_root = subprocess.run(["git", "rev-parse", "--show-toplevel"],
-                                  capture_output=True, text=True, timeout=5).stdout.strip()
+                                  capture_output=True, text=True,
+                                  encoding="utf-8", errors="replace",
+                                  timeout=5).stdout.strip()
         if git_root and Path(git_root).is_dir():
             return Path(git_root).resolve()
     except Exception:
