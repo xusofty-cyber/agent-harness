@@ -50,6 +50,7 @@ usage() {
     echo "  -u, --update            覆盖更新已有全局规则并备份；同时更新外部 skills"
     echo "  -k, --check-only        只读检查模式 (技能仅检查差异、文档仅分析影响)"
     echo "  --apply-skills          在技能同步阶段主动拉取并应用上游更新"
+    echo "  --brief-probe           探针极简输出模式 (仅打印探针关键摘要前 15 项，适合 CI)"
     echo "  -y, --yes               非交互/无人值守执行 (直接使用推荐配置，不弹窗确认)"
     echo "  --interactive, -I       强制启用交互式逐步选择向导"
     echo "  -h, --help              显示本帮助信息"
@@ -286,6 +287,7 @@ RUN_UPDATE=false
 NON_INTERACTIVE=false
 FORCE_INTERACTIVE=false
 EXPLICIT_CONFIG=false
+BRIEF_PROBE=false
 RUN_DETAIL_MODE="quick" # quick or detailed
 GLOBAL_DEPLOYED_IN_WIZARD=false
 SKILLS_SYNC_CHOICE="check"
@@ -474,6 +476,7 @@ while [[ $# -gt 0 ]]; do
         -u|--update) RUN_UPDATE=true; EXPLICIT_CONFIG=true; shift ;;
         -k|--check-only) CHECK_ONLY=true; EXPLICIT_CONFIG=true; shift ;;
         --apply-skills) APPLY_SKILLS=true; EXPLICIT_CONFIG=true; shift ;;
+        --brief-probe) BRIEF_PROBE=true; shift ;;
         -y|--yes|--non-interactive) NON_INTERACTIVE=true; shift ;;
         -I|--interactive) FORCE_INTERACTIVE=true; shift ;;
         -h|--help) usage ;;
@@ -927,9 +930,17 @@ if command -v comet >/dev/null 2>&1; then
     fi
 
     echo -e "\n  ${YELLOW}--- 跨平台体检报告 (comet doctor) ---${NC}"
-    _comet_doc=$(cd "$TARGET_ABS" && comet doctor 2>&1) || true
-    if [ -n "$_comet_doc" ]; then
-        echo -e "${YELLOW}${_comet_doc}${NC}\n"
+    if [ "$BRIEF_PROBE" = true ]; then
+        _comet_doc=$(cd "$TARGET_ABS" && comet doctor 2>&1 | grep -E "✓|✗|⚠" | head -n 15) || true
+        if [ -n "$_comet_doc" ]; then
+            echo -e "${YELLOW}${_comet_doc}${NC}"
+            echo -e "  ${DIM}... (已启用 --brief-probe 极简模式，忽略后续详细平台检测)${NC}\n"
+        fi
+    else
+        _comet_doc=$(cd "$TARGET_ABS" && comet doctor 2>&1) || true
+        if [ -n "$_comet_doc" ]; then
+            echo -e "${YELLOW}${_comet_doc}${NC}\n"
+        fi
     fi
 fi
 

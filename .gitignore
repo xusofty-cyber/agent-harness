@@ -2,6 +2,14 @@
 .claude/skills/
 .comet/
 
+# Machine-specific agent hook configurations (comet init / local IDE hooks with absolute paths)
+.codex/hooks.json
+.trae/hooks.json
+.trae-cn/hooks.json
+.devin/hooks.json
+.github/hooks/
+.kiro/hooks/
+
 # Backup files generated during deployment
 *.bak-*
 

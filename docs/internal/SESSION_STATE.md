@@ -48,6 +48,11 @@
     - **阶段二（脚手架与配置供给）**：新增工业级规范配置模板 `templates/comet.config.yaml`（`comet.project.v1`，默认 Native，开箱支持本地知识库与四阶文档深度集成）；在 `deploy-agents` 与 `run-pipeline`（Bash & PowerShell 双脚本）中全面集成 Comet 探测与自动脚手架分发，彻底消除未配置时的 `comet status` 报错；
     - **阶段三（体检探针集成）**：在 `run-pipeline.sh` 与 `run-pipeline.ps1` 中集成非阻塞式 `comet status` 与 `comet doctor` 阶段报告，辅助开发者全面感知跨 37+ 平台的规则、技能与 Hooks 挂载健康状况；在 `tests/repo_checks.py` 中增加跨脚本配置模板同步 Parity 强校验。
 
+11. **审查建议闭环优化（Hook 忽略保护、规则别名与探针极简模式）**：
+    - **Hook 忽略保护**：在 `.gitignore` 中增加针对 `comet init` 生成的机器绝对路径配置（`.codex/hooks.json`、`.trae/hooks.json`、`.devin/hooks.json`、`.github/hooks/`、`.kiro/hooks/`）的忽略规则，杜绝团队协作时误提交机器私有路径；
+    - **工程规则别名**：在 `.agents/rules/` 下创建 `engineering.md` 软链接指向 `engineering-spec.md`，兼容第三方提示词或集成文档简写；
+    - **流水线探针极简模式**：在 `run-pipeline.sh` 与 `run-pipeline.ps1` 中新增 `--brief-probe` / `-BriefProbe` 参数，在 CI 或轻量调试时仅打印前 15 条核心检查项，大幅精简终端输出。
+
 ## 验证证据与质量闸门
 
 - `python3 tests/repo_checks.py`：**68 项检查全数 PASS**（包含跨脚本 Parity、文档结构对称性、doc-impact 副本逐字节同步校验等）。

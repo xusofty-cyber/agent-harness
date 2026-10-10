@@ -58,6 +58,9 @@ param (
     [switch]$Yes,
 
     [Parameter(Mandatory = $false)]
+    [switch]$BriefProbe,
+
+    [Parameter(Mandatory = $false)]
     [Alias('I')]
     [switch]$Interactive,
 
@@ -85,6 +88,7 @@ if ($Help) {
     Write-Host "  -Update, -u            覆盖更新已有全局规则并备份；同时更新外部 skills"
     Write-Host "  -CheckOnly, -k         只读检查模式 (技能仅检查差异、文档仅分析影响)"
     Write-Host "  -ApplySkills           在技能同步阶段主动拉取并应用上游更新"
+    Write-Host "  -BriefProbe            探针极简输出模式 (仅打印探针关键摘要前 15 项，适合 CI)"
     Write-Host "  -Yes, -y               非交互/无人值守执行 (直接使用推荐配置，不弹窗确认)"
     Write-Host "  -Interactive, -I       强制启用交互式逐步选择向导"
     Write-Host "  -Help, -h              显示本帮助信息`n"
@@ -834,9 +838,17 @@ if (Get-Command comet -ErrorAction SilentlyContinue) {
         }
 
         Write-Host "`n  --- 跨平台体检报告 (comet doctor) ---" -ForegroundColor Yellow
-        $doctorOut = & comet doctor 2>&1
-        if ($doctorOut) {
-            $doctorOut | ForEach-Object { Write-Host "  $_" -ForegroundColor Yellow }
+        if ($BriefProbe) {
+            $doctorOut = & comet doctor 2>&1 | Where-Object { $_ -match "[✓✗⚠]" } | Select-Object -First 15
+            if ($doctorOut) {
+                $doctorOut | ForEach-Object { Write-Host "  $_" -ForegroundColor Yellow }
+                Write-Host "  ... (已启用 -BriefProbe 极简模式，忽略后续详细平台检测)" -ForegroundColor DarkGray
+            }
+        } else {
+            $doctorOut = & comet doctor 2>&1
+            if ($doctorOut) {
+                $doctorOut | ForEach-Object { Write-Host "  $_" -ForegroundColor Yellow }
+            }
         }
         Write-Host ""
     } catch {} finally {
