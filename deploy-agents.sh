@@ -1312,8 +1312,18 @@ done
 echo -e "  ${GREEN}[√] 已就绪文档骨架目录: docs/{specs,architecture,reference,guides,adr}${NC}"
 
 # ==============================================================================
-# 9. Optional Comet CLI Init (--comet-init)
+# 9. Optional Comet CLI Init (--comet-init) & Configuration Scaffold
 # ==============================================================================
+if command -v comet >/dev/null 2>&1 || [ "$DO_COMET_INIT" = true ]; then
+    TARGET_COMET_DIR="${TARGET_PROJECT_DIR}/.comet"
+    TARGET_COMET_CONFIG="${TARGET_COMET_DIR}/config.yaml"
+    if [ ! -f "${TARGET_COMET_CONFIG}" ] && [ -f "${SCRIPT_DIR}/templates/comet.config.yaml" ]; then
+        mkdir -p "${TARGET_COMET_DIR}"
+        cp "${SCRIPT_DIR}/templates/comet.config.yaml" "${TARGET_COMET_CONFIG}"
+        echo -e "  ${GREEN}[√] 已同步 Comet 工作流配置模板: .comet/config.yaml (Native/Classic 双模启用)${NC}"
+    fi
+fi
+
 if [ "$DO_COMET_INIT" = true ]; then
     if command -v comet >/dev/null 2>&1; then
         echo -e "\n${YELLOW}>>> 正在目标项目中运行 'comet init'...${NC}"

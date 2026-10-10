@@ -904,6 +904,17 @@ if [ "$STAGE_DOCS" = true ]; then
     fi
 fi
 
+# ------------------------------------------------------------------------------
+# 附加探针: Comet 智能体工作流引擎就绪检测 (Comet Workflow Engine Probe)
+# ------------------------------------------------------------------------------
+if command -v comet >/dev/null 2>&1; then
+    echo -e "${CYAN}>>> [Comet Probe] 正在检测 Comet 智能体工作流状态 (comet status)...${NC}"
+    _comet_status=$(cd "$TARGET_ABS" && comet status 2>&1 | head -n 10) || true
+    if [ -n "$_comet_status" ]; then
+        echo -e "${YELLOW}${_comet_status}${NC}\n"
+    fi
+fi
+
 # ==============================================================================
 # 流水线执行汇总 (Pipeline Execution Summary)
 # ==============================================================================

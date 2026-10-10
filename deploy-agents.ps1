@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 # deploy-agents.ps1
 # Platforms: Windows (PowerShell 5.1 / PowerShell 7+)
 # Purpose: One-click deploy & online update AI Agents Harness spec, rules & skills
@@ -1214,9 +1214,19 @@ foreach ($sub in $docSubdirs) {
 Write-Host "  [OK] Initialized living documentation scaffold: docs/{specs,architecture,reference,guides,adr}" -ForegroundColor Green
 
 # ==============================================================================
-# 9. Optional Comet CLI Init (-CometInit)
+# 9. Optional Comet CLI Init (-CometInit) & Configuration Scaffold
 # ==============================================================================
 $cometCli = Get-Command "comet" -ErrorAction SilentlyContinue
+$targetCometDir = Join-Path $ResolvedProjectPath ".comet"
+$targetCometConfig = Join-Path $targetCometDir "config.yaml"
+$tplCometConfig = Join-Path $PSScriptRoot "templates\comet.config.yaml"
+if ($cometCli -or $CometInit) {
+    if (-not (Test-Path $targetCometConfig) -and (Test-Path $tplCometConfig)) {
+        $null = New-Item -ItemType Directory -Path $targetCometDir -Force
+        Copy-Item -Path $tplCometConfig -Destination $targetCometConfig -Force
+        Write-Host "  [OK] Synchronized Comet workflow config template: .comet/config.yaml (Native/Classic dual-enabled)" -ForegroundColor Green
+    }
+}
 if ($CometInit) {
     if ($cometCli) {
         Write-Host "`n>>> Running 'comet init' in target project..." -ForegroundColor Yellow

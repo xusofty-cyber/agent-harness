@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 # run-pipeline.ps1
 # Platforms: Windows (PowerShell)
 # Purpose: Unified pipeline runner for agent-harness:
@@ -805,6 +805,23 @@ if ($stageDocs) {
             $summaryStatus += "FAIL"
             $summaryDetail += "文档影响分析工具异常"
         }
+    }
+}
+
+# ------------------------------------------------------------------------------
+# 附加探针: Comet 智能体工作流引擎就绪检测 (Comet Workflow Engine Probe)
+# ------------------------------------------------------------------------------
+if (Get-Command comet -ErrorAction SilentlyContinue) {
+    Write-Host "`n>>> [Comet Probe] 正在检测 Comet 智能体工作流状态 (comet status)..." -ForegroundColor Cyan
+    try {
+        Push-Location $targetAbs
+        $probeOut = & comet status 2>&1 | Select-Object -First 10
+        if ($probeOut) {
+            $probeOut | ForEach-Object { Write-Host "  $_" -ForegroundColor Yellow }
+        }
+        Write-Host ""
+    } catch {} finally {
+        Pop-Location
     }
 }
 

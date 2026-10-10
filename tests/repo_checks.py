@@ -186,6 +186,7 @@ PARITY = [
     ("skills-lock.json", "skills-lock.json", "skills lock metadata"),
     (".claude", ".claude", "Claude Code hooks deployment"),
     ("CometInit", "comet-init", "optional Comet init flag"),
+    ("comet.config.yaml", "comet.config.yaml", "Comet config template sync"),
     ("AiMemoryInit", "ai-memory-init", "optional ai-memory init flag"),
     (".ai-memory.toml.example", ".ai-memory.toml.example", "ai-memory config template sync"),
     ("LivingDocScaffold", "living-doc-scaffold", "living documentation directory scaffold"),

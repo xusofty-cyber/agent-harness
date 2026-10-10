@@ -22,6 +22,10 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   default ANSI/GBK code page 936.
 
 ### Added
+- **Comet Workflow Engine deep integration (Native & Classic dual-mode)**:
+  - **Phase 1 (Rules & Skills)**: Enriched `.agents/rules/engineering-spec.md` with Decision Ownership (investigable facts, user choices, implementation choices) and Independent Verifier Protocol. Upgraded `.agents/skills/comet/SKILL.md` into a full-featured dual-mode guide covering Native goal loops, Classic phase state machines, crash recovery, and living documentation bindings.
+  - **Phase 2 (Scaffolding)**: Added `templates/comet.config.yaml` standard configuration template (`comet.project.v1`, Native default, Dual-mode enabled, local knowledge corpus integrated with living-doc directories). Updated `deploy-agents.sh` and `deploy-agents.ps1` to automatically scaffold `.comet/config.yaml` when Comet CLI is detected or `--comet-init` is chosen.
+  - **Phase 3 (Diagnostic Probes)**: Integrated non-blocking Comet workflow engine status probes (`comet status`) into `run-pipeline.sh` and `run-pipeline.ps1`, giving instant visibility into agent workflow readiness.
 - **`engineering-docs` native skill & Comet workflow deep integration**:
   Introduced the `engineering-docs` skill (v0.1.0) providing 15 bilingual phase-gate templates
   covering 31 R&D document types from project initiation to delivery. Seamlessly connects

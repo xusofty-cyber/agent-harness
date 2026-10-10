@@ -43,6 +43,11 @@
    - 彻底杜绝任何 AI Agent 复制模板时漏写元数据，与 `living-documentation`、`doc-impact.py` 及 Comet 变更门禁建立原生无缝的端到端代码-文档双向追溯。
    - 更新 `SKILL.md` 工作流说明，并在 `tests/repo_checks.py` 中增强文档类型校验容错，天然兼容单复数形式（`spec`/`specs`, `guide`/`guides`）。
 
+10. **Comet 智能体工作流引擎双模深度整合（三阶段全量落地）**：
+    - **阶段一（规范与技能增强）**：在 `.agents/rules/engineering-spec.md` 中增加决策所有权（可调查事实/用户决定/实现选择）三界线与独立只读核验员（Independent Verifier Protocol）准则；全面重构 `.agents/skills/comet/SKILL.md` 为双模全功能协议指引，原生支持 Native 目标驱动循环与 Classic 阶段状态机，打通四阶活体文档模板绑定与崩溃恢复机制；
+    - **阶段二（脚手架与配置供给）**：新增工业级规范配置模板 `templates/comet.config.yaml`（`comet.project.v1`，默认 Native，开箱支持本地知识库与四阶文档深度集成）；在 `deploy-agents.sh` 与 `deploy-agents.ps1` 中集成自动探测与配置脚手架分发，彻底解决未配置时的 `comet status` 报错；
+    - **阶段三（体检探针集成）**：在 `run-pipeline.sh` 与 `run-pipeline.ps1` 中集成非阻塞式 Comet 状态就绪探针（`comet status`）；在 `tests/repo_checks.py` 中增加跨脚本配置模板同步 Parity 强校验。
+
 ## 验证证据与质量闸门
 
 - `python3 tests/repo_checks.py`：**68 项检查全数 PASS**（包含跨脚本 Parity、文档结构对称性、doc-impact 副本逐字节同步校验等）。
