@@ -593,6 +593,18 @@ function Ensure-ProjectMemoryScaffold([string]$targetDir, [string]$langOpt) {
         [System.IO.File]::WriteAllText($sTarget, $content, [System.Text.Encoding]::UTF8)
         Write-Host "  [√] 自动初始化当前会话断点: SESSION_STATE.md" -ForegroundColor Green
     }
+
+    $cometCli = Get-Command "comet" -ErrorAction SilentlyContinue
+    if ($cometCli) {
+        $cometDir = Join-Path $targetDir ".comet"
+        $cometCfg = Join-Path $cometDir "config.yaml"
+        $cometTpl = Join-Path $repoRoot "templates\comet.config.yaml"
+        if (-not (Test-Path $cometCfg) -and (Test-Path $cometTpl)) {
+            $null = New-Item -ItemType Directory -Path $cometDir -Force
+            Copy-Item -Path $cometTpl -Destination $cometCfg -Force
+            Write-Host "  [√] 检测到 Comet CLI，自动补齐项目级配置: .comet/config.yaml" -ForegroundColor Green
+        }
+    }
 }
 
 Write-Host "`n▶ 开始执行 Agent Harness 工程流水线" -ForegroundColor Cyan
@@ -809,15 +821,22 @@ if ($stageDocs) {
 }
 
 # ------------------------------------------------------------------------------
-# 附加探针: Comet 智能体工作流引擎就绪检测 (Comet Workflow Engine Probe)
+# 附加探针: Comet 智能体工作流引擎就绪检测与跨平台体检探针 (Comet Workflow & Doctor Probe)
 # ------------------------------------------------------------------------------
 if (Get-Command comet -ErrorAction SilentlyContinue) {
-    Write-Host "`n>>> [Comet Probe] 正在检测 Comet 智能体工作流状态 (comet status)..." -ForegroundColor Cyan
+    Write-Host "`n>>> [Comet Probe] 正在检测 Comet 智能体工作流状态与跨平台健康度..." -ForegroundColor Cyan
     try {
         Push-Location $targetAbs
-        $probeOut = & comet status 2>&1 | Select-Object -First 10
+        Write-Host "  --- 工作流状态 (comet status) ---" -ForegroundColor Yellow
+        $probeOut = & comet status 2>&1 | Select-Object -First 12
         if ($probeOut) {
             $probeOut | ForEach-Object { Write-Host "  $_" -ForegroundColor Yellow }
+        }
+
+        Write-Host "`n  --- 跨平台体检报告 (comet doctor) ---" -ForegroundColor Yellow
+        $doctorOut = & comet doctor 2>&1
+        if ($doctorOut) {
+            $doctorOut | ForEach-Object { Write-Host "  $_" -ForegroundColor Yellow }
         }
         Write-Host ""
     } catch {} finally {

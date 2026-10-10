@@ -698,6 +698,17 @@ ensure_project_memory_scaffold() {
         sed "s/<PROJECT_NAME>/$proj_basename/g" "$s_template" > "$s_target"
         echo -e "  ${GREEN}[√] 自动初始化当前会话断点: SESSION_STATE.md${NC}"
     fi
+
+    if command -v comet >/dev/null 2>&1; then
+        local comet_dir="$target_dir/.comet"
+        local comet_cfg="$comet_dir/config.yaml"
+        local comet_tpl="$REPO_ROOT/templates/comet.config.yaml"
+        if [ ! -f "$comet_cfg" ] && [ -f "$comet_tpl" ]; then
+            mkdir -p "$comet_dir"
+            cp "$comet_tpl" "$comet_cfg"
+            echo -e "  ${GREEN}[√] 检测到 Comet CLI，自动补齐项目级配置: .comet/config.yaml${NC}"
+        fi
+    fi
 }
 
 echo -e "\n${BOLD}${CYAN}▶ 开始执行 Agent Harness 工程流水线${NC}"
@@ -905,13 +916,20 @@ if [ "$STAGE_DOCS" = true ]; then
 fi
 
 # ------------------------------------------------------------------------------
-# 附加探针: Comet 智能体工作流引擎就绪检测 (Comet Workflow Engine Probe)
+# 附加探针: Comet 智能体工作流引擎就绪检测与跨平台体检探针 (Comet Workflow & Doctor Probe)
 # ------------------------------------------------------------------------------
 if command -v comet >/dev/null 2>&1; then
-    echo -e "${CYAN}>>> [Comet Probe] 正在检测 Comet 智能体工作流状态 (comet status)...${NC}"
-    _comet_status=$(cd "$TARGET_ABS" && comet status 2>&1 | head -n 10) || true
+    echo -e "${CYAN}>>> [Comet Probe] 正在检测 Comet 智能体工作流状态与跨平台健康度...${NC}"
+    echo -e "  ${YELLOW}--- 工作流状态 (comet status) ---${NC}"
+    _comet_status=$(cd "$TARGET_ABS" && comet status 2>&1 | head -n 12) || true
     if [ -n "$_comet_status" ]; then
-        echo -e "${YELLOW}${_comet_status}${NC}\n"
+        echo -e "${YELLOW}${_comet_status}${NC}"
+    fi
+
+    echo -e "\n  ${YELLOW}--- 跨平台体检报告 (comet doctor) ---${NC}"
+    _comet_doc=$(cd "$TARGET_ABS" && comet doctor 2>&1) || true
+    if [ -n "$_comet_doc" ]; then
+        echo -e "${YELLOW}${_comet_doc}${NC}\n"
     fi
 fi
 
