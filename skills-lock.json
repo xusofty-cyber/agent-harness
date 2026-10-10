@@ -25,7 +25,7 @@
       "sourceType": "github",
       "package": "@rpamis/comet",
       "repository": "https://github.com/rpamis/comet",
-      "computedHash": "5125213247da6be65b461b222c67ee743a3afd24269299fb7335a54af49ce7a8"
+      "computedHash": "6d33c9c7eaf29e865d2597946987bed75cb468c37c50046df8ba07c5a15c3cf6"
     },
     "cross-tool-memory": {
       "source": "./agent-harness (authored in-repo)",
@@ -63,7 +63,7 @@
       "sourceType": "local",
       "version": "0.1.0",
       "skillPath": ".agents/skills/engineering-docs/SKILL.md",
-      "computedHash": "2ca4a5edb233580dfca388cebf1b1f2af5df9b1e5beacf3ff4bad08776b8458b"
+      "computedHash": "ea20a9f1dadb81a1f2a3f6e79211f42eb37fb0b457dda0532a4bfd57365b716b"
     },
     "executing-plans": {
       "source": "obra/superpowers",

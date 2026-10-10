@@ -5,7 +5,7 @@
 set -euo pipefail
 
 OUT_DIR="${1:-.}"
-TEMPLATE_URL="https://github.com/Achuan-2/pandoc_docx_template/raw/main/templates/template_%E6%A0%87%E9%A2%98%E4%B8%8D%E7%BC%96%E5%8F%B7-%E5%88%97%E8%A8%A8%E7%AC%AC%E4%BA%8C%E8%A1%8C%E9%A1%B6%E6%A0%BC.docx"
+TEMPLATE_URL="https://raw.githubusercontent.com/Achuan-2/pandoc_docx_template/main/templates/template_%E6%A0%87%E9%A2%98%E4%B8%8D%E7%BC%96%E5%8F%B7-%E5%88%97%E8%A1%A8%E7%AC%AC%E4%BA%8C%E8%A1%8C%E9%A1%B6%E6%A0%BC.docx"
 OUT_FILE="$OUT_DIR/word-reference-template.docx"
 
 echo "Downloading Chinese Word reference template..."

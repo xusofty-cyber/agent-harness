@@ -78,7 +78,7 @@ license: MIT
 
 | Skill | 职责 | 边界与协同 |
 |---|---|---|
-| `living-documentation` | 文档生命周期管理（四阶模型与变更门禁） | 负责目录划分与代码追溯；具体章节内容采用本模板库 |
+| `living-documentation` | 文档生命周期管理（六阶模型与变更门禁） | 负责目录划分与代码追溯；具体章节内容采用本模板库 |
 | `comet` | 研发工作流驱动（Open→Design→Build→Verify→Archive） | 驱动状态机流转；各阶段产出的正式文档格式采用本模板库 |
 | `openspec-*` | Spec 驱动敏捷变更流程 | 轻量迭代方案；不管传统 PRD/SRS/SAD 格式 |
 | `engineering-docs`（本） | 31 种文档的内容模板与渲染规范 | 专注于"写什么章节"与"排版格式一致"，为各工作流提供统一内容底座 |

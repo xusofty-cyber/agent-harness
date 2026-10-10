@@ -71,7 +71,7 @@
 | **复杂 Bug / 偶现排障** | `engineering-spec.md` + `systematic-debugging` | 粘贴完整报错 Trace | 严禁创可贴盲修；必须先收集证据、建立假设、定位根因再写修复 |
 | **超长输出 / 测试跑批** | `token-discipline.md` + 可选 `rtk` | RTK Hook 已配置时由其改写支持的命令；否则使用 CLI 原生精简参数 | 不假定命令会被自动改写；必要时将长日志保存在本地并只汇报相关摘要 |
 | **Token 告急 / 精简输出** | `Global AGENTS.md` + 可选 `caveman` | 宿主工具支持并加载该 Skill 时按需启用 | 精简表达但保留安全说明、必要上下文和技术准确性 |
-| **文档创建 / 架构与追溯同步** | `engineering-spec.md` + 可选 `living-documentation` | `/living-documentation` / 需求架构与详细参考归档 | 依据 L0/L1/L2 阈值同步四阶文档，维护 Frontmatter 代码与文档双向追溯引用 |
+| **文档创建 / 架构与追溯同步** | `engineering-spec.md` + 可选 `living-documentation` | `/living-documentation` / 需求架构与详细参考归档 | 依据 L0/L1/L2 阈值同步六阶文档，维护 Frontmatter 代码与文档双向追溯引用 |
 | **正式研发文档 / 模板化输出** | `engineering-docs` | 写 PRD/SRS/HLD/LLD/测试计划等正式文档时 | 按 31→15 决策树选用模板，遵循 rendering-spec.md 格式规范（标题字号/字体/段落） |
 | **代码评审 / 合并前质量门禁** | `open-code-review` + `requesting-code-review` | 完成功能或合并前 | 规则先行、行号锚定、全量覆盖；`ocr` CLI 已装走 Tier A 委托，否则走 Tier B 方法论 |
 
