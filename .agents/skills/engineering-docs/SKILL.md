@@ -22,7 +22,7 @@ license: MIT
 
 需求 Requirements
 ├── 用户视角的需求？                 → 04-user-requirements.md
-├── 产品视角的规格？                 → 05-product-spec.md
+├── 产品视角的规格？                 → 05-product-spec.md（完整示例见 `references/examples/05-product-spec-example.md`）
 └── 开发视角的形式化规格？           → 06-srs.md
 
 设计 Design
