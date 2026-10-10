@@ -1,17 +1,23 @@
-<!--
-模板：软件需求规格说明 / 开发需求细化表
-阶段：需求 Requirements
-覆盖文档：软件需求规格说明、开发需求细化表
-渲染规范：参见 ../rendering-spec.md（标题字号/段落/字体）
-填写指引：[方括号] 为占位符，填写时替换；未知项标 TODO: <说明>，不要编造。
--->
+---
+id: SRS-XXX
+title: "[模块/系统名称] 软件需求规格说明"
+type: specs
+status: draft
+modules:
+  - "src/your_module/**"
+depends_on:
+  - "docs/specs/PRD-XXX.md"
+version: 0.1.0
+last_verified_commit: HEAD
+---
 
 # 软件需求规格说明
 # Software Requirements Specification (SRS)
 
 > **文档类型**：软件需求规格说明 / 开发需求细化表  
 > **适用阶段**：需求 Requirements  
-> **覆盖**：软件需求规格说明、开发需求细化表
+> **覆盖**：软件需求规格说明、开发需求细化表  
+> **渲染规范**：参见 `../rendering-spec.md`（标题字号/段落/字体）；未知项标 `TODO: <说明>`，不要编造。
 
 ## 1. 引言 / Introduction
 

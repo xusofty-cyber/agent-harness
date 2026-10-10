@@ -1,17 +1,23 @@
-<!--
-模板：项目进展报告 / 项目总结报告 / 试运行报告 / 评审报告 / 会议纪要
-阶段：管理 Management
-覆盖文档：项目进展报告、项目总结报告、试运行报告、评审报告、会议纪要
-渲染规范：参见 ../rendering-spec.md（标题字号/段落/字体）
-填写指引：[方括号] 为占位符，填写时替换；未知项标 TODO: <说明>，不要编造。
--->
+---
+id: REP-XXX
+title: "[模块/系统名称] 项目报告"
+type: guide
+status: draft
+modules:
+  - "src/your_module/**"
+depends_on:
+  - "docs/guides/PLAN-XXX.md"
+version: 0.1.0
+last_verified_commit: HEAD
+---
 
 # 项目报告
 # Project Report
 
 > **文档类型**：项目进展报告 / 项目总结报告 / 试运行报告 / 评审报告 / 会议纪要  
 > **适用阶段**：管理 Management  
-> **覆盖**：项目进展报告、项目总结报告、试运行报告、评审报告、会议纪要
+> **覆盖**：项目进展报告、项目总结报告、试运行报告、评审报告、会议纪要  
+> **渲染规范**：参见 `../rendering-spec.md`（标题字号/段落/字体）；未知项标 `TODO: <说明>`，不要编造。
 
 ## 1. 基本信息 / Basic Info
 

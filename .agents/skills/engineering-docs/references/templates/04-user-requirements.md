@@ -1,17 +1,22 @@
-<!--
-模板：用户需求说明书
-阶段：需求 Requirements
-覆盖文档：用户需求说明书
-渲染规范：参见 ../rendering-spec.md（标题字号/段落/字体）
-填写指引：[方括号] 为占位符，填写时替换；未知项标 TODO: <说明>，不要编造。
--->
+---
+id: URS-XXX
+title: "[模块/系统名称] 用户需求说明书"
+type: specs
+status: draft
+modules:
+  - "src/your_module/**"
+depends_on: []
+version: 0.1.0
+last_verified_commit: HEAD
+---
 
 # 用户需求说明书
 # User Requirements Specification
 
 > **文档类型**：用户需求说明书  
 > **适用阶段**：需求 Requirements  
-> **覆盖**：用户需求说明书
+> **覆盖**：用户需求说明书  
+> **渲染规范**：参见 `../rendering-spec.md`（标题字号/段落/字体）；未知项标 `TODO: <说明>`，不要编造。
 
 ## 1. 引言 / Introduction
 

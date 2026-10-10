@@ -1,17 +1,23 @@
-<!--
-模板：项目计划
-阶段：管理 Management
-覆盖文档：项目计划
-渲染规范：参见 ../rendering-spec.md（标题字号/段落/字体）
-填写指引：[方括号] 为占位符，填写时替换；未知项标 TODO: <说明>，不要编造。
--->
+---
+id: PLAN-XXX
+title: "[模块/系统名称] 项目计划"
+type: guide
+status: draft
+modules:
+  - "src/your_module/**"
+depends_on:
+  - "docs/specs/SRS-XXX.md"
+version: 0.1.0
+last_verified_commit: HEAD
+---
 
 # 项目计划
 # Project Plan
 
 > **文档类型**：项目计划  
 > **适用阶段**：管理 Management  
-> **覆盖**：项目计划
+> **覆盖**：项目计划  
+> **渲染规范**：参见 `../rendering-spec.md`（标题字号/段落/字体）；未知项标 `TODO: <说明>`，不要编造。
 
 ## 1. 项目目标 / Objectives
 

@@ -13,6 +13,7 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   notes in `docs/internal/` intentionally unchanged. GitHub repo rename
   (`xusofty-cyber/agent-harness`) to be done via Settings; old URLs redirect
   automatically.
+- **Native YAML Frontmatter in 15 `engineering-docs` templates**: Upgraded headers of all 15 Markdown template files in `.agents/skills/engineering-docs/references/templates/` (and generator `gen_templates.py`) to native YAML Frontmatter blocks with schema metadata (`id`, `title`, `type`, `status`, `modules`, `depends_on`, `version`, `last_verified_commit`). Ensures any AI agent copying templates defaults to complete traceability metadata for downstream `living-documentation` and `doc-impact.py` analysis.
 
 ### Fixed
 - **Windows PowerShell BOM encoding**: Saved all PowerShell scripts (`run-pipeline.ps1`,

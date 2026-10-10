@@ -1,17 +1,23 @@
-<!--
-模板：接口说明书 / 数据库设计说明书
-阶段：设计 Design
-覆盖文档：接口说明书、数据库设计说明书
-渲染规范：参见 ../rendering-spec.md（标题字号/段落/字体）
-填写指引：[方括号] 为占位符，填写时替换；未知项标 TODO: <说明>，不要编造。
--->
+---
+id: REF-IF-XXX
+title: "[模块/系统名称] 接口与数据库设计说明"
+type: reference
+status: draft
+modules:
+  - "src/your_module/**"
+depends_on:
+  - "docs/architecture/HLD-XXX.md"
+version: 0.1.0
+last_verified_commit: HEAD
+---
 
 # 接口与数据库设计说明
 # Interface & Database Specification
 
 > **文档类型**：接口说明书 / 数据库设计说明书  
 > **适用阶段**：设计 Design  
-> **覆盖**：接口说明书、数据库设计说明书
+> **覆盖**：接口说明书、数据库设计说明书  
+> **渲染规范**：参见 `../rendering-spec.md`（标题字号/段落/字体）；未知项标 `TODO: <说明>`，不要编造。
 
 ## 1. 接口总览 / Interface Overview
 

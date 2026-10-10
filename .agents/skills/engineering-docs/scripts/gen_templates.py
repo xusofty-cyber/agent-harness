@@ -4,12 +4,13 @@ from pathlib import Path
 
 OUT = Path(__file__).parent.parent / "references" / "templates"
 
-# Each template: (filename, title_cn, title_en, doc_name, phase, covers, sections)
+# Each template: (filename, title_cn, title_en, doc_name, phase, covers, doc_id, doc_type, depends_on, sections)
 # sections: list of (cn_title, en_title, guidance_cn)
 TEMPLATES = [
     ("01-project-proposal.md", "项目立项建议书", "Project Proposal",
      "项目立项建议书 / 立项论证报告", "立项 Initiation",
      "项目立项建议书、立项论证报告",
+     "PROP-XXX", "specs", [],
      [
          ("项目背景", "Background", "项目提出的背景、政策依据、市场或业务驱动因素。"),
          ("问题与机会", "Problem & Opportunity", "当前存在的问题、痛点，立项要抓住的机会。"),
@@ -24,6 +25,7 @@ TEMPLATES = [
     ("02-project-approval.md", "项目立项审批文件", "Project Approval Documents",
      "立项评审报告 / 立项审批报告 / 会签评审表", "立项 Initiation",
      "项目立项评审报告、项目立项审批报告、会签评审表",
+     "APPR-XXX", "specs", ["docs/specs/PROP-XXX.md"],
      [
          ("评审基本信息", "Review Info", "评审时间、地点、主持人、参会人员、评审对象。"),
          ("评审材料清单", "Materials Reviewed", "本次评审所依据的材料列表。"),
@@ -35,6 +37,7 @@ TEMPLATES = [
     ("03-project-task-book.md", "项目任务书", "Project Task Book",
      "项目任务书 / 项目工作任务书", "立项 Initiation",
      "项目任务书、项目工作任务书",
+     "TASK-XXX", "specs", ["docs/specs/APPR-XXX.md"],
      [
          ("任务背景", "Background", "任务来源、上级要求或立项依据。"),
          ("任务目标", "Objectives", "要达成的目标，量化、可验收。"),
@@ -47,6 +50,7 @@ TEMPLATES = [
     ("04-user-requirements.md", "用户需求说明书", "User Requirements Specification",
      "用户需求说明书", "需求 Requirements",
      "用户需求说明书",
+     "URS-XXX", "specs", [],
      [
          ("引言", "Introduction", "目的、范围、读者、术语。"),
          ("用户概况", "User Profile", "用户角色、数量、使用场景。"),
@@ -59,6 +63,7 @@ TEMPLATES = [
     ("05-product-spec.md", "产品规格说明书", "Product Specification",
      "产品规格说明书", "需求 Requirements",
      "产品规格说明书",
+     "PRD-XXX", "specs", ["docs/specs/URS-XXX.md"],
      [
          ("产品概述", "Overview", "产品定位、目标用户、价值主张。"),
          ("产品架构", "Product Architecture", "功能模块划分、模块关系图。"),
@@ -71,6 +76,7 @@ TEMPLATES = [
     ("06-srs.md", "软件需求规格说明", "Software Requirements Specification (SRS)",
      "软件需求规格说明 / 开发需求细化表", "需求 Requirements",
      "软件需求规格说明、开发需求细化表",
+     "SRS-XXX", "specs", ["docs/specs/PRD-XXX.md"],
      [
          ("引言", "Introduction", "目的、范围、定义、参考资料。"),
          ("总体描述", "Overall Description", "产品视角、用户特征、约束、假设。"),
@@ -84,6 +90,7 @@ TEMPLATES = [
     ("07-solution-design.md", "方案设计报告", "Solution Design Report",
      "方案设计报告", "设计 Design",
      "方案设计报告",
+     "ARCH-SOL-XXX", "architecture", ["docs/specs/SRS-XXX.md"],
      [
          ("设计目标", "Design Goals", "方案要解决的问题、达成的目标。"),
          ("设计原则", "Principles", "遵循的设计原则与约束。"),
@@ -96,6 +103,7 @@ TEMPLATES = [
     ("08-hld.md", "软件概要设计说明书", "High-Level Design (HLD)",
      "软件概要设计说明书", "设计 Design",
      "软件概要设计说明书",
+     "HLD-XXX", "architecture", ["docs/specs/SRS-XXX.md"],
      [
          ("概述", "Overview", "目的、范围、设计约束。"),
          ("架构目标", "Architecture Goals", "质量属性目标：性能、可扩展性、安全性等。"),
@@ -109,6 +117,7 @@ TEMPLATES = [
     ("09-lld.md", "软件详细设计说明书", "Low-Level Design (LLD)",
      "软件详细设计说明书", "设计 Design",
      "软件详细设计说明书",
+     "LLD-XXX", "architecture", ["docs/architecture/HLD-XXX.md"],
      [
          ("概述", "Overview", "目的、范围、引用 HLD 章节。"),
          ("模块划分", "Module Breakdown", "模块列表、职责、对应 HLD 子系统。"),
@@ -120,6 +129,7 @@ TEMPLATES = [
     ("10-interface-spec.md", "接口与数据库设计说明", "Interface & Database Specification",
      "接口说明书 / 数据库设计说明书", "设计 Design",
      "接口说明书、数据库设计说明书",
+     "REF-IF-XXX", "reference", ["docs/architecture/HLD-XXX.md"],
      [
          ("接口总览", "Interface Overview", "接口清单、版本、协议。"),
          ("接口详细定义", "Interface Details", "每个接口：路径/方法、请求参数表、响应结构、错误码、示例。"),
@@ -131,6 +141,7 @@ TEMPLATES = [
     ("11-project-plan.md", "项目计划", "Project Plan",
      "项目计划", "管理 Management",
      "项目计划",
+     "PLAN-XXX", "guide", ["docs/specs/SRS-XXX.md"],
      [
          ("项目目标", "Objectives", "范围、成功标准。"),
          ("工作分解", "WBS", "工作包列表、编号、负责人。"),
@@ -143,6 +154,7 @@ TEMPLATES = [
     ("12-project-report.md", "项目报告", "Project Report",
      "项目进展报告 / 项目总结报告 / 试运行报告 / 评审报告 / 会议纪要", "管理 Management",
      "项目进展报告、项目总结报告、试运行报告、评审报告、会议纪要",
+     "REP-XXX", "guide", ["docs/guides/PLAN-XXX.md"],
      [
          ("基本信息", "Basic Info", "报告类型、报告期、编写人、日期。"),
          ("总体状态", "Status Overview", "🟢/🟡/🔴 总体状态一句话。"),
@@ -155,6 +167,7 @@ TEMPLATES = [
     ("13-test-plan.md", "软件测试计划", "Software Test Plan",
      "软件集成测试计划 / 软件系统测试计划", "测试 Testing",
      "软件集成测试计划、软件系统测试计划",
+     "TEST-PLAN-XXX", "reference", ["docs/specs/SRS-XXX.md"],
      [
          ("测试目标", "Objectives", "测试要验证什么。"),
          ("测试范围", "Scope", "测试/不测试的功能列表。"),
@@ -168,6 +181,7 @@ TEMPLATES = [
     ("14-test-report.md", "软件测试报告", "Software Test Report",
      "软件单元测试报告 / 集成测试报告 / 系统测试报告 / 性能测试报告 / 软件测试用例", "测试 Testing",
      "软件单元测试报告、软件集成测试报告、软件系统测试报告、软件性能测试报告、软件测试用例",
+     "TEST-REP-XXX", "reference", ["docs/reference/TEST-PLAN-XXX.md"],
      [
          ("测试概述", "Overview", "测试对象版本、测试时间、测试人员。"),
          ("测试环境", "Environment", "实际测试环境描述。"),
@@ -180,6 +194,7 @@ TEMPLATES = [
     ("15-delivery-docs.md", "软件交付文档", "Software Delivery Documents",
      "软件版本说明 / 软件用户手册", "交付 Delivery",
      "软件版本说明、软件用户手册",
+     "GUIDE-DELIVERY-XXX", "guide", ["docs/reference/TEST-REP-XXX.md"],
      [
          ("版本信息", "Version Info", "版本号、发布日期、适用范围。"),
          ("更新内容", "Changelog", "新增/优化/修复列表。"),
@@ -191,24 +206,41 @@ TEMPLATES = [
      ]),
 ]
 
-HEADER = """<!--
-模板：{doc_name}
-阶段：{phase}
-覆盖文档：{covers}
-渲染规范：参见 ../rendering-spec.md（标题字号/段落/字体）
-填写指引：[方括号] 为占位符，填写时替换；未知项标 TODO: <说明>，不要编造。
--->
+HEADER = """---
+id: {doc_id}
+title: "[模块/系统名称] {title_cn}"
+type: {doc_type}
+status: draft
+modules:
+  - "src/your_module/**"
+depends_on:{depends_on_block}
+version: 0.1.0
+last_verified_commit: HEAD
+---
 
 # {title_cn}
 # {title_en}
 """
 
-for fname, t_cn, t_en, doc_name, phase, covers, sections in TEMPLATES:
-    lines = [HEADER.format(title_cn=t_cn, title_en=t_en, doc_name=doc_name,
-                           phase=phase, covers=covers)]
+for fname, t_cn, t_en, doc_name, phase, covers, doc_id, doc_type, deps, sections in TEMPLATES:
+    if deps:
+        deps_block = "\n" + "\n".join(f'  - "{d}"' for d in deps)
+    else:
+        deps_block = " []"
+
+    header_text = HEADER.format(
+        doc_id=doc_id,
+        title_cn=t_cn,
+        title_en=t_en,
+        doc_type=doc_type,
+        depends_on_block=deps_block,
+    )
+    lines = [header_text.strip()]
+    lines.append("")
     lines.append(f"> **文档类型**：{doc_name}  ")
     lines.append(f"> **适用阶段**：{phase}  ")
-    lines.append(f"> **覆盖**：{covers}")
+    lines.append(f"> **覆盖**：{covers}  ")
+    lines.append("> **渲染规范**：参见 `../rendering-spec.md`（标题字号/段落/字体）；未知项标 `TODO: <说明>`，不要编造。")
     lines.append("")
     for i, (cn, en, guide) in enumerate(sections, 1):
         lines.append(f"## {i}. {cn} / {en}")

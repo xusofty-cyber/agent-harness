@@ -103,10 +103,10 @@ check("version:matches-changelog",
 # type must match the containing tier directory. Missing tier dirs are skipped
 # (scaffold is created by deploy scripts in target projects, not in this repo).
 DOC_TIERS = ("specs", "architecture", "reference", "guides", "adr")
-DOC_TYPES = {"specs", "architecture", "reference", "guide", "adr"}
+DOC_TYPES = {"specs", "spec", "architecture", "reference", "guide", "guides", "adr"}
 DOC_STATUS = {"draft", "active", "deprecated"}
-TIER_TYPE = {"specs": "specs", "architecture": "architecture",
-             "reference": "reference", "guides": "guide", "adr": "adr"}
+TIER_TYPES = {"specs": {"specs", "spec"}, "architecture": {"architecture"},
+              "reference": {"reference"}, "guides": {"guide", "guides"}, "adr": {"adr"}}
 
 def _parse_simple_frontmatter(text):
     """Minimal YAML-subset parser for flat key: value, key: [a, b],
@@ -153,8 +153,8 @@ for tier in DOC_TIERS:
               fm.get("type") in DOC_TYPES,
               f"type {fm.get('type')!r} not in {sorted(DOC_TYPES)}")
         check(f"doc:{rel}:type-tier-match",
-              fm.get("type") == TIER_TYPE[tier],
-              f"type {fm.get('type')!r} != tier {tier!r} (expected {TIER_TYPE[tier]!r})")
+              fm.get("type") in TIER_TYPES[tier],
+              f"type {fm.get('type')!r} != tier {tier!r} (expected one of {sorted(TIER_TYPES[tier])!r})")
         check(f"doc:{rel}:status-valid",
               fm.get("status") in DOC_STATUS,
               f"status {fm.get('status')!r} not in {sorted(DOC_STATUS)}")

@@ -50,7 +50,7 @@ license: MIT
 3. **访谈**：向用户提问填补 `[占位符]`；未知项标 `TODO: <说明>`，**绝不编造**。
 4. **追溯与生成**：
    - 按模板章节输出，严格遵循 `references/rendering-spec.md` 的格式规范（章节编号 `1.` `1.1`、表格标题置顶等）。
-   - 若输出到 `docs/{specs,architecture,reference,guides,adr}/` 活体文档四阶目录，在文档最顶部附带 YAML Frontmatter（声明 `id`, `title`, `type`, `status`, `modules`），以便 `doc-impact.py` 自动分析代码与文档的关联影响。
+   - **原生 Frontmatter**：所有 15 个模板最顶部已原生内置标准 YAML Frontmatter（自带 `id`, `title`, `type`, `status`, `modules`, `depends_on`, `version`, `last_verified_commit`）。复制模板时只需按需替换 `[占位符]`，即可与 `living-documentation` 的 `doc-impact.py` 及变更门禁无缝联动，彻底杜绝元数据漏写。
 
 ## 需求纪律（writing docs 时强制）
 

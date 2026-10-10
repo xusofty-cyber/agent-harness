@@ -1,17 +1,22 @@
-<!--
-模板：项目立项建议书 / 立项论证报告
-阶段：立项 Initiation
-覆盖文档：项目立项建议书、立项论证报告
-渲染规范：参见 ../rendering-spec.md（标题字号/段落/字体）
-填写指引：[方括号] 为占位符，填写时替换；未知项标 TODO: <说明>，不要编造。
--->
+---
+id: PROP-XXX
+title: "[模块/系统名称] 项目立项建议书"
+type: specs
+status: draft
+modules:
+  - "src/your_module/**"
+depends_on: []
+version: 0.1.0
+last_verified_commit: HEAD
+---
 
 # 项目立项建议书
 # Project Proposal
 
 > **文档类型**：项目立项建议书 / 立项论证报告  
 > **适用阶段**：立项 Initiation  
-> **覆盖**：项目立项建议书、立项论证报告
+> **覆盖**：项目立项建议书、立项论证报告  
+> **渲染规范**：参见 `../rendering-spec.md`（标题字号/段落/字体）；未知项标 `TODO: <说明>`，不要编造。
 
 ## 1. 项目背景 / Background
 

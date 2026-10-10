@@ -1,17 +1,23 @@
-<!--
-模板：立项评审报告 / 立项审批报告 / 会签评审表
-阶段：立项 Initiation
-覆盖文档：项目立项评审报告、项目立项审批报告、会签评审表
-渲染规范：参见 ../rendering-spec.md（标题字号/段落/字体）
-填写指引：[方括号] 为占位符，填写时替换；未知项标 TODO: <说明>，不要编造。
--->
+---
+id: APPR-XXX
+title: "[模块/系统名称] 项目立项审批文件"
+type: specs
+status: draft
+modules:
+  - "src/your_module/**"
+depends_on:
+  - "docs/specs/PROP-XXX.md"
+version: 0.1.0
+last_verified_commit: HEAD
+---
 
 # 项目立项审批文件
 # Project Approval Documents
 
 > **文档类型**：立项评审报告 / 立项审批报告 / 会签评审表  
 > **适用阶段**：立项 Initiation  
-> **覆盖**：项目立项评审报告、项目立项审批报告、会签评审表
+> **覆盖**：项目立项评审报告、项目立项审批报告、会签评审表  
+> **渲染规范**：参见 `../rendering-spec.md`（标题字号/段落/字体）；未知项标 `TODO: <说明>`，不要编造。
 
 ## 1. 评审基本信息 / Review Info
 
