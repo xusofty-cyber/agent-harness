@@ -158,6 +158,48 @@ def check_skill(name: str, meta: dict) -> dict:
     return result
 
 
+def local_skills(lock: dict, only: str | None = None) -> list[tuple[str, dict]]:
+    """Return (name, meta) for locally-authored skills (sourceType: local).
+
+    These have no upstream to sync from, but their integrity can still be
+    verified against the computedHash recorded in skills-lock.json.
+    """
+    out = []
+    for name, meta in lock.get("skills", {}).items():
+        if only and name != only:
+            continue
+        if meta.get("sourceType") != "local":
+            continue
+        local_file = SKILLS_DIR / name / "SKILL.md"
+        if not local_file.is_file():
+            continue
+        out.append((name, meta))
+    return out
+
+
+def check_local_skill(name: str, meta: dict) -> dict:
+    """Verify a locally-authored skill against its locked hash.
+
+    Returns status "in-sync" if the local SKILL.md matches computedHash,
+    "tampered-local" if it differs, "missing-hash" if the lock has no hash.
+    """
+    local_file = SKILLS_DIR / name / "SKILL.md"
+    result: dict = {"skill": name, "source": meta.get("source", "local"),
+                    "path": meta.get("skillPath", "")}
+    expected_hash = meta.get("computedHash")
+    if not expected_hash:
+        result["status"] = "missing-hash"
+        return result
+    local_hash = sha256_norm(local_file.read_bytes())
+    result["local_sha256"] = local_hash[:12]
+    result["expected_sha256"] = expected_hash[:12]
+    if local_hash == expected_hash:
+        result["status"] = "in-sync"
+    else:
+        result["status"] = "tampered-local"
+    return result
+
+
 def apply_update(name: str, meta: dict, upstream: bytes) -> None:
     local_file = SKILLS_DIR / name / "SKILL.md"
     local_file.write_bytes(upstream)
@@ -220,8 +262,8 @@ def main() -> int:
 
     skills = external_skills(lock, args.skill)
     if args.skill and not skills:
-        print(f"Unknown or non-external skill: {args.skill}", file=sys.stderr)
-        return 0
+        # Fall through to local-skill check before declaring unknown
+        pass
 
     results = []
     for name, meta in skills:
@@ -233,6 +275,15 @@ def main() -> int:
             r.pop("upstream_bytes", None)
         results.append(r)
 
+    # Integrity check for locally-authored skills (no upstream to sync from,
+    # but tampering is still detectable via the locked hash).
+    for name, meta in local_skills(lock, args.skill):
+        results.append(check_local_skill(name, meta))
+
+    if args.skill and not results:
+        print(f"Unknown skill: {args.skill}", file=sys.stderr)
+        return 0
+
     summary = {}
     for r in results:
         summary[r["status"]] = summary.get(r["status"], 0) + 1
@@ -242,7 +293,8 @@ def main() -> int:
                          indent=2, ensure_ascii=False))
     else:
         icons = {"in-sync": "🟢", "outdated": "🟡", "updated": "🔵",
-                 "fetch-failed": "⚪", "missing-local": "🔴", "tampered": "🚨"}
+                 "fetch-failed": "⚪", "missing-local": "🔴", "tampered": "🚨",
+                 "tampered-local": "🚨", "missing-hash": "⚠️"}
         print(f"Checked {len(results)} external skills: " +
               ", ".join(f"{k}={v}" for k, v in sorted(summary.items())))
         print()

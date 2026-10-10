@@ -25,7 +25,7 @@
       "sourceType": "github",
       "package": "@rpamis/comet",
       "repository": "https://github.com/rpamis/comet",
-      "computedHash": "a3944ee6af2b7e7f3ebbd5cf604f4a5821c3da8d3e0e14175771fdd304c4f9f6"
+      "computedHash": "997e73d128987cf959c8910cbfd228106034324629c6ee9e5c0ca0af7b29ea33"
     },
     "cross-tool-memory": {
       "source": "./agent-harness (authored in-repo)",

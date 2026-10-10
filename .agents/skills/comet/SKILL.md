@@ -62,8 +62,8 @@ Comet 是面向软件工程的智能体工作流执行引擎与评估框架（`@
 | :--- | :--- | :--- |
 | **Open / Shape** | `docs/specs/` (需求层) | `04-user-requirements.md` (URS), `05-product-spec.md` (PRD), `06-srs.md` (SRS) |
 | **Design** | `docs/architecture/` (架构层) | `07-solution-design.md`, `08-hld.md` (HLD), `09-lld.md` (LLD), `10-interface-spec.md` |
-| **Build** | `docs/reference/` (参考层) & `docs/management/` | `10-interface-spec.md` (接口/DB定义), `11-project-plan.md`, `12-project-report.md` |
-| **Verify** | `docs/reference/` 或 `docs/tests/` | `13-test-plan.md` (测试计划), `14-test-report.md` (测试报告/用例) |
+| **Build** | `docs/reference/` (参考层) | `10-interface-spec.md` (接口/DB定义), `11-project-plan.md`, `12-project-report.md` |
+| **Verify** | `docs/reference/` (参考层) | `13-test-plan.md` (测试计划), `14-test-report.md` (测试报告/用例) |
 | **Archive** | `docs/guides/` (指南层) | `15-delivery-docs.md` (交付版本说明/用户手册) |
 
 > 模板最顶部均已原生内置标准 YAML Frontmatter（`id`, `title`, `type`, `status`, `modules`, `depends_on`），与 `tools/doc-impact.py` 双向关联分析完全兼容。

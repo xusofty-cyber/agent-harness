@@ -89,6 +89,15 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   paragraph styles) for consistent output across agents. Optional pandoc
   Word-rendering guidance included.
 
+- **Review follow-ups** (from 4-expert audit of 65f0446):
+  - `sync-skills.py`: local skill integrity check (`tampered-local` status).
+    Previously only github skills were verified; the 5 local skills had no
+    tamper detection despite having locked hashes.
+  - `comet/SKILL.md`: converged remaining `docs/management/` / `docs/tests/`
+    references to the 4-tier model (`docs/guides/` / `docs/reference/`).
+  - CI: install PyYAML (enables comet.config.yaml validation); run
+    `tests/sync_skills_test.py`.
+
 ### Fixed
 - **Markdownlint CI blocker (P0)**: Unified heading in all 15 engineering document templates from dual H1s to single bilingual `# {title_cn} / {title_en}` (MD025) and added language identifier to `SKILL.md` decision tree fenced code block (MD040), eliminating 31 markdownlint errors in CI.
 - **Traceability path alignment (P1-1)**: Converged recommended document output paths in `engineering-docs/SKILL.md` and `comet/SKILL.md` to the standard 4-tier living-doc hierarchy (`docs/{specs,architecture,reference,guides}/`), ensuring all generated docs are discovered by `doc-impact.py`.
