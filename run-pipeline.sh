@@ -106,9 +106,9 @@ prompt_select() {
     while true; do
         for i in "${!labels[@]}"; do
             if [ "$i" -eq "$cur" ]; then
-                printf "${CYAN}> ● %s${NC}\n" "${labels[$i]}"
+                printf "\r\033[K${CYAN}> ● %s${NC}\n" "${labels[$i]}"
             else
-                printf "  ${DIM}○${NC} %s\n" "${labels[$i]}"
+                printf "\r\033[K  ${DIM}○${NC} %s\n" "${labels[$i]}"
             fi
         done
 
@@ -198,17 +198,18 @@ prompt_multiselect() {
 
     while true; do
         for i in "${!labels[@]}"; do
-            local mark="[ ]"
-            local color="${DIM}"
-            if [ "${checked[$i]}" -eq 1 ]; then
-                mark="[x]"
-                color="${GREEN}"
-            fi
-
             if [ "$i" -eq "$cur" ]; then
-                printf "${CYAN}> %s %s${NC}\n" "$mark" "${labels[$i]}"
+                if [ "${checked[$i]}" -eq 1 ]; then
+                    printf "\r\033[K${CYAN}> ${GREEN}[x]${CYAN} %s${NC}\n" "${labels[$i]}"
+                else
+                    printf "\r\033[K${CYAN}> ${DIM}[ ]${CYAN} %s${NC}\n" "${labels[$i]}"
+                fi
             else
-                printf "  %s%s %s${NC}\n" "$color" "$mark" "${labels[$i]}"
+                if [ "${checked[$i]}" -eq 1 ]; then
+                    printf "\r\033[K  ${GREEN}[x]${NC} %s\n" "${labels[$i]}"
+                else
+                    printf "\r\033[K  ${DIM}[ ]${NC} %s\n" "${labels[$i]}"
+                fi
             fi
         done
 

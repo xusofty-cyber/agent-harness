@@ -174,7 +174,7 @@ prompt_select() {
                 pointer="\033[36m> \033[0m"
                 symbol="\033[36m●\033[0m "
             fi
-            echo -e "${pointer}${symbol}${labels[$i]}"
+            echo -e "\r\033[K${pointer}${symbol}${labels[$i]}"
         done
 
         IFS= read -rsn1 key
@@ -273,7 +273,7 @@ prompt_multiselect() {
             if [ "${checked[$i]}" -eq 1 ]; then
                 box="\033[32m◉\033[0m "
             fi
-            echo -e "${pointer}${box}${labels[$i]}"
+            echo -e "\r\033[K${pointer}${box}${labels[$i]}"
         done
 
         IFS= read -rsn1 key
