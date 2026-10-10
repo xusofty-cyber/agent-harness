@@ -1,4 +1,4 @@
-# ==============================================================================
+﻿# ==============================================================================
 # deploy-agents.ps1
 # Platforms: Windows (PowerShell 5.1 / PowerShell 7+)
 # Purpose: One-click deploy & online update AI Agents Harness spec, rules & skills
