@@ -72,6 +72,7 @@ To avoid context explosion, fine-grained rules and skills reside in `.agents/rul
 | **Verbose Output / Batch Test Runs** | `token-discipline.md` + optional `rtk` | RTK hook rewrites supported commands when configured; else use native concise flags | Do not assume automatic rewrites; save long logs locally and report only relevant summaries |
 | **Token Exhaustion / Concise Output** | `Global AGENTS.md` + optional `caveman` | Enable on-demand when host tool loads skill | Concise expression while retaining safety warnings, necessary context, and technical precision |
 | **Documentation / Architecture Sync** | `engineering-spec.md` + optional `living-documentation` | `/living-documentation` / Arch and reference docs sync | Sync four-tier docs per L0/L1/L2 thresholds; maintain bi-directional Frontmatter traceability |
+| **Formal R&D Docs / Templated Output** | `engineering-docs` | When writing PRD/SRS/HLD/LLD/test plans etc. | Pick template via 31→15 decision tree; follow rendering-spec.md (heading sizes/fonts/paragraphs) |
 | **Code Review / Pre-Merge Quality Gate** | `open-code-review` + `requesting-code-review` | Feature complete or prior to merging | Rule-first, line-anchored, full-coverage; use Tier A via `ocr` CLI if present, else Tier B |
 
 ---
