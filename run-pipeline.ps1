@@ -657,8 +657,8 @@ if ($stageMemory) {
             if ($doCreate) {
                 $projName = Split-Path $targetAbs -Leaf
                 $raw = Get-Content $examplePath -Raw
-                $raw = $raw -replace 'replace-with-workspace-id', "workspace-$projName"
-                $raw = $raw -replace 'replace-with-project-id', $projName
+                $raw = $raw -replace 'replace-with-workspace-(name|id)', "workspace-$projName"
+                $raw = $raw -replace 'replace-with-project-(name|id)', $projName
                 Set-Content -Path $tomlPath -Value $raw -Encoding UTF8
                 Write-Host "✔ 已生成 $tomlPath" -ForegroundColor Green
             } else {

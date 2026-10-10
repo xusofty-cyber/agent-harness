@@ -96,7 +96,7 @@ prompt_select() {
 
     local old_stty
     old_stty="$(stty -g 2>/dev/null || true)"
-    trap 'stty "$old_stty" 2>/dev/null; printf "\033[?25h\n"; exit 1' INT TERM
+    trap 'stty "${old_stty:-}" 2>/dev/null || true; printf "\033[?25h\n"; trap - INT TERM; exit 1' INT TERM
 
     stty -echo -icanon min 1 time 0 2>/dev/null || true
     printf "\033[?25l"
@@ -143,6 +143,7 @@ prompt_select() {
 
     stty "$old_stty" 2>/dev/null || true
     printf "\033[?25h\n"
+    trap - INT TERM
     SELECTED_VALUE="${values[$cur]}"
 }
 
@@ -189,7 +190,7 @@ prompt_multiselect() {
 
     local old_stty
     old_stty="$(stty -g 2>/dev/null || true)"
-    trap 'stty "$old_stty" 2>/dev/null; printf "\033[?25h\n"; exit 1' INT TERM
+    trap 'stty "${old_stty:-}" 2>/dev/null || true; printf "\033[?25h\n"; trap - INT TERM; exit 1' INT TERM
 
     stty -echo -icanon min 1 time 0 2>/dev/null || true
     printf "\033[?25l"
@@ -260,6 +261,7 @@ prompt_multiselect() {
 
     stty "$old_stty" 2>/dev/null || true
     printf "\033[?25h\n"
+    trap - INT TERM
 
     SELECTED_VALUES=()
     for i in "${!values[@]}"; do
@@ -755,7 +757,7 @@ if [ "$STAGE_MEMORY" = true ]; then
 
                 if [ "$do_create" = true ]; then
                     proj_name="$(basename "$TARGET_ABS")"
-                    sed "s/replace-with-workspace-id/workspace-$proj_name/g; s/replace-with-project-id/$proj_name/g" \
+                    sed -E "s/replace-with-workspace-(name|id)/workspace-$proj_name/g; s/replace-with-project-(name|id)/$proj_name/g" \
                         "$REPO_ROOT/.ai-memory.toml.example" > "$toml_path"
                     echo -e "${GREEN}✔ 已生成 $toml_path${NC}"
                 else
