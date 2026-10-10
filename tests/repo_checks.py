@@ -359,6 +359,14 @@ orphan_lock = sorted(lock_skills - dir_skills - META_ENTRIES)
 check("lock:no-orphans", not orphan_lock,
       f"lock entries without skill dir: {orphan_lock}")
 
+# Every skill must declare a domain (namespace grouping for scoped loading).
+# Valid domains: openspec | superpowers | local | document | integration | utility
+SKILL_DOMAINS = {"openspec", "superpowers", "local", "document", "integration", "utility"}
+for name, meta in sorted(lock_data.get("skills", {}).items()):
+    domain = meta.get("domain")
+    check(f"lock-domain:{name}", domain in SKILL_DOMAINS,
+          f"skill {name} has invalid/missing domain: {domain!r}")
+
 # Verify computedHash matches actual local file content for all locked skills
 for name, meta in sorted(lock_data.get("skills", {}).items()):
     expected_hash = meta.get("computedHash")
@@ -370,6 +378,56 @@ for name, meta in sorted(lock_data.get("skills", {}).items()):
     actual_hash = hashlib.sha256(skill_file.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
     check(f"lock-hash:{name}", actual_hash == expected_hash,
           f"computedHash mismatch for {name}: lock={expected_hash[:8]}, disk={actual_hash[:8]}")
+
+# --- 5b. skills-lock history consistency ---
+# Guards against silent lock edits: if a skill's computedHash changed vs the
+# base ref, the corresponding SKILL.md must also have changed in the same diff.
+# A hash-only change means someone edited the lock to cover a file state that
+# was never reviewed — the git history is the audit trail, so force them together.
+import subprocess as _sp
+import os as _os
+
+def _git_out(args):
+    try:
+        r = _sp.run(["git"] + args, capture_output=True, text=True,
+                    cwd=str(ROOT), timeout=30)
+        return r.stdout.strip() if r.returncode == 0 else None
+    except Exception:
+        return None
+
+_lock_base = _os.environ.get("LOCK_CHECK_BASE")
+if not _lock_base:
+    # Prefer origin/main, fall back to previous commit; skip if neither exists.
+    for _cand in ("origin/main", "HEAD~1"):
+        if _git_out(["rev-parse", "--verify", "--quiet", _cand]):
+            _lock_base = _cand
+            break
+
+if _lock_base:
+    _prev_lock_raw = _git_out(["show", f"{_lock_base}:skills-lock.json"])
+    _changed_raw = _git_out(["diff", "--name-only", f"{_lock_base}...HEAD"]) or ""
+    _uncommitted = _git_out(["diff", "--name-only"]) or ""
+    _staged = _git_out(["diff", "--cached", "--name-only"]) or ""
+    _changed_files = set(_changed_raw.split()) | set(_uncommitted.split()) | set(_staged.split())
+    _changed_files.discard("")
+    if _prev_lock_raw:
+        try:
+            _prev_skills = json.loads(_prev_lock_raw).get("skills", {})
+        except Exception:
+            _prev_skills = None
+        if _prev_skills is not None:
+            _cur_skills = lock_data.get("skills", {})
+            for _name in sorted(set(_cur_skills) | set(_prev_skills)):
+                _cur_h = (_cur_skills.get(_name) or {}).get("computedHash")
+                _prev_h = (_prev_skills.get(_name) or {}).get("computedHash")
+                if _cur_h and _prev_h and _cur_h != _prev_h:
+                    _skill_path = f".agents/skills/{_name}/SKILL.md"
+                    check(f"lock-history:{_name}",
+                          _skill_path in _changed_files,
+                          f"computedHash for {_name} changed vs {_lock_base} but "
+                          f"{_skill_path} did not — silent lock edit?")
+else:
+    print("  [warn] lock-history: no base ref found, check skipped")
 
 # --- 6. Multilingual doc pairs: structural parity ---
 # Each translated guide must keep the same ## section count as its source,

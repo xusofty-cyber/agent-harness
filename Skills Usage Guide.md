@@ -20,6 +20,19 @@ If Claude doesn't pick up a skill when you expect it, just name it explicitly.
 
 ## Skill Catalog by Category
 
+> **Skill Domains** (namespaces for scoped loading): every skill belongs to one domain,
+> recorded in `skills-lock.json` and enforced by CI. When building agents that only need
+> a subset, load by domain instead of the full catalog.
+>
+> | Domain | Skills | Purpose |
+> |---|---|---|
+> | `openspec` | 17 | OpenSpec spec-driven workflow family |
+> | `superpowers` | 16 | obra/superpowers methodology family |
+> | `local` | 5 | In-repo authored (engineering-docs, living-documentation, open-code-review, option-review, cross-tool-memory) |
+> | `document` | 2 | Document processing (docx, pdf) |
+> | `integration` | 2 | External tool integrations (comet, codegraph) |
+> | `utility` | 3 | Single-purpose utilities (caveman, ponytail, rtk) |
+
 ### 1. Workflow & Process Control
 
 | Skill | Trigger | Slash | What It Does | When to Use |

@@ -109,6 +109,15 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   template format hints (table vs headings guidance); one-click Word template
   fetch script (`scripts/fetch-word-template.sh`).
 
+- **Strategic hardening**:
+  - `lock-history` consistency check (5b): CI fails if a skill's `computedHash`
+    changed vs the base ref without the corresponding `SKILL.md` changing —
+    prevents silent lock edits. Override base with `LOCK_CHECK_BASE` env.
+  - **Skill domains** (namespaces): every skill in `skills-lock.json` now declares
+    a `domain` (`openspec` ×17, `superpowers` ×16, `local` ×5, `document` ×2,
+    `integration` ×2, `utility` ×3), enforced by CI. Enables scoped loading as
+    the catalog grows beyond 43 skills.
+
 ### Fixed
 - **Markdownlint CI blocker (P0)**: Unified heading in all 15 engineering document templates from dual H1s to single bilingual `# {title_cn} / {title_en}` (MD025) and added language identifier to `SKILL.md` decision tree fenced code block (MD040), eliminating 31 markdownlint errors in CI.
 - **Traceability path alignment (P1-1)**: Converged recommended document output paths in `engineering-docs/SKILL.md` and `comet/SKILL.md` to the standard 4-tier living-doc hierarchy (`docs/{specs,architecture,reference,guides}/`), ensuring all generated docs are discovered by `doc-impact.py`.
