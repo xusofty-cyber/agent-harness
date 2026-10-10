@@ -64,11 +64,11 @@ Markdown 定稿后，用 pandoc 转换为 Word：
 #    （下载自 Achuan-2/pandoc_docx_template，社区验证的中文排版）
 
 # 2. 转换
-pandoc input.md -o output.docx --reference-doc template.docx
+pandoc input.md -o output.docx --reference-doc word-reference-template.docx
 
 # 3. 如需处理 HTML 标签/图片标题/字体颜色，加 lua 过滤器
 pandoc input.md -t html | pandoc -f html -o output.docx \
-  --reference-doc template.docx --lua-filter markdown-to-docx.lua
+  --reference-doc word-reference-template.docx --lua-filter markdown-to-docx.lua
 ```
 
 > 参考模板只需保证**样式名**与本规范对应（Heading 1-4、正文、表格等），

@@ -212,7 +212,7 @@ def _extract_template_paths(skill_md: Path, pattern: str) -> dict:
     """Extract {template_number: docs_path} from a SKILL.md mapping table."""
     import re
     mapping = {}
-    for m in re.finditer(pattern, skill_md.read_text(encoding="utf-8")):
+    for m in re.finditer(pattern, skill_md.read_text(encoding="utf-8"), re.M):
         mapping[m.group(1)] = m.group(2)
     return mapping
 
@@ -221,6 +221,8 @@ comet_skill = ROOT / ".agents" / "skills" / "comet" / "SKILL.md"
 # engineering-docs table: "| 01 | ... | `docs/xxx/` |"
 edoc_paths = _extract_template_paths(
     edoc_skill, r"^\| (\d{2}) \| [^|]+ \| [^|]+ \| [^|]+ \| `docs/([^/]+)/`")
+check("xcheck:edoc-parsed-15", len(edoc_paths) == 15,
+      f"engineering-docs template table parsed {len(edoc_paths)} templates, expected 15")
 # comet table: template numbers mentioned per phase row; extract all `docs/xxx/` per row
 # then map template numbers listed in that row to those paths.
 import re as _re
