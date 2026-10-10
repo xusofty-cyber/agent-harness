@@ -50,6 +50,13 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   detection + install prompt, and version display for detected CLIs
   (codegraph/rtk/ocr/comet).
 
+- **Skills Usage Guide** (new, EN+ZH): documents all 42 skills by trigger mode
+  (Auto / Explicit `/command` / Hybrid), with per-skill "when to use" guidance.
+  Covers `/comet` workflow setup, OpenSpec lifecycle, code review gates, and more.
+- **Project memory bootstrap docs**: `PROJECT_CONTEXT.md` / `SESSION_STATE.md`
+  creation guide with copy-paste templates. Clarifies these are NOT auto-created —
+  the `cross-tool-memory` skill reads them, but the user must create initial versions.
+
 ### Fixed
 - `deploy-agents.ps1`: fixed Bashism parameter expansion syntax (`${var:+ ...}`) in CLI version string formatting.
 - `deploy-agents.sh`: restored executable file mode (100755).
