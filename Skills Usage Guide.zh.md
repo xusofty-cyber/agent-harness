@@ -87,6 +87,13 @@ Claude Code 通过两种方式决定加载 skill：
 | `writing-skills` | 自动 | — | 指导 skill 的创建/编辑/验证。 | 在 `.agents/skills/` 下创建或修改 skill 时。 |
 | `diagnosing-superpowers` | 自动 | — | 诊断 superpowers 工作流出错的原因。 | Claude 忽略计划、重复劳动、表现异常时。说"诊断哪里出问题了"。 |
 
+
+### 7. 工程文档
+
+| Skill | 触发 | 命令 | 作用 | 使用时机 |
+|---|---|---|---|---|
+| `engineering-docs` | 混合 | — | 15 个中英双语模板，覆盖 31 种研发文档（立项→需求→设计→测试→交付）。含渲染规范（标题字号/字体/段落），保证输出一致。 | 写任何正式研发文档时。说"写一份 PRD"/"写概要设计"即自动选用模板。 |
+
 ## 项目记忆设置
 
 ### `PROJECT_CONTEXT.md` 和 `SESSION_STATE.md`

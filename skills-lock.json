@@ -266,6 +266,12 @@
       "sourceType": "github",
       "skillPath": "skills/writing-skills/SKILL.md",
       "computedHash": "7a13d9b3fd40e886c97f4b467ccc0f5edce03d606ea0dedc72d568d6e813e206"
+    },
+    "engineering-docs": {
+      "source": "agent-harness (authored in-repo)",
+      "sourceType": "local",
+      "version": "0.1.0",
+      "skillPath": ".agents/skills/engineering-docs/SKILL.md"
     }
   }
 }

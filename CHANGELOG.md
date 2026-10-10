@@ -71,6 +71,14 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   creation guide with copy-paste templates. Clarifies these are NOT auto-created —
   the `cross-tool-memory` skill reads them, but the user must create initial versions.
 
+- **engineering-docs skill v0.1.0** (new, 43rd native skill): 15 bilingual
+  templates covering 31 R&D document types across 6 lifecycle phases
+  (initiation → requirements → design → management → testing → delivery).
+  Includes 31→15 decision tree, requirement discipline (explicit/derived/
+  assumption/unknown), and `rendering-spec.md` (heading sizes, CN/EN fonts,
+  paragraph styles) for consistent output across agents. Optional pandoc
+  Word-rendering guidance included.
+
 ### Fixed
 - `deploy-agents.ps1`: fixed Bashism parameter expansion syntax (`${var:+ ...}`) in CLI version string formatting.
 - `deploy-agents.sh`: restored executable file mode (100755).
