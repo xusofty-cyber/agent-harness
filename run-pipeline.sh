@@ -283,6 +283,115 @@ NON_INTERACTIVE=false
 FORCE_INTERACTIVE=false
 EXPLICIT_CONFIG=false
 RUN_DETAIL_MODE="quick" # quick or detailed
+GLOBAL_DEPLOYED_IN_WIZARD=false
+SKILLS_SYNC_CHOICE="check"
+
+get_lang_suffix() {
+    local lang="$1"
+    case "$lang" in
+        zh|zh-cn|cn) echo "" ;;
+        zh-tw|tw)    echo ".zh-tw" ;;
+        fr|fr-fr)    echo ".fr" ;;
+        de|de-de)    echo ".de" ;;
+        *)           echo ".en" ;;
+    esac
+}
+
+resolve_global_template() {
+    local suffix="$1"
+    local path="${REPO_ROOT}/Global AGENTS${suffix}.md"
+    if [ -n "$suffix" ] && [ -f "$path" ]; then
+        echo "$path"
+        return
+    fi
+    path="${REPO_ROOT}/Global AGENTS.md"
+    if [ -f "$path" ]; then
+        echo "$path"
+        return
+    fi
+    echo "${REPO_ROOT}/Global AGENTS.md"
+}
+
+backup_global_file() {
+    local path="$1"
+    local backup_path
+    backup_path="${path}.bak.$(date +%Y%m%d%H%M%S)"
+    local suffix=1
+    while [ -e "$backup_path" ] || [ -L "$backup_path" ]; do
+        backup_path="${path}.bak.$(date +%Y%m%d%H%M%S).${suffix}"
+        suffix=$((suffix + 1))
+    done
+    cp -a "$path" "$backup_path"
+    printf '%s' "$backup_path"
+}
+
+deploy_global_agent_file() {
+    local tool_name="$1"
+    local target_path="$2"
+    local source_template="$3"
+
+    local target_dir
+    target_dir="$(dirname "$target_path")"
+    mkdir -p "$target_dir"
+
+    if [ -e "$target_path" ] || [ -L "$target_path" ]; then
+        if [ -d "$target_path" ] && [ ! -L "$target_path" ]; then
+            echo -e "  ${RED}[!] ${tool_name} 全局规则目标是目录: ${target_path}${NC}" >&2
+            return 1
+        fi
+        local backup_file
+        backup_file="$(backup_global_file "$target_path")"
+        if [ -L "$target_path" ]; then rm "$target_path"; fi
+        cp -f "$source_template" "$target_path"
+        echo -e "  ${GREEN}[√] 已更新 ${tool_name} 全局规则: ${target_path} (备份: ${backup_file})${NC}"
+        return 0
+    fi
+
+    cp "$source_template" "$target_path"
+    echo -e "  ${GREEN}[√] 已初始化 ${tool_name} 全局规则: ${target_path}${NC}"
+    return 0
+}
+
+deploy_selected_global_agents() {
+    local lang_option="$1"
+    shift
+    local selected_tools=("$@")
+    local suffix
+    suffix="$(get_lang_suffix "$lang_option")"
+    local global_tmpl
+    global_tmpl="$(resolve_global_template "$suffix")"
+    local antigravity_pointer="${REPO_ROOT}/templates/antigravity-GEMINI.md"
+
+    if [ ! -f "$global_tmpl" ]; then
+        echo -e "  ${YELLOW}[警告] 未找到全局模板: ${global_tmpl}，跳过。${NC}"
+        return 1
+    fi
+
+    echo -e "\n${YELLOW}>>> 正在处理所选 Agent 工具全局规则部署与更新...${NC}"
+    for tool in "${selected_tools[@]}"; do
+        case "$tool" in
+            claude)
+                deploy_global_agent_file "Claude Code" "${HOME}/.claude/CLAUDE.md" "$global_tmpl"
+                ;;
+            antigravity)
+                deploy_global_agent_file "Antigravity 2.0 / CLI / IDE" "${HOME}/.gemini/AGENTS.md" "$global_tmpl"
+                if [ -f "$antigravity_pointer" ]; then
+                    deploy_global_agent_file "Antigravity legacy GEMINI.md" "${HOME}/.gemini/GEMINI.md" "$antigravity_pointer"
+                fi
+                ;;
+            codex)
+                local codex_dir="${CODEX_HOME:-${HOME}/.codex}"
+                local codex_file="${codex_dir}/AGENTS.md"
+                if [ -s "${codex_dir}/AGENTS.override.md" ]; then
+                    codex_file="${codex_dir}/AGENTS.override.md"
+                    echo -e "  ${CYAN}[i] 检测到 Codex 全局覆盖文件，将更新当前生效的 AGENTS.override.md。${NC}"
+                fi
+                deploy_global_agent_file "Codex" "$codex_file" "$global_tmpl"
+                ;;
+        esac
+    done
+    echo -e "${GREEN}[√] 所选 Agent 工具全局规则处理完成！${NC}\n"
+}
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -354,11 +463,52 @@ if [ "$EXPLICIT_CONFIG" = false ] && [ "$NON_INTERACTIVE" = false ]; then
         "Deutsch (German, de)" "de"
     LANG_OPTION="$SELECTED_VALUE"
 
-    echo -e "\n${CYAN}[2/6] 目标工程根目录 (Target Project Path):${NC}"
+    prompt_select "[2/6] 是否全局更新各工具的 agents (Global Agents Rules):" \
+        "是，更新各工具全局规则 (Update: 备份并更新本机全局配置)" "yes" \
+        "否，仅在项目工程内生效 (Skip: 跳过全局更新，仅限当前项目)" "no"
+
+    if [ "$SELECTED_VALUE" = "yes" ]; then
+        prompt_multiselect "请选择要全局更新规则的 Agent 工具 (Select Agent Tools):" \
+            "Claude Code (~/.claude/CLAUDE.md)" "claude" 1 \
+            "Antigravity 2.0 / CLI / IDE (~/.gemini/AGENTS.md, GEMINI.md)" "antigravity" 1 \
+            "Codex CLI / app (~/.codex/AGENTS.md)" "codex" 1
+
+        if [ ${#SELECTED_VALUES[@]} -gt 0 ]; then
+            deploy_selected_global_agents "$LANG_OPTION" "${SELECTED_VALUES[@]}"
+            GLOBAL_DEPLOYED_IN_WIZARD=true
+        else
+            echo -e "${YELLOW}  [i] 未勾选任何 Agent 工具，跳过全局更新。${NC}\n"
+        fi
+        RUN_GLOBAL=false
+    else
+        RUN_GLOBAL=false
+    fi
+
+    prompt_select "[3/6] 选择是否更新外部扩展的 skills 技能库 (External Skills Sync):" \
+        "在线同步更新 (Apply: 自动拉取上游更新并应用到本地技能库)" "apply" \
+        "安全检查模式 (Check only: 仅对比校验版本差异，不覆写技能文件)" "check" \
+        "跳过更新 (Skip: 不更新也不检查外部技能库)" "skip"
+    SKILLS_SYNC_CHOICE="$SELECTED_VALUE"
+    case "$SKILLS_SYNC_CHOICE" in
+        apply)
+            RUN_APPLY_SKILLS=true
+            CHECK_ONLY=false
+            ;;
+        check)
+            RUN_APPLY_SKILLS=false
+            CHECK_ONLY=true
+            ;;
+        skip)
+            RUN_APPLY_SKILLS=false
+            CHECK_ONLY=false
+            ;;
+    esac
+
+    echo -e "\n${CYAN}[4/6] 目标工程根目录 (Target Project Path):${NC}"
     read -r -p "请输入工程路径 [默认: 当前目录 .]: " input_proj
     PROJECT_DIR="${input_proj:-.}"
 
-    prompt_select "[3/6] 选择流水线执行流程 (Select Pipeline Flow & Stages):" \
+    prompt_select "[5/6] 选择流水线执行流程与阶段组合 (Select Pipeline Flow & Stages):" \
         "一键全量流水线 (Run Full Pipeline: 规则部署 -> AI记忆 -> 技能同步 -> 文档质检)" "all" \
         "自定义阶段组合 (Custom Stages: 自选执行部分阶段)" "custom" \
         "仅规则与 Agent 桥接部署 (Deploy Rules & Bridges only)" "only-deploy" \
@@ -399,29 +549,10 @@ if [ "$EXPLICIT_CONFIG" = false ] && [ "$NON_INTERACTIVE" = false ]; then
         only-docs) STAGE_DOCS=true ;;
     esac
 
-    prompt_select "[4/6] 选择执行交互细化程度 (Execution Detail):" \
+    prompt_select "[6/6] 选择执行交互细化程度 (Execution Detail):" \
         "极速推荐配置 (Quick Run: 自动使用最佳实践一键贯通流水线)" "quick" \
         "逐步向导配置 (Interactive: 依次打开各工具阶段的详细选项向导)" "detailed"
     RUN_DETAIL_MODE="$SELECTED_VALUE"
-
-    prompt_select "[5/6] 是否同步部署/更新本机全局规则 (Global Rules: ~/.gemini, ~/.codex, ~/.claude)？" \
-        "跳过全局规则 (Skip: 仅在当前项目工程内生效)" "skip" \
-        "同步更新全局规则 (Sync: 备份并更新各工具全局 AGENTS.md / CLAUDE.md)" "sync"
-    if [ "$SELECTED_VALUE" = "sync" ]; then
-        RUN_GLOBAL=true
-        RUN_UPDATE=true
-    else
-        RUN_GLOBAL=false
-    fi
-
-    prompt_select "[6/6] 外部技能库同步与更新处理 (External Skills Sync):" \
-        "安全检查模式 (Check only: 仅对比差异，不覆盖文件)" "check" \
-        "在线同步更新 (Apply: 自动拉取上游更新并应用)" "apply"
-    if [ "$SELECTED_VALUE" = "apply" ]; then
-        RUN_APPLY_SKILLS=true
-    else
-        RUN_APPLY_SKILLS=false
-    fi
 fi
 
 # Pre-flight review: when user passed explicit CLI parameters but NOT -y
@@ -505,7 +636,7 @@ if [ "$STAGE_DEPLOY" = true ]; then
     SUMMARY_NAMES+=("$STAGE_NAME")
     
     deploy_cmd=("$REPO_ROOT/deploy-agents.sh" "$TARGET_ABS" "--lang" "$LANG_OPTION")
-    if [ "$RUN_GLOBAL" = true ]; then
+    if [ "$GLOBAL_DEPLOYED_IN_WIZARD" != true ] && [ "$RUN_GLOBAL" = true ]; then
         deploy_cmd+=("--global")
     fi
     if [ "$RUN_UPDATE" = true ]; then
@@ -609,7 +740,11 @@ if [ "$STAGE_SKILLS" = true ]; then
     STAGE_NAME="外部技能库同步与校验 (sync-skills)"
     SUMMARY_NAMES+=("$STAGE_NAME")
 
-    if [ -z "$PYTHON_BIN" ]; then
+    if [ "$SKILLS_SYNC_CHOICE" = "skip" ]; then
+        echo -e "${YELLOW}↷ 外部技能库同步已在步骤 [3/6] 选择跳过。${NC}\n"
+        SUMMARY_STATUS+=("SKIP")
+        SUMMARY_DETAIL+=("步骤 [3/6] 选择跳过技能同步")
+    elif [ -z "$PYTHON_BIN" ]; then
         echo -e "${YELLOW}⚠ 未找到 Python 解释器，跳过技能同步。${NC}\n"
         SUMMARY_STATUS+=("SKIP")
         SUMMARY_DETAIL+=("未找到 Python 环境")

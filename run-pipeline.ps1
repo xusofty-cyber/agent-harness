@@ -259,6 +259,99 @@ $runDetailMode = "quick"
 $runGlobal = $Global.IsPresent
 $runUpdate = $Update.IsPresent
 $runApplySkills = $ApplySkills.IsPresent -or $runUpdate
+$globalDeployedInWizard = $false
+$skillsSyncChoice = "check"
+
+function Get-LangSuffix([string]$lang) {
+    switch ($lang.ToLower()) {
+        { $_ -in "zh", "zh-cn", "cn" } { return "" }
+        { $_ -in "zh-tw", "tw" }       { return ".zh-tw" }
+        { $_ -in "fr", "fr-fr" }       { return ".fr" }
+        { $_ -in "de", "de-de" }       { return ".de" }
+        default                         { return ".en" }
+    }
+}
+
+function Resolve-GlobalTemplate([string]$suffix) {
+    $path = Join-Path $repoRoot "Global AGENTS$suffix.md"
+    if ($suffix -and (Test-Path $path)) { return $path }
+    $basePath = Join-Path $repoRoot "Global AGENTS.md"
+    if (Test-Path $basePath) { return $basePath }
+    return $basePath
+}
+
+function Backup-GlobalFile([string]$path) {
+    $ts = Get-Date -Format "yyyyMMddHHmmss"
+    $backupPath = "$path.bak.$ts"
+    $suffix = 1
+    while (Test-Path $backupPath) {
+        $backupPath = "$path.bak.$ts.$suffix"
+        $suffix++
+    }
+    Copy-Item -LiteralPath $path -Destination $backupPath -Force
+    return $backupPath
+}
+
+function Deploy-GlobalAgentFile([string]$toolName, [string]$targetPath, [string]$sourceTemplate) {
+    $targetDir = Split-Path $targetPath -Parent
+    if (-not (Test-Path $targetDir)) {
+        New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
+    }
+
+    if (Test-Path $targetPath) {
+        if ((Get-Item $targetPath) -is [System.IO.DirectoryInfo]) {
+            Write-Warning "$toolName global rule target is a directory: $targetPath"
+            return
+        }
+        $backupPath = Backup-GlobalFile $targetPath
+        Copy-Item -LiteralPath $sourceTemplate -Destination $targetPath -Force
+        Write-Host "  [√] 已更新 $toolName 全局规则: $targetPath (备份: $backupPath)" -ForegroundColor Green
+        return
+    }
+
+    Copy-Item -LiteralPath $sourceTemplate -Destination $targetPath -Force
+    Write-Host "  [√] 已初始化 $toolName 全局规则: $targetPath" -ForegroundColor Green
+}
+
+function Deploy-SelectedGlobalAgents([string]$langOption, [string[]]$selectedTools) {
+    $suffix = Get-LangSuffix $langOption
+    $globalTmpl = Resolve-GlobalTemplate $suffix
+    $antigravityPointer = Join-Path $repoRoot "templates\antigravity-GEMINI.md"
+
+    if (-not (Test-Path $globalTmpl)) {
+        Write-Warning "未找到全局模板: $globalTmpl，跳过全局规则部署。"
+        return
+    }
+
+    Write-Host "`n>>> 正在处理所选 Agent 工具全局规则部署与更新..." -ForegroundColor Yellow
+    foreach ($tool in $selectedTools) {
+        switch ($tool) {
+            "claude" {
+                $claudeFile = Join-Path $HOME ".claude\CLAUDE.md"
+                Deploy-GlobalAgentFile "Claude Code" $claudeFile $globalTmpl
+            }
+            "antigravity" {
+                $geminiAgents = Join-Path $HOME ".gemini\AGENTS.md"
+                Deploy-GlobalAgentFile "Antigravity 2.0 / CLI / IDE" $geminiAgents $globalTmpl
+                if (Test-Path $antigravityPointer) {
+                    $geminiFile = Join-Path $HOME ".gemini\GEMINI.md"
+                    Deploy-GlobalAgentFile "Antigravity legacy GEMINI.md" $geminiFile $antigravityPointer
+                }
+            }
+            "codex" {
+                $codexDir = if ([string]::IsNullOrWhiteSpace($env:CODEX_HOME)) { Join-Path $HOME ".codex" } else { [Environment]::ExpandEnvironmentVariables($env:CODEX_HOME) }
+                $codexFile = Join-Path $codexDir "AGENTS.md"
+                $overrideFile = Join-Path $codexDir "AGENTS.override.md"
+                if (Test-Path $overrideFile) {
+                    $codexFile = $overrideFile
+                    Write-Host "  [i] 检测到 Codex 全局覆盖文件，将更新当前生效的 AGENTS.override.md。" -ForegroundColor Cyan
+                }
+                Deploy-GlobalAgentFile "Codex" $codexFile $globalTmpl
+            }
+        }
+    }
+    Write-Host "[√] 所选 Agent 工具全局规则处理完成！`n" -ForegroundColor Green
+}
 
 # Interactive 6-step wizard when executed without explicit stage/config flags
 if (-not $explicit -and -not $Yes.IsPresent -and (-not [Console]::IsInputRedirected -or $Interactive.IsPresent)) {
@@ -274,11 +367,55 @@ if (-not $explicit -and -not $Yes.IsPresent -and (-not [Console]::IsInputRedirec
         @{ Label = "Deutsch (German, de)"; Value = "de" }
     )
 
-    Write-Host "`n[2/6] 目标工程根目录 (Target Project Path):" -ForegroundColor Cyan
+    $globalChoice = Prompt-Select "[2/6] 是否全局更新各工具的 agents (Global Agents Rules):" @(
+        @{ Label = "是，更新各工具全局规则 (Update: 备份并更新本机全局配置)"; Value = "yes" },
+        @{ Label = "否，仅在项目工程内生效 (Skip: 跳过全局更新，仅限当前项目)"; Value = "no" }
+    )
+
+    if ($globalChoice -eq "yes") {
+        $selectedTools = Prompt-MultiSelect "请选择要全局更新规则的 Agent 工具 (Select Agent Tools):" @(
+            @{ Label = "Claude Code (~/.claude/CLAUDE.md)"; Value = "claude"; Checked = $true },
+            @{ Label = "Antigravity 2.0 / CLI / IDE (~/.gemini/AGENTS.md, GEMINI.md)"; Value = "antigravity"; Checked = $true },
+            @{ Label = "Codex CLI / app (~/.codex/AGENTS.md)"; Value = "codex"; Checked = $true }
+        )
+
+        if ($selectedTools -and $selectedTools.Count -gt 0) {
+            Deploy-SelectedGlobalAgents $Lang $selectedTools
+            $globalDeployedInWizard = $true
+        } else {
+            Write-Host "  [i] 未勾选任何 Agent 工具，跳过全局更新。`n" -ForegroundColor Yellow
+        }
+        $runGlobal = $false
+    } else {
+        $runGlobal = $false
+    }
+
+    $skillChoice = Prompt-Select "[3/6] 选择是否更新外部扩展的 skills 技能库 (External Skills Sync):" @(
+        @{ Label = "在线同步更新 (Apply: 自动拉取上游更新并应用到本地技能库)"; Value = "apply" },
+        @{ Label = "安全检查模式 (Check only: 仅对比校验版本差异，不覆写技能文件)"; Value = "check" },
+        @{ Label = "跳过更新 (Skip: 不更新也不检查外部技能库)"; Value = "skip" }
+    )
+    $skillsSyncChoice = $skillChoice
+    switch ($skillsSyncChoice) {
+        "apply" {
+            $runApplySkills = $true
+            $CheckOnly = $false
+        }
+        "check" {
+            $runApplySkills = $false
+            $CheckOnly = $true
+        }
+        "skip" {
+            $runApplySkills = $false
+            $CheckOnly = $false
+        }
+    }
+
+    Write-Host "`n[4/6] 目标工程根目录 (Target Project Path):" -ForegroundColor Cyan
     $inputProj = Read-Host "请输入工程路径 [默认: 当前目录 .]"
     if (-not [string]::IsNullOrWhiteSpace($inputProj)) { $Project = $inputProj }
 
-    $pipeMode = Prompt-Select "[3/6] 选择流水线执行流程 (Select Pipeline Flow & Stages):" @(
+    $pipeMode = Prompt-Select "[5/6] 选择流水线执行流程与阶段组合 (Select Pipeline Flow & Stages):" @(
         @{ Label = "一键全量流水线 (Run Full Pipeline: 规则部署 -> AI记忆 -> 技能同步 -> 文档质检)"; Value = "all" },
         @{ Label = "自定义阶段组合 (Custom Stages: 自选执行部分阶段)"; Value = "custom" },
         @{ Label = "仅规则与 Agent 桥接部署 (Deploy Rules & Bridges only)"; Value = "only-deploy" },
@@ -309,27 +446,10 @@ if (-not $explicit -and -not $Yes.IsPresent -and (-not [Console]::IsInputRedirec
         "only-docs"   { $stageDocs   = $true }
     }
 
-    $runDetailMode = Prompt-Select "[4/6] 选择执行交互细化程度 (Execution Detail):" @(
+    $runDetailMode = Prompt-Select "[6/6] 选择执行交互细化程度 (Execution Detail):" @(
         @{ Label = "极速推荐配置 (Quick Run: 自动使用最佳实践一键贯通流水线)"; Value = "quick" },
         @{ Label = "逐步向导配置 (Interactive: 依次打开各工具阶段的详细选项向导)"; Value = "detailed" }
     )
-
-    $globalChoice = Prompt-Select "[5/6] 是否同步部署/更新本机全局规则 (Global Rules: ~/.gemini, ~/.codex, ~/.claude)？" @(
-        @{ Label = "跳过全局规则 (Skip: 仅在当前项目工程内生效)"; Value = "skip" },
-        @{ Label = "同步更新全局规则 (Sync: 备份并更新各工具全局 AGENTS.md / CLAUDE.md)"; Value = "sync" }
-    )
-    if ($globalChoice -eq "sync") {
-        $runGlobal = $true
-        $runUpdate = $true
-    } else {
-        $runGlobal = $false
-    }
-
-    $skillChoice = Prompt-Select "[6/6] 外部技能库同步与更新处理 (External Skills Sync):" @(
-        @{ Label = "安全检查模式 (Check only: 仅对比差异，不覆盖文件)"; Value = "check" },
-        @{ Label = "在线同步更新 (Apply: 自动拉取上游更新并应用)"; Value = "apply" }
-    )
-    $runApplySkills = ($skillChoice -eq "apply")
 }
 
 # Pre-flight review: when user passed explicit CLI parameters but NOT -Yes
@@ -401,7 +521,7 @@ if ($stageDeploy) {
 
     $deployScript = Join-Path $repoRoot "deploy-agents.ps1"
     $deployParams = @{ ProjectPath = $targetAbs; Language = $Lang }
-    if ($runGlobal) { $deployParams["Global"] = $true }
+    if (-not $globalDeployedInWizard -and $runGlobal) { $deployParams["Global"] = $true }
     if ($runUpdate) { $deployParams["Update"] = $true }
     if ($runDetailMode -eq "detailed") {
         $deployParams["Interactive"] = $true
@@ -512,7 +632,11 @@ if ($stageSkills) {
     $stageName = "外部技能库同步与校验 (sync-skills)"
     $summaryNames += $stageName
 
-    if (-not $pythonCmd) {
+    if ($skillsSyncChoice -eq "skip") {
+        Write-Host "↷ 外部技能库同步已在步骤 [3/6] 选择跳过。`n" -ForegroundColor Yellow
+        $summaryStatus += "SKIP"
+        $summaryDetail += "步骤 [3/6] 选择跳过技能同步"
+    } elseif (-not $pythonCmd) {
         Write-Host "⚠ 未找到 Python 解释器，跳过技能同步。`n" -ForegroundColor Yellow
         $summaryStatus += "SKIP"
         $summaryDetail += "未找到 Python 环境"
