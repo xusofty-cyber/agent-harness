@@ -19,6 +19,21 @@ Claude Code 透過兩種方式決定載入 skill：
 
 ## Skill 分類速查
 
+> **Skill 領域**（按需載入的命名空間）：每個 skill 屬於一個領域，
+> 記錄於 `skills-lock.json` 並由 CI 強制校驗。只需要部分功能時按領域載入，而非全量。
+>
+> | 領域 | Skills | 用途 |
+> |---|---|---|
+> | `openspec` | 17 | OpenSpec 工作流家族 |
+> | `superpowers` | 16 | obra/superpowers 方法論家族 |
+> | `local` | 5 | 倉庫自研（engineering-docs、living-documentation、open-code-review、option-review、cross-tool-memory） |
+> | `document` | 2 | 文件處理（docx、pdf） |
+> | `integration` | 2 | 外部工具整合（comet、codegraph） |
+> | `utility` | 3 | 單一用途工具（caveman、ponytail、rtk） |
+>
+> **數量說明**：`skills-lock.json` 有 45 個條目，但本目錄只列 43 個 skill。
+> 多出的 2 個（`openspec`、`superpowers`）是來源倉庫的 meta 條目——僅作來源標記，非可安裝 skill。
+
 ### 1. 工作流與流程控制
 
 | Skill | 觸發 | 命令 | 作用 | 使用時機 |
@@ -36,6 +51,10 @@ Claude Code 透過兩種方式決定載入 skill：
 | `openspec-bulk-archive-change` | 自動 | — | 批次歸檔多個已完成變更。 | 批次清理。 |
 | `openspec-ff-change` | 自動 | — | 快進跳過製成品建立。 | 想跳過儀式感、直接開工。 |
 | `openspec-onboard` | 混合 | — | OpenSpec 工作流引導。 | 第一次使用：「onboard me to openspec」。 |
+| `draft-openspec-docs` | 混合 | — | OpenSpec 文件協作起草模式。 | 起草 OpenSpec 文件頁面時。 |
+| `write-openspec-docs` | 混合 | — | OpenSpec 文件寫作模式（含風格指南）。 | 寫 OpenSpec 使用者文件時。 |
+| `verify-openspec-docs` | 混合 | — | 用全新上下文 subagent 核查 OpenSpec 文件。 | 驗證 OpenSpec 文件聲明時。 |
+| `release-openspec` | 混合 | — | 稽核已合併工作以發佈 OpenSpec。 | 發佈 OpenSpec 版本時。 |
 | `living-documentation` | 混合 | — | 維護規格/架構/參考/指南，帶溯源關係。 | 持續。文檔任務自動啟動；說「update living docs」強制觸發。 |
 
 ### 2. 程式碼品質與審查

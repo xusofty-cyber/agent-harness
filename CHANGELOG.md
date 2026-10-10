@@ -124,6 +124,12 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   - Worked PRD example: `references/examples/05-product-spec-example.md`
     (team task board, fully filled, linked from decision tree).
 
+- **Provenance enforcement**: new `provenance:*` checks — every skill must have
+  `version` or `computedHash` in lock (meta entries exempt).
+- **Word template SHA256 pin**: `fetch-word-template.sh` verifies download integrity.
+- **i18n sync**: DE/FR/ZH-TW guides gain 4 openspec-docs skills + domain table +
+  meta-entry note; EN/ZH gain meta-entry note.
+
 ### Fixed
 - **Markdownlint CI blocker (P0)**: Unified heading in all 15 engineering document templates from dual H1s to single bilingual `# {title_cn} / {title_en}` (MD025) and added language identifier to `SKILL.md` decision tree fenced code block (MD040), eliminating 31 markdownlint errors in CI.
 - **Traceability path alignment (P1-1)**: Converged recommended document output paths in `engineering-docs/SKILL.md` and `comet/SKILL.md` to the standard 4-tier living-doc hierarchy (`docs/{specs,architecture,reference,guides}/`), ensuring all generated docs are discovered by `doc-impact.py`.
