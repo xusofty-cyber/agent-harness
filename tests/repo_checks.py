@@ -103,11 +103,12 @@ check("version:matches-changelog",
 # valid traceability frontmatter: id / type / status / modules (non-empty).
 # type must match the containing tier directory. Missing tier dirs are skipped
 # (scaffold is created by deploy scripts in target projects, not in this repo).
-DOC_TIERS = ("specs", "architecture", "reference", "guides", "adr")
-DOC_TYPES = {"specs", "architecture", "reference", "guide", "adr"}
+DOC_TIERS = ("specs", "architecture", "reference", "guides", "management", "tests", "adr")
+DOC_TYPES = {"specs", "architecture", "reference", "guide", "management", "tests", "adr"}
 DOC_STATUS = {"draft", "active", "deprecated"}
 TIER_TYPES = {"specs": "specs", "architecture": "architecture",
-              "reference": "reference", "guides": "guide", "adr": "adr"}
+              "reference": "reference", "guides": "guide",
+              "management": "management", "tests": "tests", "adr": "adr"}
 
 def _parse_simple_frontmatter(text):
     """Minimal YAML-subset parser for flat key: value, key: [a, b],
@@ -202,6 +203,43 @@ for tf in tmpl_files:
     check(f"tmpl:{rel}:depends_on-is-list",
           isinstance(fm.get("depends_on"), list),
           f"template frontmatter depends_on must be a list")
+
+# --- 3f2. Comet <-> engineering-docs path mapping cross-check ---
+# The "recommended storage path" for each template must agree between
+# engineering-docs/SKILL.md (template table) and comet/SKILL.md (phase table).
+# Prevents silent divergence of the two manually-maintained mappings.
+def _extract_template_paths(skill_md: Path, pattern: str) -> dict:
+    """Extract {template_number: docs_path} from a SKILL.md mapping table."""
+    import re
+    mapping = {}
+    for m in re.finditer(pattern, skill_md.read_text(encoding="utf-8")):
+        mapping[m.group(1)] = m.group(2)
+    return mapping
+
+edoc_skill = ROOT / ".agents" / "skills" / "engineering-docs" / "SKILL.md"
+comet_skill = ROOT / ".agents" / "skills" / "comet" / "SKILL.md"
+# engineering-docs table: "| 01 | ... | `docs/xxx/` |"
+edoc_paths = _extract_template_paths(
+    edoc_skill, r"^\| (\d{2}) \| [^|]+ \| [^|]+ \| [^|]+ \| `docs/([^/]+)/`")
+# comet table: template numbers mentioned per phase row; extract all `docs/xxx/` per row
+# then map template numbers listed in that row to those paths.
+import re as _re
+comet_text = comet_skill.read_text(encoding="utf-8")
+comet_paths: dict[str, set[str]] = {}
+for row in _re.findall(r"^\| \*\*[^|]+\*\* \| ([^|]+) \| ([^|]+) \|", comet_text, _re.M):
+    dirs, tmpls = row
+    dir_set = set(_re.findall(r"`docs/([^/]+)/`", dirs))
+    for tnum in _re.findall(r"`(\d{2})-[^`]+`", tmpls):
+        comet_paths.setdefault(tnum, set()).update(dir_set)
+
+for tnum, edoc_dir in sorted(edoc_paths.items()):
+    cdirs = comet_paths.get(tnum, set())
+    if cdirs:
+        check(f"xcheck:tmpl-{tnum}-path",
+              edoc_dir in cdirs,
+              f"template {tnum}: engineering-docs says docs/{edoc_dir}/, "
+              f"comet says {sorted('docs/'+d+'/' for d in cdirs)}")
+
 
 # --- 3g. comet.config.yaml validity ---
 # templates/comet.config.yaml must be valid YAML and have required top-level keys.

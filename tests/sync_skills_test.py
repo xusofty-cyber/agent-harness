@@ -117,5 +117,58 @@ class TestCheckSkill(unittest.TestCase):
         self.assertIn("upstream_bytes", r)
 
 
+class TestCheckLocalSkill(unittest.TestCase):
+    def _meta(self, h):
+        return {"source": "agent-harness (authored in-repo)",
+                "sourceType": "local",
+                "skillPath": ".agents/skills/x/SKILL.md",
+                "computedHash": h}
+
+    def test_in_sync(self):
+        content = b"# local skill"
+        h = mod.sha256_norm(content)
+        with patch.object(mod, "SKILLS_DIR") as sd:
+            fake_file = Path("/fake/x/SKILL.md")
+            sd.__truediv__.return_value.__truediv__.return_value = fake_file
+            with patch.object(Path, "is_file", lambda self: True):
+                with patch.object(Path, "read_bytes", lambda self: content):
+                    r = mod.check_local_skill("x", self._meta(h))
+        self.assertEqual(r["status"], "in-sync")
+
+    def test_tampered_local(self):
+        h = mod.sha256_norm(b"# original")
+        with patch.object(mod, "SKILLS_DIR") as sd:
+            fake_file = Path("/fake/x/SKILL.md")
+            sd.__truediv__.return_value.__truediv__.return_value = fake_file
+            with patch.object(Path, "is_file", lambda self: True):
+                with patch.object(Path, "read_bytes", lambda self: b"# TAMPERED"):
+                    r = mod.check_local_skill("x", self._meta(h))
+        self.assertEqual(r["status"], "tampered-local")
+
+    def test_missing_hash(self):
+        meta = {"source": "local", "sourceType": "local",
+                "skillPath": ".agents/skills/x/SKILL.md"}
+        with patch.object(mod, "SKILLS_DIR") as sd:
+            fake_file = Path("/fake/x/SKILL.md")
+            sd.__truediv__.return_value.__truediv__.return_value = fake_file
+            with patch.object(Path, "is_file", lambda self: True):
+                r = mod.check_local_skill("x", meta)
+        self.assertEqual(r["status"], "missing-hash")
+
+
+class TestLocalSkillsFilter(unittest.TestCase):
+    def test_filters_local_only(self):
+        lock = {"skills": {
+            "a": {"sourceType": "local", "skillPath": ".agents/skills/a/SKILL.md"},
+            "b": {"sourceType": "github", "source": "o/r",
+                  "skillPath": "skills/b/SKILL.md"},
+            "c": {"sourceType": "local", "skillPath": ".agents/skills/c/SKILL.md"},
+        }}
+        with patch.object(mod, "SKILLS_DIR") as sd:
+            sd.__truediv__.return_value.__truediv__.return_value.is_file.return_value = True
+            names = [n for n, _ in mod.local_skills(lock)]
+        self.assertEqual(sorted(names), ["a", "c"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)
