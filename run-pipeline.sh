@@ -389,6 +389,48 @@ deploy_selected_global_agents() {
                 fi
                 deploy_global_agent_file "Codex" "$codex_file" "$global_tmpl"
                 ;;
+            cursor)
+                deploy_global_agent_file "Cursor" "${HOME}/.cursorrules" "$global_tmpl"
+                ;;
+            zed)
+                deploy_global_agent_file "Zed" "${HOME}/.config/zed/AGENTS.md" "$global_tmpl"
+                ;;
+            pi)
+                deploy_global_agent_file "Pi" "${HOME}/.pi/agent/AGENTS.md" "$global_tmpl"
+                ;;
+            trae)
+                deploy_global_agent_file "Trae" "${HOME}/.trae/rules/AGENTS.md" "$global_tmpl"
+                ;;
+            codebuddy)
+                deploy_global_agent_file "CodeBuddy" "${HOME}/.codebuddy/CODEBUDDY.md" "$global_tmpl"
+                ;;
+            copilot)
+                deploy_global_agent_file "GitHub Copilot" "${HOME}/.config/github-copilot/copilot-instructions.md" "$global_tmpl"
+                ;;
+            gemini)
+                deploy_global_agent_file "Gemini CLI" "${HOME}/.gemini/GEMINI.md" "$global_tmpl"
+                ;;
+            windsurf)
+                deploy_global_agent_file "Windsurf" "${HOME}/.windsurf/rules/agent-harness.md" "$global_tmpl"
+                ;;
+            cline)
+                deploy_global_agent_file "Cline" "${HOME}/.clinerules" "$global_tmpl"
+                ;;
+            roo)
+                deploy_global_agent_file "Roo Code" "${HOME}/.roo/rules/agent-harness.md" "$global_tmpl"
+                ;;
+            qwen)
+                deploy_global_agent_file "Qwen Code" "${HOME}/.qwen/QWEN.md" "$global_tmpl"
+                ;;
+            kiro)
+                deploy_global_agent_file "Kiro" "${HOME}/.kiro/steering/agent-harness.md" "$global_tmpl"
+                ;;
+            continue)
+                deploy_global_agent_file "Continue.dev" "${HOME}/.continue/rules/agent-harness.md" "$global_tmpl"
+                ;;
+            opencode)
+                deploy_global_agent_file "OpenCode" "${HOME}/.config/opencode/AGENTS.md" "$global_tmpl"
+                ;;
         esac
     done
     echo -e "${GREEN}[√] 所选 Agent 工具全局规则处理完成！${NC}\n"
@@ -472,7 +514,21 @@ if [ "$EXPLICIT_CONFIG" = false ] && [ "$NON_INTERACTIVE" = false ]; then
         prompt_multiselect "请选择要全局更新规则的 Agent 工具 (Select Agent Tools):" \
             "Claude Code (~/.claude/CLAUDE.md)" "claude" 1 \
             "Antigravity 2.0 / CLI / IDE (~/.gemini/AGENTS.md, GEMINI.md)" "antigravity" 1 \
-            "Codex CLI / app (~/.codex/AGENTS.md)" "codex" 1
+            "Codex CLI / app (~/.codex/AGENTS.md)" "codex" 1 \
+            "Cursor (~/.cursorrules)" "cursor" 1 \
+            "Zed (~/.config/zed/AGENTS.md)" "zed" 1 \
+            "Pi (~/.pi/agent/AGENTS.md)" "pi" 1 \
+            "Trae (~/.trae/rules/AGENTS.md)" "trae" 0 \
+            "CodeBuddy (~/.codebuddy/CODEBUDDY.md)" "codebuddy" 0 \
+            "GitHub Copilot (copilot-instructions.md)" "copilot" 0 \
+            "Gemini CLI (~/.gemini/GEMINI.md)" "gemini" 0 \
+            "Windsurf (~/.windsurf/rules/agent-harness.md)" "windsurf" 0 \
+            "Cline (~/.clinerules)" "cline" 0 \
+            "Roo Code (~/.roo/rules/agent-harness.md)" "roo" 0 \
+            "Qwen Code (~/.qwen/QWEN.md)" "qwen" 0 \
+            "Kiro (~/.kiro/steering/agent-harness.md)" "kiro" 0 \
+            "Continue.dev (~/.continue/rules/agent-harness.md)" "continue" 0 \
+            "OpenCode (~/.config/opencode/AGENTS.md)" "opencode" 0
 
         if [ ${#SELECTED_VALUES[@]} -gt 0 ]; then
             deploy_selected_global_agents "$LANG_OPTION" "${SELECTED_VALUES[@]}"

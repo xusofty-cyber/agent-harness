@@ -348,6 +348,63 @@ function Deploy-SelectedGlobalAgents([string]$langOption, [string[]]$selectedToo
                 }
                 Deploy-GlobalAgentFile "Codex" $codexFile $globalTmpl
             }
+            "cursor" {
+                $cursorFile = Join-Path $HOME ".cursorrules"
+                Deploy-GlobalAgentFile "Cursor" $cursorFile $globalTmpl
+            }
+            "zed" {
+                $zedDir = if ($env:APPDATA) { Join-Path $env:APPDATA "Zed" } else { Join-Path $HOME ".config\zed" }
+                $zedFile = Join-Path $zedDir "AGENTS.md"
+                Deploy-GlobalAgentFile "Zed" $zedFile $globalTmpl
+            }
+            "pi" {
+                $piFile = Join-Path $HOME ".pi\agent\AGENTS.md"
+                Deploy-GlobalAgentFile "Pi" $piFile $globalTmpl
+            }
+            "trae" {
+                $traeFile = Join-Path $HOME ".trae\rules\AGENTS.md"
+                Deploy-GlobalAgentFile "Trae" $traeFile $globalTmpl
+            }
+            "codebuddy" {
+                $cbFile = Join-Path $HOME ".codebuddy\CODEBUDDY.md"
+                Deploy-GlobalAgentFile "CodeBuddy" $cbFile $globalTmpl
+            }
+            "copilot" {
+                $copilotFile = Join-Path $HOME ".config\github-copilot\copilot-instructions.md"
+                Deploy-GlobalAgentFile "GitHub Copilot" $copilotFile $globalTmpl
+            }
+            "gemini" {
+                $gemFile = Join-Path $HOME ".gemini\GEMINI.md"
+                Deploy-GlobalAgentFile "Gemini CLI" $gemFile $globalTmpl
+            }
+            "windsurf" {
+                $wsFile = Join-Path $HOME ".windsurf\rules\agent-harness.md"
+                Deploy-GlobalAgentFile "Windsurf" $wsFile $globalTmpl
+            }
+            "cline" {
+                $clineFile = Join-Path $HOME ".clinerules"
+                Deploy-GlobalAgentFile "Cline" $clineFile $globalTmpl
+            }
+            "roo" {
+                $rooFile = Join-Path $HOME ".roo\rules\agent-harness.md"
+                Deploy-GlobalAgentFile "Roo Code" $rooFile $globalTmpl
+            }
+            "qwen" {
+                $qwenFile = Join-Path $HOME ".qwen\QWEN.md"
+                Deploy-GlobalAgentFile "Qwen Code" $qwenFile $globalTmpl
+            }
+            "kiro" {
+                $kiroFile = Join-Path $HOME ".kiro\steering\agent-harness.md"
+                Deploy-GlobalAgentFile "Kiro" $kiroFile $globalTmpl
+            }
+            "continue" {
+                $contFile = Join-Path $HOME ".continue\rules\agent-harness.md"
+                Deploy-GlobalAgentFile "Continue.dev" $contFile $globalTmpl
+            }
+            "opencode" {
+                $ocFile = Join-Path $HOME ".config\opencode\AGENTS.md"
+                Deploy-GlobalAgentFile "OpenCode" $ocFile $globalTmpl
+            }
         }
     }
     Write-Host "[√] 所选 Agent 工具全局规则处理完成！`n" -ForegroundColor Green
@@ -376,7 +433,21 @@ if (-not $explicit -and -not $Yes.IsPresent -and (-not [Console]::IsInputRedirec
         $selectedTools = Prompt-MultiSelect "请选择要全局更新规则的 Agent 工具 (Select Agent Tools):" @(
             @{ Label = "Claude Code (~/.claude/CLAUDE.md)"; Value = "claude"; Checked = $true },
             @{ Label = "Antigravity 2.0 / CLI / IDE (~/.gemini/AGENTS.md, GEMINI.md)"; Value = "antigravity"; Checked = $true },
-            @{ Label = "Codex CLI / app (~/.codex/AGENTS.md)"; Value = "codex"; Checked = $true }
+            @{ Label = "Codex CLI / app (~/.codex/AGENTS.md)"; Value = "codex"; Checked = $true },
+            @{ Label = "Cursor (~/.cursorrules)"; Value = "cursor"; Checked = $true },
+            @{ Label = "Zed (~/.config/zed/AGENTS.md)"; Value = "zed"; Checked = $true },
+            @{ Label = "Pi (~/.pi/agent/AGENTS.md)"; Value = "pi"; Checked = $true },
+            @{ Label = "Trae (~/.trae/rules/AGENTS.md)"; Value = "trae"; Checked = $false },
+            @{ Label = "CodeBuddy (~/.codebuddy/CODEBUDDY.md)"; Value = "codebuddy"; Checked = $false },
+            @{ Label = "GitHub Copilot (copilot-instructions.md)"; Value = "copilot"; Checked = $false },
+            @{ Label = "Gemini CLI (~/.gemini/GEMINI.md)"; Value = "gemini"; Checked = $false },
+            @{ Label = "Windsurf (~/.windsurf/rules/agent-harness.md)"; Value = "windsurf"; Checked = $false },
+            @{ Label = "Cline (~/.clinerules)"; Value = "cline"; Checked = $false },
+            @{ Label = "Roo Code (~/.roo/rules/agent-harness.md)"; Value = "roo"; Checked = $false },
+            @{ Label = "Qwen Code (~/.qwen/QWEN.md)"; Value = "qwen"; Checked = $false },
+            @{ Label = "Kiro (~/.kiro/steering/agent-harness.md)"; Value = "kiro"; Checked = $false },
+            @{ Label = "Continue.dev (~/.continue/rules/agent-harness.md)"; Value = "continue"; Checked = $false },
+            @{ Label = "OpenCode (~/.config/opencode/AGENTS.md)"; Value = "opencode"; Checked = $false }
         )
 
         if ($selectedTools -and $selectedTools.Count -gt 0) {
