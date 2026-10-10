@@ -30,7 +30,8 @@
    - **实现与检索指导**：`ponytail`（最小实现决策阶梯）与 `codegraph`（CodeGraph 可选集成指引；CLI/MCP 需单独安装配置）。
    - **输出与表达指导**：`rtk`（Rust Token Killer 可选 CLI 指引；需配置命令重写 Hook）与 `caveman`（简明表达 Skill）。
    - **事前决策评审与共享记忆**：`option-review`（5 维度多候选方案事前独立评审与决策矩阵）与 `cross-tool-memory`（跨工具项目长期记忆导航与经验检索）。
-   - **专业文档处理**：`docx`（Word 专业排版）、`pdf`（结构化抽取与分析）。
+   - **专业文档处理**：`docx`（Word 专业排版）、`pdf`（结构化抽取与分析）；
+   - **技能使用与触发时机指南**：各 skill 的触发机制（自动/显式/混合）、分类速查与项目记忆使用说明详见 [`Skills Usage Guide.zh.md`](Skills%20Usage%20Guide.zh.md)（[English](Skills%20Usage%20Guide.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Français](Skills%20Usage%20Guide.fr.md) | [Deutsch](Skills%20Usage%20Guide.de.md)）。
 
 4. **一键部署、交互向导与统一流水线（`deploy-agents` & `pipeline`）**：
    - **交互式终端逐步选择向导**：执行脚本时不带任何参数（或显式指定 `--interactive` / `-Interactive`）将自动拉起向导（上下方向键选择、空格键切选、Enter 确认），引导完成规则模板语言（`en`, `zh`, `zh-tw`, `fr`, `de`）、部署范围（`project`, `global`, `both`）、目标项目路径、12 种 Agent 桥接文件多选（Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy）以及可选工作流开关，彻底杜绝命令行参数遗漏与拼写错误；
@@ -82,8 +83,9 @@ agent-harness/
 ├── Multi-Tool Deployment and Configuration Guide.zh.md              # 跨工具适配原理、安全钩子与部署更新专著（中文）
 ├── Multi-Tool Deployment and Configuration Guide.md # 英文版部署配置指南
 ├── Tools Practical Usage and Skills Panorama Guide.zh.md     # 42 个技能详解、Token 经济学与实战流转（中文）
-├── Skills Usage Guide.zh.md                       # 各 skill 触发方式与使用时机说明（中文）
 ├── Tools Practical Usage and Skills Panorama Guide.md # 英文版技能实战指南
+├── Skills Usage Guide.zh.md                       # 各 skill 触发方式与使用时机说明（中文）
+├── Skills Usage Guide.md                          # 各 skill 触发方式与使用时机说明（英文）
 ├── run-pipeline.ps1 / pipeline.ps1  # Windows PowerShell 统一流水线执行脚本
 ├── run-pipeline.sh / pipeline.sh   # Linux / macOS Bash 统一流水线执行脚本
 ├── deploy-agents.ps1                # Windows 一键部署与在线更新自动化脚本

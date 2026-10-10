@@ -29,7 +29,8 @@ Dieses Repository bietet globale, projekt- und verzeichnisbezogene Regelsätze, 
    - **Implementierungs- und Suchunterstützung**: `ponytail` (Entscheidungsleiter für minimale Lösungen) und `codegraph` (Code-Graph MCP);
    - **Ausgabe- und Kommunikationssteuerung**: `rtk` (Token Killer) und `caveman` (komprimierte Ausgabe);
    - **Entscheidungsreview vor Umsetzung**: `option-review` und `cross-tool-memory`;
-   - **Professionelle Dokumentenverarbeitung**: `docx`- und `pdf`-Skills.
+   - **Professionelle Dokumentenverarbeitung**: `docx`- und `pdf`-Skills;
+   - **Skill-Nutzungs- und Trigger-Leitfaden**: Für Trigger-Modi (auto/explizit/hybrid), Kategorisierung und Projektgedächtnis aller 42 Skills siehe [`Skills Usage Guide.de.md`](Skills%20Usage%20Guide.de.md) ([English](Skills%20Usage%20Guide.md) | [简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Français](Skills%20Usage%20Guide.fr.md)).
 
 4. **Ein-Klick-Bereitstellung, interaktiver Assistent & einheitliche Pipeline (`deploy-agents` & `pipeline`)**:
    - **Schrittweiser interaktiver Terminal-Assistent**: Bei Aufruf ohne Argumente (oder mit `--interactive` / `-Interactive`) startet ein geführter TUI-Assistent (Pfeiltasten, Leertaste zur Mehrfachauswahl, Eingabetaste zur Bestätigung) zur Auswahl von Sprache (`en`, `zh`, `zh-tw`, `fr`, `de`), Bereitstellungsumfang (`project`, `global`, `both`), Projektpfad, 12 Agent-Bridge-Dateien (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy) sowie optionalen Workflows;
@@ -74,6 +75,8 @@ agent-harness/
 ├── Multi-Tool Deployment and Configuration Guide.md    # Bereitstellungsleitfaden (Englisch)
 ├── Tools Practical Usage and Skills Panorama Guide.de.md # Praxisleitfaden (Deutsch)
 ├── Tools Practical Usage and Skills Panorama Guide.md    # Praxisleitfaden (Englisch)
+├── Skills Usage Guide.de.md                       # Skills-Nutzungsleitfaden (Deutsch)
+├── Skills Usage Guide.md                          # Skills-Nutzungsleitfaden (Englisch)
 ├── run-pipeline.ps1 / pipeline.ps1  # Windows PowerShell Pipeline-Runner
 ├── run-pipeline.sh / pipeline.sh   # Linux / macOS Bash Pipeline-Runner
 ├── deploy-agents.ps1                # Windows PowerShell-Skript

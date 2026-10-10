@@ -29,7 +29,8 @@ This repository provides global, project, and directory rule templates, Claude C
    - **Implementation and retrieval guidance**: `ponytail` (minimal-solution ladder) and `codegraph` (optional CodeGraph integration guide; CLI/MCP setup is separate);
    - **Output and communication guidance**: `rtk` (optional Rust Token Killer CLI guide; command-rewrite hooks require setup) and `caveman` (concise-response Skill);
    - **Pre-decision review and shared memory**: `option-review` (isolated 5-dimension candidate approach review matrix) and `cross-tool-memory` (project-scoped long-term memory navigation aid);
-   - **Professional Document Processing**: `docx` (Word formatting & manipulation) and `pdf` (structured extraction & analysis). Note: `docx` ships its full OOXML validation toolchain (~1.3 MB, mostly XSD schemas), making it the largest skill in the repo — delete the directory from your target project if you never process Word files.
+   - **Professional Document Processing**: `docx` (Word formatting & manipulation) and `pdf` (structured extraction & analysis). Note: `docx` ships its full OOXML validation toolchain (~1.3 MB, mostly XSD schemas), making it the largest skill in the repo — delete the directory from your target project if you never process Word files;
+   - **Skills Usage & Trigger Guide**: For trigger modes (auto/explicit/hybrid), categorization, and project memory setup of all 42 skills, see [`Skills Usage Guide.md`](Skills%20Usage%20Guide.md) ([简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Français](Skills%20Usage%20Guide.fr.md) | [Deutsch](Skills%20Usage%20Guide.de.md)).
 
 4. **One-Click Deployment, Interactive Wizard & Unified Pipeline (`deploy-agents` & `pipeline`)**:
    - **Interactive Step-by-Step Terminal Wizard**: Running scripts without arguments (or with `--interactive` / `-Interactive`) launches a guided TUI wizard (arrow keys to move, spacebar to toggle, enter to confirm) to select template language (`en`, `zh`, `zh-tw`, `fr`, `de`), deployment scope (`project`, `global`, `both`), target project path, and multi-select agent bridge files (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy) plus optional workflows, preventing CLI mistakes;
@@ -83,8 +84,9 @@ agent-harness/
 ├── Multi-Tool Deployment and Configuration Guide.md # Comprehensive deployment & configuration guide (English)
 ├── Multi-Tool Deployment and Configuration Guide.zh.md              # 跨工具部署与配置指南（中文）
 ├── Tools Practical Usage and Skills Panorama Guide.md # Practical usage, token economics & skills panorama (English)
-├── Skills Usage Guide.md                          # How each skill triggers & when to use it (English)
 ├── Tools Practical Usage and Skills Panorama Guide.zh.md     # 各工具实战使用与技能全景指南（中文）
+├── Skills Usage Guide.md                          # How each skill triggers & when to use it (English)
+├── Skills Usage Guide.zh.md                       # 各 skill 触发方式与使用时机说明（中文）
 ├── run-pipeline.ps1 / pipeline.ps1  # Windows PowerShell unified pipeline runner
 ├── run-pipeline.sh / pipeline.sh   # Linux / macOS Bash unified pipeline runner
 ├── deploy-agents.ps1                # Windows PowerShell one-click deploy & update script

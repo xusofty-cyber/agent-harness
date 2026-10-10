@@ -29,7 +29,8 @@ Ce dépôt fournit des modèles de règles aux niveaux global, projet et répert
    - **Orientation implémentation** : `ponytail` (échelle de solution minimale) et `codegraph` (graphe de code via MCP) ;
    - **Sortie et communication** : `rtk` (troncature et limitation de tokens) et `caveman` (mode ultra-concis) ;
    - **Revue avant décision & mémoire partagée** : `option-review` et `cross-tool-memory` ;
-   - **Documents professionnels** : compétences `docx` et `pdf`.
+   - **Documents professionnels** : compétences `docx` et `pdf` ;
+   - **Guide d'utilisation et déclenchement des compétences** : Pour les modes de déclenchement (auto/explicite/hybride), la catégorisation et la mémoire de projet, voir [`Skills Usage Guide.fr.md`](Skills%20Usage%20Guide.fr.md) ([English](Skills%20Usage%20Guide.md) | [简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Deutsch](Skills%20Usage%20Guide.de.md)).
 
 4. **Déploiement en un clic, assistant interactif & pipeline unifié (`deploy-agents` & `pipeline`)** :
    - **Assistant terminal interactif étape par étape** : L'exécution sans argument (ou avec `--interactive` / `-Interactive`) lance un assistant guidé (navigation par flèches, sélection multiple par espace, validation Entrée) pour choisir la langue (`en`, `zh`, `zh-tw`, `fr`, `de`), la portée (`project`, `global`, `both`), le chemin du projet et sélectionner parmi 12 ponts d'outils (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy) ainsi que les workflows optionnels ;
@@ -74,6 +75,8 @@ agent-harness/
 ├── Multi-Tool Deployment and Configuration Guide.md    # Guide de déploiement (Anglais)
 ├── Tools Practical Usage and Skills Panorama Guide.fr.md # Panorama des outils (Français)
 ├── Tools Practical Usage and Skills Panorama Guide.md    # Panorama des outils (Anglais)
+├── Skills Usage Guide.fr.md                       # Guide d'utilisation des compétences (Français)
+├── Skills Usage Guide.md                          # Guide d'utilisation des compétences (Anglais)
 ├── run-pipeline.ps1 / pipeline.ps1  # Exécuteur de pipeline unifié Windows PowerShell
 ├── run-pipeline.sh / pipeline.sh   # Exécuteur de pipeline unifié Linux / macOS Bash
 ├── deploy-agents.ps1                # Script Windows PowerShell

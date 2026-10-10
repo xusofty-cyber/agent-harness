@@ -11,6 +11,7 @@ The long-form guides are maintained with English as source of truth and supporte
 | `README.md` | `README_zh.md` | `README.zh-tw.md` | `README.fr.md` | `README.de.md` |
 | `Multi-Tool Deployment and Configuration Guide.md` | `Multi-Tool Deployment and Configuration Guide.zh.md` | `Multi-Tool Deployment and Configuration Guide.zh-tw.md` | `Multi-Tool Deployment and Configuration Guide.fr.md` | `Multi-Tool Deployment and Configuration Guide.de.md` |
 | `Tools Practical Usage and Skills Panorama Guide.md` | `Tools Practical Usage and Skills Panorama Guide.zh.md` | `Tools Practical Usage and Skills Panorama Guide.zh-tw.md` | `Tools Practical Usage and Skills Panorama Guide.fr.md` | `Tools Practical Usage and Skills Panorama Guide.de.md` |
+| `Skills Usage Guide.md` | `Skills Usage Guide.zh.md` | `Skills Usage Guide.zh-tw.md` | `Skills Usage Guide.fr.md` | `Skills Usage Guide.de.md` |
 
 Rules:
 
