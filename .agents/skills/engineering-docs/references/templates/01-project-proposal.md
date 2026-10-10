@@ -10,8 +10,7 @@ version: 0.1.0
 last_verified_commit: HEAD
 ---
 
-# 项目立项建议书
-# Project Proposal
+# 项目立项建议书 / Project Proposal
 
 > **文档类型**：项目立项建议书 / 立项论证报告  
 > **适用阶段**：立项 Initiation  

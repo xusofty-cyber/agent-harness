@@ -10,6 +10,7 @@ Checks:
   4. deploy-agents.ps1 / deploy-agents.sh feature-parity markers
 """
 
+import hashlib
 import json
 import re
 import sys
@@ -103,10 +104,10 @@ check("version:matches-changelog",
 # type must match the containing tier directory. Missing tier dirs are skipped
 # (scaffold is created by deploy scripts in target projects, not in this repo).
 DOC_TIERS = ("specs", "architecture", "reference", "guides", "adr")
-DOC_TYPES = {"specs", "spec", "architecture", "reference", "guide", "guides", "adr"}
+DOC_TYPES = {"specs", "architecture", "reference", "guide", "adr"}
 DOC_STATUS = {"draft", "active", "deprecated"}
-TIER_TYPES = {"specs": {"specs", "spec"}, "architecture": {"architecture"},
-              "reference": {"reference"}, "guides": {"guide", "guides"}, "adr": {"adr"}}
+TIER_TYPES = {"specs": "specs", "architecture": "architecture",
+              "reference": "reference", "guides": "guide", "adr": "adr"}
 
 def _parse_simple_frontmatter(text):
     """Minimal YAML-subset parser for flat key: value, key: [a, b],
@@ -153,8 +154,8 @@ for tier in DOC_TIERS:
               fm.get("type") in DOC_TYPES,
               f"type {fm.get('type')!r} not in {sorted(DOC_TYPES)}")
         check(f"doc:{rel}:type-tier-match",
-              fm.get("type") in TIER_TYPES[tier],
-              f"type {fm.get('type')!r} != tier {tier!r} (expected one of {sorted(TIER_TYPES[tier])!r})")
+              fm.get("type") == TIER_TYPES[tier],
+              f"type {fm.get('type')!r} != tier {tier!r} (expected exact {TIER_TYPES[tier]!r})")
         check(f"doc:{rel}:status-valid",
               fm.get("status") in DOC_STATUS,
               f"status {fm.get('status')!r} not in {sorted(DOC_STATUS)}")
@@ -169,6 +170,53 @@ check("doc-impact:sync",
       _impact_a.is_file() and _impact_b.is_file()
       and _impact_a.read_bytes() == _impact_b.read_bytes(),
       "tools/doc-impact.py and living-documentation/scripts/doc-impact.py diverged")
+
+# --- 3f. Engineering-docs templates frontmatter check ---
+# All 15 templates under .agents/skills/engineering-docs/references/templates/
+# must declare valid living-doc YAML frontmatter with canonical types and schemas.
+tmpl_dir = ROOT / ".agents" / "skills" / "engineering-docs" / "references" / "templates"
+tmpl_files = sorted(tmpl_dir.glob("*.md"))
+check("tmpl:count-15", len(tmpl_files) == 15,
+      f"expected 15 engineering-docs templates, got {len(tmpl_files)}")
+
+for tf in tmpl_files:
+    rel = tf.relative_to(ROOT).as_posix()
+    tf_content = tf.read_text(encoding="utf-8-sig")
+    fm = _parse_simple_frontmatter(tf_content)
+    check(f"tmpl:{rel}:frontmatter", fm is not None, "missing YAML frontmatter block")
+    if fm is None:
+        continue
+    for field in ("id", "type", "status", "modules"):
+        check(f"tmpl:{rel}:{field}",
+              bool(fm.get(field)),
+              f"template frontmatter must define non-empty {field}:")
+    check(f"tmpl:{rel}:type-canonical",
+          fm.get("type") in DOC_TYPES,
+          f"type {fm.get('type')!r} not in canonical {sorted(DOC_TYPES)}")
+    check(f"tmpl:{rel}:status-valid",
+          fm.get("status") in DOC_STATUS,
+          f"status {fm.get('status')!r} not in {sorted(DOC_STATUS)}")
+    check(f"tmpl:{rel}:modules-is-list",
+          isinstance(fm.get("modules"), list),
+          f"template frontmatter modules must be a list")
+    check(f"tmpl:{rel}:depends_on-is-list",
+          isinstance(fm.get("depends_on"), list),
+          f"template frontmatter depends_on must be a list")
+
+# --- 3g. comet.config.yaml validity ---
+# templates/comet.config.yaml must be valid YAML and have required top-level keys.
+try:
+    import yaml
+    comet_cfg_path = ROOT / "templates" / "comet.config.yaml"
+    check("comet-cfg:file-exists", comet_cfg_path.is_file(), "templates/comet.config.yaml missing")
+    if comet_cfg_path.is_file():
+        cfg_data = yaml.safe_load(comet_cfg_path.read_text(encoding="utf-8"))
+        check("comet-cfg:valid-yaml-dict", isinstance(cfg_data, dict), "comet.config.yaml root must be a dict")
+        if isinstance(cfg_data, dict):
+            for req_key in ("schema", "default_workflow", "workflows"):
+                check(f"comet-cfg:key-{req_key}", req_key in cfg_data, f"missing {req_key} in comet.config.yaml")
+except ImportError:
+    pass
 
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
@@ -225,12 +273,44 @@ for ps1_marker, sh_marker, feature in PARITY:
         detail = f"'{ps1_marker}' missing in deploy-agents.ps1"
     check(f"parity:{feature}", in_ps1 == in_sh, detail)
 
+# --- 4b. run-pipeline script parity ---
+# Ensures run-pipeline.ps1 and run-pipeline.sh maintain feature parity across stages.
+PIPELINE_PARITY = [
+    ("deploy-agents", "deploy-agents", "pipeline stage 1: deploy-agents"),
+    ("setup-ai-memory", "setup-ai-memory", "pipeline stage 2: setup-ai-memory"),
+    ("sync-skills.py", "sync-skills.py", "pipeline stage 3: sync-skills.py"),
+    ("doc-impact.py", "doc-impact.py", "pipeline stage 4: doc-impact.py"),
+    ("comet doctor", "comet doctor", "pipeline comet doctor health check"),
+    ("comet status", "comet status", "pipeline comet status probe"),
+    ("comet.config.yaml", "comet.config.yaml", "pipeline comet config scaffold"),
+    ("PROJECT_CONTEXT.md", "PROJECT_CONTEXT.md", "pipeline project context scaffold"),
+    ("SESSION_STATE.md", "SESSION_STATE.md", "pipeline session state scaffold"),
+    ("BriefProbe", "brief-probe", "pipeline brief probe mode"),
+    ("CheckOnly", "check-only", "pipeline check-only read-only mode"),
+    ("ApplySkills", "apply-skills", "pipeline apply-skills flag"),
+]
+p_ps1 = (ROOT / "run-pipeline.ps1").read_text(encoding="utf-8-sig")
+p_sh = (ROOT / "run-pipeline.sh").read_text(encoding="utf-8")
+for ps1_marker, sh_marker, feature in PIPELINE_PARITY:
+    in_ps1 = ps1_marker in p_ps1
+    in_sh = sh_marker in p_sh
+    if not in_ps1 and not in_sh:
+        print(f"[SKIP] pipeline-parity:{feature} (not present on this branch)")
+        continue
+    detail = ""
+    if in_ps1 and not in_sh:
+        detail = f"'{sh_marker}' missing in run-pipeline.sh"
+    elif in_sh and not in_ps1:
+        detail = f"'{ps1_marker}' missing in run-pipeline.ps1"
+    check(f"pipeline-parity:{feature}", in_ps1 == in_sh, detail)
+
 # --- 5. skills-lock.json consistency ---
 # Every skill directory must have a lock entry (provenance metadata).
 # Lock entries without a directory are allowed only for known meta-entries
 # (suites, not single skills).
 META_ENTRIES = {"openspec", "superpowers"}
-lock_skills = set(json.loads((ROOT / "skills-lock.json").read_text(encoding="utf-8-sig"))["skills"])
+lock_data = json.loads((ROOT / "skills-lock.json").read_text(encoding="utf-8-sig"))
+lock_skills = set(lock_data["skills"])
 dir_skills = {p.name for p in (ROOT / ".agents" / "skills").iterdir() if p.is_dir()}
 missing_lock = sorted(dir_skills - lock_skills)
 check("lock:covers-all-dirs", not missing_lock,
@@ -238,6 +318,18 @@ check("lock:covers-all-dirs", not missing_lock,
 orphan_lock = sorted(lock_skills - dir_skills - META_ENTRIES)
 check("lock:no-orphans", not orphan_lock,
       f"lock entries without skill dir: {orphan_lock}")
+
+# Verify computedHash matches actual local file content for all locked skills
+for name, meta in sorted(lock_data.get("skills", {}).items()):
+    expected_hash = meta.get("computedHash")
+    if not expected_hash:
+        continue
+    skill_file = ROOT / ".agents" / "skills" / name / "SKILL.md"
+    if not skill_file.is_file():
+        continue
+    actual_hash = hashlib.sha256(skill_file.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+    check(f"lock-hash:{name}", actual_hash == expected_hash,
+          f"computedHash mismatch for {name}: lock={expected_hash[:8]}, disk={actual_hash[:8]}")
 
 # --- 6. Multilingual doc pairs: structural parity ---
 # Each translated guide must keep the same ## section count as its source,

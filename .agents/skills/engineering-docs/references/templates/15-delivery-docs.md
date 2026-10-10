@@ -11,8 +11,7 @@ version: 0.1.0
 last_verified_commit: HEAD
 ---
 
-# 软件交付文档
-# Software Delivery Documents
+# 软件交付文档 / Software Delivery Documents
 
 > **文档类型**：软件版本说明 / 软件用户手册  
 > **适用阶段**：交付 Delivery  

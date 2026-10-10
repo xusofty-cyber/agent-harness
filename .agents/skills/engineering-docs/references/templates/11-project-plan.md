@@ -11,8 +11,7 @@ version: 0.1.0
 last_verified_commit: HEAD
 ---
 
-# 项目计划
-# Project Plan
+# 项目计划 / Project Plan
 
 > **文档类型**：项目计划  
 > **适用阶段**：管理 Management  

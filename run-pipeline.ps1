@@ -838,16 +838,22 @@ if (Get-Command comet -ErrorAction SilentlyContinue) {
         }
 
         Write-Host "`n  --- 跨平台体检报告 (comet doctor) ---" -ForegroundColor Yellow
+        $rawDoc = & comet doctor 2>&1
         if ($BriefProbe) {
-            $doctorOut = & comet doctor 2>&1 | Where-Object { $_ -match "[✓✗⚠]" } | Select-Object -First 15
+            $doctorOut = $rawDoc | Where-Object { $_ -match "[✓✗⚠]" } | Select-Object -First 15
             if ($doctorOut) {
                 $doctorOut | ForEach-Object { Write-Host "  $_" -ForegroundColor Yellow }
                 Write-Host "  ... (已启用 -BriefProbe 极简模式，忽略后续详细平台检测)" -ForegroundColor DarkGray
             }
         } else {
-            $doctorOut = & comet doctor 2>&1
-            if ($doctorOut) {
-                $doctorOut | ForEach-Object { Write-Host "  $_" -ForegroundColor Yellow }
+            $issues = $rawDoc | Where-Object { $_ -match "[✗⚠]" }
+            $passes = ($rawDoc | Where-Object { $_ -match "^\s*✓" }).Count
+            if ($issues) {
+                Write-Host "  发现告警/异常项 ($($issues.Count) 项):" -ForegroundColor Yellow
+                $issues | ForEach-Object { Write-Host "  $_" -ForegroundColor Yellow }
+                Write-Host "  ✓ 其余 $passes 项平台检查通过" -ForegroundColor Green
+            } else {
+                Write-Host "  ✓ 全部 $passes 项跨平台健康检查通过" -ForegroundColor Green
             }
         }
         Write-Host ""

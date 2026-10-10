@@ -11,8 +11,7 @@ version: 0.1.0
 last_verified_commit: HEAD
 ---
 
-# 产品规格说明书
-# Product Specification
+# 产品规格说明书 / Product Specification
 
 > **文档类型**：产品规格说明书  
 > **适用阶段**：需求 Requirements  

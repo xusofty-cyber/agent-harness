@@ -11,8 +11,7 @@ version: 0.1.0
 last_verified_commit: HEAD
 ---
 
-# 软件概要设计说明书
-# High-Level Design (HLD)
+# 软件概要设计说明书 / High-Level Design (HLD)
 
 > **文档类型**：软件概要设计说明书  
 > **适用阶段**：设计 Design  

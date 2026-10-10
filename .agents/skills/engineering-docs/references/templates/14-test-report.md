@@ -11,8 +11,7 @@ version: 0.1.0
 last_verified_commit: HEAD
 ---
 
-# 软件测试报告
-# Software Test Report
+# 软件测试报告 / Software Test Report
 
 > **文档类型**：软件单元测试报告 / 集成测试报告 / 系统测试报告 / 性能测试报告 / 软件测试用例  
 > **适用阶段**：测试 Testing  

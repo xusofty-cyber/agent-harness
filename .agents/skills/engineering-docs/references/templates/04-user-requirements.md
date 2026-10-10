@@ -10,8 +10,7 @@ version: 0.1.0
 last_verified_commit: HEAD
 ---
 
-# 用户需求说明书
-# User Requirements Specification
+# 用户需求说明书 / User Requirements Specification
 
 > **文档类型**：用户需求说明书  
 > **适用阶段**：需求 Requirements  

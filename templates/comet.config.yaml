@@ -10,10 +10,10 @@ schema: comet.project.v1
 # `/comet` 默认进入的工作流 (native: 强模型目标驱动; classic: 阶段治理五步流)
 default_workflow: native
 
-# 此项目启用的工作流，可填写 native、classic 或同时启用两者
+# 此项目启用的工作流，可填写 native、classic 或同时启用两者 (推荐强模型默认使用 native)
 workflows:
   - native
-  - classic
+  # - classic  # 如需阶段治理五步流，取消注释此行
 
 # 是否启用只读的环境感知恢复探针 (Ambient Resume probe)，支持会话中断无缝恢复
 ambient_resume: true

@@ -683,6 +683,9 @@ ensure_project_memory_scaffold() {
 
     local proj_basename
     proj_basename="$(basename "$target_dir")"
+    local safe_proj_basename="${proj_basename//\\/\\\\}"
+    safe_proj_basename="${safe_proj_basename//\//\\/}"
+    safe_proj_basename="${safe_proj_basename//&/\\&}"
 
     local p_template="$REPO_ROOT/templates/PROJECT_CONTEXT.template${lang_suffix}.md"
     [ ! -f "$p_template" ] && p_template="$REPO_ROOT/templates/PROJECT_CONTEXT.template.md"
@@ -692,13 +695,13 @@ ensure_project_memory_scaffold() {
 
     local p_target="$target_dir/PROJECT_CONTEXT.md"
     if [ ! -f "$p_target" ] && [ -f "$p_template" ]; then
-        sed "s/<PROJECT_NAME>/$proj_basename/g" "$p_template" > "$p_target"
+        sed "s/<PROJECT_NAME>/$safe_proj_basename/g" "$p_template" > "$p_target"
         echo -e "  ${GREEN}[√] 自动初始化项目长期事实: PROJECT_CONTEXT.md${NC}"
     fi
 
     local s_target="$target_dir/SESSION_STATE.md"
     if [ ! -f "$s_target" ] && [ -f "$s_template" ]; then
-        sed "s/<PROJECT_NAME>/$proj_basename/g" "$s_template" > "$s_target"
+        sed "s/<PROJECT_NAME>/$safe_proj_basename/g" "$s_template" > "$s_target"
         echo -e "  ${GREEN}[√] 自动初始化当前会话断点: SESSION_STATE.md${NC}"
     fi
 
@@ -930,16 +933,27 @@ if command -v comet >/dev/null 2>&1; then
     fi
 
     echo -e "\n  ${YELLOW}--- 跨平台体检报告 (comet doctor) ---${NC}"
+    local raw_doc
+    raw_doc=$(cd "$TARGET_ABS" && comet doctor 2>&1) || true
     if [ "$BRIEF_PROBE" = true ]; then
-        _comet_doc=$(cd "$TARGET_ABS" && comet doctor 2>&1 | grep -E "✓|✗|⚠" | head -n 15) || true
-        if [ -n "$_comet_doc" ]; then
-            echo -e "${YELLOW}${_comet_doc}${NC}"
+        local brief_lines
+        brief_lines=$(echo "$raw_doc" | grep -E "✓|✗|⚠" | head -n 15 || true)
+        if [ -n "$brief_lines" ]; then
+            echo -e "${YELLOW}${brief_lines}${NC}"
             echo -e "  ${DIM}... (已启用 --brief-probe 极简模式，忽略后续详细平台检测)${NC}\n"
         fi
     else
-        _comet_doc=$(cd "$TARGET_ABS" && comet doctor 2>&1) || true
-        if [ -n "$_comet_doc" ]; then
-            echo -e "${YELLOW}${_comet_doc}${NC}\n"
+        local issues passes warn_cnt fail_cnt
+        issues=$(echo "$raw_doc" | grep -E "✗|⚠" || true)
+        passes=$(echo "$raw_doc" | grep -E "^  ✓" | wc -l || true)
+        warn_cnt=$(echo "$raw_doc" | grep -c "⚠" || true)
+        fail_cnt=$(echo "$raw_doc" | grep -c "✗" || true)
+        if [ -n "$issues" ]; then
+            echo -e "  ${YELLOW}发现告警/异常项 ($warn_cnt 警告, $fail_cnt 错误):${NC}"
+            echo -e "${YELLOW}${issues}${NC}"
+            echo -e "  ${GREEN}✓ 其余 $passes 项平台检查通过${NC}\n"
+        else
+            echo -e "  ${GREEN}✓ 全部 $passes 项跨平台健康检查通过${NC}\n"
         fi
     fi
 fi

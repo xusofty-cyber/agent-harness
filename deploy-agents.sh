@@ -993,7 +993,10 @@ TARGET_PROJECT_CONTEXT="${TARGET_PROJECT_DIR}/PROJECT_CONTEXT.md"
 if [ ! -f "${TARGET_PROJECT_CONTEXT}" ]; then
     if [ -f "${PROJECT_CONTEXT_TEMPLATE}" ]; then
         proj_basename="$(basename "${TARGET_PROJECT_DIR}")"
-        sed "s/<PROJECT_NAME>/${proj_basename}/g" "${PROJECT_CONTEXT_TEMPLATE}" > "${TARGET_PROJECT_CONTEXT}"
+        safe_proj_basename="${proj_basename//\\/\\\\}"
+        safe_proj_basename="${safe_proj_basename//\//\\/}"
+        safe_proj_basename="${safe_proj_basename//&/\\&}"
+        sed "s/<PROJECT_NAME>/${safe_proj_basename}/g" "${PROJECT_CONTEXT_TEMPLATE}" > "${TARGET_PROJECT_CONTEXT}"
         echo -e "  ${GREEN}[√] 已生成项目长期事实: PROJECT_CONTEXT.md（从模板初始化）${NC}"
     fi
 else
@@ -1004,7 +1007,10 @@ TARGET_SESSION_STATE="${TARGET_PROJECT_DIR}/SESSION_STATE.md"
 if [ ! -f "${TARGET_SESSION_STATE}" ]; then
     if [ -f "${SESSION_STATE_TEMPLATE}" ]; then
         proj_basename="$(basename "${TARGET_PROJECT_DIR}")"
-        sed "s/<PROJECT_NAME>/${proj_basename}/g" "${SESSION_STATE_TEMPLATE}" > "${TARGET_SESSION_STATE}"
+        safe_proj_basename="${proj_basename//\\/\\\\}"
+        safe_proj_basename="${safe_proj_basename//\//\\/}"
+        safe_proj_basename="${safe_proj_basename//&/\\&}"
+        sed "s/<PROJECT_NAME>/${safe_proj_basename}/g" "${SESSION_STATE_TEMPLATE}" > "${TARGET_SESSION_STATE}"
         echo -e "  ${GREEN}[√] 已生成当前会话断点: SESSION_STATE.md（从模板初始化）${NC}"
     fi
 else

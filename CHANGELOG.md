@@ -15,12 +15,6 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   automatically.
 - **Native YAML Frontmatter in 15 `engineering-docs` templates**: Upgraded headers of all 15 Markdown template files in `.agents/skills/engineering-docs/references/templates/` (and generator `gen_templates.py`) to native YAML Frontmatter blocks with schema metadata (`id`, `title`, `type`, `status`, `modules`, `depends_on`, `version`, `last_verified_commit`). Ensures any AI agent copying templates defaults to complete traceability metadata for downstream `living-documentation` and `doc-impact.py` analysis.
 
-### Fixed
-- **Windows PowerShell BOM encoding**: Saved all PowerShell scripts (`run-pipeline.ps1`,
-  `pipeline.ps1`, `deploy-agents.ps1`) with UTF-8 BOM (`utf-8-sig`) to prevent
-  Windows PowerShell 5.1 from misinterpreting Chinese characters and quotes under
-  default ANSI/GBK code page 936.
-
 ### Added
 - **Comet Workflow Engine deep integration (Native & Classic dual-mode)**:
   - **Phase 1 (Rules & Skills)**: Enriched `.agents/rules/engineering-spec.md` with Decision Ownership (investigable facts, user choices, implementation choices) and Independent Verifier Protocol. Upgraded `.agents/skills/comet/SKILL.md` into a full-featured dual-mode guide covering Native goal loops, Classic phase state machines, crash recovery, and living documentation bindings.
@@ -96,6 +90,16 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   Word-rendering guidance included.
 
 ### Fixed
+- **Markdownlint CI blocker (P0)**: Unified heading in all 15 engineering document templates from dual H1s to single bilingual `# {title_cn} / {title_en}` (MD025) and added language identifier to `SKILL.md` decision tree fenced code block (MD040), eliminating 31 markdownlint errors in CI.
+- **Traceability path alignment (P1-1)**: Converged recommended document output paths in `engineering-docs/SKILL.md` and `comet/SKILL.md` to the standard 4-tier living-doc hierarchy (`docs/{specs,architecture,reference,guides}/`), ensuring all generated docs are discovered by `doc-impact.py`.
+- **Canonical document type enforcement (P1-2)**: Restored strict equality checking for `TIER_TYPES` in `tests/repo_checks.py`, enforcing exact canonical document types (`specs`, `architecture`, `reference`, `guide`, `adr`) across all templates and docs.
+- **Skill lock tamper verification (P1-3)**: Enhanced `tools/sync-skills.py` to validate `computedHash` from `skills-lock.json`, distinguishing local unauthorized modifications (`tampered`) from upstream releases (`outdated`), with unit test coverage and refreshed SHA256 hashes across all 43 skills.
+- **CI coverage & pipeline parity (P1-4)**: Added static frontmatter schema verification for all 15 document templates in `tests/repo_checks.py`, YAML syntax validation for `templates/comet.config.yaml`, stage parity verification between `run-pipeline.sh` and `run-pipeline.ps1`, and added Comet config verification in CI smoke tests.
+- **Comet config & pipeline runner hardening (P2)**: Defaulted `templates/comet.config.yaml` active workflows to native only (classic commented out); permitted `.comet/config.yaml` in `.gitignore` for team version control; safely escaped special characters (`&`, `/`, `\`) in `sed` replacement; condensed `comet doctor` output in `run-pipeline` to highlight issues and summarize passed checks; fixed lingering English guide prompts and duplicate blank lines.
+- **Windows PowerShell BOM encoding**: Saved all PowerShell scripts (`run-pipeline.ps1`,
+  `pipeline.ps1`, `deploy-agents.ps1`) with UTF-8 BOM (`utf-8-sig`) to prevent
+  Windows PowerShell 5.1 from misinterpreting Chinese characters and quotes under
+  default ANSI/GBK code page 936.
 - `deploy-agents.ps1`: fixed Bashism parameter expansion syntax (`${var:+ ...}`) in CLI version string formatting.
 - `deploy-agents.sh`: restored executable file mode (100755).
 - `deploy-agents.sh` / `deploy-agents.ps1`: sync `.agents/review-sensitive-paths.json` to deployed projects and track in PARITY table.

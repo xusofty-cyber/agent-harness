@@ -88,12 +88,11 @@ If Claude doesn't pick up a skill when you expect it, just name it explicitly.
 | `writing-skills` | Auto | — | Guides skill creation/editing/verification. | When creating or modifying skills in `.agents/skills/`. |
 | `diagnosing-superpowers` | Auto | — | Diagnoses when a superpowers workflow went wrong. | When Claude ignored plans, repeated work, or seemed "off". Say "diagnose what went wrong". |
 
-
 ### 7. Engineering Documentation
 
 | Skill | Trigger | Slash | What It Does | When to Use |
 |---|---|---|---|---|
-| `engineering-docs` | Hybrid | — | 15 bilingual templates covering 31 R&D document types (proposal → requirements → design → test → delivery). Includes rendering spec (heading sizes, fonts, paragraph styles) for consistent output. | When writing any formal R&D document. Say "write a PRD" / "写一份概要设计" and it picks the right template. |
+| `engineering-docs` | Hybrid | — | 15 bilingual templates covering 31 R&D document types (proposal → requirements → design → test → delivery). Includes rendering spec (heading sizes, fonts, paragraph styles) for consistent output. | When writing any formal R&D document. Say "write a PRD" / "write an HLD" and it picks the right template. |
 
 ## Project Memory Setup
 

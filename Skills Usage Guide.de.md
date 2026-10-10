@@ -87,7 +87,6 @@ Wenn Claude einen Skill nicht wie erwartet lädt, benennen Sie ihn einfach expli
 | `writing-skills` | Auto | — | Leitet die Erstellung, Bearbeitung und Verifizierung von Skills an. | Beim Erstellen oder Ändern von Skills in `.agents/skills/`. |
 | `diagnosing-superpowers` | Auto | — | Diagnostiziert Fehler im Superpowers-Workflow. | Wenn Claude Pläne ignoriert oder Arbeiten wiederholt. Sagen Sie "diagnostiziere, was schiefgelaufen ist". |
 
-
 ### 7. Engineering-Dokumentation
 
 | Skill | Trigger | Befehl | Funktion | Wann einsetzen |

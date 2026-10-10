@@ -64,6 +64,16 @@ jobs:
           test -f /tmp/smoke-proj/.claude/hooks/guard.mjs
           test -f /tmp/smoke-proj/skills-lock.json
           test -d /tmp/smoke-proj/.agents/skills
+          test -d /tmp/smoke-proj/docs/specs
+          test -d /tmp/smoke-proj/docs/architecture
+          test -d /tmp/smoke-proj/docs/reference
+          test -d /tmp/smoke-proj/docs/guides
+          test -d /tmp/smoke-proj/docs/adr
+          # Smoke test Comet config deployment with --comet-init
+          mkdir -p /tmp/smoke-comet-proj
+          bash deploy-agents.sh /tmp/smoke-comet-proj --comet-init < /dev/null
+          test -f /tmp/smoke-comet-proj/.comet/config.yaml
+          rm -rf /tmp/smoke-comet-proj
           echo "deploy smoke test passed"
 
   ps-analyzer:

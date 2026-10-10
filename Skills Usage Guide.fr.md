@@ -87,7 +87,6 @@ Si Claude ne charge pas une compétence comme prévu, nommez-la simplement de ma
 | `writing-skills` | Auto | — | Guide la création, l'édition et la vérification de compétences. | Lors de la création ou modification de compétences dans `.agents/skills/`. |
 | `diagnosing-superpowers` | Auto | — | Diagnostique les anomalies dans le flux de travail superpowers. | Lorsque Claude ignore les plans ou répète des tâches. Dites "diagnostique ce qui ne va pas". |
 
-
 ### 7. Documentation d'ingénierie
 
 | Compétence | Déclencheur | Commande | Description | Quand l'utiliser |

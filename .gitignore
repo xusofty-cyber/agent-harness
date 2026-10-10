@@ -1,6 +1,7 @@
 # Claude & Comet local runtime generated artifacts
 .claude/skills/
-.comet/
+.comet/*
+!.comet/config.yaml
 
 # Machine-specific agent hook configurations (comet init / local IDE hooks with absolute paths)
 .codex/hooks.json

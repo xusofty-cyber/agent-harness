@@ -87,7 +87,6 @@ Claude Code 通过两种方式决定加载 skill：
 | `writing-skills` | 自动 | — | 指导 skill 的创建/编辑/验证。 | 在 `.agents/skills/` 下创建或修改 skill 时。 |
 | `diagnosing-superpowers` | 自动 | — | 诊断 superpowers 工作流出错的原因。 | Claude 忽略计划、重复劳动、表现异常时。说"诊断哪里出问题了"。 |
 
-
 ### 7. 工程文档
 
 | Skill | 触发 | 命令 | 作用 | 使用时机 |

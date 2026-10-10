@@ -87,7 +87,6 @@ Claude Code 透過兩種方式決定載入 skill：
 | `writing-skills` | 自動 | — | 指導 skill 的建立/編輯/驗證。 | 在 `.agents/skills/` 下建立或修改 skill 時。 |
 | `diagnosing-superpowers` | 自動 | — | 診斷 superpowers 工作流出錯的原因。 | Claude 忽視計畫、重複工作、表現異常時。說「診斷哪裡出問題了」。 |
 
-
 ### 7. 工程文件
 
 | Skill | 觸發 | 命令 | 作用 | 使用時機 |

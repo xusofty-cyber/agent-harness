@@ -141,10 +141,17 @@ def check_skill(name: str, meta: dict) -> dict:
 
     local_hash = sha256_norm(local_file.read_bytes())
     upstream_hash = sha256_norm(upstream)
+    expected_hash = meta.get("computedHash")
     result["local_sha256"] = local_hash[:12]
     result["upstream_sha256"] = upstream_hash[:12]
+    if expected_hash:
+        result["expected_sha256"] = expected_hash[:12]
+
     if local_hash == upstream_hash:
         result["status"] = "in-sync"
+    elif expected_hash and upstream_hash == expected_hash and local_hash != expected_hash:
+        result["status"] = "tampered"
+        result["upstream_bytes"] = upstream
     else:
         result["status"] = "outdated"
         result["upstream_bytes"] = upstream
@@ -219,7 +226,7 @@ def main() -> int:
     results = []
     for name, meta in skills:
         r = check_skill(name, meta)
-        if do_apply and r.get("status") == "outdated":
+        if do_apply and r.get("status") in ("outdated", "tampered"):
             apply_update(name, meta, r.pop("upstream_bytes"))
             r["status"] = "updated"
         else:
@@ -235,14 +242,14 @@ def main() -> int:
                          indent=2, ensure_ascii=False))
     else:
         icons = {"in-sync": "🟢", "outdated": "🟡", "updated": "🔵",
-                 "fetch-failed": "⚪", "missing-local": "🔴"}
+                 "fetch-failed": "⚪", "missing-local": "🔴", "tampered": "🚨"}
         print(f"Checked {len(results)} external skills: " +
               ", ".join(f"{k}={v}" for k, v in sorted(summary.items())))
         print()
         for r in sorted(results, key=lambda x: x["skill"]):
             icon = icons.get(r["status"], "❓")
             extra = ""
-            if r["status"] in ("outdated", "updated"):
+            if r["status"] in ("outdated", "updated", "tampered"):
                 extra = f" ({r['local_sha256']} → {r['upstream_sha256']})"
             print(f"{icon} {r['skill']}: {r['status']}{extra}")
         if do_apply and summary.get("updated"):

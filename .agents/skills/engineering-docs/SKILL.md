@@ -14,7 +14,7 @@ license: MIT
 
 **需要什么文档？→ 用哪个模板：**
 
-```
+```text
 立项 Initiation
 ├── 要建议立项 / 做可行性论证？     → 01-project-proposal.md
 ├── 要评审记录 / 审批 / 会签？       → 02-project-approval.md
@@ -87,9 +87,9 @@ license: MIT
 
 | # | 模板 | 阶段 | Comet 对应阶段 | 推荐存储路径 | 覆盖文档数 |
 |---|---|---|---|---|---|
-| 01 | project-proposal | 立项 | — | `docs/management/` | 2 |
-| 02 | project-approval | 立项 | — | `docs/management/` | 3 |
-| 03 | project-task-book | 立项 | — | `docs/management/` | 2 |
+| 01 | project-proposal | 立项 | — | `docs/specs/` | 2 |
+| 02 | project-approval | 立项 | — | `docs/specs/` | 3 |
+| 03 | project-task-book | 立项 | — | `docs/specs/` | 2 |
 | 04 | user-requirements | 需求 | Open | `docs/specs/` | 1 |
 | 05 | product-spec | 需求 | Open | `docs/specs/` | 1 |
 | 06 | srs | 需求 | Open | `docs/specs/` | 2 |
@@ -97,10 +97,10 @@ license: MIT
 | 08 | hld | 设计 | Design | `docs/architecture/` | 1 |
 | 09 | lld | 设计 | Design | `docs/architecture/` | 1 |
 | 10 | interface-spec | 设计 | Design / Build | `docs/reference/` | 2 |
-| 11 | project-plan | 管理 | Build | `docs/management/` | 1 |
-| 12 | project-report | 管理 | Build | `docs/management/` | 5 |
-| 13 | test-plan | 测试 | Verify | `docs/reference/` 或 `docs/tests/` | 2 |
-| 14 | test-report | 测试 | Verify | `docs/reference/` 或 `docs/tests/` | 5 |
+| 11 | project-plan | 管理 | Build | `docs/guides/` | 1 |
+| 12 | project-report | 管理 | Build | `docs/guides/` | 5 |
+| 13 | test-plan | 测试 | Verify | `docs/reference/` | 2 |
+| 14 | test-report | 测试 | Verify | `docs/reference/` | 5 |
 | 15 | delivery-docs | 交付 | Archive | `docs/guides/` | 2 |
 
 共 15 个模板，覆盖 31 种文档。无论使用哪种 AI Agent 工具，均输出相同章节结构与排版格式。

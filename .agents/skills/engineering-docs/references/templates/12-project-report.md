@@ -11,8 +11,7 @@ version: 0.1.0
 last_verified_commit: HEAD
 ---
 
-# 项目报告
-# Project Report
+# 项目报告 / Project Report
 
 > **文档类型**：项目进展报告 / 项目总结报告 / 试运行报告 / 评审报告 / 会议纪要  
 > **适用阶段**：管理 Management  

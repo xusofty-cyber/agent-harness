@@ -11,8 +11,7 @@ version: 0.1.0
 last_verified_commit: HEAD
 ---
 
-# 方案设计报告
-# Solution Design Report
+# 方案设计报告 / Solution Design Report
 
 > **文档类型**：方案设计报告  
 > **适用阶段**：设计 Design  

@@ -11,8 +11,7 @@ version: 0.1.0
 last_verified_commit: HEAD
 ---
 
-# 接口与数据库设计说明
-# Interface & Database Specification
+# 接口与数据库设计说明 / Interface & Database Specification
 
 > **文档类型**：接口说明书 / 数据库设计说明书  
 > **适用阶段**：设计 Design  

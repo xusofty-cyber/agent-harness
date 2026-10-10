@@ -11,8 +11,7 @@ version: 0.1.0
 last_verified_commit: HEAD
 ---
 
-# 项目任务书
-# Project Task Book
+# 项目任务书 / Project Task Book
 
 > **文档类型**：项目任务书 / 项目工作任务书  
 > **适用阶段**：立项 Initiation  

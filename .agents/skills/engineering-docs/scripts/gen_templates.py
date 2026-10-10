@@ -218,8 +218,7 @@ version: 0.1.0
 last_verified_commit: HEAD
 ---
 
-# {title_cn}
-# {title_en}
+# {title_cn} / {title_en}
 """
 
 for fname, t_cn, t_en, doc_name, phase, covers, doc_id, doc_type, deps, sections in TEMPLATES:

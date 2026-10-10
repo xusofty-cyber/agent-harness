@@ -11,8 +11,7 @@ version: 0.1.0
 last_verified_commit: HEAD
 ---
 
-# 软件详细设计说明书
-# Low-Level Design (LLD)
+# 软件详细设计说明书 / Low-Level Design (LLD)
 
 > **文档类型**：软件详细设计说明书  
 > **适用阶段**：设计 Design  

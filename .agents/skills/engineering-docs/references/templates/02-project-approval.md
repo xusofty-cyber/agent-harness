@@ -11,8 +11,7 @@ version: 0.1.0
 last_verified_commit: HEAD
 ---
 
-# 项目立项审批文件
-# Project Approval Documents
+# 项目立项审批文件 / Project Approval Documents
 
 > **文档类型**：立项评审报告 / 立项审批报告 / 会签评审表  
 > **适用阶段**：立项 Initiation  

@@ -100,6 +100,22 @@ class TestCheckSkill(unittest.TestCase):
             r = mod.check_skill("x", meta)
         self.assertEqual(r["status"], "fetch-failed")
 
+    def test_tampered(self):
+        # When upstream matches locked computedHash, but local file was modified: tampered
+        meta = {
+            "source": "o/r",
+            "skillPath": "skills/x/SKILL.md",
+            "computedHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"  # sha of empty
+        }
+        with patch.object(mod, "fetch_upstream", return_value=b""):
+            with patch.object(mod, "SKILLS_DIR") as sd:
+                fake_file = Path("/fake/x/SKILL.md")
+                sd.__truediv__.return_value.__truediv__.return_value = fake_file
+                with patch.object(Path, "read_bytes", lambda self: b"locally modified"):
+                    r = mod.check_skill("x", meta)
+        self.assertEqual(r["status"], "tampered")
+        self.assertIn("upstream_bytes", r)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=1)

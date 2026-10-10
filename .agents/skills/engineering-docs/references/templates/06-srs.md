@@ -11,8 +11,7 @@ version: 0.1.0
 last_verified_commit: HEAD
 ---
 
-# 软件需求规格说明
-# Software Requirements Specification (SRS)
+# 软件需求规格说明 / Software Requirements Specification (SRS)
 
 > **文档类型**：软件需求规格说明 / 开发需求细化表  
 > **适用阶段**：需求 Requirements  

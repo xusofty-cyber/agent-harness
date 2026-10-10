@@ -11,8 +11,7 @@ version: 0.1.0
 last_verified_commit: HEAD
 ---
 
-# 软件测试计划
-# Software Test Plan
+# 软件测试计划 / Software Test Plan
 
 > **文档类型**：软件集成测试计划 / 软件系统测试计划  
 > **适用阶段**：测试 Testing  
