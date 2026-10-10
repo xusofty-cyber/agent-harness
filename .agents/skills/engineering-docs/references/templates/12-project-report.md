@@ -1,7 +1,7 @@
 ---
 id: REP-XXX
 title: "[模块/系统名称] 项目报告"
-type: guide
+type: management
 status: draft
 modules:
   - "src/your_module/**"

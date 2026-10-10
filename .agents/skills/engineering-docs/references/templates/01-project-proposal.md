@@ -1,7 +1,7 @@
 ---
 id: PROP-XXX
 title: "[模块/系统名称] 项目立项建议书"
-type: specs
+type: management
 status: draft
 modules:
   - "src/your_module/**"

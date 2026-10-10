@@ -1,7 +1,7 @@
 ---
 id: LLD-XXX
 title: "[模块/系统名称] 软件详细设计说明书"
-type: architecture
+type: reference
 status: draft
 modules:
   - "src/your_module/**"
@@ -32,13 +32,13 @@ last_verified_commit: HEAD
 
 ## 3. 模块详细设计 / Module Details
 
-<!-- 每个模块：接口定义、内部类/函数、核心算法（伪代码或流程图）。 -->
+<!-- 每个模块：接口定义、内部类/函数、核心算法（伪代码或流程图）。 格式：每个模块用 ### 子标题，含接口定义（代码块）、内部流程（mermaid 或伪代码）。 -->
 
 [模块详细设计内容]
 
 ## 4. 数据结构 / Data Structures
 
-<!-- 关键数据结构定义。 -->
+<!-- 关键数据结构定义。 格式：用代码块定义结构体/类。 -->
 
 [数据结构内容]
 

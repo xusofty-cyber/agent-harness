@@ -27,7 +27,7 @@ sys.path.insert(0, str(__import__('pathlib').Path(__file__).resolve().parent))
 from tui import tui_select
 from pathlib import Path
 
-DOC_TIERS = ("specs", "architecture", "reference", "guides", "adr")
+DOC_TIERS = ("specs", "architecture", "reference", "guides", "management", "tests", "adr")
 
 
 def _sh(cmd: list[str], cwd: Path) -> str:

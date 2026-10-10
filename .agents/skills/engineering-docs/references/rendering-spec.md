@@ -59,9 +59,9 @@
 Markdown 定稿后，用 pandoc 转换为 Word：
 
 ```bash
-# 1. 准备中文 Word 参考模板（只需一次）
-#    可使用 Achuan-2/pandoc_docx_template 的模板
-#    https://github.com/Achuan-2/pandoc_docx_template
+# 1. 一键获取中文 Word 参考模板（只需一次）
+./scripts/fetch-word-template.sh
+#    （下载自 Achuan-2/pandoc_docx_template，社区验证的中文排版）
 
 # 2. 转换
 pandoc input.md -o output.docx --reference-doc template.docx
