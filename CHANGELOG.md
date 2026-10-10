@@ -23,6 +23,13 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 - **Native-reader notice**: OpenCode, Aider, Qoder and Pi read `AGENTS.md`
   natively (zero config) — listed as auto-supported in the wizard alongside
   Codex, Antigravity and Zed. Total: 19 tools covered (12 bridge + 7 native).
+- **Automatic project memory scaffold (`PROJECT_CONTEXT.md` & `SESSION_STATE.md`)**:
+  Both pipeline runners (`run-pipeline.sh`, `run-pipeline.ps1`, and shortcuts `pipeline.sh`, `pipeline.ps1`)
+  and deploy scripts (`deploy-agents.sh`, `deploy-agents.ps1`) now detect whether `PROJECT_CONTEXT.md`
+  and `SESSION_STATE.md` exist in the target project. Missing files are automatically scaffolded
+  from production-grade multilingual templates (`templates/PROJECT_CONTEXT.template.*.md` and
+  `templates/SESSION_STATE.template.*.md` in EN, ZH, ZH-TW, FR, DE), synthesizing architecture facts,
+  tech stack matrices, Ponytail decision ladders, strict verification evidence gates, and session breakpoints.
 
 - **Interactive TUI step-by-step wizards**: Added interactive terminal selection wizards
   (↑↓ arrow navigation, space toggle, enter confirm, with automatic non-TTY numbered fallbacks)

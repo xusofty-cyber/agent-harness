@@ -92,8 +92,7 @@ Claude Code 通过两种方式决定加载 skill：
 ### `PROJECT_CONTEXT.md` 和 `SESSION_STATE.md`
 
 这是 ai-memory MCP 服务不可用时的文件回退方案。
-`cross-tool-memory` skill 会自动读取它们——但**它们不会被自动创建**。
-每个项目需要手动创建一次初始版本。
+`cross-tool-memory` skill 会自动读取它们。在执行 `deploy-agents.sh / .ps1` 或 `run-pipeline.sh / .ps1`（及快捷入口 `pipeline.sh / .ps1`）时，若目标项目缺少这两个文件，脚本会**自动从模板初始化创建**。亦可在任何时候通过问答或下方模板手动初始化。
 
 **何时创建：**
 - `PROJECT_CONTEXT.md`：每个项目一次，架构稳定后创建。只在持久事实变化时更新（技术栈、约束、关键决策）。

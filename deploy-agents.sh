@@ -488,6 +488,25 @@ if [ ! -f "${DIRECTORY_TEMPLATE}" ]; then
     DIRECTORY_TEMPLATE="${SCRIPT_DIR}/Directory AGENTS.md"
 fi
 
+resolve_aux_template() {
+    local base_name="$1"
+    local suffix="$2"
+    local path="${SCRIPT_DIR}/templates/${base_name}.template${suffix}.md"
+    if [ -n "$suffix" ] && [ -f "$path" ]; then
+        echo "$path"
+        return
+    fi
+    path="${SCRIPT_DIR}/templates/${base_name}.template.md"
+    if [ -f "$path" ]; then
+        echo "$path"
+        return
+    fi
+    echo "${SCRIPT_DIR}/templates/${base_name}.template.md"
+}
+
+PROJECT_CONTEXT_TEMPLATE="$(resolve_aux_template "PROJECT_CONTEXT" "$LANG_SUFFIX")"
+SESSION_STATE_TEMPLATE="$(resolve_aux_template "SESSION_STATE" "$LANG_SUFFIX")"
+
 SOURCE_RULES_DIR="${SCRIPT_DIR}/.agents/rules"
 SOURCE_SKILLS_DIR="${SCRIPT_DIR}/.agents/skills"
 SOURCE_SKILLS_LOCK="${SCRIPT_DIR}/skills-lock.json"
@@ -967,6 +986,29 @@ else
         cp -f "${PROJECT_TEMPLATE}" "${TARGET_PROJECT_DIR}/AGENTS.template.md"
         echo "  [i] 已生成最新的 AGENTS.template.md 供参照。"
     fi
+fi
+
+# 3.1 部署项目长期事实与会话断点记忆 (PROJECT_CONTEXT.md & SESSION_STATE.md)
+TARGET_PROJECT_CONTEXT="${TARGET_PROJECT_DIR}/PROJECT_CONTEXT.md"
+if [ ! -f "${TARGET_PROJECT_CONTEXT}" ]; then
+    if [ -f "${PROJECT_CONTEXT_TEMPLATE}" ]; then
+        proj_basename="$(basename "${TARGET_PROJECT_DIR}")"
+        sed "s/<PROJECT_NAME>/${proj_basename}/g" "${PROJECT_CONTEXT_TEMPLATE}" > "${TARGET_PROJECT_CONTEXT}"
+        echo -e "  ${GREEN}[√] 已生成项目长期事实: PROJECT_CONTEXT.md（从模板初始化）${NC}"
+    fi
+else
+    echo "  [i] 目标项目已存在 PROJECT_CONTEXT.md，保持现状。"
+fi
+
+TARGET_SESSION_STATE="${TARGET_PROJECT_DIR}/SESSION_STATE.md"
+if [ ! -f "${TARGET_SESSION_STATE}" ]; then
+    if [ -f "${SESSION_STATE_TEMPLATE}" ]; then
+        proj_basename="$(basename "${TARGET_PROJECT_DIR}")"
+        sed "s/<PROJECT_NAME>/${proj_basename}/g" "${SESSION_STATE_TEMPLATE}" > "${TARGET_SESSION_STATE}"
+        echo -e "  ${GREEN}[√] 已生成当前会话断点: SESSION_STATE.md（从模板初始化）${NC}"
+    fi
+else
+    echo "  [i] 目标项目已存在 SESSION_STATE.md，保持现状。"
 fi
 
 if [ "$DO_INITIALIZE" = true ]; then

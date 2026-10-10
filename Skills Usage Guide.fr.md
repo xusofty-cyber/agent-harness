@@ -92,8 +92,7 @@ Si Claude ne charge pas une compétence comme prévu, nommez-la simplement de ma
 ### `PROJECT_CONTEXT.md` et `SESSION_STATE.md`
 
 Ce mécanisme constitue la solution de repli basée sur des fichiers lorsque le service MCP ai-memory est indisponible.
-La compétence `cross-tool-memory` les lit automatiquement — mais **ils ne sont pas créés automatiquement**.
-Vous devez créer les versions initiales une fois par projet.
+La compétence `cross-tool-memory` les lit automatiquement. Lors de l'exécution de `deploy-agents.sh / .ps1` ou `run-pipeline.sh / .ps1` (et `pipeline.sh / .ps1`), s'ils sont absents du projet cible, les scripts **les initialisent automatiquement à partir de modèles**. Vous pouvez également les initialiser ou les personnaliser manuellement via les modèles ci-dessous.
 
 **Quand les créer :**
 - `PROJECT_CONTEXT.md` : Une fois par projet, quand l'architecture est stable. Mettre à jour uniquement lorsque les faits durables changent (stack, contraintes, décisions clés).

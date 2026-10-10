@@ -206,6 +206,7 @@ PARITY = [
     (".kiro/steering", ".kiro/steering", "Kiro bridge"),
     (".continue/rules", ".continue/rules", "Continue.dev bridge"),
     (".trae/rules", ".trae/rules", "Trae bridge"),
+    ("PROJECT_CONTEXT.md", "PROJECT_CONTEXT.md", "project memory scaffold (PROJECT_CONTEXT/SESSION_STATE)"),
     ("Pipeline", "run-pipeline", "pipeline runner integration"),
 ]
 ps1 = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")

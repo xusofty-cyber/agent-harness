@@ -92,8 +92,7 @@ Wenn Claude einen Skill nicht wie erwartet lädt, benennen Sie ihn einfach expli
 ### `PROJECT_CONTEXT.md` und `SESSION_STATE.md`
 
 Dies ist die dateibasierte Ausweichlösung, wenn der ai-memory MCP-Dienst nicht verfügbar ist.
-Der Skill `cross-tool-memory` liest diese Dateien automatisch — sie werden jedoch **nicht automatisch erstellt**.
-Sie müssen die initialen Versionen einmal pro Projekt anlegen.
+Der Skill `cross-tool-memory` liest diese Dateien automatisch. Beim Ausführen von `deploy-agents.sh / .ps1` oder `run-pipeline.sh / .ps1` (und `pipeline.sh / .ps1`) werden fehlende Dateien im Zielprojekt **automatisch aus Vorlagen initialisiert**. Sie können sie auch manuell anhand der folgenden Vorlagen erstellen oder anpassen.
 
 **Wann erstellen:**
 - `PROJECT_CONTEXT.md`: Einmal pro Projekt, sobald die Architektur stabil ist. Nur aktualisieren, wenn sich dauerhafte Fakten ändern (Stack, Constraints, Schlüsselentscheidungen).

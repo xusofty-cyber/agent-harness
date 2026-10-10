@@ -93,8 +93,7 @@ If Claude doesn't pick up a skill when you expect it, just name it explicitly.
 ### `PROJECT_CONTEXT.md` and `SESSION_STATE.md`
 
 These are the file-based fallback when the ai-memory MCP service is unavailable.
-The `cross-tool-memory` skill reads them automatically — but **they are not auto-created**.
-You need to create the initial versions once per project.
+The `cross-tool-memory` skill reads them automatically. When running `deploy-agents.sh / .ps1` or `run-pipeline.sh / .ps1` (and `pipeline.sh / .ps1`), if either file is missing in the target project, the scripts **automatically initialize them from templates**. You can also create or customize them manually using the templates below.
 
 **When to create:**
 - `PROJECT_CONTEXT.md`: Once per project, when the architecture is stable. Update only when durable facts change (stack, constraints, key decisions).

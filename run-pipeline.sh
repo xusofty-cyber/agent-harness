@@ -665,10 +665,47 @@ fi
 # Resolve absolute target path
 TARGET_ABS="$(cd "$PROJECT_DIR" 2>/dev/null && pwd || echo "$PROJECT_DIR")"
 
+ensure_project_memory_scaffold() {
+    local target_dir="$1"
+    local lang_opt="$2"
+    local lang_suffix=""
+    case "$lang_opt" in
+        zh|zh-cn|zh-hans) lang_suffix=".zh" ;;
+        zh-tw|zh-hk|zh-hant) lang_suffix=".zh-tw" ;;
+        en|en-us|en-gb) lang_suffix="" ;;
+        fr|fr-fr) lang_suffix=".fr" ;;
+        de|de-de) lang_suffix=".de" ;;
+        *) lang_suffix="" ;;
+    esac
+
+    local proj_basename
+    proj_basename="$(basename "$target_dir")"
+
+    local p_template="$REPO_ROOT/templates/PROJECT_CONTEXT.template${lang_suffix}.md"
+    [ ! -f "$p_template" ] && p_template="$REPO_ROOT/templates/PROJECT_CONTEXT.template.md"
+
+    local s_template="$REPO_ROOT/templates/SESSION_STATE.template${lang_suffix}.md"
+    [ ! -f "$s_template" ] && s_template="$REPO_ROOT/templates/SESSION_STATE.template.md"
+
+    local p_target="$target_dir/PROJECT_CONTEXT.md"
+    if [ ! -f "$p_target" ] && [ -f "$p_template" ]; then
+        sed "s/<PROJECT_NAME>/$proj_basename/g" "$p_template" > "$p_target"
+        echo -e "  ${GREEN}[√] 自动初始化项目长期事实: PROJECT_CONTEXT.md${NC}"
+    fi
+
+    local s_target="$target_dir/SESSION_STATE.md"
+    if [ ! -f "$s_target" ] && [ -f "$s_template" ]; then
+        sed "s/<PROJECT_NAME>/$proj_basename/g" "$s_template" > "$s_target"
+        echo -e "  ${GREEN}[√] 自动初始化当前会话断点: SESSION_STATE.md${NC}"
+    fi
+}
+
 echo -e "\n${BOLD}${CYAN}▶ 开始执行 Agent Harness 工程流水线${NC}"
 echo -e "  目标工程: ${GREEN}$TARGET_ABS${NC}"
 echo -e "  模版语言: ${GREEN}$LANG_OPTION${NC}"
 echo -e "  执行模式: ${GREEN}$RUN_DETAIL_MODE${NC}\n"
+
+ensure_project_memory_scaffold "$TARGET_ABS" "$LANG_OPTION"
 
 # Tracking results
 declare -a SUMMARY_NAMES=()

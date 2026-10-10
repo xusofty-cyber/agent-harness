@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 # deploy-agents.ps1
 # Platforms: Windows (PowerShell 5.1 / PowerShell 7+)
 # Purpose: One-click deploy & online update AI Agents Harness spec, rules & skills
@@ -310,6 +310,19 @@ $ResolvedDirectoryTemplate = Resolve-TemplateFile "Directory AGENTS" $LangSuffix
 if (-not (Test-Path $ResolvedDirectoryTemplate)) {
     $ResolvedDirectoryTemplate = Join-Path $ScriptDir "Directory AGENTS.md"
 }
+
+function Resolve-AuxTemplate([string]$BaseName, [string]$Suffix) {
+    if ($Suffix) {
+        $candidate = Join-Path $ScriptDir "templates\$BaseName.template$Suffix.md"
+        if (Test-Path $candidate) { return $candidate }
+    }
+    $fallback = Join-Path $ScriptDir "templates\$BaseName.template.md"
+    if (Test-Path $fallback) { return $fallback }
+    return $fallback
+}
+
+$ResolvedProjectContextTemplate = Resolve-AuxTemplate "PROJECT_CONTEXT" $LangSuffix
+$ResolvedSessionStateTemplate = Resolve-AuxTemplate "SESSION_STATE" $LangSuffix
 
 $SourceRulesDir = Join-Path $ScriptDir ".agents\rules"
 $SourceSkillsDir = Join-Path $ScriptDir ".agents\skills"
@@ -812,6 +825,33 @@ if (-not (Test-Path $TargetAgentsFile)) {
         Copy-Item -Path $ResolvedProjectTemplate -Destination $TargetRefTemplate -Force
         Write-Host "  [INFO] Created AGENTS.template.md for reference with latest specs." -ForegroundColor Gray
     }
+}
+
+# 3.1 部署项目长期事实与会话断点记忆 (PROJECT_CONTEXT.md & SESSION_STATE.md)
+$TargetProjectContext = Join-Path $ResolvedProjectPath "PROJECT_CONTEXT.md"
+if (-not (Test-Path $TargetProjectContext)) {
+    if (Test-Path $ResolvedProjectContextTemplate) {
+        $projBaseName = Split-Path -Leaf $ResolvedProjectPath
+        $content = Get-Content -Path $ResolvedProjectContextTemplate -Raw -Encoding utf8
+        $content = $content -replace '<PROJECT_NAME>', $projBaseName
+        [System.IO.File]::WriteAllText($TargetProjectContext, $content, [System.Text.Encoding]::UTF8)
+        Write-Host "  [OK] Created PROJECT_CONTEXT.md from template" -ForegroundColor Green
+    }
+} else {
+    Write-Host "  [INFO] PROJECT_CONTEXT.md already exists, preserving custom project configuration." -ForegroundColor Gray
+}
+
+$TargetSessionState = Join-Path $ResolvedProjectPath "SESSION_STATE.md"
+if (-not (Test-Path $TargetSessionState)) {
+    if (Test-Path $ResolvedSessionStateTemplate) {
+        $projBaseName = Split-Path -Leaf $ResolvedProjectPath
+        $content = Get-Content -Path $ResolvedSessionStateTemplate -Raw -Encoding utf8
+        $content = $content -replace '<PROJECT_NAME>', $projBaseName
+        [System.IO.File]::WriteAllText($TargetSessionState, $content, [System.Text.Encoding]::UTF8)
+        Write-Host "  [OK] Created SESSION_STATE.md from template" -ForegroundColor Green
+    }
+} else {
+    Write-Host "  [INFO] SESSION_STATE.md already exists, preserving custom project configuration." -ForegroundColor Gray
 }
 
 if ($Initialize) {

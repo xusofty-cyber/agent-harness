@@ -561,10 +561,46 @@ if (-not $targetAbs) { $targetAbs = (Get-Item -Path $Project -ErrorAction Silent
 if (-not $targetAbs) { $targetAbs = $Project }
 if ($targetAbs -is [System.Management.Automation.PathInfo]) { $targetAbs = $targetAbs.Path }
 
+function Ensure-ProjectMemoryScaffold([string]$targetDir, [string]$langOpt) {
+    $langSuffix = switch -Regex ($langOpt) {
+        '^(zh|zh-cn|zh-hans)$' { '.zh' }
+        '^(zh-tw|zh-hk|zh-hant)$' { '.zh-tw' }
+        '^(fr|fr-fr)$' { '.fr' }
+        '^(de|de-de)$' { '.de' }
+        Default { '' }
+    }
+
+    $projBaseName = Split-Path -Leaf $targetDir
+
+    $pTemplate = Join-Path $repoRoot "templates\PROJECT_CONTEXT.template$langSuffix.md"
+    if (-not (Test-Path $pTemplate)) { $pTemplate = Join-Path $repoRoot "templates\PROJECT_CONTEXT.template.md" }
+
+    $sTemplate = Join-Path $repoRoot "templates\SESSION_STATE.template$langSuffix.md"
+    if (-not (Test-Path $sTemplate)) { $sTemplate = Join-Path $repoRoot "templates\SESSION_STATE.template.md" }
+
+    $pTarget = Join-Path $targetDir "PROJECT_CONTEXT.md"
+    if (-not (Test-Path $pTarget) -and (Test-Path $pTemplate)) {
+        $content = Get-Content -Path $pTemplate -Raw -Encoding utf8
+        $content = $content -replace '<PROJECT_NAME>', $projBaseName
+        [System.IO.File]::WriteAllText($pTarget, $content, [System.Text.Encoding]::UTF8)
+        Write-Host "  [√] 自动初始化项目长期事实: PROJECT_CONTEXT.md" -ForegroundColor Green
+    }
+
+    $sTarget = Join-Path $targetDir "SESSION_STATE.md"
+    if (-not (Test-Path $sTarget) -and (Test-Path $sTemplate)) {
+        $content = Get-Content -Path $sTemplate -Raw -Encoding utf8
+        $content = $content -replace '<PROJECT_NAME>', $projBaseName
+        [System.IO.File]::WriteAllText($sTarget, $content, [System.Text.Encoding]::UTF8)
+        Write-Host "  [√] 自动初始化当前会话断点: SESSION_STATE.md" -ForegroundColor Green
+    }
+}
+
 Write-Host "`n▶ 开始执行 Agent Harness 工程流水线" -ForegroundColor Cyan
 Write-Host "  目标工程: $targetAbs" -ForegroundColor Green
 Write-Host "  模版语言: $Lang" -ForegroundColor Green
 Write-Host "  执行模式: $runDetailMode`n" -ForegroundColor Green
+
+Ensure-ProjectMemoryScaffold $targetAbs $Lang
 
 $summaryNames = @()
 $summaryStatus = @()
