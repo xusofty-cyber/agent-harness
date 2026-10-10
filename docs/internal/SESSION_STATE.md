@@ -38,6 +38,11 @@
    - 同步更新 5 种语言的全部 README、Skills Usage Guide、Panorama Guide 及 `skills-lock.json`（原生技能数校准为 43 个）。
    - 完善 `.gitignore`，增加 `.comet/` 运行时目录与 `*.bak-*` 备份文件隔离，防止运行时软链接污染版本库。
 
+9. **`gen_templates.py` 优化与 15 个模板原生 YAML Frontmatter 升级**：
+   - 将 `gen_templates.py` 生成的 15 个模板文件头部的 HTML 注释直接升级为原生 YAML Frontmatter 示例段（自带 `id: ...`, `title: ...`, `type: specs|architecture|reference|guide`, `status: draft`, `modules: ["src/your_module/**"]`, `depends_on: [...]`, `version: 0.1.0`, `last_verified_commit: HEAD`）。
+   - 彻底杜绝任何 AI Agent 复制模板时漏写元数据，与 `living-documentation`、`doc-impact.py` 及 Comet 变更门禁建立原生无缝的端到端代码-文档双向追溯。
+   - 更新 `SKILL.md` 工作流说明，并在 `tests/repo_checks.py` 中增强文档类型校验容错，天然兼容单复数形式（`spec`/`specs`, `guide`/`guides`）。
+
 ## 验证证据与质量闸门
 
 - `python3 tests/repo_checks.py`：**68 项检查全数 PASS**（包含跨脚本 Parity、文档结构对称性、doc-impact 副本逐字节同步校验等）。
