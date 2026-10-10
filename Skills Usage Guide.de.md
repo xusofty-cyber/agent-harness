@@ -17,7 +17,23 @@ Claude Code entscheidet auf zwei Arten über das Laden eines Skills:
 **Wichtige Erkenntnis:** Das automatische Auslösen hängt vom Feld `description` in der Datei `SKILL.md` jedes Skills ab.
 Wenn Claude einen Skill nicht wie erwartet lädt, benennen Sie ihn einfach explizit.
 
-## Skill-Katalog nach Kategorien
+## Skill-Katalog
+
+> **Skill-Domänen** (Namespaces für gezieltes Laden): Jeder Skill gehört zu einer Domäne,
+> in `skills-lock.json` erfasst und per CI erzwungen. Bei Agents mit Teilbedarf pro Domäne laden statt Vollkatalog.
+>
+> | Domäne | Skills | Zweck |
+> |---|---|---|
+> | `openspec` | 17 | OpenSpec-Workflow-Familie |
+> | `superpowers` | 16 | obra/superpowers-Methodenfamilie |
+> | `local` | 5 | Im Repo erstellt (engineering-docs, living-documentation, open-code-review, option-review, cross-tool-memory) |
+> | `document` | 2 | Dokumentenverarbeitung (docx, pdf) |
+> | `integration` | 2 | Externe Tool-Integrationen (comet, codegraph) |
+> | `utility` | 3 | Einzelzweck-Utilities (caveman, ponytail, rtk) |
+>
+> **Hinweis zur Zählung**: `skills-lock.json` hat 45 Einträge, dieser Katalog listet 43 Skills.
+> Die 2 zusätzlichen Einträge (`openspec`, `superpowers`) sind Meta-Einträge der Quell-Repos —
+> Provenienz-Platzhalter, keine installierbaren Skills. nach Kategorien
 
 ### 1. Workflow- und Ablaufsteuerung
 
@@ -36,6 +52,10 @@ Wenn Claude einen Skill nicht wie erwartet lädt, benennen Sie ihn einfach expli
 | `openspec-bulk-archive-change` | Auto | — | Archiviert mehrere abgeschlossene Änderungen gleichzeitig. | Batch-Bereinigung. |
 | `openspec-ff-change` | Auto | — | Schneller Vorlauf unter Umgehung der Artefakterstellung. | Um Zeremonien zu überspringen und direkt zur Implementierung überzugehen. |
 | `openspec-onboard` | Hybrid | — | Geführte Einführung in den OpenSpec-Workflow. | Bei der ersten Nutzung von OpenSpec: "onboard me to openspec". |
+| `draft-openspec-docs` | Hybrid | — | Kollaborativer Entwurfsmodus für OpenSpec-Dokumentation. | Beim Erstellen von OpenSpec-Dokumentseiten. |
+| `write-openspec-docs` | Hybrid | — | OpenSpec-Dokmodus mit Hausstil. | Beim Schreiben von OpenSpec-Benutzerdokumentation. |
+| `verify-openspec-docs` | Hybrid | — | Prüft OpenSpec-Dokumentation mit frischem Kontext. | Beim Validieren von OpenSpec-Dokumentationsaussagen. |
+| `release-openspec` | Hybrid | — | Prüft zusammengeführte Arbeit für OpenSpec-Releases. | Bei einem OpenSpec-Release. |
 | `living-documentation` | Hybrid | — | Pflegt Spezifikationen/Architektur/Referenzen/Leitfäden mit Rückverfolgbarkeit. | Fortlaufend. Aktiviert sich bei Dokumentationsaufgaben; "update living docs" erzwingt den Lauf. |
 
 ### 2. Codequalität und Review
