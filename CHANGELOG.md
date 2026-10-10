@@ -118,6 +118,12 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
     `integration` ×2, `utility` ×3), enforced by CI. Enables scoped loading as
     the catalog grows beyond 43 skills.
 
+- **Polish round**:
+  - 3g check warns (not silently skips) when PyYAML is missing locally.
+  - Format hints added to all 15 engineering-docs templates (was 6).
+  - Worked PRD example: `references/examples/05-product-spec-example.md`
+    (team task board, fully filled, linked from decision tree).
+
 ### Fixed
 - **Markdownlint CI blocker (P0)**: Unified heading in all 15 engineering document templates from dual H1s to single bilingual `# {title_cn} / {title_en}` (MD025) and added language identifier to `SKILL.md` decision tree fenced code block (MD040), eliminating 31 markdownlint errors in CI.
 - **Traceability path alignment (P1-1)**: Converged recommended document output paths in `engineering-docs/SKILL.md` and `comet/SKILL.md` to the standard 4-tier living-doc hierarchy (`docs/{specs,architecture,reference,guides}/`), ensuring all generated docs are discovered by `doc-impact.py`.
