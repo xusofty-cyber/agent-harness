@@ -1306,16 +1306,16 @@ if [ ! -d "${TARGET_OPENSPEC_DIR}" ]; then
 fi
 
 # ==============================================================================
-# 8. Initialize Living Documentation Scaffold (docs/{specs,architecture,reference,guides,adr})
+# 8. Initialize Living Documentation Scaffold (docs/{specs,architecture,reference,guides,management,tests,adr})
 # ==============================================================================
 # living-doc-scaffold
 TARGET_DOCS_DIR="${TARGET_PROJECT_DIR}/docs"
-for doc_subdir in specs architecture reference guides adr; do
+for doc_subdir in specs architecture reference guides management tests adr; do
     if [ ! -d "${TARGET_DOCS_DIR}/${doc_subdir}" ]; then
         mkdir -p "${TARGET_DOCS_DIR}/${doc_subdir}"
     fi
 done
-echo -e "  ${GREEN}[√] 已就绪文档骨架目录: docs/{specs,architecture,reference,guides,adr}${NC}"
+echo -e "  ${GREEN}[√] 已就绪文档骨架目录: docs/{specs,architecture,reference,guides,management,tests,adr}${NC}"
 
 # ==============================================================================
 # 9. Optional Comet CLI Init (--comet-init) & Configuration Scaffold

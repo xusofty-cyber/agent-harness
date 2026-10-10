@@ -214,6 +214,12 @@ for tf in tmpl_files:
     check(f"tmpl:{rel}:depends_on-is-list",
           isinstance(fm.get("depends_on"), list),
           f"template frontmatter depends_on must be a list")
+    # depends_on paths must point to valid doc tiers
+    for _dep in (fm.get("depends_on") or []):
+        _dep_tier = _dep.split("/")[1] if _dep.startswith("docs/") and "/" in _dep[5:] else None
+        check(f"tmpl:{rel}:depends_on-tier",
+              _dep_tier in DOC_TIERS,
+              f"depends_on {_dep!r} must point to docs/<tier>/ with tier in {DOC_TIERS}")
 
 # --- 3f2. Comet <-> engineering-docs path mapping cross-check ---
 # The "recommended storage path" for each template must agree between
@@ -329,6 +335,22 @@ for ps1_marker, sh_marker, feature in PARITY:
     elif in_sh and not in_ps1:
         detail = f"'{ps1_marker}' missing in deploy-agents.ps1"
     check(f"parity:{feature}", in_ps1 == in_sh, detail)
+
+# --- 4a2. Deploy scaffold covers all doc tiers ---
+# deploy-agents.sh/.ps1 must create every DOC_TIERS directory in target projects.
+# Catches six-tier migration gaps (e.g. missing management/tests) without ci.yml changes.
+import re as _re2
+_deploy_sh = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")
+_deploy_ps1 = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
+_sh_tiers = set(_re2.search(
+    r"for doc_subdir in ([a-z ]+); do", _deploy_sh).group(1).split())
+_ps1_tiers = set(_re2.findall(
+    r'\$docSubdirs = @\(([^)]+)\)', _deploy_ps1)[0].replace('"', "").replace(",", " ").split())
+for _tier in DOC_TIERS:
+    check(f"deploy-scaffold:sh-{_tier}", _tier in _sh_tiers,
+          f"deploy-agents.sh doc scaffold missing tier: {_tier}")
+    check(f"deploy-scaffold:ps1-{_tier}", _tier in _ps1_tiers,
+          f"deploy-agents.ps1 doc scaffold missing tier: {_tier}")
 
 # --- 4b. run-pipeline script parity ---
 # Ensures run-pipeline.ps1 and run-pipeline.sh maintain feature parity across stages.
