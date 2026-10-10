@@ -98,6 +98,17 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   - CI: install PyYAML (enables comet.config.yaml validation); run
     `tests/sync_skills_test.py`.
 
+- **Six-tier document model** (方案A): expand living-documentation from 4 to 6 tiers,
+  adding `docs/management/` (project governance) and `docs/tests/` (verification).
+  Reassign 8 engineering-docs template types to match semantics (no more stuffing
+  initiation docs into specs/ or weekly reports into guides/). Update
+  `doc-impact.py`, `repo_checks.py`, and both skill mapping tables; add
+  cross-validation check (3f2) preventing comet/engineering-docs path divergence.
+- **Review follow-ups round 2**: unit tests for `check_local_skill` (4 new cases);
+  Skills Usage Guide adds 4 missing openspec-docs skills; comet PATH trust note;
+  template format hints (table vs headings guidance); one-click Word template
+  fetch script (`scripts/fetch-word-template.sh`).
+
 ### Fixed
 - **Markdownlint CI blocker (P0)**: Unified heading in all 15 engineering document templates from dual H1s to single bilingual `# {title_cn} / {title_en}` (MD025) and added language identifier to `SKILL.md` decision tree fenced code block (MD040), eliminating 31 markdownlint errors in CI.
 - **Traceability path alignment (P1-1)**: Converged recommended document output paths in `engineering-docs/SKILL.md` and `comet/SKILL.md` to the standard 4-tier living-doc hierarchy (`docs/{specs,architecture,reference,guides}/`), ensuring all generated docs are discovered by `doc-impact.py`.
