@@ -23,19 +23,25 @@
 5. **多语言文档体系升级 (5 语种全量对齐)**：
    - 《README》、《多工具部署与配置指南》、《实战使用与技能全景指南》、《技能使用指南》全部提供 EN、ZH、ZH-TW、FR、DE 5 种语言版本，保持严格的二级标题数量一致性。
 
-6. **Windows PowerShell 兼容性修复**：
+6. **Windows PowerShell 与编码兼容性修复**：
    - 所有 `.ps1` 脚本统一以带 BOM 的 UTF-8 (`utf-8-sig`) 保存，彻底消除 Windows PowerShell 5.1 在 GBK/CP936 代码页环境下的语法分析器解析错位问题。
+   - `deploy-agents.ps1` 增加 `$npmCmd` 探测，优先调用 `npm.cmd`，避免 PowerShell 下 `& npm` 调用触发 Node.js 官方 `npm.ps1` 的入参切片截断 Bug（`Unknown command: "pm"`）。
+   - `tools/doc-impact.py` 与技能端副本在 `subprocess.run` 中显式指定 `encoding="utf-8", errors="replace"`，彻底消除中文 Windows (CP936/GBK) 运行环境下的 `UnicodeDecodeError`。
+
+7. **外部技能库同步与哈希锁定**：
+   - 随流水线阶段 3 完成 11 项外部技能最新版本拉取，同步刷新 `skills-lock.json` 与 `.claude/settings.json` 工具权限。
 
 ## 验证证据与质量闸门
 
-- `python3 tests/repo_checks.py`：**68 项检查全数 PASS**（包含跨脚本 Parity、文档结构对称性、可执行权限等）。
+- `python3 tests/repo_checks.py`：**68 项检查全数 PASS**（包含跨脚本 Parity、文档结构对称性、doc-impact 副本逐字节同步校验等）。
 - `node tests/hooks.test.mjs`：**16 项测试全数 PASS**（Claude Code PreToolUse Bash 安全卫士拦截测试）。
 - `python3 tests/sync_skills_test.py`：**7 项测试全数 PASS**（技能自更新与哈希校验）。
-- 本地实测通过：运行流水线自动在目标工程根目录下初始化 `PROJECT_CONTEXT.md` 和 `SESSION_STATE.md`。
+- `python tools/doc-impact.py`：**正常识别并输出变更文件，无任何 UnicodeDecodeError 异常**。
+- 本地实测通过：`npm.cmd` 与 `deploy-agents.ps1` 可顺利调起包安装。
 
 ## 现场约束与下一步事项
 
 - **现场约束**：下游目标项目创建的双轨记忆文件必须严格放置于下游项目的根目录下；`docs/internal/` 仅为 `agent-harness` 仓库自身的 dogfood 实践，切勿混淆。
 - **后续规划**：
   - 持续跟进各宿主 Agent 工具的最新规则加载机制并扩展桥接；
-  - 结合实际项目反馈微调多语言脚手架字段与提示词规范。
+  - 关注 upstream CodeGraph 1.6.2+ 后续对 Windows platform `statInode` 导出修复。
