@@ -9,6 +9,7 @@
 #          4. Living documentation impact analysis & quality gate (tools/doc-impact.py)
 # ==============================================================================
 
+{
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -898,3 +899,4 @@ else
     echo -e "${GREEN}🎉 流水线全部阶段执行完毕！${NC}\n"
     exit 0
 fi
+}
