@@ -1,7 +1,7 @@
 # SESSION_STATE.md — 会话断点
 
 > **最后更新**：2026-10-10
-> **状态**：阶段性功能已全部合入 `main` 并推送到远端 `origin/main`（最新提交 `007dd09`）
+> **状态**：阶段性功能已全部合入 `main` 并推送到远端 `origin/main`（最新提交 `bf47199`）
 
 ## 当前工程基线与已完成项
 
@@ -30,6 +30,13 @@
 
 7. **外部技能库同步与哈希锁定**：
    - 随流水线阶段 3 完成 11 项外部技能最新版本拉取，同步刷新 `skills-lock.json` 与 `.claude/settings.json` 工具权限。
+
+8. **`engineering-docs` 原生技能与 `/comet` 工作流全链路打通**：
+   - 引入并完善本地自研技能 `engineering-docs`（v0.1.0，31 种文档类型、15 个中英双语门禁模板），统一跨 AI Agent 工具在各阶段的输出格式。
+   - 深度贯通 `/comet` 研发流转：Open (04/05/06) → Design (07/08/09/10) → Build (10/11/12) → Verify (13/14) → Archive (15)。
+   - 强化 Frontmatter 铁律以保证 `doc-impact.py` 活体文档模块依赖追溯与门禁正常流转。
+   - 同步更新 5 种语言的全部 README、Skills Usage Guide、Panorama Guide 及 `skills-lock.json`（原生技能数校准为 43 个）。
+   - 完善 `.gitignore`，增加 `.comet/` 运行时目录与 `*.bak-*` 备份文件隔离，防止运行时软链接污染版本库。
 
 ## 验证证据与质量闸门
 
