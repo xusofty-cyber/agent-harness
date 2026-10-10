@@ -1,0 +1,75 @@
+# ==============================================================================
+# Comet Project Configuration (comet.project.v1)
+# 智能体研发流协同配置文件
+# 文档: https://docs.comet.rpamis.com/
+# ==============================================================================
+
+# 配置格式版本，请勿修改此值
+schema: comet.project.v1
+
+# `/comet` 默认进入的工作流 (native: 强模型目标驱动; classic: 阶段治理五步流)
+default_workflow: native
+
+# 此项目启用的工作流，可填写 native、classic 或同时启用两者 (推荐强模型默认使用 native)
+workflows:
+  - native
+  # - classic  # 如需阶段治理五步流，取消注释此行
+
+# 是否启用只读的环境感知恢复探针 (Ambient Resume probe)，支持会话中断无缝恢复
+ambient_resume: true
+
+# 个人记忆自动学习与注入策略
+memory:
+  learning: true
+  retrieval: true
+
+# 项目知识库检索配置（与活体文档集成）
+knowledge:
+  provider: local
+  local:
+    include:
+      - "docs/**/*.md"
+      - "docs/specs/**/*.md"
+      - "docs/architecture/**/*.md"
+      - "docs/reference/**/*.md"
+      - "docs/guides/**/*.md"
+    max_file_mb: 10
+    max_total_mb: 50
+
+# 阶段防护写入白名单
+hook:
+  allow_paths: []
+
+# ------------------------------------------------------------------------------
+# Native 工作流配置 (目标驱动 · 强模型推荐)
+# ------------------------------------------------------------------------------
+native:
+  # Native 规格和 change 的存放根目录（与四阶活体文档根目录对齐）
+  artifact_root: docs
+  # 产物语言 (en | zh-CN)
+  language: zh-CN
+  # 需求澄清模式 (batch: 批量集中确认; sequential: 逐题递进确认)
+  clarification_mode: batch
+  # 归档确认机制 (automatic: 检查通过后自动归档; required: 需显式确认)
+  archive_confirmation: automatic
+  # 验证失败最大允许重试次数
+  max_verify_failures: 5
+  # 文档写入策略 (allow: 允许在各阶段写入文档而不被打回 Build; revert: 严格拦截)
+  document_writes: allow
+
+# ------------------------------------------------------------------------------
+# Classic 工作流配置 (阶段治理 · 完整五阶段审计)
+# ------------------------------------------------------------------------------
+classic:
+  # 产物布局 (docs: 存放于 docs/openspec/; legacy: 根目录 openspec/)
+  artifact_layout: docs
+  # 产物语言 (en | zh-CN)
+  language: zh-CN
+  # 上下文压缩机制 (off | beta)
+  context_compression: off
+  # 代码审查模式 (off | standard | thorough)
+  review_mode: standard
+  # 阶段通过后是否自动推进到下一阶段
+  auto_transition: true
+  # 文档证据容错 (neutral: 仅改动文档不使构建证据失效; strict: 严格重测)
+  document_evidence: neutral

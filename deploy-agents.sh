@@ -1238,11 +1238,17 @@ if [ -d "${SOURCE_SKILLS_DIR}" ]; then
                 echo "  [i] 技能 .agents/skills/${skill_name} 已存在。"
             fi
 
-            # Claude Code symlink bridge
-            dest_claude_link="${TARGET_CLAUDE_SKILLS_DIR}/${skill_name}"
-            if [ ! -e "${dest_claude_link}" ]; then
-                ln -sf "../../.agents/skills/${skill_name}" "${dest_claude_link}"
-                echo -e "  ${GREEN}[√] 已建立 Claude 技能链接: .claude/skills/${skill_name}${NC}"
+            # Deploy Claude Code skill (Physical copy avoids symlink/junction crossing security errors in Comet/OpenSpec)
+            dest_claude_skill="${TARGET_CLAUDE_SKILLS_DIR}/${skill_name}"
+            if [ -L "${dest_claude_skill}" ]; then
+                rm -f "${dest_claude_skill}"
+            fi
+            if [ "$DO_UPDATE" = true ] || [ ! -d "${dest_claude_skill}" ]; then
+                rm -rf "${dest_claude_skill}"
+                cp -r "${skill_path}" "${dest_claude_skill}"
+                echo -e "  ${GREEN}[√] 已部署 Claude 技能: .claude/skills/${skill_name}${NC}"
+            else
+                echo "  [i] Claude 技能 .claude/skills/${skill_name} 已存在。"
             fi
         fi
     done

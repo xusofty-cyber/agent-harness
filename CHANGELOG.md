@@ -13,6 +13,7 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   notes in `docs/internal/` intentionally unchanged. GitHub repo rename
   (`xusofty-cyber/agent-harness`) to be done via Settings; old URLs redirect
   automatically.
+- **Physical copy for Claude Code skills deployment**: Changed `deploy-agents.ps1` and `deploy-agents.sh` to deploy skills into `.claude/skills/` via physical directory copies (with automatic cleanup of legacy NTFS junctions / symlinks). Eliminates path traversal and junction crossing errors (`crosses a symbolic link or junction`) during `comet init` and `run-pipeline` runs regardless of execution order.
 - **Native YAML Frontmatter in 15 `engineering-docs` templates**: Upgraded headers of all 15 Markdown template files in `.agents/skills/engineering-docs/references/templates/` (and generator `gen_templates.py`) to native YAML Frontmatter blocks with schema metadata (`id`, `title`, `type`, `status`, `modules`, `depends_on`, `version`, `last_verified_commit`). Ensures any AI agent copying templates defaults to complete traceability metadata for downstream `living-documentation` and `doc-impact.py` analysis.
 
 ### Added

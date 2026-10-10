@@ -1120,17 +1120,26 @@ if (Test-Path $SourceSkillsDir) {
             }
         }
 
-        # Create Claude Code junction / symlink
-        $claudeSkillLink = Join-Path $TargetClaudeSkillsDir $skillName
-        if (-not (Test-Path $claudeSkillLink)) {
-            try {
-                New-Item -ItemType Junction -Path $claudeSkillLink -Target $targetSkillPath -ErrorAction Stop | Out-Null
-                Write-Host "  [OK] Created Claude junction: .claude/skills/$skillName" -ForegroundColor Green
-            } catch {
-                # Fallback to copy if junction fails
-                Copy-Item -Path $targetSkillPath -Destination $claudeSkillLink -Recurse -Force
-                Write-Host "  [OK] Copied Claude skill: .claude/skills/$skillName" -ForegroundColor Green
+        # Deploy Claude Code skill (Physical copy avoids Windows NTFS junction / symlink crossing errors in Comet/OpenSpec)
+        $claudeSkillDest = Join-Path $TargetClaudeSkillsDir $skillName
+        $existingClaudeSkill = Get-Item -LiteralPath $claudeSkillDest -Force -ErrorAction SilentlyContinue
+        if ($existingClaudeSkill -and ($existingClaudeSkill.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) {
+            # Clean up legacy junction/symlink so it can be replaced with a clean physical directory
+            if ($existingClaudeSkill.LinkType) {
+                $existingClaudeSkill.Delete()
+            } else {
+                Remove-Item -LiteralPath $claudeSkillDest -Force -Recurse -ErrorAction SilentlyContinue
             }
+        }
+
+        if ($Update -or (-not (Test-Path $claudeSkillDest))) {
+            if ($Update -and (Test-Path $claudeSkillDest)) {
+                Remove-Item -LiteralPath $claudeSkillDest -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            Copy-Item -Path $_.FullName -Destination $claudeSkillDest -Recurse -Force
+            Write-Host "  [OK] Deployed Claude skill: .claude/skills/$skillName" -ForegroundColor Green
+        } else {
+            Write-Host "  [INFO] Claude skill .claude/skills/$skillName already exists." -ForegroundColor Gray
         }
     }
 }
