@@ -72,6 +72,7 @@ Afin d'éviter la saturation du contexte, les spécifications fines et compéten
 | **Sorties volumineuses / Séries de tests** | `token-discipline.md` + option `rtk` | Hook RTK réécrit les commandes si configuré ; sinon flags concis natifs du CLI | Ne pas présumer de réécriture automatique ; enregistrer les longs logs localement et ne restituer que les synthèses |
 | **Saturation de tokens / Sortie concise** | `Global AGENTS.md` + option `caveman` | Activer à la demande si l'hôte charge la compétence | Expression concise tout en préservant les avertissements de sécurité et l'exactitude technique |
 | **Documentation / Synchronisation d'architecture** | `engineering-spec.md` + option `living-documentation` | `/living-documentation` / Archivage specs et architecture | Synchroniser les documents selon les seuils L0/L1/L2 ; maintenir la traçabilité bidirectionnelle Frontmatter |
+| **Docs R&D formels / Modèles** | `engineering-docs` | Lors de la rédaction de PRD/SRS/HLD/LLD/plans de test | Choisir le modèle via l'arbre 31→15 ; suivre rendering-spec.md |
 | **Revue de code / Porte de validation avant merge** | `open-code-review` + `requesting-code-review` | Fin de développement ou avant fusion | Revue guidée par les règles, ancrée aux lignes de code ; Tier A via CLI `ocr` si présent, sinon Tier B |
 
 ---

@@ -72,6 +72,7 @@
 | **超長輸出 / 測試批次執行** | `token-discipline.md` + 可選 `rtk` | RTK Hook 已配置時由其改寫支援的命令；否則使用 CLI 原生精簡參數 | 不假定命令會被自動改寫；必要時將長日誌儲存在本地並只回報相關摘要 |
 | **Token 告急 / 精簡輸出** | `Global AGENTS.md` + 可選 `caveman` | 宿主工具支援並載入該 Skill 時按需啟用 | 精簡表達但保留安全說明、必要上下文和技術準確性 |
 | **文件建立 / 架構與追溯同步** | `engineering-spec.md` + 可選 `living-documentation` | `/living-documentation` / 需求架構與詳細參考歸檔 | 依據 L0/L1/L2 門檻同步四階文件，維護 Frontmatter 程式碼與文件雙向追溯引用 |
+| **正式研發文件 / 模板化輸出** | `engineering-docs` | 撰寫 PRD/SRS/HLD/LLD/測試計畫等正式文件時 | 按 31→15 決策樹選用模板，遵循 rendering-spec.md 格式規範（標題字號/字體/段落） |
 | **程式碼審查 / 合併前品質門禁** | `open-code-review` + `requesting-code-review` | 完成功能或合併前 | 規則先行、行號錨定、全量覆蓋；`ocr` CLI 已裝走 Tier A 委託，否則走 Tier B 方法論 |
 
 ---

@@ -72,6 +72,7 @@ Um Kontextaufblähung zu vermeiden, befinden sich spezifische Vorgaben in `.agen
 | **Lange Ausgaben / Testläufe** | `token-discipline.md` + optional `rtk` | RTK-Hook schreibt Befehle um falls aktiv; sonst native prägnante CLI-Optionen | Keine automatische Umschreibung voraussetzen; lange Logs lokal speichern, nur Zusammenfassung liefern |
 | **Token-Knappheit / Prägnante Ausgabe** | `Global AGENTS.md` + optional `caveman` | Aktivierung bei geladenem Skill | Prägnanter Ausdruck unter Wahrung von Sicherheitshinweisen und technischer Präzision |
 | **Dokumentation / Architektursynchronisation** | `engineering-spec.md` + optional `living-documentation` | `/living-documentation` / Specs & Architektur-Sync | Vierstufige Dokumente nach L0/L1/L2 abgleichen; Frontmatter-Rückverfolgbarkeit pflegen |
+| **Formale F&E-Dokumente / Vorlagen** | `engineering-docs` | Beim Schreiben von PRD/SRS/HLD/LLD/Testplänen | Vorlage per 31→15-Entscheidungsbaum wählen; rendering-spec.md einhalten |
 | **Code-Review / Qualitäts-Gate vor Merge** | `open-code-review` + `requesting-code-review` | Nach Feature-Fertigstellung oder vor dem Merge | Regelbasiert, zeilenverankert; Tier A über `ocr` CLI falls vorhanden, sonst Tier B |
 
 ---
