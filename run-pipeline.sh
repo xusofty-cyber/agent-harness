@@ -715,6 +715,60 @@ ensure_project_memory_scaffold() {
             echo -e "  ${GREEN}[√] 检测到 Comet CLI，自动补齐项目级配置: .comet/config.yaml${NC}"
         fi
     fi
+
+    local target_gi="$target_dir/.gitignore"
+    local tpl_gi="$REPO_ROOT/templates/gitignore.snippet"
+    local gi_marker="# Agent Harness local runtime & machine-specific ignores"
+    if [ ! -f "$target_gi" ]; then
+        if [ -f "$tpl_gi" ]; then
+            cp "$tpl_gi" "$target_gi"
+        else
+            cat << 'EOF' > "$target_gi"
+# ==============================================================================
+# Agent Harness local runtime & machine-specific ignores
+# ==============================================================================
+.claude/skills/
+.comet/*
+!.comet/config.yaml
+.codex/hooks.json
+.trae/hooks.json
+.trae-cn/hooks.json
+.devin/hooks.json
+.github/hooks/
+.kiro/hooks/
+*.bak-*
+/.ai-memory.toml
+scratch/
+EOF
+        fi
+        echo -e "  ${GREEN}[√] 自动初始化目标项目 .gitignore (写入 Agent Harness 忽略规则)${NC}"
+    else
+        if ! grep -qF "$gi_marker" "$target_gi"; then
+            echo "" >> "$target_gi"
+            if [ -f "$tpl_gi" ]; then
+                cat "$tpl_gi" >> "$target_gi"
+            else
+                cat << 'EOF' >> "$target_gi"
+# ==============================================================================
+# Agent Harness local runtime & machine-specific ignores
+# ==============================================================================
+.claude/skills/
+.comet/*
+!.comet/config.yaml
+.codex/hooks.json
+.trae/hooks.json
+.trae-cn/hooks.json
+.devin/hooks.json
+.github/hooks/
+.kiro/hooks/
+*.bak-*
+/.ai-memory.toml
+scratch/
+EOF
+            fi
+            echo -e "  ${GREEN}[√] 自动向目标项目 .gitignore 追加 Agent Harness 忽略规则${NC}"
+        fi
+    fi
 }
 
 echo -e "\n${BOLD}${CYAN}▶ 开始执行 Agent Harness 工程流水线${NC}"

@@ -17,6 +17,13 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 - **Native YAML Frontmatter in 15 `engineering-docs` templates**: Upgraded headers of all 15 Markdown template files in `.agents/skills/engineering-docs/references/templates/` (and generator `gen_templates.py`) to native YAML Frontmatter blocks with schema metadata (`id`, `title`, `type`, `status`, `modules`, `depends_on`, `version`, `last_verified_commit`). Ensures any AI agent copying templates defaults to complete traceability metadata for downstream `living-documentation` and `doc-impact.py` analysis.
 
 ### Added
+- **Automatic target project `.gitignore` scaffold & protection**:
+  Updated `deploy-agents.ps1`, `deploy-agents.sh`, `run-pipeline.ps1`, and `run-pipeline.sh`
+  to automatically create or idempotently append Agent Harness ignore rules (`.claude/skills/`,
+  `.comet/*`, `!.comet/config.yaml`, machine-specific IDE hooks in `.codex/hooks.json` /
+  `.trae/hooks.json` / etc., `*.bak-*`, `/.ai-memory.toml`, `scratch/`) to downstream projects'
+  `.gitignore`. Prevents deployment artifacts, local state, and absolute-path machine configs from being
+  accidentally committed to git.
 - **Comet Workflow Engine deep integration (Native & Classic dual-mode)**:
   - **Phase 1 (Rules & Skills)**: Enriched `.agents/rules/engineering-spec.md` with Decision Ownership (investigable facts, user choices, implementation choices) and Independent Verifier Protocol. Upgraded `.agents/skills/comet/SKILL.md` into a full-featured dual-mode guide covering Native goal loops, Classic phase state machines, crash recovery, and living documentation bindings.
   - **Phase 2 (Scaffolding)**: Added `templates/comet.config.yaml` standard configuration template (`comet.project.v1`, Native default, Dual-mode enabled, local knowledge corpus integrated with living-doc directories). Updated `deploy-agents` and `run-pipeline` (both Bash and PowerShell) to automatically detect Comet CLI and scaffold `.comet/config.yaml` if missing, preventing missing-config warnings.

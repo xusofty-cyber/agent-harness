@@ -1387,6 +1387,64 @@ EOF
     fi
 fi
 
+# ==============================================================================
+# 11. Initialize / Update .gitignore Scaffold (Agent Harness Runtime & Hook Ignores)
+# ==============================================================================
+TARGET_GITIGNORE="${TARGET_PROJECT_DIR}/.gitignore"
+TPL_GITIGNORE="${SCRIPT_DIR}/templates/gitignore.snippet"
+GI_MARKER="# Agent Harness local runtime & machine-specific ignores"
+
+if [ ! -f "${TARGET_GITIGNORE}" ]; then
+    if [ -f "${TPL_GITIGNORE}" ]; then
+        cp "${TPL_GITIGNORE}" "${TARGET_GITIGNORE}"
+    else
+        cat << 'EOF' > "${TARGET_GITIGNORE}"
+# ==============================================================================
+# Agent Harness local runtime & machine-specific ignores
+# ==============================================================================
+.claude/skills/
+.comet/*
+!.comet/config.yaml
+.codex/hooks.json
+.trae/hooks.json
+.trae-cn/hooks.json
+.devin/hooks.json
+.github/hooks/
+.kiro/hooks/
+*.bak-*
+/.ai-memory.toml
+scratch/
+EOF
+    fi
+    echo -e "  ${GREEN}[√] 已初始化目标项目 .gitignore (写入 Agent Harness 忽略规则)${NC}"
+else
+    if ! grep -qF "${GI_MARKER}" "${TARGET_GITIGNORE}"; then
+        echo "" >> "${TARGET_GITIGNORE}"
+        if [ -f "${TPL_GITIGNORE}" ]; then
+            cat "${TPL_GITIGNORE}" >> "${TARGET_GITIGNORE}"
+        else
+            cat << 'EOF' >> "${TARGET_GITIGNORE}"
+# ==============================================================================
+# Agent Harness local runtime & machine-specific ignores
+# ==============================================================================
+.claude/skills/
+.comet/*
+!.comet/config.yaml
+.codex/hooks.json
+.trae/hooks.json
+.trae-cn/hooks.json
+.devin/hooks.json
+.github/hooks/
+.kiro/hooks/
+*.bak-*
+/.ai-memory.toml
+scratch/
+EOF
+        fi
+        echo -e "  ${GREEN}[√] 已向目标项目 .gitignore 追加 Agent Harness 忽略规则${NC}"
+    fi
+fi
+
 guide_optional_cli_tools "$TARGET_PROJECT_DIR"
 
 echo -e "\n${GREEN}==================================================${NC}"

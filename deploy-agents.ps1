@@ -1294,6 +1294,66 @@ ignore_paths = [
     }
 }
 
+# ==============================================================================
+# 11. Initialize / Update .gitignore Scaffold (Agent Harness Runtime & Hook Ignores)
+# ==============================================================================
+$targetGitignore = Join-Path $ResolvedProjectPath ".gitignore"
+$tplGitignore = Join-Path $PSScriptRoot "templates\gitignore.snippet"
+$giMarker = "# Agent Harness local runtime & machine-specific ignores"
+if (-not (Test-Path $targetGitignore)) {
+    if (Test-Path $tplGitignore) {
+        Copy-Item -Path $tplGitignore -Destination $targetGitignore -Force
+    } else {
+        $defaultGiContent = @"
+# ==============================================================================
+# Agent Harness local runtime & machine-specific ignores
+# ==============================================================================
+.claude/skills/
+.comet/*
+!.comet/config.yaml
+.codex/hooks.json
+.trae/hooks.json
+.trae-cn/hooks.json
+.devin/hooks.json
+.github/hooks/
+.kiro/hooks/
+*.bak-*
+/.ai-memory.toml
+scratch/
+"@
+        Set-Content -Path $targetGitignore -Value $defaultGiContent -Encoding utf8
+    }
+    Write-Host "  [OK] Initialized .gitignore with Agent Harness ignore rules" -ForegroundColor Green
+} else {
+    $giContent = Get-Content -Path $targetGitignore -Raw -Encoding utf8
+    if ($giContent -notmatch [regex]::Escape($giMarker)) {
+        $snippetText = if (Test-Path $tplGitignore) {
+            Get-Content -Path $tplGitignore -Raw -Encoding utf8
+        } else {
+            @"
+# ==============================================================================
+# Agent Harness local runtime & machine-specific ignores
+# ==============================================================================
+.claude/skills/
+.comet/*
+!.comet/config.yaml
+.codex/hooks.json
+.trae/hooks.json
+.trae-cn/hooks.json
+.devin/hooks.json
+.github/hooks/
+.kiro/hooks/
+*.bak-*
+/.ai-memory.toml
+scratch/
+"@
+        }
+        $newGiContent = if ($giContent.EndsWith("`n")) { "$giContent`n$snippetText" } else { "$giContent`n`n$snippetText" }
+        [System.IO.File]::WriteAllText($targetGitignore, $newGiContent, [System.Text.Encoding]::UTF8)
+        Write-Host "  [OK] Appended Agent Harness ignore rules to existing .gitignore" -ForegroundColor Green
+    }
+}
+
 Guide-OptionalCliTools $ResolvedProjectPath
 
 Write-Host "`n==================================================" -ForegroundColor Green

@@ -320,6 +320,7 @@ PARITY = [
     (".trae/rules", ".trae/rules", "Trae bridge"),
     ("PROJECT_CONTEXT.md", "PROJECT_CONTEXT.md", "project memory scaffold (PROJECT_CONTEXT/SESSION_STATE)"),
     ("Pipeline", "run-pipeline", "pipeline runner integration"),
+    ("Agent Harness local runtime & machine-specific ignores", "Agent Harness local runtime & machine-specific ignores", "target project gitignore scaffold"),
 ]
 ps1 = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
 sh = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")
@@ -367,6 +368,7 @@ PIPELINE_PARITY = [
     ("BriefProbe", "brief-probe", "pipeline brief probe mode"),
     ("CheckOnly", "check-only", "pipeline check-only read-only mode"),
     ("ApplySkills", "apply-skills", "pipeline apply-skills flag"),
+    ("gitignore.snippet", "gitignore.snippet", "pipeline gitignore snippet scaffold"),
 ]
 p_ps1 = (ROOT / "run-pipeline.ps1").read_text(encoding="utf-8-sig")
 p_sh = (ROOT / "run-pipeline.sh").read_text(encoding="utf-8")

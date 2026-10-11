@@ -609,6 +609,63 @@ function Ensure-ProjectMemoryScaffold([string]$targetDir, [string]$langOpt) {
             Write-Host "  [√] 检测到 Comet CLI，自动补齐项目级配置: .comet/config.yaml" -ForegroundColor Green
         }
     }
+
+    $targetGitignore = Join-Path $targetDir ".gitignore"
+    $tplGitignore = Join-Path $repoRoot "templates\gitignore.snippet"
+    $giMarker = "# Agent Harness local runtime & machine-specific ignores"
+    if (-not (Test-Path $targetGitignore)) {
+        if (Test-Path $tplGitignore) {
+            Copy-Item -Path $tplGitignore -Destination $targetGitignore -Force
+        } else {
+            $defaultGiContent = @"
+# ==============================================================================
+# Agent Harness local runtime & machine-specific ignores
+# ==============================================================================
+.claude/skills/
+.comet/*
+!.comet/config.yaml
+.codex/hooks.json
+.trae/hooks.json
+.trae-cn/hooks.json
+.devin/hooks.json
+.github/hooks/
+.kiro/hooks/
+*.bak-*
+/.ai-memory.toml
+scratch/
+"@
+            Set-Content -Path $targetGitignore -Value $defaultGiContent -Encoding utf8
+        }
+        Write-Host "  [√] 自动初始化目标项目 .gitignore" -ForegroundColor Green
+    } else {
+        $giContent = Get-Content -Path $targetGitignore -Raw -Encoding utf8
+        if ($giContent -notmatch [regex]::Escape($giMarker)) {
+            $snippetText = if (Test-Path $tplGitignore) {
+                Get-Content -Path $tplGitignore -Raw -Encoding utf8
+            } else {
+                @"
+# ==============================================================================
+# Agent Harness local runtime & machine-specific ignores
+# ==============================================================================
+.claude/skills/
+.comet/*
+!.comet/config.yaml
+.codex/hooks.json
+.trae/hooks.json
+.trae-cn/hooks.json
+.devin/hooks.json
+.github/hooks/
+.kiro/hooks/
+*.bak-*
+/.ai-memory.toml
+scratch/
+"@
+            }
+            $newGiContent = if ($giContent.EndsWith("`n")) { "$giContent`n$snippetText" } else { "$giContent`n`n$snippetText" }
+            [System.IO.File]::WriteAllText($targetGitignore, $newGiContent, [System.Text.Encoding]::UTF8)
+            Write-Host "  [√] 自动向目标项目 .gitignore 追加 Agent Harness 忽略规则" -ForegroundColor Green
+        }
+    }
 }
 
 Write-Host "`n▶ 开始执行 Agent Harness 工程流水线" -ForegroundColor Cyan

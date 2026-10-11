@@ -53,6 +53,13 @@
     - **工程规则别名**：在 `.agents/rules/` 下创建 `engineering.md` 软链接指向 `engineering-spec.md`，兼容第三方提示词或集成文档简写；
     - **流水线探针极简模式**：在 `run-pipeline.sh` 与 `run-pipeline.ps1` 中新增 `--brief-probe` / `-BriefProbe` 参数，在 CI 或轻量调试时仅打印前 15 条核心检查项，大幅精简终端输出。
 
+12. **下游目标项目 `.gitignore` 自动创建与规则增量合并防护**：
+    - 在 `templates/` 下新增通用的 `gitignore.snippet` 忽略规则模板；
+    - 升级 `deploy-agents.ps1`、`deploy-agents.sh`、`run-pipeline.ps1` 和 `run-pipeline.sh`，在向目标项目部署脚手架与规则时，自动检测目标项目根目录下的 `.gitignore`：
+      - 若不存在，自动创建并写入 Agent Harness 运行时与机器绝对路径钩子隔离规则；
+      - 若已存在，以标记 `# Agent Harness local runtime & machine-specific ignores` 为幂等锚点，安全追加缺失的忽略项，绝不覆盖项目原有忽略配置；
+    - 扩展 `tests/repo_checks.py` 的 Parity 测试套件，确保双脚本针对目标 `.gitignore` 脚手架的逻辑 100% 对齐。
+
 ## 验证证据与质量闸门
 
 - `python3 tests/repo_checks.py`：**68 项检查全数 PASS**（包含跨脚本 Parity、文档结构对称性、doc-impact 副本逐字节同步校验等）。
