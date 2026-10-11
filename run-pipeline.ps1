@@ -71,6 +71,14 @@ param (
 
 $repoRoot = $PSScriptRoot
 
+# Ensure UTF-8 encoding for external CLI subprocesses (Node.js/Python/Comet)
+$origOutputEncoding = $OutputEncoding
+$origConsoleEncoding = [Console]::OutputEncoding
+try {
+    $OutputEncoding = [System.Text.Encoding]::UTF8
+    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+} catch {}
+
 if ($Help) {
     Write-Host "用法 (Usage):" -ForegroundColor Cyan
     Write-Host "  .\run-pipeline.ps1 [选项 (Options)]`n"
@@ -887,6 +895,8 @@ if ($stageDocs) {
 if (Get-Command comet -ErrorAction SilentlyContinue) {
     Write-Host "`n>>> [Comet Probe] 正在检测 Comet 智能体工作流状态与跨平台健康度..." -ForegroundColor Cyan
     try {
+        $OutputEncoding = [System.Text.Encoding]::UTF8
+        [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         Push-Location $targetAbs
         Write-Host "  --- 工作流状态 (comet status) ---" -ForegroundColor Yellow
         $probeOut = & comet status 2>&1 | Select-Object -First 12

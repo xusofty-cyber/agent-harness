@@ -55,6 +55,12 @@ $ToolCodebuddy = $true
 
 $ErrorActionPreference = "Stop"
 
+# Ensure UTF-8 encoding for external CLI subprocesses (Node.js/Python/Comet)
+try {
+    $OutputEncoding = [System.Text.Encoding]::UTF8
+    [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+} catch {}
+
 # Script directory
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
