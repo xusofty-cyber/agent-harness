@@ -1115,8 +1115,7 @@ if (Test-Path $SourceSkillsDir) {
         # Copy / Update skill files
         if (-not $isSelfRepo) {
             if ($Update -or (-not (Test-Path $targetSkillPath))) {
-                if ($Update -and (Test-Path $targetSkillPath)) {
-                    Backup-ManagedPath $targetSkillPath
+                if (Test-Path $targetSkillPath) {
                     Remove-Item -Path $targetSkillPath -Recurse -Force -ErrorAction SilentlyContinue
                 }
                 Copy-Item -Path $_.FullName -Destination $targetSkillPath -Recurse -Force

@@ -1230,7 +1230,6 @@ if [ -d "${SOURCE_SKILLS_DIR}" ]; then
             dest_skill="${TARGET_SKILLS_DIR}/${skill_name}"
 
             if [ "$DO_UPDATE" = true ] || [ ! -d "${dest_skill}" ]; then
-                if [ "$DO_UPDATE" = true ]; then backup_path "${dest_skill}"; fi
                 rm -rf "${dest_skill}"
                 cp -r "${skill_path}" "${dest_skill}"
                 echo -e "  ${GREEN}[√] 已部署技能: .agents/skills/${skill_name}${NC}"
