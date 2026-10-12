@@ -18,6 +18,7 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 - **Native YAML Frontmatter in 15 `engineering-docs` templates**: Upgraded headers of all 15 Markdown template files in `.agents/skills/engineering-docs/references/templates/` (and generator `gen_templates.py`) to native YAML Frontmatter blocks with schema metadata (`id`, `title`, `type`, `status`, `modules`, `depends_on`, `version`, `last_verified_commit`). Ensures any AI agent copying templates defaults to complete traceability metadata for downstream `living-documentation` and `doc-impact.py` analysis.
 
 ### Added
+- **ai-memory Docker deployment guide**: Documented official Docker container deployment patterns and volume mapping guidelines (fixing in-container `/data` mount path, loopback binding for security, and client-server scope decoupling via `.ai-memory.toml`) across deployment guides and READMEs.
 - **Automatic target project `.gitignore` scaffold & protection**:
   Updated `deploy-agents.ps1`, `deploy-agents.sh`, `run-pipeline.ps1`, and `run-pipeline.sh`
   to automatically create or idempotently append Agent Harness ignore rules (`.claude/skills/`,

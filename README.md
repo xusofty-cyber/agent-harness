@@ -218,6 +218,15 @@ Execute the setup script to register the MCP endpoint and managed skill instruct
     Once the terminal prints `bind=127.0.0.1:49374`, the server is ready and the IDE can query and store project memory over MCP.
   - **Linux background daemon (nohup / systemd)**:
     Use `nohup ai-memory serve --transport http > ~/.local/share/ai-memory/serve.log 2>&1 &` or create a user-level service with `systemd --user`.
+  - **Docker Container**:
+    ```bash
+    # In-container data path is fixed to /data; binds to 127.0.0.1 for local security
+    docker run -d --name ai-memory \
+      --restart unless-stopped \
+      -p 127.0.0.1:49374:49374 \
+      -v "${HOME}/env/ai-memory-data:/data" \
+      docker.io/akitaonrails/ai-memory:latest
+    ```
 - **For Claude Code / Codex CLI**:
   Native lifecycle hooks capture sessions automatically, or use `ai-memory run <harness>` for a managed workstream launch.
 

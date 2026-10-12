@@ -219,6 +219,15 @@ ai-memory 采用安全优先的 Fail-closed 门禁，必须显式声明才激活
     终端输出 `bind=127.0.0.1:49374` 即代表服务就绪，IDE 的 MCP 即可正常检索与存储记忆。
   - **Linux 后台常驻 / 开机自启**：
     可使用 `nohup ai-memory serve --transport http > ~/.local/share/ai-memory/serve.log 2>&1 &` 或配置为 `systemd --user` 服务。
+  - **Docker 容器化运行（隔离环境）**：
+    ```bash
+    # 容器内部数据目录固定为 /data，绑定 127.0.0.1 保持环回安全
+    docker run -d --name ai-memory \
+      --restart unless-stopped \
+      -p 127.0.0.1:49374:49374 \
+      -v "${HOME}/env/ai-memory-data:/data" \
+      docker.io/akitaonrails/ai-memory:latest
+    ```
 - **面向 Claude Code / Codex CLI**：
   可通过原生 hooks 自动捕获，或使用 `ai-memory run <harness>` 进行受管托管启动。
 

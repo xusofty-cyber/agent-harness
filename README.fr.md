@@ -147,7 +147,16 @@ cargo install ai-memory
 cp .ai-memory.toml.example .ai-memory.toml
 sed -i 's/replace-with-workspace-name/default/g; s/replace-with-project-name/agent-harness/g' .ai-memory.toml
 ./setup-ai-memory.sh antigravity-ide
+# Option A: Exécution directe
 ai-memory serve --transport http
+
+# Option B: Conteneur Docker (environnement isolé)
+# Le chemin des données dans le conteneur est fixé à /data ; lie à 127.0.0.1 pour la sécurité locale
+docker run -d --name ai-memory \
+  --restart unless-stopped \
+  -p 127.0.0.1:49374:49374 \
+  -v "${HOME}/env/ai-memory-data:/data" \
+  docker.io/akitaonrails/ai-memory:latest
 ```
 
 ### 4. Mise à jour en ligne

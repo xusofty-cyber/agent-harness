@@ -194,9 +194,19 @@ agent-harness/
 ```
 
 #### Step 4: 啟動本地記憶引擎服務
-```bash
-ai-memory serve --transport http
-```
+- **終端直接執行**：
+  ```bash
+  ai-memory serve --transport http
+  ```
+- **Docker 容器化執行（隔離環境）**：
+  ```bash
+  # 容器內部資料目錄固定為 /data，綁定 127.0.0.1 保持環回安全
+  docker run -d --name ai-memory \
+    --restart unless-stopped \
+    -p 127.0.0.1:49374:49374 \
+    -v "${HOME}/env/ai-memory-data:/data" \
+    docker.io/akitaonrails/ai-memory:latest
+  ```
 
 ### 3. 線上更新規範與技能庫
 

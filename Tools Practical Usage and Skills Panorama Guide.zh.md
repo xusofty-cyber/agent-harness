@@ -447,6 +447,16 @@ Ponytail Skill 提供一套实现前决策阶梯。先读懂问题和现有代�
   - **Linux 后台常驻**：`nohup ai-memory serve --transport http > ~/.local/share/ai-memory/serve.log 2>&1 &`；
   - **Linux 生产级开机自启（Systemd 用户服务）**：
     创建 `~/.config/systemd/user/ai-memory.service`（写入 `ExecStart=%h/.local/bin/ai-memory serve --transport http` 与 `Restart=always`），执行 `systemctl --user enable --now ai-memory`。
+  - **Docker 容器化部署（开箱隔离）**：
+    ```bash
+    # 容器内部数据目录固定为 /data；绑定 127.0.0.1 保持环回安全；容器无需挂载项目源码
+    mkdir -p "${HOME}/env/ai-memory-data"
+    docker run -d --name ai-memory \
+      --restart unless-stopped \
+      -p 127.0.0.1:49374:49374 \
+      -v "${HOME}/env/ai-memory-data:/data" \
+      docker.io/akitaonrails/ai-memory:latest
+    ```
 - **面向 Claude Code / Codex CLI**：
   可通过原生 hooks 自动捕获，或使用 `ai-memory run <harness>` 进行受管托管启动。
 

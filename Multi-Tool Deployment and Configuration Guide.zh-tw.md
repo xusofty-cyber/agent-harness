@@ -308,7 +308,19 @@ To enable Claude Code to discover skills located in `.agents/skills/`:
 1. Install and start ai-memory separately by following its [official installation guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md). Leave LLM and embedding providers unconfigured for the free, zero-key path.
 2. Review `.ai-memory.toml.example`, copy it to `.ai-memory.toml`, and replace both names. `.ai-memory.toml` is ignored by Git; committing this opt-in is intentionally avoided.
 3. Run `./setup-ai-memory.sh <claude-code|codex|antigravity|antigravity-ide|antigravity-cli>` on Linux/macOS/WSL2, or the equivalent `-Agent` value in PowerShell. Use `antigravity` for Antigravity 2.0 and `antigravity-ide` for the IDE; both configure MCP and managed instructions. The CLI target additionally installs allowlist hooks. Native executable and hook-mode preflight applies to hook targets; MCP-only targets do not need it. The helper does not download software or start the server.
-4. Keep the server bound to loopback for same-machine use. Default data locations are `~/.local/share/ai-memory` on Linux, `~/Library/Application Support/ai-memory` on macOS, and typically `%LOCALAPPDATA%\ai-memory` on Windows; `AI_MEMORY_DATA_DIR` can override them. Back up with `ai-memory --data-dir <data-dir> backup --to <archive-path>` (for Docker deployments, use the upstream container command). `ai-memory uninstall --apply` removes managed client integrations but does not delete the data. To erase memory, stop the service and remove its configured data directory only after confirming the backup and target. See the [official installation/operations guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md).
+4. Keep the server bound to loopback for same-machine use. Default data locations are `~/.local/share/ai-memory` on Linux, `~/Library/Application Support/ai-memory` on macOS, and typically `%LOCALAPPDATA%\ai-memory` on Windows; `AI_MEMORY_DATA_DIR` can override them.
+   - **Docker 容器化部署（面向 Antigravity IDE HTTP MCP）**：
+     ```bash
+     # 容器內資料目錄固定為 /data；綁定本地環回 127.0.0.1
+     mkdir -p "${HOME}/env/ai-memory-data"
+     docker run -d --name ai-memory \
+       --restart unless-stopped \
+       -p 127.0.0.1:49374:49374 \
+       -v "${HOME}/env/ai-memory-data:/data" \
+       docker.io/akitaonrails/ai-memory:latest
+     ```
+     *說明：容器無需掛載專案程式碼目錄；Antigravity IDE 作為 MCP 客戶端會依據 `.ai-memory.toml` 自動在調用工具時傳遞上下文（`workspace`/`project`）。*
+   - Back up with `ai-memory --data-dir <data-dir> backup --to <archive-path>` (for Docker deployments, use the upstream container command). `ai-memory uninstall --apply` removes managed client integrations but does not delete the data. To erase memory, stop the service and remove its configured data directory only after confirming the backup and target. See the [official installation/operations guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md).
 
 #### Host boundaries
 

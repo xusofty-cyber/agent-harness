@@ -422,6 +422,29 @@ ai-memory 采用安全优先的 Fail-closed 门禁，必须显式声明才激活
     systemctl --user daemon-reload
     systemctl --user enable --now ai-memory
     ```
+  - **Docker 容器化部署（开箱隔离运行）**：
+    若不想在宿主机安装 Rust 工具链或 CLI 二进制，可直接运行官方 Docker 镜像作为本地 MCP 服务端：
+    > ⚠️ **关键挂载与网络说明**：
+    > 1. **容器内数据路径固定为 `/data`**：镜像内置 `AI_MEMORY_DATA_DIR=/data`，因此卷挂载的目标目录必须是 `/data`（例如 `-v /path/to/data:/data` 或 `-v ai-memory-data:/data`）。若挂载到其他路径，数据将写入容器临时层而无法持久化；
+    > 2. **宿主机网络安全**：使用 `-p 127.0.0.1:49374:49374` 绑定本地环回地址，保证本机安全访问；
+    > 3. **无需挂载项目目录**：Antigravity IDE 作为 MCP 客户端，Agent 在调用 MCP 工具时会自动读取项目根目录的 `.ai-memory.toml`，并将 `workspace` 与 `project` 自动传给 MCP 服务端。
+
+    ```bash
+    # 方式一：挂载宿主机真实目录持久化（推荐，便于查看与备份 Markdown wiki 数据）
+    mkdir -p "${HOME}/env/ai-memory-data"
+    docker run -d --name ai-memory \
+      --restart unless-stopped \
+      -p 127.0.0.1:49374:49374 \
+      -v "${HOME}/env/ai-memory-data:/data" \
+      docker.io/akitaonrails/ai-memory:latest
+
+    # 方式二：使用 Docker Named Volume 持久化
+    docker run -d --name ai-memory \
+      --restart unless-stopped \
+      -p 127.0.0.1:49374:49374 \
+      -v ai-memory-data:/data \
+      docker.io/akitaonrails/ai-memory:latest
+    ```
 - **面向 Claude Code / Codex CLI**：
   可通过原生 hooks 自动捕获，或使用 `ai-memory run <harness>` 进行受管托管启动。
 
