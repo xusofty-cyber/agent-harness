@@ -1,5 +1,8 @@
 # 多工具（Codex / Claude Code / Antigravity 2.0 / CLI / IDE / Zed）AI 研发指令部署与配置指南
 
+> **版本说明**：本文档为中文扩展版，包含英文原版之外的补充内容（实战案例、本地化说明）。核心规范以英文版为准，扩展内容仅供参考。
+
+
 > **Language / 语言**: [English](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | **简体中文** | [繁體中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [Français](Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [Deutsch](Multi-Tool%20Deployment%20and%20Configuration%20Guide.de.md)
 
 本指南系统阐述如何在 **OpenAI Codex / GitHub Copilot**、**Claude Code**、**Google Antigravity IDE** 以及 **Zed IDE** 中部署并高效协同使用 **三级 AGENTS.md 体系**（全局级、项目级、目录级），并针对“以软件研发为主、兼顾专业文档处理”的实际工程场景提供开箱即用的落地指南与自动化部署方案。

@@ -1,5 +1,8 @@
 # 多工具（Claude Code / Codex / Antigravity 2.0 / CLI / IDE / Zed）AI 研发实战与技能全景指南
 
+> **版本说明**：本文档为中文扩展版，包含英文原版之外的补充内容（实战案例、本地化说明）。核心规范以英文版为准，扩展内容仅供参考。
+
+
 > **Language / 语言**: [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | **简体中文** | [繁體中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Français](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
 
 > 本指南针对日常“以软件研发为主、兼顾专业文档处理”的实际工程场景，系统解答：**需要安装哪些技能（Skills）与 Harness 工具、底层加载与 Token 经济学原理、各工具如何配置与接线、核心命令（如 `/comet`、`/plan`、`/opsx`、`codegraph` 等）在何时以及如何使用**，并提供端到端的实战流转演示与避坑自检指南。
@@ -10,7 +13,7 @@
 
 1. [核心架构与工具矩阵全景（谁管什么）](#一-核心架构与工具矩阵全景谁管什么)
 2. [技能（Skills）与生态工具安装清单](#二-技能skills与生态工具安装清单)
-   - 2.1 开箱即用 / 43 原生技能分类全景清单
+   - 2.1 开箱即用 / 44 原生技能分类全景清单
    - 2.2 技能来源元数据与在线更新机制 (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
    - 2.3 Harness 核心工程扩展工具（按需选用）
    - 2.4 平台安装与配置文件位置速查表
@@ -82,11 +85,11 @@
 
 ## 二、 技能（Skills）与生态工具安装清单
 
-### 2.1 开箱即用 / 42 原生技能分类全景清单
+### 2.1 开箱即用 / 44 原生技能分类全景清单
 
 通过执行自动化部署脚本 [`deploy-agents.ps1`](deploy-agents.ps1)（Windows）或 [`deploy-agents.sh`](deploy-agents.sh)（Linux/macOS）后，全套技能库会自动部署至目标项目的 `.agents/skills/`，并无缝接线至 `.claude/skills/`。
 
-整套技能库包含 **42 个专业工程技能**，按功能领域归类如下：
+整套技能库包含 **44 个专业工程技能**，按功能领域归类如下：
 
 #### 1. Comet 工作流
 - **`comet`**：Comet CLI 按版本提供 Native/Classic 工作流。本仓库只提供入口指引，不实现 Comet 的状态机或阶段守卫；使用前检查项目配置和 CLI 版本。

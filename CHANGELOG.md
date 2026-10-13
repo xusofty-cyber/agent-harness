@@ -6,6 +6,8 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 ### Changed
+- **仓库结构整理**：15 个 Guide 移入 `docs/guides/`（根目录 53→38 文件）；
+  `README_zh.md` 重命名为 `README.zh.md`（统一命名规范）；中文 Guide 标注"扩展版"。
 - **项目级评审优化**：Panorama Guide 5 语言 skill 计数 43→44；Hook 测试 25→37
   （非首命令段、删除变体、警告分支、误伤测试）；Global AGENTS 5 语言 Git 章节
   压缩为指针（消除与 git-workflow.md 的三层重复）。

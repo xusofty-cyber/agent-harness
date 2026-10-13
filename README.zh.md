@@ -31,7 +31,7 @@
    - **输出与表达指导**：`rtk`（Rust Token Killer 可选 CLI 指引；需配置命令重写 Hook）与 `caveman`（简明表达 Skill）。
    - **事前决策评审与共享记忆**：`option-review`（5 维度多候选方案事前独立评审与决策矩阵）与 `cross-tool-memory`（跨工具项目长期记忆导航与经验检索）。
    - **专业文档处理**：`docx`（Word 专业排版）、`pdf`（结构化抽取与分析）；
-   - **技能使用与触发时机指南**：各 skill 的触发机制（自动/显式/混合）、分类速查与项目记忆使用说明详见 [`Skills Usage Guide.zh.md`](Skills%20Usage%20Guide.zh.md)（[English](Skills%20Usage%20Guide.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Français](Skills%20Usage%20Guide.fr.md) | [Deutsch](Skills%20Usage%20Guide.de.md)）。
+   - **技能使用与触发时机指南**：各 skill 的触发机制（自动/显式/混合）、分类速查与项目记忆使用说明详见 [`Skills Usage Guide.zh.md`](docs/guides/Skills%20Usage%20Guide.zh.md)（[English](docs/guides/Skills%20Usage%20Guide.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md) | [Français](docs/guides/Skills%20Usage%20Guide.fr.md) | [Deutsch](docs/guides/Skills%20Usage%20Guide.de.md)）。
 
 4. **一键部署、交互向导与统一流水线（`deploy-agents` & `pipeline`）**：
    - **交互式终端逐步选择向导**：执行脚本时不带任何参数（或显式指定 `--interactive` / `-Interactive`）将自动拉起向导（上下方向键选择、空格键切选、Enter 确认），引导完成规则模板语言（`en`, `zh`, `zh-tw`, `fr`, `de`）、部署范围（`project`, `global`, `both`）、目标项目路径、12 种 Agent 桥接文件多选（Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy）以及可选工作流开关，彻底杜绝命令行参数遗漏与拼写错误；
@@ -98,7 +98,7 @@ agent-harness/
 ├── .ai-memory.toml.example          # 本地显式加入标记示例
 ├── skills-lock.json                 # 技能来源及部分文件完整性元数据
 ├── README.md                        # 项目总览（English）
-└── README_zh.md                     # 项目总览（中文）
+└── README.zh.md                     # 项目总览（中文）
 ```
 
 首次部署时可用 `-Initialize` / `--initialize` 生成带项目事实和待确认清单的规则；使用 `-DirectoryPath` / `--directory` 指定一个已存在的模块目录，同时生成目录级规则。脚本只自动填写可从本地 Git、清单/锁文件和 CI 配置核实的信息；检测到 `package.json` 时还会把存在的 scripts 命令、常见框架/存储依赖列为“建议确认”，不会当成已验证的事实。业务定位、维护者、模块职责和边界交由用户或当前编码 Agent 确认。已有 `AGENTS.md` 不会被覆盖，改为生成 `AGENTS.generated.md` 供审阅。完成后使用 `-Check` / `--check` 检查待确认项。
@@ -247,9 +247,9 @@ ai-memory 采用安全优先的 Fail-closed 门禁，必须显式声明才激活
 ## 文档索引
 
 - 📖 **部署与配置指南**：
-  - [简体中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [English](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [繁體中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [Français](Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [Deutsch](Multi-Tool%20Deployment%20and%20Configuration%20Guide.de.md)
+  - [简体中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [English](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [繁體中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [Français](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [Deutsch](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.de.md)
 - 📖 **实战使用与技能全景**：
-  - [简体中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [繁體中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Français](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
+  - [简体中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [English](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [繁體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Français](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
 - 📜 **三级规则架构**：
   - **全局宪法**：[`Global AGENTS.md`](Global%20AGENTS.md)（简体中文）| [`English`](Global%20AGENTS.en.md) | [`繁體中文`](Global%20AGENTS.zh-tw.md) | [`Français`](Global%20AGENTS.fr.md) | [`Deutsch`](Global%20AGENTS.de.md)
   - **项目规范**：[`Project AGENTS.md`](Project%20AGENTS.md)（简体中文）| [`English`](Project%20AGENTS.en.md) | [`繁體中文`](Project%20AGENTS.zh-tw.md) | [`Français`](Project%20AGENTS.fr.md) | [`Deutsch`](Project%20AGENTS.de.md)
