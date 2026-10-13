@@ -24,9 +24,9 @@ graph TD
 ## 核心特性
 
 1. **三級 AGENTS.md 漸進式揭露架構**：
-   - **全域級（[`Global AGENTS.zh-tw.md`](Global%20AGENTS.zh-tw.md)）**：跨專案通用工程憲法，涵蓋溝通、實現、上下文與 Git 授權邊界。
-   - **專案級（[`Project AGENTS.zh-tw.md`](Project%20AGENTS.zh-tw.md)）**：可自訂裁剪的專案工程範本，提供 CLI 命令、技術棧、架構邊界和按需規則索引。
-   - **目錄級（[`Directory AGENTS.zh-tw.md`](Directory%20AGENTS.zh-tw.md)）**：Monorepo / 獨立子模組的微型邊界修補程式（In/Out Scope、依賴隔離與極速測試）。
+   - **全域級（[`Global AGENTS.zh-tw.md`](templates/agents/Global%20AGENTS.zh-tw.md)）**：跨專案通用工程憲法，涵蓋溝通、實現、上下文與 Git 授權邊界。
+   - **專案級（[`Project AGENTS.zh-tw.md`](templates/agents/Project%20AGENTS.zh-tw.md)）**：可自訂裁剪的專案工程範本，提供 CLI 命令、技術棧、架構邊界和按需規則索引。
+   - **目錄級（[`Directory AGENTS.zh-tw.md`](templates/agents/Directory%20AGENTS.zh-tw.md)）**：Monorepo / 獨立子模組的微型邊界修補程式（In/Out Scope、依賴隔離與極速測試）。
    - **細粒度子規則庫（[`.agents/rules/`](.agents/rules/)）**：按需動態查閱，涵蓋 `token-discipline.md`、`engineering-spec.md`、`security-boundary.md` 與 `git-workflow.md`。
 
 2. **Claude Code 客戶端鉤子（[`.claude/settings.json`](.claude/settings.json) + [`.claude/hooks/`](.claude/hooks/)）**：
@@ -241,9 +241,9 @@ agent-harness/
 - 📖 **實戰使用與技能全景**：
   - [繁體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [English](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [簡體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [Français](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
 - 📜 **三級規則架構**：
-  - **全域憲法**：[`Global AGENTS.zh-tw.md`](Global%20AGENTS.zh-tw.md)（繁體中文）| [`English`](Global%20AGENTS.en.md) | [`簡體中文`](Global%20AGENTS.md) | [`Français`](Global%20AGENTS.fr.md) | [`Deutsch`](Global%20AGENTS.de.md)
-  - **專案規範**：[`Project AGENTS.zh-tw.md`](Project%20AGENTS.zh-tw.md)（繁體中文）| [`English`](Project%20AGENTS.en.md) | [`簡體中文`](Project%20AGENTS.md) | [`Français`](Project%20AGENTS.fr.md) | [`Deutsch`](Project%20AGENTS.de.md)
-  - **目錄規則**：[`Directory AGENTS.zh-tw.md`](Directory%20AGENTS.zh-tw.md)（繁體中文）| [`English`](Directory%20AGENTS.en.md) | [`簡體中文`](Directory%20AGENTS.md) | [`Français`](Directory%20AGENTS.fr.md) | [`Deutsch`](Directory%20AGENTS.de.md)
+  - **全域憲法**：[`Global AGENTS.zh-tw.md`](templates/agents/Global%20AGENTS.zh-tw.md)（繁體中文）| [`English`](templates/agents/Global%20AGENTS.en.md) | [`簡體中文`](templates/agents/Global%20AGENTS.md) | [`Français`](templates/agents/Global%20AGENTS.fr.md) | [`Deutsch`](templates/agents/Global%20AGENTS.de.md)
+  - **專案規範**：[`Project AGENTS.zh-tw.md`](templates/agents/Project%20AGENTS.zh-tw.md)（繁體中文）| [`English`](templates/agents/Project%20AGENTS.en.md) | [`簡體中文`](templates/agents/Project%20AGENTS.md) | [`Français`](templates/agents/Project%20AGENTS.fr.md) | [`Deutsch`](templates/agents/Project%20AGENTS.de.md)
+  - **目錄規則**：[`Directory AGENTS.zh-tw.md`](templates/agents/Directory%20AGENTS.zh-tw.md)（繁體中文）| [`English`](templates/agents/Directory%20AGENTS.en.md) | [`簡體中文`](templates/agents/Directory%20AGENTS.md) | [`Français`](templates/agents/Directory%20AGENTS.fr.md) | [`Deutsch`](templates/agents/Directory%20AGENTS.de.md)
 
 ---
 
