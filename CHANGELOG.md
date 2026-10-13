@@ -6,6 +6,9 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 ### Changed
+- **项目级评审优化**：Panorama Guide 5 语言 skill 计数 43→44；Hook 测试 25→37
+  （非首命令段、删除变体、警告分支、误伤测试）；Global AGENTS 5 语言 Git 章节
+  压缩为指针（消除与 git-workflow.md 的三层重复）。
 - **Hook 安全加固**（红队评审）：命令归一化预处理（防引号/转义/`-c`插队绕过）；
   补 force 语义（`+refspec`、`-vf` 捆绑）；`update-ref` 覆盖受保护 ref；
   分支检查跟随 `-C`/`--git-dir`；测试 17→25。

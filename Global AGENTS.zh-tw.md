@@ -54,14 +54,12 @@
 
 ## 授權邊界與 Git 安全鐵律
 
-- **受保護分支強隔離**：
-  - `develop` / `master` / `main` / `release*` / `staging` 分支絕對禁止直接 commit；新改動必須在臨時分支（`feature/*`, `fix/*`, `refactor/*`）進行；
-- **觸碰遠端強授權**：
-  - 執行 `git push`、合入受保護分支、刪除遠端分支等共享遠端操作前，必須獲得明確授權；使用者當前指令已明確具體目標和操作時即視為授權，不重複詢問；
-- **永久禁止破壞性操作**：
-  - 嚴禁 `git push --force`（或 `-f` / `--force-with-lease`）；嚴禁在受保護分支上執行 `git rebase`；回滾程式碼優先使用 `git revert -m 1`；
-- **防誤提交閘門**：
-  - 嚴禁盲目 `git add .` 或 `git add -A`，必須只 `git add <明確路徑>`，防止將大文件、自動儲存臨時文件、建置產物或敏感資料誤帶入倉庫；
+> Git 完整規範見 `.agents/rules/git-workflow.md`（授權矩陣、鋼鐵紀律、Never List）。
+> 此處僅保留跨專案底線：
+
+- **受保護分支隔離**：`develop`/`master`/`main`/`release*`/`staging` 禁止直接 commit；新改動走臨時分支；
+- **觸碰遠端強授權**：`git push`、合入、刪遠端分支前必須明確授權；
+- **永久禁止**：`git push --force`、受保護分支 `rebase`、`git add .` 盲目暫存；
 - **風險分級**：高影響或不可逆操作按 `.agents/rules/security-boundary.md` 處理。跨越多個文件本身不是確認理由；先評估風險、說明影響，只有規則或使用者要求明確需要授權時才暫停等待確認；
 - **憑證零洩漏**：
   - 嚴禁在程式碼、註釋、提交歷史、文件、輸出日誌中明文記錄或硬編碼 API Key、Token、密碼、憑證、私鑰或內部敏感連接字串。

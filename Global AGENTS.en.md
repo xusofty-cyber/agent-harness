@@ -54,14 +54,12 @@ Load context as needed by the task. Multi-step tasks should use structured plans
 
 ## Authorization Boundaries and Git Safety Ironclad Rules
 
-- **Protected branch strong isolation**:
-  - Direct commits to `develop` / `master` / `main` / `release*` / `staging` branches are strictly prohibited; new changes must be made on temporary branches (`feature/*`, `fix/*`, `refactor/*`);
-- **Explicit authorization for touching remotes**:
-  - Explicit authorization is mandatory before performing shared remote operations like `git push`, merging into protected branches, or deleting remote branches; user instructions explicitly specifying the target and action count as authorization without repeated asking;
-- **Permanent prohibition of destructive operations**:
-  - Strictly prohibit `git push --force` (or `-f` / `--force-with-lease`); strictly prohibit `git rebase` on protected branches; prioritize `git revert -m 1` when rolling back code;
-- **Anti-accidental staging gate**:
-  - Strictly prohibit blind `git add .` or `git add -A`; stage only via `git add <explicit-path>` to prevent staging large files, auto-saved temporary files, build artifacts, or sensitive data;
+> Full Git spec: `.agents/rules/git-workflow.md` (authorization matrix, iron laws, never list).
+> Cross-project baselines only below:
+
+- **Protected branch isolation**: no direct commits to `develop`/`master`/`main`/`release*`/`staging`; use temporary branches;
+- **Explicit authorization for remotes**: required before `git push`, merging, or deleting remote branches;
+- **Permanently prohibited**: `git push --force`, `rebase` on protected branches, blind `git add .`;
 - **Risk classification**: Handle high-impact or irreversible operations per `.agents/rules/security-boundary.md`. Touching multiple files is not by itself a reason to pause; evaluate risks, explain impacts, and pause for confirmation only when rules or user instructions explicitly require authorization;
 - **Zero credential leakage**:
   - Strictly prohibit storing or hardcoding API keys, tokens, passwords, certificates, private keys, or sensitive internal connection strings in plaintext across code, comments, commit history, documentation, or output logs.

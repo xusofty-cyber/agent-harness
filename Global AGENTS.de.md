@@ -54,14 +54,12 @@ Kontext nur nach Bedarf laden. Mehrstufige Aufgaben erfordern strukturierte Plä
 
 ## Autorisierungsgrenzen und eiserne Git-Sicherheitsregeln
 
-- **Strikte Isolation geschützter Branches**:
-  - Direkte Commits auf `develop` / `master` / `main` / `release*` / `staging` sind strikt verboten; Änderungen müssen auf temporären Branches (`feature/*`, `fix/*`, `refactor/*`) erfolgen;
-- **Explizite Autorisierung für Remote-Aktionen**:
-  - Vor `git push`, dem Mergen in geschützte Branches oder dem Löschen geteilter Remote-Branches ist eine explizite Genehmigung erforderlich; nennt der Benutzer bereits Aktion und Ziel, gilt dies als Autorisierung;
-- **Dauerhaftes Verbot destruktiver Operationen**:
-  - `git push --force` (oder `-f` / `--force-with-lease`) ist streng verboten; `git rebase` auf geschützten Branches ist verboten; für Rollbacks `git revert -m 1` bevorzugen;
-- **Schutz vor versehentlichem Staging**:
-  - Blindes `git add .` oder `git add -A` ist verboten; nur gezielt über `git add <expliziter-pfad>` stagen, um das Hinzufügen großer Dateien, temporärer Dateien, Build-Artefakte oder sensibler Daten zu verhindern;
+> Vollständige Git-Spezifikation: `.agents/rules/git-workflow.md`.
+> Nur projektübergreifende Baselines unten:
+
+- **Isolation geschützter Branches**: keine direkten Commits auf `develop`/`master`/`main`/`release*`/`staging`; temporäre Branches verwenden;
+- **Explizite Autorisierung für Remotes**: erforderlich vor `git push`, Merges oder Löschen von Remote-Branches;
+- **Dauerhaft verboten**: `git push --force`, `rebase` auf geschützten Branches, blindes `git add .`;
 - **Risikoklassifizierung**: Operationen mit hoher Auswirkung oder Irreversibilität gemäß `.agents/rules/security-boundary.md` behandeln. Änderungen über mehrere Dateien hinweg sind allein kein Grund für Pausen; Risiken bewerten, Auswirkungen erklären und nur pausieren, wenn Regeln oder Benutzer dies ausdrücklich fordern;
 - **Keine Offenlegung von Zugangsdaten**:
   - Das Speichern oder Hardcodieren von API-Keys, Token, Passwörtern, Zertifikaten, privaten Schlüsseln oder sensiblen Verbindungszeichenfolgen im Klartext in Code, Kommentaren, Commits, Dokumenten oder Protokollen ist strengstens verboten.
