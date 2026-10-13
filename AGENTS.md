@@ -2,12 +2,13 @@
 
 > This file describes **the agent-harness repository itself** for tools that
 > auto-load a root `AGENTS.md` (Antigravity, Codex, Zed). The *distributable
-> rule templates* live in `Global AGENTS.md`, `Project AGENTS.md`,
-> `Directory AGENTS.md` and `.agents/rules/` — this file is not one of them.
+> rule templates* live in `templates/agents/Global AGENTS.md`,
+> `templates/agents/Project AGENTS.md`, `templates/agents/Directory AGENTS.md`
+> and `.agents/rules/` — this file is not one of them.
 
 ## What this repo is
 
-Reusable AI coding-rule templates, Claude Code hooks, 43 native skill
+Reusable AI coding-rule templates, Claude Code hooks, 44 native skill
 directories, and one-click deployment scripts (`deploy-agents.ps1` / `.sh`)
 for Claude Code, Codex, Antigravity, Copilot and Zed. MIT licensed.
 
@@ -28,7 +29,7 @@ for Claude Code, Codex, Antigravity, Copilot and Zed. MIT licensed.
 ## Key paths
 
 - `.agents/rules/` — modular sub-rules (engineering, git, security, tokens)
-- `.agents/skills/` — 43 skill directories (openspec ×16, superpowers ×15, …)
+- `.agents/skills/` — 44 skill directories
 - `.claude/hooks/guard.mjs` — Claude Code PreToolUse Bash guard
 - `docs/internal/` — this repo's own dev notes (not deployed)
 
