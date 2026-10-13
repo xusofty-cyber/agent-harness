@@ -6,6 +6,8 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 ### Changed
+- **可访问性提升**：Hook 报错双语化（EN+ZH）；新增 `docs/glossary.md` 术语表；
+  README 5 语言加 30 秒上手 TL;DR + mermaid 架构图。
 - **专家遗留项收尾**：Guide 5 语言加触发语过宽警告（ponytail/using-superpowers，
   外部 skill 不直接改以保同步）；repo_checks.py 新增 markdown 内链检查
   （修复 Guide 移动导致的 131 个断链）；CI 移除已合并分支触发。

@@ -8,6 +8,19 @@ Ce dépôt fournit des modèles de règles aux niveaux global, projet et répert
 
 ---
 
+## Architecture
+
+```mermaid
+graph TD
+    G[Global AGENTS.md<br/>cross-project constitution] --> P[Project AGENTS.md<br/>project template]
+    P --> D[Directory AGENTS.md<br/>monorepo micro-boundaries]
+    P --> R[.agents/rules/<br/>on-demand sub-rules]
+    R --> S[.agents/skills/<br/>44 on-demand skills]
+    G --> H[.claude/hooks/<br/>PreToolUse guards]
+    S --> T[tools/<br/>sync, tui, doc-impact]
+```
+
+
 ## Fonctionnalités clés
 
 1. **Architecture progressive à trois niveaux AGENTS.md** :

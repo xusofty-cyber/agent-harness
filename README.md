@@ -4,9 +4,24 @@
 
 > **Reusable AI coding-rule templates, Claude Code hooks, and multi-tool deployment scripts**
 
+> **⚡ 30-second start**: `git clone https://github.com/xusofty-cyber/agent-harness.git && cd agent-harness && ./pipeline.sh`
+> See [Quick Start](#quick-start) for details. New to the jargon? Check [Glossary](docs/glossary.md).
+
 This repository provides global, project, and directory rule templates, Claude Code PreToolUse hooks, skill files, and Windows/Linux/macOS deployment scripts. Rule loading and hook behavior vary by tool. Hooks are client-side mechanisms, not operating-system or server-side security boundaries.
 
 ---
+
+## Architecture
+
+```mermaid
+graph TD
+    G[Global AGENTS.md<br/>cross-project constitution] --> P[Project AGENTS.md<br/>project template]
+    P --> D[Directory AGENTS.md<br/>monorepo micro-boundaries]
+    P --> R[.agents/rules/<br/>on-demand sub-rules]
+    R --> S[.agents/skills/<br/>44 on-demand skills]
+    G --> H[.claude/hooks/<br/>PreToolUse guards]
+    S --> T[tools/<br/>sync, tui, doc-impact]
+```
 
 ## Key Features
 

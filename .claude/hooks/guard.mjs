@@ -363,8 +363,8 @@ for (const inv of gitInvocations) {
     const branch = branchFor(inv);
     if (isProtectedBranch(branch)) {
       deny(
-        `[SECURITY-HOOK] ❌ 禁止在受保护分支 ${branch} 上直接 commit！` +
-          `新改动必须在临时分支提交，再经 merge 合入。`
+        `[SECURITY-HOOK] ❌ Direct commit on protected branch '${branch}' is prohibited! / 禁止在受保护分支上直接 commit！` +
+          ` Make changes on a temp branch, then merge. / 新改动必须在临时分支提交，再经 merge 合入。`
       );
     }
   }
@@ -386,7 +386,7 @@ function isForcePush(inv) {
 for (const inv of gitInvocations) {
   if (isForcePush(inv)) {
     deny(
-      `[SECURITY-HOOK] ❌ force push / +refspec 强制更新（历史改写）永久禁止！`
+      `[SECURITY-HOOK] ❌ Force push / +refspec (history rewrite) permanently prohibited! / 永久禁止！`
     );
   }
 }
@@ -402,19 +402,19 @@ for (const inv of gitInvocations) {
     if (a === "--delete" || a === "-d") {
       const target = args[i + 1];
       if (target && PROTECTED_REF_RE.test(target)) {
-        deny(`[SECURITY-HOOK] ❌ 删除受保护远程分支（${target}）永久禁止！`);
+        deny(`[SECURITY-HOOK] ❌ Deleting protected remote branch '${target}' permanently prohibited! / 永久禁止！`);
       }
     } else if (a.startsWith("--delete=")) {
       const target = a.slice("--delete=".length);
       if (PROTECTED_REF_RE.test(target)) {
-        deny(`[SECURITY-HOOK] ❌ 删除受保护远程分支（${target}）永久禁止！`);
+        deny(`[SECURITY-HOOK] ❌ Deleting protected remote branch '${target}' permanently prohibited! / 永久禁止！`);
       }
     }
     // :<branch> / :refs/heads/<branch> refspec deletion
     else if (/^:(?!\/)/.test(a)) {
       const target = a.slice(1);
       if (target && PROTECTED_REF_RE.test(target)) {
-        deny(`[SECURITY-HOOK] ❌ 删除受保护远程分支（${target}）永久禁止！`);
+        deny(`[SECURITY-HOOK] ❌ Deleting protected remote branch '${target}' permanently prohibited! / 永久禁止！`);
       }
     }
   }
@@ -430,7 +430,7 @@ for (const inv of gitInvocations) {
       return a === "--force";
     });
     if (hasDestructive) {
-      deny(`[SECURITY-HOOK] ❌ git clean -d/-f（删除未跟踪文件）永久禁止！`);
+      deny(`[SECURITY-HOOK] ❌ git clean -d/-f (deletes untracked files) permanently prohibited! / 永久禁止！`);
     }
   }
 }
@@ -441,7 +441,7 @@ for (const inv of gitInvocations) {
     for (const a of inv.args) {
       // ref is typically args[0] (or after -m msg / --no-deref)
       if (PROTECTED_REF_RE.test(a)) {
-        deny(`[SECURITY-HOOK] ❌ git update-ref 直接改写受保护 ref（${a}）永久禁止！`);
+        deny(`[SECURITY-HOOK] ❌ git update-ref rewriting protected ref '${a}' permanently prohibited! / 永久禁止！`);
       }
     }
   }
@@ -469,7 +469,7 @@ for (const inv of gitInvocations) {
     const branch = branchFor(inv);
     if (isProtectedBranch(branch)) {
       warn(
-        `受保护分支 ${branch} 上的 merge/push —— 必须经人类明确授权方可执行；未授权请停下确认。`
+        `Merge/push on protected branch '${branch}' requires explicit human authorization. / 必须经人类明确授权。`
       );
       break;
     }
@@ -487,7 +487,7 @@ for (const inv of gitInvocations) {
     return dst && PROTECTED_REF_RE.test(dst);
   });
   if (hit) {
-    warn("push refspec 目标可能是受保护分支——请先确认目标并取得明确授权。");
+    warn("Push refspec may target a protected branch — confirm target and get authorization. / 请先确认目标并取得明确授权。");
     break;
   }
 }

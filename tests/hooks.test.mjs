@@ -296,7 +296,7 @@ test("warns on push to protected branch", () => {
   const mainRepo = makeRepo("main");
   const r = runHook("git push origin main", mainRepo);
   assert.equal(r.exitCode, 0);
-  assert.match(r.stderr, /受保护分支/);
+  assert.match(r.stderr, /protected branch/);
 });
 
 test("warns on git reset --hard", () => {
