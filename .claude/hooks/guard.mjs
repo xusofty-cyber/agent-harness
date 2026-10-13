@@ -93,7 +93,8 @@ function isProtectedBranch(branch) {
 // Attackers evade string matching via:
 //   - quotes/escapes: "git" push, 'git' push, g\it push, gi''t push
 //   - global options between git and subcommand: git -c x=y push, git -C dir push
-//   - command substitution: $(which git) push
+//   NOTE: command substitution $(...) is NOT recursively parsed — $(which git)
+//   style bypasses are a known limitation (fail-open by design for usability).
 // We normalize the command into argv tokens before matching.
 // ============================================================
 
@@ -166,6 +167,10 @@ function parseGitInvocation(tokens) {
   // Resolve argv[0]: strip path, handle env/command prefixes.
   let idx = 0;
   let prog = tokens[0].split("/").pop();
+  // Strip leading VAR=value assignments (e.g. FOO=bar git push --force)
+  while (idx < tokens.length && /^[A-Za-z_][A-Za-z0-9_]*=/.test(tokens[idx])) idx++;
+  if (idx >= tokens.length) return null;
+  prog = tokens[idx].split("/").pop();
   // Skip "env VAR=x" style prefixes and "command"/"sudo" wrappers.
   while ((prog === "env" || prog === "command" || prog === "sudo") && idx + 1 < tokens.length) {
     idx++;
@@ -176,6 +181,15 @@ function parseGitInvocation(tokens) {
   }
   if (prog !== "git") return null;
   idx++;
+  // SECURITY: Detect inline alias definitions (git -c alias.x=y) - these can
+  // disguise the real subcommand. Be conservative and flag for manual review.
+  for (let i = idx; i < tokens.length - 1; i++) {
+    if ((tokens[i] === "-c" || tokens[i] === "--config") && 
+        /^alias\./.test(tokens[i + 1])) {
+      // Alias detected - cannot reliably determine subcommand, treat as suspicious
+      return { subcommand: "__alias__", args: tokens.slice(idx), gitDir: null, suspicious: true };
+    }
+  }
   // Skip global options (and their values) to find the subcommand.
   let gitDir = null;
   while (idx < tokens.length) {
@@ -394,7 +408,13 @@ for (const inv of gitInvocations) {
 function isForcePush(inv) {
   if (inv.subcommand !== "push") return false;
   for (const a of inv.args) {
-    if (a === "--force" || a.startsWith("--force-with-lease") || a === "--force-if-includes") return true;
+    // Git accepts unambiguous abbreviations: --forc, --for, --fo all mean --force.
+    // Check both directions: a starts with --force (e.g. --force-with-lease=),
+    // or --force starts with a (abbreviation, e.g. --forc). Minimum 5 chars to avoid --fo matching --format.
+    if (a.startsWith("--force")) return true;
+    if (a.startsWith("--") && "--force".startsWith(a) && a.length >= 6) return true;
+    // Same for --force-with-lease and --force-if-includes abbreviations
+    if (a.startsWith("--") && ("--force-with-lease".startsWith(a) || "--force-if-includes".startsWith(a)) && a.length >= 8) return true;
     // Bundled short flags: -vf, -fv, -f → contains 'f' as a short flag
     if (/^-[a-zA-Z]+$/.test(a) && !a.startsWith("--") && a.includes("f")) return true;
     // +refspec prefix = force update for that ref
@@ -404,6 +424,12 @@ function isForcePush(inv) {
 }
 
 for (const inv of gitInvocations) {
+  // SECURITY: Inline git aliases obscure the real subcommand - warn user
+  if (inv.suspicious && inv.subcommand === "__alias__") {
+    warn(
+      `⚠️ Inline git alias detected - subcommand obfuscated, manual review recommended. / 检测到内联 git 别名，子命令被混淆，建议人工复核。`
+    );
+  }
   if (isForcePush(inv)) {
     deny(
       `[SECURITY-HOOK] ❌ Force push / +refspec (history rewrite) permanently prohibited! / 永久禁止！`

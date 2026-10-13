@@ -421,7 +421,7 @@ if [ "$FORCE_INTERACTIVE" = true ] || { [ -z "$TARGET_PROJECT_ARG" ] && [ "$DEPL
 fi
 
 if [ -z "$TARGET_PROJECT_ARG" ] && [ "$DEPLOY_GLOBAL" = false ]; then
-    echo -e "${RED}[错误] 请指定目标项目路径，或者使用 --global 仅更新全局配置。${NC}\n"
+    echo -e "${RED}[Error] Please specify target project path, or use --global for global config only. / 请指定目标项目路径，或使用 --global。${NC}\n"
     usage
 fi
 
@@ -915,7 +915,7 @@ fi
 
 # Validate target project directory
 if [ ! -d "${TARGET_PROJECT_ARG}" ]; then
-    echo -e "${RED}[错误] 目标项目路径不存在或不是目录: ${TARGET_PROJECT_ARG}${NC}"
+    echo -e "${RED}[Error] Target project path does not exist or is not a directory: / 目标项目路径不存在或不是目录: ${TARGET_PROJECT_ARG}${NC}"
     exit 1
 fi
 
