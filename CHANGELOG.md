@@ -6,6 +6,12 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 ### Changed
+- **Hook 安全加固**（红队评审）：命令归一化预处理（防引号/转义/`-c`插队绕过）；
+  补 force 语义（`+refspec`、`-vf` 捆绑）；`update-ref` 覆盖受保护 ref；
+  分支检查跟随 `-C`/`--git-dir`；测试 17→25。
+- **一致性修复**：11 处补 `staging`（rule/README/Panorama/部署指南）；
+  `Skills Usage Guide.zh.md` 补域汇总表。
+- **新人上手**：头部加读者身份说明、人类 PR 快速通道、`<protected>`/`<DEFAULT_BRANCH>` 定义。
 - **git-workflow.md 三专家评审优化**：新增 Hook 覆盖声明（"Hook 硬拦截"仅 Claude Code 生效，
   修正 exit code 表述）；§8 新增"提交/回退"意图消歧表与决策树；精益删除冗余 20+ 行
   （钢铁纪律浓缩、删除重复 Gotchas）。
