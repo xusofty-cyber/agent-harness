@@ -4,9 +4,25 @@
 
 > **可复用的 AI 编程规范模板、Claude Code 安全钩子与多工具部署脚本**
 
+> **⚡ 30 秒上手**：`git clone https://github.com/xusofty-cyber/agent-harness.git && cd agent-harness && ./pipeline.sh`
+> 详情见 [快速开始](#快速开始)。术语不懂？查 [术语表](docs/glossary.md)。
+
 本项目提供全局、项目和目录级规范模板、Claude Code PreToolUse 钩子、技能文件，以及 Windows/Linux/macOS 部署脚本。各工具的规则加载方式和钩子能力不同；请以支持矩阵和部署脚本实际行为为准。钩子属于客户端机制，不是操作系统或服务端安全边界。
 
 ---
+
+## 架构
+
+```mermaid
+graph TD
+    G[Global AGENTS.md<br/>cross-project constitution] --> P[Project AGENTS.md<br/>project template]
+    P --> D[Directory AGENTS.md<br/>monorepo micro-boundaries]
+    P --> R[.agents/rules/<br/>on-demand sub-rules]
+    R --> S[.agents/skills/<br/>44 on-demand skills]
+    G --> H[.claude/hooks/<br/>PreToolUse guards]
+    S --> T[tools/<br/>sync, tui, doc-impact]
+```
+
 
 ## 核心特性
 
