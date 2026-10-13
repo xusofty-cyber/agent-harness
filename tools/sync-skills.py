@@ -85,7 +85,13 @@ def default_branch(repo: str) -> str:
     return _branch_cache[repo]
 
 
-def fetch_upstream(repo: str, path: str) -> bytes | None:
+def fetch_upstream(repo: str, path: str, pinned_commit: str | None = None) -> bytes | None:
+    # Prefer pinned commit (version lock); fall back to branch tip for unpinned skills.
+    if pinned_commit:
+        data = _http_bytes(f"{RAW}/{repo}/{pinned_commit}/{path}")
+        if data is not None:
+            return data
+        # Pinned commit not found (e.g. force-pushed) — fall through to branch
     branch = default_branch(repo)
     for b in (branch, "main", "master"):
         data = _http_bytes(f"{RAW}/{repo}/{b}/{path}")
@@ -134,7 +140,7 @@ def check_skill(name: str, meta: dict) -> dict:
     local_file = SKILLS_DIR / name / "SKILL.md"
     result: dict = {"skill": name, "source": repo, "path": rel}
 
-    upstream = fetch_upstream(repo, rel)
+    upstream = fetch_upstream(repo, rel, meta.get("pinnedCommit"))
     if upstream is None:
         result["status"] = "fetch-failed"
         return result

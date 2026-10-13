@@ -6,6 +6,9 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 ### Changed
+- **skills-lock 真版本锁定**：37 个外部 skill 新增 `pinnedCommit` 字段（commit SHA），
+  `sync-skills.py` 优先从 pin 的 commit 拉取，不再静默跟随上游 tip；lock 版本升至 v2。
+- **de/fr README 补全**：ai-memory 4 步详细配置完整翻译（此前压缩为 19 行代码块）。
 - **Hook 安全回归修复**（P0）：`--force-with-lease=<ref>` 带等号值形式绕过 force 检测，
   改为 `startsWith` 匹配；加回归测试（38/38）。
 - **Hook 性能优化**：`getCurrentBranch()` 单次调用内缓存；`getRepoRoot()` 优先

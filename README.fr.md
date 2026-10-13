@@ -155,22 +155,79 @@ Exécutez toutes les étapes du cycle de vie de manière séquentielle via le pi
 
 ### 3. Mémoire partagée optionnelle (ai-memory)
 
-```bash
-cargo install ai-memory
-cp .ai-memory.toml.example .ai-memory.toml
-sed -i 's/replace-with-workspace-name/default/g; s/replace-with-project-name/agent-harness/g' .ai-memory.toml
-./setup-ai-memory.sh antigravity-ide
-# Option A: Exécution directe
-ai-memory serve --transport http
+#### Étape 1 : Installer le CLI prérequis et préparer l'environnement
+- **Via Rust Cargo** :
+  ```bash
+  cargo install ai-memory
+  ```
+- **Ou via GitHub Releases (binaire précompilé)** :
+  - **Linux / macOS** :
+    ```bash
+    mkdir -p ~/.local/bin
+    curl -fsSL https://github.com/akitaonrails/ai-memory/releases/latest/download/ai-memory-linux-x86_64.tar.gz | tar -xz -C ~/.local/bin/
+    chmod +x ~/.local/bin/ai-memory
+    export PATH="$HOME/.local/bin:$PATH"
+    ```
+  - **Windows** :
+    Téléchargez l'archive depuis [Releases](https://github.com/akitaonrails/ai-memory/releases) (`ai-memory-windows-x86_64.zip`), extrayez-la et ajoutez son répertoire à votre `PATH` système.
+- 💡 **Dépannage : Actualisation du PATH dans Windows Terminal**
+  Si vous avez modifié `PATH` pendant qu'Antigravity IDE / VS Code était en cours d'exécution, les sessions de terminal actives n'hériteront pas du changement. Dans PowerShell, actualisez PATH directement depuis le registre sans redémarrer l'IDE :
+  ```powershell
+  $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+  ```
 
-# Option B: Conteneur Docker (environnement isolé)
-# Le chemin des données dans le conteneur est fixé à /data ; lie à 127.0.0.1 pour la sécurité locale
-docker run -d --name ai-memory \
-  --restart unless-stopped \
-  -p 127.0.0.1:49374:49374 \
-  -v "${HOME}/env/ai-memory-data:/data" \
-  docker.io/akitaonrails/ai-memory:latest
-```
+#### Étape 2 : Initialiser le marqueur d'adhésion du projet (.ai-memory.toml)
+ai-memory applique une politique stricte de refus par défaut, exigeant un marqueur d'adhésion explicite avant de capturer tout dépôt (ce fichier est ignoré par `.gitignore` et ne sera donc jamais commité par accident) :
+- **Windows PowerShell** :
+  ```powershell
+  Copy-Item .ai-memory.toml.example .ai-memory.toml
+  (Get-Content .ai-memory.toml) `
+      -replace 'replace-with-workspace-name', 'default' `
+      -replace 'replace-with-project-name', 'agent-harness' |
+      Set-Content .ai-memory.toml
+  ```
+- **Linux / macOS (Bash)** :
+  ```bash
+  cp .ai-memory.toml.example .ai-memory.toml
+  sed -i 's/replace-with-workspace-name/default/g; s/replace-with-project-name/agent-harness/g' .ai-memory.toml
+  ```
+
+#### Étape 3 : Exécuter l'assistant de configuration client
+Exécutez le script de configuration pour enregistrer le point de terminaison MCP et les instructions de skill gérées (prend en charge `antigravity-ide`, `antigravity-cli`, `claude-code`, `codex`) :
+- **Windows** :
+  ```powershell
+  .\setup-ai-memory.ps1 -Agent antigravity-ide
+  ```
+- **Linux / macOS** :
+  ```bash
+  chmod +x ./setup-ai-memory.sh
+  ./setup-ai-memory.sh antigravity-ide
+  ```
+- 🔍 **Guide de sortie** :
+  - `✓ no-op ... (already up to date)` : Indique une **protection d'idempotence** ; les fichiers cibles existants sont déjà à jour et ne nécessitent pas de réécriture.
+  - `Configured <agent>. No server, container, API key, or LLM provider was installed or started.` : Confirmation déclarative que la configuration client est terminée, honorant la garantie zéro-démon / zéro-facturation.
+
+#### Étape 4 : Démarrer le moteur de mémoire local
+- **Pour Antigravity IDE (via HTTP MCP)** :
+  > ⚠️ `ai-memory serve` utilise par défaut le mode de transport `stdio`, qui ne lie aucun port réseau. Pour servir Antigravity IDE, **vous devez le démarrer avec `--transport http`** :
+  - **Terminal au premier plan** :
+    ```bash
+    ai-memory serve --transport http
+    ```
+    Une fois que le terminal affiche `bind=127.0.0.1:49374`, le serveur est prêt et l'IDE peut interroger et stocker la mémoire du projet via MCP.
+  - **Démon d'arrière-plan Linux (nohup / systemd)** :
+    Utilisez `nohup ai-memory serve --transport http > ~/.local/share/ai-memory/serve.log 2>&1 &` ou créez un service utilisateur avec `systemd --user`.
+  - **Conteneur Docker** :
+    ```bash
+    # Le chemin des données dans le conteneur est fixé à /data ; lie à 127.0.0.1 pour la sécurité locale
+    docker run -d --name ai-memory \
+      --restart unless-stopped \
+      -p 127.0.0.1:49374:49374 \
+      -v "${HOME}/env/ai-memory-data:/data" \
+      docker.io/akitaonrails/ai-memory:latest
+    ```
+- **Pour Claude Code / Codex CLI** :
+  Les hooks natifs du cycle de vie capturent automatiquement les sessions, ou utilisez `ai-memory run <harness>` pour un lancement de flux de travail géré.
 
 ### 4. Mise à jour en ligne
 

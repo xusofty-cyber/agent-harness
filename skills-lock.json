@@ -1,19 +1,21 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
     "brainstorming": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/brainstorming/SKILL.md",
       "computedHash": "6ee10d1481b8a2580d5336ff66c5c08acc9d4b251b13bbc3bfd31be99c261d43",
-      "domain": "superpowers"
+      "domain": "superpowers",
+      "pinnedCommit": "bb92a77741419a4ab5f06e711a283343f1ada0c3"
     },
     "caveman": {
       "source": "JuliusBrussee/caveman",
       "sourceType": "github",
       "skillPath": "skills/caveman/SKILL.md",
       "computedHash": "415d43518f2b1a9498c15a445d4657117b129ee5e81b19454ce348439cc6672b",
-      "domain": "utility"
+      "domain": "utility",
+      "pinnedCommit": "2178ed6495c3c0ecd7d037e60acf3b1d0c554b97"
     },
     "codegraph": {
       "source": "colbymchenry/codegraph",
@@ -44,28 +46,32 @@
       "sourceType": "github",
       "skillPath": "skills/diagnosing-superpowers/SKILL.md",
       "computedHash": "5a652f8132cc901eb5ca61f89157839f87a2f20aed037fc7a2b51051bc37cd19",
-      "domain": "superpowers"
+      "domain": "superpowers",
+      "pinnedCommit": "5bf4e78011075bcfc0dc295f0724994cd123ee71"
     },
     "dispatching-parallel-agents": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/dispatching-parallel-agents/SKILL.md",
       "computedHash": "1968923066f3b707eb01d1992cdf4c42284c3855f70253b9cd5000ff45fca13c",
-      "domain": "superpowers"
+      "domain": "superpowers",
+      "pinnedCommit": "6dbbbda3baeff8407f3dddb0cc9e8a9495a273bc"
     },
     "docx": {
       "source": "anthropics/skills",
       "sourceType": "github",
       "skillPath": "skills/docx/SKILL.md",
       "computedHash": "8017469ea95fb7d28225c62daf8e2f3492a7b516fc64c18c28977cbf8980b7fe",
-      "domain": "document"
+      "domain": "document",
+      "pinnedCommit": "fa0fa64bdc967915dc8399e803be67759e1e62b8"
     },
     "draft-openspec-docs": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": ".agents/skills/draft-openspec-docs/SKILL.md",
       "computedHash": "274209302f5171434c69ab9a658a660419179feec77dbc99b432e7c69606a4cc",
-      "domain": "openspec"
+      "domain": "openspec",
+      "pinnedCommit": "f1b521dffac38ed6638689cd28b0c204b1eef0f1"
     },
     "engineering-docs": {
       "source": "./agent-harness (authored in-repo)",
@@ -80,14 +86,16 @@
       "sourceType": "github",
       "skillPath": "skills/executing-plans/SKILL.md",
       "computedHash": "f38e8f2ddcf079f65493adc713c1fed78421dfaf5f4dbf6b3a6b2b1d95466e71",
-      "domain": "superpowers"
+      "domain": "superpowers",
+      "pinnedCommit": "5bf4e78011075bcfc0dc295f0724994cd123ee71"
     },
     "finishing-a-development-branch": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/finishing-a-development-branch/SKILL.md",
       "computedHash": "8db5a922b242dd4e1bf824cb91c13b3e8d8e8a86d6ceaf7f0774eb9cce909d65",
-      "domain": "superpowers"
+      "domain": "superpowers",
+      "pinnedCommit": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797"
     },
     "git-advanced": {
       "source": "./agent-harness (authored in-repo)",
@@ -118,91 +126,104 @@
       "sourceType": "github",
       "skillPath": ".agents/skills/write-openspec-docs/SKILL.md",
       "repository": "https://github.com/Fission-AI/OpenSpec",
-      "domain": "openspec"
+      "domain": "openspec",
+      "pinnedCommit": "f1b521dffac38ed6638689cd28b0c204b1eef0f1"
     },
     "openspec-apply-change": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": "skills/openspec-apply-change/SKILL.md",
       "computedHash": "40fc0655ae650213a130f376eed1475527d6c65cdc32973754449776a3227152",
-      "domain": "openspec"
+      "domain": "openspec",
+      "pinnedCommit": "7056a580568a686ce8205961fea6e071052b5e15"
     },
     "openspec-archive-change": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": "skills/openspec-archive-change/SKILL.md",
       "computedHash": "b080e65449e9895fb63964c811168943bf99cb131a378b6a9937ed519ae4d37f",
-      "domain": "openspec"
+      "domain": "openspec",
+      "pinnedCommit": "0ff63dbae60748aecde48c80835d63b010e71e75"
     },
     "openspec-bulk-archive-change": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": "skills/openspec-bulk-archive-change/SKILL.md",
       "computedHash": "cf2d41a55e4edc805ae9da48b418c8da3055e0ffd4824070a501b3dd840a5484",
-      "domain": "openspec"
+      "domain": "openspec",
+      "pinnedCommit": "0ff63dbae60748aecde48c80835d63b010e71e75"
     },
     "openspec-continue-change": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": "skills/openspec-continue-change/SKILL.md",
       "computedHash": "ff4739969b00b2b4569ddb258de3f8401628f155fe26d4da8ff6ecad4b1ff2ec",
-      "domain": "openspec"
+      "domain": "openspec",
+      "pinnedCommit": "852a0738832645f0549aa035f836ae09bea71ee2"
     },
     "openspec-explore": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": "skills/openspec-explore/SKILL.md",
       "computedHash": "5bc03c568d0348c61b37f0647167252db5be1775ff5742ca9760b4e03ab9a5ac",
-      "domain": "openspec"
+      "domain": "openspec",
+      "pinnedCommit": "d6bdef6577a077614382ef47b64100852182d6a6"
     },
     "openspec-ff-change": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": "skills/openspec-ff-change/SKILL.md",
       "computedHash": "c2e02ca40846ebddd99d799226b2993f7fad912b8f3f295a2eb5276ff807bffb",
-      "domain": "openspec"
+      "domain": "openspec",
+      "pinnedCommit": "0b5ce44b55e0d793a312290ba5a41170a78e47c6"
     },
     "openspec-new-change": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": "skills/openspec-new-change/SKILL.md",
       "computedHash": "5b28565b38e7cb46c4895c0b190ed1dd896da3853c38a96065b3101604f9ba24",
-      "domain": "openspec"
+      "domain": "openspec",
+      "pinnedCommit": "5f5914e7f7a817262c7564ac92694db833564978"
     },
     "openspec-onboard": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": "skills/openspec-onboard/SKILL.md",
       "computedHash": "3418d949ea0c49de6110e6d9bbe714799517b0f159804647931fcc23dfedfcd1",
-      "domain": "openspec"
+      "domain": "openspec",
+      "pinnedCommit": "ed5d386a559c0215af1182d479d7f99b309fdcd2"
     },
     "openspec-propose": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": "skills/openspec-propose/SKILL.md",
       "computedHash": "7848351e7c513a25c32315b466b224ed228ceb43c75b914c145702aa9957ff0b",
-      "domain": "openspec"
+      "domain": "openspec",
+      "pinnedCommit": "5f5914e7f7a817262c7564ac92694db833564978"
     },
     "openspec-sync-specs": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": "skills/openspec-sync-specs/SKILL.md",
       "computedHash": "474952afb40497c5cb756e5654ddc901619de6b3bd57aaa03fb11d2611a99da3",
-      "domain": "openspec"
+      "domain": "openspec",
+      "pinnedCommit": "3312af4799eb162d3ddb7804d643ace5282c22cb"
     },
     "openspec-update-change": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": "skills/openspec-update-change/SKILL.md",
       "computedHash": "819f15652d398877045a8dd103b117df0d802e91225c88edfe0627dbcdb27bf6",
-      "domain": "openspec"
+      "domain": "openspec",
+      "pinnedCommit": "d6bdef6577a077614382ef47b64100852182d6a6"
     },
     "openspec-verify-change": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": "skills/openspec-verify-change/SKILL.md",
       "computedHash": "76a04af7b5926b6b3266627f26b42df58d8a4084712a686b4aa658114212358c",
-      "domain": "openspec"
+      "domain": "openspec",
+      "pinnedCommit": "43d23ccb96495d1a2ac910ae74b44020f4f5c188"
     },
     "option-review": {
       "source": "./agent-harness (authored in-repo)",
@@ -217,35 +238,40 @@
       "sourceType": "github",
       "skillPath": "skills/pdf/SKILL.md",
       "computedHash": "9f78b8359fbd4943ad260a7a1e436e5a96503406d6c34e99f69223d647d85b9c",
-      "domain": "document"
+      "domain": "document",
+      "pinnedCommit": "4e6907a33c3c0c9ce7c1836980546aaba78a34b5"
     },
     "ponytail": {
       "source": "DietrichGebert/ponytail",
       "sourceType": "github",
       "skillPath": "skills/ponytail/SKILL.md",
       "computedHash": "ba68ff26239c3c3b05b2a9a47ee0d9a6b93a69639a2555ec87a5d44bffaf2f0c",
-      "domain": "utility"
+      "domain": "utility",
+      "pinnedCommit": "2a1fe842d078cf66ec7f3e6096a8ca4279c2cad7"
     },
     "receiving-code-review": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/receiving-code-review/SKILL.md",
       "computedHash": "091df1629510af1b92fc4abd6f96732ebedb4cb2c0f3457e8f2740b0504a2438",
-      "domain": "superpowers"
+      "domain": "superpowers",
+      "pinnedCommit": "3fb75974186ea7fada621d8ab77b3b02169baf57"
     },
     "release-openspec": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": ".agents/skills/release-openspec/SKILL.md",
       "computedHash": "56b391b3b4e8a0250f24d967f2b0d31324d679a84b3ac5f9490b78e001604e18",
-      "domain": "openspec"
+      "domain": "openspec",
+      "pinnedCommit": "3f02c686c5c52ea03e66912354b49c25c5cf0f8b"
     },
     "requesting-code-review": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/requesting-code-review/SKILL.md",
       "computedHash": "2180e14a448e9410bec88e6646a2d1f0ce7fdd58de27388c1e052e929679d2bc",
-      "domain": "superpowers"
+      "domain": "superpowers",
+      "pinnedCommit": "bb92a77741419a4ab5f06e711a283343f1ada0c3"
     },
     "rtk": {
       "source": "rtk-ai/rtk",
@@ -260,77 +286,88 @@
       "sourceType": "github",
       "skillPath": "skills/subagent-driven-development/SKILL.md",
       "computedHash": "8dde5589ee083fb4999106d116f01c8fdaf3116a8a9813fdedeb80329de49046",
-      "domain": "superpowers"
+      "domain": "superpowers",
+      "pinnedCommit": "5bf4e78011075bcfc0dc295f0724994cd123ee71"
     },
     "superpowers": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/test-driven-development/SKILL.md",
       "repository": "https://github.com/obra/superpowers",
-      "domain": "superpowers"
+      "domain": "superpowers",
+      "pinnedCommit": "5bf4e78011075bcfc0dc295f0724994cd123ee71"
     },
     "systematic-debugging": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/systematic-debugging/SKILL.md",
       "computedHash": "51c6435d98c83c42c96ba7c35725a0b2c376cd487fb1a4e6bd0ddbe7e33ef202",
-      "domain": "superpowers"
+      "domain": "superpowers",
+      "pinnedCommit": "bb92a77741419a4ab5f06e711a283343f1ada0c3"
     },
     "test-driven-development": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/test-driven-development/SKILL.md",
       "computedHash": "64b03fce4aee5a97a93160cea8111f3ba13a17b7c001db4bd5836d67fd10705d",
-      "domain": "superpowers"
+      "domain": "superpowers",
+      "pinnedCommit": "5bf4e78011075bcfc0dc295f0724994cd123ee71"
     },
     "using-git-worktrees": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/using-git-worktrees/SKILL.md",
       "computedHash": "8cfb86f121269e8f7f12361e6795c4f6738828340e28964c9229d365666c9edd",
-      "domain": "superpowers"
+      "domain": "superpowers",
+      "pinnedCommit": "bc868020bbcec32bbaf9d6b51fa0538dba0b487f"
     },
     "using-superpowers": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/using-superpowers/SKILL.md",
       "computedHash": "82c5c8866ad7f5dd4440ce66bd7806ba48a2f13771beae5cf112e53f08fe36ba",
-      "domain": "superpowers"
+      "domain": "superpowers",
+      "pinnedCommit": "5bf4e78011075bcfc0dc295f0724994cd123ee71"
     },
     "verification-before-completion": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/verification-before-completion/SKILL.md",
       "computedHash": "2befe7fc55bcadaa3d97dd9e8efeb633d2561c0ebe74c5a8b17c4d9e7e4520b3",
-      "domain": "superpowers"
+      "domain": "superpowers",
+      "pinnedCommit": "3be5aad3dd2400ef23b15680969f4bcd3b6d7b8b"
     },
     "verify-openspec-docs": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": ".agents/skills/verify-openspec-docs/SKILL.md",
       "computedHash": "a3fa53a4ce377610cf8bafb72b78ce49492dd49bda6f0ff4485d5481925b94fb",
-      "domain": "openspec"
+      "domain": "openspec",
+      "pinnedCommit": "f1b521dffac38ed6638689cd28b0c204b1eef0f1"
     },
     "write-openspec-docs": {
       "source": "Fission-AI/OpenSpec",
       "sourceType": "github",
       "skillPath": ".agents/skills/write-openspec-docs/SKILL.md",
       "computedHash": "581e121b2c98040d5ce0a93ad88d0a8736fe06d9c00f5e1105b937c1499dce85",
-      "domain": "openspec"
+      "domain": "openspec",
+      "pinnedCommit": "f1b521dffac38ed6638689cd28b0c204b1eef0f1"
     },
     "writing-plans": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/writing-plans/SKILL.md",
       "computedHash": "a6c67c1900064347c2a329990dd3c555657c51c3ec53b259a08aa01a2c26139a",
-      "domain": "superpowers"
+      "domain": "superpowers",
+      "pinnedCommit": "8ca22dba9a94f28898bbce59f2537ff4d87c747d"
     },
     "writing-skills": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/writing-skills/SKILL.md",
       "computedHash": "bbdfe742f853562e643a3d40d64476359d47881e39cef80a189283fa26d11ab9",
-      "domain": "superpowers"
+      "domain": "superpowers",
+      "pinnedCommit": "5bf4e78011075bcfc0dc295f0724994cd123ee71"
     }
   }
 }
