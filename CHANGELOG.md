@@ -6,6 +6,9 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 ### Changed
+- **git-workflow.md 三专家评审优化**：新增 Hook 覆盖声明（"Hook 硬拦截"仅 Claude Code 生效，
+  修正 exit code 表述）；§8 新增"提交/回退"意图消歧表与决策树；精益删除冗余 20+ 行
+  （钢铁纪律浓缩、删除重复 Gotchas）。
 - **git-workflow.md 架构重组**（三专家评审）：12 节→8 节（268→176 行），安全约束集中前三节
   （授权矩阵→钢铁纪律→Never List）；§7/§8/§11 的手册内容并入 `git-advanced` skill；
   `git-forensics` 更名为 `git-advanced`（覆盖冲突/cherry-pick/bisect/速查）。

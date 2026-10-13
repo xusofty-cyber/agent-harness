@@ -5,6 +5,9 @@
 >
 > 本文件只收录**常驻约束**（每次会话必须遵守）。低频操作手册
 > （冲突解决、cherry-pick、bisect 等）已拆分为按需加载的 `git-advanced` skill。
+>
+> ⚠️ "Hook 硬拦截"仅在 **Claude Code** 下生效（`.claude/hooks/guard.mjs`）；
+> 其他工具无 Hook 机制，"永久禁止"依赖 Agent 自觉遵守本文件约束。
 
 ---
 
@@ -16,12 +19,12 @@
 | **本地分支** | `git checkout -b <type>/xxx` | 否 | 放行（新需求一律走临时分支） |
 | **临时分支提交** | 在临时分支改代码 / `git commit` | 按用户指令与项目政策 | 用户已明确要求提交时直接执行；否则交付 Diff，不把每次提交默认设为确认门 |
 | **本地冲突处理** | 临时分支上 `git merge origin/<protected>` | 否（本地） | 放行（**严禁在受保护分支上解冲突**） |
-| **受保护分支直改** | **在 develop / master / main / release* 上直接 commit** | — | **永久禁止（Hook 硬拦截 exit 1）** |
+| **受保护分支直改** | **在 develop / master / main / release* 上直接 commit** | — | **永久禁止（Hook 硬拦截）** |
 | **推送/合入共享分支** | 推送到受保护分支或合入受保护分支 | **必须人类明确授权，或用户当前指令已明确授权** | 看清目标分支和 refspec；仅在当前分支判断不足以确认目标 |
 | **临时分支推送** | 推送本地临时分支到共享远端 | **必须人类明确授权，或用户当前指令已明确授权** | 仅保留本地直到获授权 |
-| **历史改写** | **`git push --force` / `-f` / `--force-with-lease`** | — | **永久禁止（Hook + 规则硬拦截 exit 1）** |
-| **受保护分支 rebase** | **在受保护分支上执行 `git rebase`** | — | **永久禁止（Hook 硬拦截 exit 1）** |
-| **删除受保护远端** | `git push origin --delete develop/master/main...` | — | **永久禁止（Hook 硬拦截 exit 1）** |
+| **历史改写** | **`git push --force` / `-f` / `--force-with-lease`** | — | **永久禁止（Hook + 规则硬拦截）** |
+| **受保护分支 rebase** | **在受保护分支上执行 `git rebase`** | — | **永久禁止（Hook 硬拦截）** |
+| **删除受保护远端** | `git push origin --delete develop/master/main...` | — | **永久禁止（Hook 硬拦截）** |
 | **删除临时远端分支** | `git push origin --delete feature/xxx` | **必须人类明确授权** | 先确认该分支已合并：`git branch -r --merged origin/<DEFAULT_BRANCH>` |
 | **绕过式推送** | `git push origin <A>:<DEFAULT_BRANCH>` | 同「推送受保护分支」 | **必须人类明确授权** |
 
@@ -29,17 +32,12 @@
 
 ## 2. 四大钢铁纪律（Iron Laws）
 
-1. **受保护分支零直接提交**：
-   - `develop` / `master` / `main` / `release*` / `staging` 分支只能通过 `merge` 合入，严禁直接在上面改代码并 commit。
-2. **严禁历史改写与强制推送**：
-   - 永久禁止 `force push`、`git rebase` 受保护分支。
-   - 线上已合入代码的回滚一律使用 `git revert`（在临时分支上执行，走正常合入流程，见 §7）。
-3. **防误提交纪律（禁止盲目 `git add .` / `git add -A`）**：
-   - 严禁全量 add！本纪律用于防止将本地临时大文件、自动保存文件（如 `*.autosave`）、构建产物（`image/`、`build/`、`dist/`）、以及含敏感配置的本地文件误带入仓库；
-   - 必须通过 `git add <明确路径>` 单独添加预期文件。
-4. **冲突一律在临时分支解决，且必须与人类协同**：
-   - 遇到合并冲突时，必须在 feature 临时分支上 `merge origin/<DEFAULT_BRANCH>` 解决并验证，绝不在 `<DEFAULT_BRANCH>` 主干上解冲突；
-   - **AI 永远不自动选择一方覆盖另一方**（详细协议见 `git-advanced` skill）。
+> §1 的浓缩版——记住这四条即记住核心：
+
+1. **受保护分支零直接提交**（`develop`/`master`/`main`/`release*`/`staging` 只能 merge 合入）。
+2. **严禁历史改写与强制推送**（`force push`、受保护分支 `rebase` 永久禁止；回滚用 `git revert`）。
+3. **防误提交纪律**：禁止 `git add .` / `git add -A`；必须通过 `git add <明确路径>` 逐个添加。
+4. **冲突一律在临时分支解决，且必须与人类协同**（AI 永远不自动选一方；详细协议见 `git-advanced` skill）。
 
 ---
 
@@ -97,8 +95,6 @@ git commit --amend                      # 仅允许修改尚未 push 的提交
 
 ## 5. Commit 前 / Push 前自查清单
 
-钢铁纪律是"不能做什么"，本清单是"动手前必须确认什么"：
-
 ```text
 Commit 前自查:
 - [ ] git branch --show-current 确认不在受保护分支上？
@@ -128,8 +124,7 @@ Push 前自查:
 | 重构 | `refactor/<short-description>` | `refactor/split-pipeline` |
 | 文档/杂项 | `docs/<short-description>`、`chore/<short-description>` | `docs/update-readme` |
 
-- 一律小写短横线分隔，禁用中文与空格；
-- 分支名即意图声明，`feature/` 前缀的分支只做该功能，不顺手修无关 Bug。
+- 一律小写短横线分隔，禁用中文与空格。
 
 ### 提交信息
 
@@ -169,8 +164,28 @@ Test-Result:
 
 ## 8. 常见踩坑防护（Gotchas）
 
+### 意图消歧："提交"一词三义
+
+| 用户说法 | 默认解释 | 授权要求 |
+|---|---|---|
+| "提交一下" / "commit 一下" | `git commit`（本地，不 push） | 按 §1"临时分支提交"；先出 Diff 概览再执行 |
+| "推送" / "推上去" / "push" | `git push`（远端） | 必须人类明确授权 |
+| "合并" / "合入" / "合到主干" | §4 完整流程 | 必须人类明确授权 |
+
+### 意图消歧："回退"决策树
+
+用户说"回退"时按顺序确认：
+
+1. **哪个提交？**（默认 HEAD；多个本地提交时向人类确认 hash）
+2. **Push 过吗？**（`git log origin/<branch>..HEAD --oneline` 只读检查）
+   - 已 push → 必须 `git revert`（在临时分支执行，走 §4 流程）
+   - 未 push → 可 `git reset`
+3. **改动还要吗？**（仅未 push 时问）
+   - 保留 → `git reset --soft HEAD~1`
+   - 丢弃 → `git reset --hard HEAD~1`（⚠️ 需人类明确确认）
+
+### 其他陷阱
+
 - **口令模糊陷阱**：用户输入"提交推送"时可能指"提交当前改动"，也可能指"合入主干并推送到远端"。**务必先确认目标分支与推送意图再动手**。
-- **分支混淆检查**：提交任何改动前，必须自检 `git branch --show-current`，确保不在受保护分支上。
 - **Hook 生效机制**：`.claude/settings.json` 或 `.ww/settings.json` 中的 Hook 脚本在客户端启动会话时加载；修改 Hook 配置后需重开会话方能生效。
-- **Rebase vs Merge**：临时分支同步主干用 `merge`（保留历史）；**永远不要在受保护分支上 rebase**。
 - **Revert 后再次 merge 陷阱**：revert 了 feature 的 merge 后再次 merge 同一分支，改动会"消失"（git 认为已在历史中）。解决：先 revert 那个 revert commit，再 merge。详见 `git-advanced` §2。

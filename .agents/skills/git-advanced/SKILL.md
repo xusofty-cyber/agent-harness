@@ -8,8 +8,7 @@ version: 0.1.0
 
 On-demand reference for Git operations beyond the everyday workflow.
 For authorization rules, branch strategy, and commit discipline,
-follow `.agents/rules/git-workflow.md` instead — its safety constraints
-always take precedence over anything here.
+follow `.agents/rules/git-workflow.md` instead.
 
 ---
 
@@ -28,16 +27,6 @@ git merge --continue          # or git rebase --continue / git cherry-pick --con
 # Note: rebase commands are for feature branches only — never on protected branches.
 ```
 
-### Conflict marker anatomy
-
-```text
-<<<<<<< HEAD
-(current branch code)
-=======
-(incoming: remote or merged branch code)
->>>>>>> origin/main
-```
-
 ### Collaborative decision flow
 
 1. Report to the human: conflicted file list + what each side means per hunk;
@@ -51,8 +40,6 @@ git merge --continue          # or git rebase --continue / git cherry-pick --con
   which side to keep (`git checkout --ours/--theirs` only on explicit instruction);
 - **stash pop conflicts**: `git add` after resolving, no commit needed,
   then `git stash drop` manually;
-- **Recurring conflicts**: `git config --global rerere.enabled true` lets Git
-  remember resolutions.
 
 ---
 
@@ -143,9 +130,6 @@ git log HEAD..origin/main --oneline               # is remote ahead? (output = y
 git branch --show-current                         # current branch (check before commit)
 git status --short                                # workspace snapshot
 git diff HEAD --stat                              # change overview
-git log --oneline -20                             # recent commits
-git show <commit>                                 # commit details
-git log --follow -- <file>                        # single-file history
 git stash push -m "WIP: xxx"                      # stash work
 git stash pop                                     # restore stash
 git restore --staged <file>                       # unstage (keeps changes)
