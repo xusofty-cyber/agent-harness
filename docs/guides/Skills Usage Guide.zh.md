@@ -83,7 +83,7 @@ Claude Code 通过两种方式决定加载 skill：
 | Skill | 触发 | 命令 | 作用 | 使用时机 |
 |---|---|---|---|---|
 | `cross-tool-memory` | 自动 | — | 跨工具加载/保存持久项目记忆。ai-memory MCP 不可用时回退到 `PROJECT_CONTEXT.md` / `SESSION_STATE.md`。 | 继续之前的工作时。自动加载相关上下文；说"记住这个"显式保存。详见下方[项目记忆设置](#项目记忆设置)。 |
-| `using-superpowers` | 自动 | — | 会话开始时建立 skill 发现协议。 | 会话开始自动触发。确保 Claude 回复前先检查可用 skill。 |
+| `using-superpowers` | 自动 | — | 会话开始时建立 skill 发现协议。  ⚠️ 触发语过宽 | 会话开始自动触发。确保 Claude 回复前先检查可用 skill。 |
 
 ### 5. 开发工具
 
@@ -94,7 +94,7 @@ Claude Code 通过两种方式决定加载 skill：
 | `docx` | 混合 | — | 创建/读取/编辑 Word 文档。 | "生成 .docx 报告" 或 "读这个 Word 文件"。 |
 | `pdf` | 混合 | — | 读取/提取 PDF 文本/表格。 | "总结这个 PDF" 或 "提取表格"。 |
 | `caveman` | 混合 | — | 超压缩输出模式（省 token）。 | "简洁点" / "caveman mode"。分级：lite、full、ultra。 |
-| `ponytail` | 混合 | — | 强制最简可用方案（反过度设计）。 | "保持简单" / Claude 过度设计时。 |
+| `ponytail` | 混合 | — | 强制最简可用方案（反过度设计）。  ⚠️ 触发语过宽 | "保持简单" / Claude 过度设计时。 |
 | `git-advanced` | 混合 | — | Git 高级操作：冲突协同解决协议、cherry-pick/回退、`git bisect`、`git reflog`、命令速查。 | "解决这个合并冲突"/"cherry-pick 这个修复"/"哪个提交引入的 Bug？"。 |
 
 ### 6. 元技能

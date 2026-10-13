@@ -87,7 +87,7 @@ Wenn Claude einen Skill nicht wie erwartet lädt, benennen Sie ihn einfach expli
 | Skill | Trigger | Befehl | Funktion | Wann einsetzen |
 |---|---|---|---|---|
 | `cross-tool-memory` | Auto | — | Lädt/speichert dauerhaftes Projektgedächtnis über Werkzeuge hinweg. Fällt auf `PROJECT_CONTEXT.md` / `SESSION_STATE.md` zurück, wenn ai-memory MCP fehlt. | Bei Weiterarbeit an bestehenden Projekten. Lädt Kontext automatisch; "merke dir das" speichert explizit. Siehe [Projektgedächtnis-Einrichtung](#projektgedächtnis-einrichtung) unten. |
-| `using-superpowers` | Auto | — | Etabliert das Skill-Discovery-Protokoll zu Sitzungsbeginn. | Löst zu Sitzungsbeginn automatisch aus. Stellt sicher, dass Claude verfügbare Skills vor der Antwort prüft. |
+| `using-superpowers` | Auto | — | Etabliert das Skill-Discovery-Protokoll zu Sitzungsbeginn.  ⚠️ Trigger zu breit | Löst zu Sitzungsbeginn automatisch aus. Stellt sicher, dass Claude verfügbare Skills vor der Antwort prüft. |
 
 ### 5. Entwicklungswerkzeuge
 
@@ -98,7 +98,7 @@ Wenn Claude einen Skill nicht wie erwartet lädt, benennen Sie ihn einfach expli
 | `docx` | Hybrid | — | Erstellt, liest und bearbeitet Word-Dokumente. | "Erstelle einen .docx-Bericht" oder "lies diese Word-Datei". |
 | `pdf` | Hybrid | — | Liest und extrahiert Text/Tabellen aus PDFs. | "Fasse dieses PDF zusammen" oder "extrahiere Tabellen...". |
 | `caveman` | Hybrid | — | Stark komprimierter Ausgabemodus (spart Tokens). | "Sei prägnant" / "caveman mode". Stufen: lite, full, ultra. |
-| `ponytail` | Hybrid | — | Erzwingt die einfachste funktionierende Lösung (Anti-Overengineering). | "Halte es einfach" / wenn Claude überdimensioniert. |
+| `ponytail` | Hybrid | — | Erzwingt die einfachste funktionierende Lösung (Anti-Overengineering).  ⚠️ Trigger zu breit | "Halte es einfach" / wenn Claude überdimensioniert. |
 | `git-advanced` | Hybrid | — | Erweiterte Git-Operationen: Konfliktlösung, Cherry-pick/Revert, `git bisect`, `git reflog`, Befehlsreferenz. | "Diesen Merge-Konflikt lösen" / "diesen Fix cherry-picken". |
 
 ### 6. Meta-Skills

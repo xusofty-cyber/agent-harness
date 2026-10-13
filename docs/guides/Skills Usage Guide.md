@@ -89,7 +89,7 @@ If Claude doesn't pick up a skill when you expect it, just name it explicitly.
 | Skill | Trigger | Slash | What It Does | When to Use |
 |---|---|---|---|---|
 | `cross-tool-memory` | Auto | — | Loads/saves durable project memory across tools. Falls back to `PROJECT_CONTEXT.md` / `SESSION_STATE.md` when ai-memory MCP is unavailable. | When continuing prior work. Auto-loads relevant context; explicitly say "remember this" to save. See [Project Memory Setup](#project-memory-setup) below. |
-| `using-superpowers` | Auto | — | Establishes skill-discovery protocol at conversation start. | Auto-fires at session start. Ensures Claude checks available skills before responding. |
+| `using-superpowers` | Auto | — | Establishes skill-discovery protocol at conversation start. ⚠️ Fires on every conversation start. | Auto-fires at session start. Ensures Claude checks available skills before responding. |
 
 ### 5. Developer Tools
 
@@ -100,7 +100,7 @@ If Claude doesn't pick up a skill when you expect it, just name it explicitly.
 | `docx` | Hybrid | — | Creates, reads, edits Word documents. | "Create a .docx report" or "read this Word file". |
 | `pdf` | Hybrid | — | Reads/extracts text/tables from PDFs. | "Summarize this PDF" or "extract tables from...". |
 | `caveman` | Hybrid | — | Ultra-compressed output mode (saves tokens). | "Be concise" / "caveman mode". Levels: lite, full, ultra. |
-| `ponytail` | Hybrid | — | Forces the simplest working solution (anti-overengineering). | "Keep it simple" / when Claude over-engineers. |
+| `ponytail` | Hybrid | — | Forces the simplest working solution (anti-overengineering). ⚠️ Broad trigger ("any coding task") may fire unexpectedly. | "Keep it simple" / when Claude over-engineers. |
 | `git-advanced` | Hybrid | — | Advanced Git: conflict resolution protocol, cherry-pick/revert, `git bisect`, `git reflog`, command reference. | "Resolve this merge conflict" / "cherry-pick this fix" / "which commit broke this?". |
 
 ### 6. Meta

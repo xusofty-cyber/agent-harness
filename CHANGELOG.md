@@ -6,6 +6,9 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 ### Changed
+- **专家遗留项收尾**：Guide 5 语言加触发语过宽警告（ponytail/using-superpowers，
+  外部 skill 不直接改以保同步）；repo_checks.py 新增 markdown 内链检查
+  （修复 Guide 移动导致的 131 个断链）；CI 移除已合并分支触发。
 - **仓库结构整理**：15 个 Guide 移入 `docs/guides/`（根目录 53→38 文件）；
   `README_zh.md` 重命名为 `README.zh.md`（统一命名规范）；中文 Guide 标注"扩展版"。
 - **项目级评审优化**：Panorama Guide 5 语言 skill 计数 43→44；Hook 测试 25→37

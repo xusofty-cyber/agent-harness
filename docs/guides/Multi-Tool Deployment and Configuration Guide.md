@@ -90,7 +90,7 @@ The hooks in `.claude/settings.json` are Claude Code-specific and run only befor
 
 ### Configuration and implementation
 
-The installer copies [`.claude/settings.json`](.claude/settings.json) and deploys [`.claude/hooks/guard.mjs`](.claude/hooks/guard.mjs) plus [`guard-write.mjs`](.claude/hooks/guard-write.mjs). Inspect those source files directly; do not copy hook examples from older guide versions because the protocol and implementation can change.
+The installer copies [`.claude/settings.json`](../../.claude/settings.json) and deploys [`.claude/hooks/guard.mjs`](../../.claude/hooks/guard.mjs) plus [`guard-write.mjs`](../../.claude/hooks/guard-write.mjs). Inspect those source files directly; do not copy hook examples from older guide versions because the protocol and implementation can change.
 
 ### Equivalents on other tools (extension point)
 
@@ -101,8 +101,8 @@ PreToolUse hooks are Claude Code-specific; the installer does not install interc
 ## 4. Cross-Tool Deployment & Template Updates (deploy-agents)
 
 The scripts deploy files to configured paths. Tool-specific loading behavior is not guaranteed by file deployment. `-Global` initializes missing global rule files and preserves existing ones. Combining `-Global -Update` first creates a timestamped backup, then replaces the active global rule with the current template. Antigravity receives the canonical `~/.gemini/AGENTS.md` plus a small `GEMINI.md` compatibility pointer instead of a duplicate full rule set. Codex uses `$CODEX_HOME` when set (otherwise `~/.codex`); if a non-empty `AGENTS.override.md` exists there, that active file is backed up and updated instead of `AGENTS.md`:
-- **Windows PowerShell**: [`deploy-agents.ps1`](deploy-agents.ps1)
-- **Linux / macOS Bash**: [`deploy-agents.sh`](deploy-agents.sh)
+- **Windows PowerShell**: [`deploy-agents.ps1`](../../deploy-agents.ps1)
+- **Linux / macOS Bash**: [`deploy-agents.sh`](../../deploy-agents.sh)
 
 ### 4.1 Script Core Architecture & Pipeline
 
@@ -188,7 +188,7 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 - `-Update` (`-u`): Fast-forwards the template repository, automatically invokes `tools/sync-skills.py --check` to scan external skills for upstream updates with interactive confirmation, and syncs files to the target. Combined with `-Global`, it backs up and replaces existing global rule files. Codex's non-empty `$CODEX_HOME/AGENTS.override.md` takes precedence and is updated as the active file. Existing project-managed rules, hooks, skills, and lock metadata follow their documented backup/update behavior. It does not upgrade global CLIs.
 - `-CometInit` (`-c`): Automatically executes `comet init` in the target project if Comet CLI is installed.
 - `-AiMemoryInit` (`-m`): Automatically initializes `.ai-memory.toml` in the target project (inferring `workspace` and `project`) for cross-tool ai-memory integration.
-- `-Pipeline`: Delegates execution directly to the unified pipeline runner ([`run-pipeline.ps1`](run-pipeline.ps1) / [`pipeline.ps1`](pipeline.ps1)).
+- `-Pipeline`: Delegates execution directly to the unified pipeline runner ([`run-pipeline.ps1`](../../run-pipeline.ps1) / [`pipeline.ps1`](../../pipeline.ps1)).
 
 **Unified Pipeline Runner (Windows)**:
 ```powershell

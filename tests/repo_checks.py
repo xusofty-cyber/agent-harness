@@ -535,6 +535,46 @@ for script in EXEC_SCRIPTS:
           f"mode is {modes.get(script)}, expected 100755 — run: "
           f"git update-index --chmod=+x {script}")
 
+# --- 8. Markdown internal link check ---
+# Verify relative links in docs resolve to existing files.
+import urllib.parse
+LINK_RE = re.compile(r'\[([^\]]*)\]\(([^)]+)\)')
+# Only check these user-facing docs (not .agents/skills which are vendored)
+LINK_CHECK_ROOTS = ["README.md", "README.zh.md", "README.zh-tw.md", "README.de.md",
+                    "README.fr.md", "CONTRIBUTING.md", "docs/guides"]
+checked_links = 0
+broken_links = []
+for root in LINK_CHECK_ROOTS:
+    rp = ROOT / root
+    files = [rp] if rp.is_file() else sorted(rp.rglob("*.md")) if rp.is_dir() else []
+    for f in files:
+        content = f.read_text(encoding="utf-8")
+        for m in LINK_RE.finditer(content):
+            url = m.group(2).strip()
+            # Skip external URLs, anchors, mailto
+            if url.startswith(("http://", "https://", "#", "mailto:")):
+                continue
+            # Strip anchor fragment
+            url_path = url.split("#")[0]
+            if not url_path:
+                continue
+            # URL-decode (%20 etc.)
+            url_path = urllib.parse.unquote(url_path)
+            target = (f.parent / url_path).resolve()
+            # Must be within repo
+            try:
+                target.relative_to(ROOT.resolve())
+            except ValueError:
+                continue  # outside repo, skip
+            checked_links += 1
+            if not target.exists():
+                broken_links.append(f"{f.relative_to(ROOT)} -> {url}")
+for bl in broken_links[:10]:  # show first 10
+    check(f"link:{bl}", False, "broken internal link")
+check("link:total-checked", True, f"{checked_links} links checked, {len(broken_links)} broken")
+if broken_links:
+    check("link:no-broken", False, f"{len(broken_links)} broken internal links")
+
 print()
 if failures:
     print(f"{len(failures)} check(s) failed.")

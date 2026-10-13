@@ -87,7 +87,7 @@ Si Claude ne charge pas une compétence comme prévu, nommez-la simplement de ma
 | Compétence | Déclencheur | Commande | Description | Quand l'utiliser |
 |---|---|---|---|---|
 | `cross-tool-memory` | Auto | — | Charge/enregistre la mémoire durable du projet entre outils. Repli sur `PROJECT_CONTEXT.md` / `SESSION_STATE.md` si ai-memory MCP est absent. | Lors de la reprise d'un travail. Charge automatiquement le contexte ; dites explicitement "mémorise ceci" pour enregistrer. Voir [Configuration de la mémoire de projet](#configuration-de-la-mémoire-de-projet) ci-dessous. |
-| `using-superpowers` | Auto | — | Établit le protocole de découverte des compétences au début de la session. | Se déclenche automatiquement au début. Assure que Claude vérifie les compétences disponibles avant de répondre. |
+| `using-superpowers` | Auto | — | Établit le protocole de découverte des compétences au début de la session.  ⚠️ Déclencheur trop large | Se déclenche automatiquement au début. Assure que Claude vérifie les compétences disponibles avant de répondre. |
 
 ### 5. Outils de développement
 
@@ -98,7 +98,7 @@ Si Claude ne charge pas une compétence comme prévu, nommez-la simplement de ma
 | `docx` | Hybride | — | Crée, lit et modifie des documents Word. | "Génère un rapport .docx" ou "lis ce fichier Word". |
 | `pdf` | Hybride | — | Lit et extrait du texte/tableaux de fichiers PDF. | "Résume ce PDF" ou "extrais les tableaux...". |
 | `caveman` | Hybride | — | Mode de sortie ultra-compressé (économise les tokens). | "Sois concis" / "caveman mode". Niveaux : lite, full, ultra. |
-| `ponytail` | Hybride | — | Impose la solution fonctionnelle la plus simple (anti-suringénierie). | "Reste simple" / lorsque Claude sur-ingénie. |
+| `ponytail` | Hybride | — | Impose la solution fonctionnelle la plus simple (anti-suringénierie).  ⚠️ Déclencheur trop large | "Reste simple" / lorsque Claude sur-ingénie. |
 | `git-advanced` | Hybride | — | Opérations Git avancées : résolution de conflits, cherry-pick/revert, `git bisect`, `git reflog`, référence. | "Résoudre ce conflit" / "cherry-pick ce correctif". |
 
 ### 6. Méta-compétences

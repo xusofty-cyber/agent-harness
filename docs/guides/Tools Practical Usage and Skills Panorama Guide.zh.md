@@ -87,7 +87,7 @@
 
 ### 2.1 开箱即用 / 44 原生技能分类全景清单
 
-通过执行自动化部署脚本 [`deploy-agents.ps1`](deploy-agents.ps1)（Windows）或 [`deploy-agents.sh`](deploy-agents.sh)（Linux/macOS）后，全套技能库会自动部署至目标项目的 `.agents/skills/`，并无缝接线至 `.claude/skills/`。
+通过执行自动化部署脚本 [`deploy-agents.ps1`](../../deploy-agents.ps1)（Windows）或 [`deploy-agents.sh`](../../deploy-agents.sh)（Linux/macOS）后，全套技能库会自动部署至目标项目的 `.agents/skills/`，并无缝接线至 `.claude/skills/`。
 
 整套技能库包含 **44 个专业工程技能**，按功能领域归类如下：
 
@@ -262,17 +262,17 @@ Skill 文件的存在不代表宿主自动加载。实际上下文成本和 CLI 
 
 | 研发场景 | 绑定规则 / 技能 | 触发方式 / 唤醒关键词 | 预期交付与行为规范 |
 |---|---|---|---|
-| **分支流转 / 提交 / 推送** | [`git-workflow.md`](.agents/rules/git-workflow.md) | 涉及 `git commit` / `git push` / 分支切换 | 严格在临时分支提交；严禁 `git add .`；触碰远端必须明确授权；禁 force push 与 rebase |
-| **高危操作 / 核心结构变更** | [`security-boundary.md`](.agents/rules/security-boundary.md) | 触碰 8 大高风险操作（改构建/协议/公共头/依赖） | 暂停执行，列出变动清单与影响面，待人类明确确认后再操作 |
-| **复杂需求 / 架构改造** | [`engineering-spec.md`](.agents/rules/engineering-spec.md) + `comet` / `openspec` | `/comet` 或 `用 openspec 规范出方案` | 仅在用户指定或项目已配置相应工作流时，遵循该工具当前版本流程 |
-| **代码依赖 / 找符号引用** | [`token-discipline.md`](.agents/rules/token-discipline.md) + `codegraph` | CodeGraph MCP 可用时进行语义查询；否则限定范围搜索 | 不假设 CodeGraph 已安装；MCP 不可用时使用相关目录的 `rg` |
-| **功能实现 / 编码阶段** | [`engineering-spec.md`](.agents/rules/engineering-spec.md) + `ponytail` + `test-driven-development` | `用 ponytail 策略实现` / 指令后追加 `极简原则` | 理解现有实现后遵循适用的最小实现原则；测试按任务与项目约定执行验证 |
-| **复杂 Bug / 偶现排障** | [`engineering-spec.md`](.agents/rules/engineering-spec.md) + `systematic-debugging` | `系统性排查该 bug` 或粘贴完整报错 Trace | 严禁创可贴盲修；必须先收集证据、建立假设、定位根因再写修复 |
-| **超长输出 / 测试跑批** | [`token-discipline.md`](.agents/rules/token-discipline.md) + `rtk` | RTK Hook 配置后才会改写支持的命令；否则使用原生命令参数 | 保留必要验证，长日志可重定向到本地文件 |
-| **Token 告急 / 精简输出** | [`Global AGENTS.md`](Global%20AGENTS.md) + `caveman` | `/caveman` 或 `进入 caveman 模式` / `说人话` | 在宿主加载 Skill 时可简化表达，同时保留必要背景、技术精度和安全说明 |
+| **分支流转 / 提交 / 推送** | [`git-workflow.md`](../../.agents/rules/git-workflow.md) | 涉及 `git commit` / `git push` / 分支切换 | 严格在临时分支提交；严禁 `git add .`；触碰远端必须明确授权；禁 force push 与 rebase |
+| **高危操作 / 核心结构变更** | [`security-boundary.md`](../../.agents/rules/security-boundary.md) | 触碰 8 大高风险操作（改构建/协议/公共头/依赖） | 暂停执行，列出变动清单与影响面，待人类明确确认后再操作 |
+| **复杂需求 / 架构改造** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `comet` / `openspec` | `/comet` 或 `用 openspec 规范出方案` | 仅在用户指定或项目已配置相应工作流时，遵循该工具当前版本流程 |
+| **代码依赖 / 找符号引用** | [`token-discipline.md`](../../.agents/rules/token-discipline.md) + `codegraph` | CodeGraph MCP 可用时进行语义查询；否则限定范围搜索 | 不假设 CodeGraph 已安装；MCP 不可用时使用相关目录的 `rg` |
+| **功能实现 / 编码阶段** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `ponytail` + `test-driven-development` | `用 ponytail 策略实现` / 指令后追加 `极简原则` | 理解现有实现后遵循适用的最小实现原则；测试按任务与项目约定执行验证 |
+| **复杂 Bug / 偶现排障** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `systematic-debugging` | `系统性排查该 bug` 或粘贴完整报错 Trace | 严禁创可贴盲修；必须先收集证据、建立假设、定位根因再写修复 |
+| **超长输出 / 测试跑批** | [`token-discipline.md`](../../.agents/rules/token-discipline.md) + `rtk` | RTK Hook 配置后才会改写支持的命令；否则使用原生命令参数 | 保留必要验证，长日志可重定向到本地文件 |
+| **Token 告急 / 精简输出** | [`Global AGENTS.md`](../../Global%20AGENTS.md) + `caveman` | `/caveman` 或 `进入 caveman 模式` / `说人话` | 在宿主加载 Skill 时可简化表达，同时保留必要背景、技术精度和安全说明 |
 | **Word / PDF 专业文档** | `docx` / `pdf` | 直接提及 `.docx`、`.pdf` 或 `导出规范文档` | 遵循专业排版规范，自动处理表格对齐、样式维护与内容抽取，不乱跑单测 |
-| **文档创建 / 架构与追溯同步** | [`engineering-spec.md`](.agents/rules/engineering-spec.md) + `living-documentation` | `/living-documentation` / `更新追溯文档` / 需求架构归档 | 依据 L0/L1/L2 阈值同步四阶文档（specs/architecture/reference/guides），维护 Frontmatter 代码与文档双向追溯引用 |
-| **研发阶段文档 / 统一门禁模板** | [`engineering-spec.md`](.agents/rules/engineering-spec.md) + `engineering-docs` | `/engineering-docs` / `输出SRS/HLD/接口文档` / 交付各阶段规范文档 | 使用 15 个中英双语阶段门禁模板（覆盖立项到交付 31 种文档），统一各 AI Agent 输出格式，无缝衔接 Comet 阶段产物与活体文档 |
+| **文档创建 / 架构与追溯同步** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `living-documentation` | `/living-documentation` / `更新追溯文档` / 需求架构归档 | 依据 L0/L1/L2 阈值同步四阶文档（specs/architecture/reference/guides），维护 Frontmatter 代码与文档双向追溯引用 |
+| **研发阶段文档 / 统一门禁模板** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `engineering-docs` | `/engineering-docs` / `输出SRS/HLD/接口文档` / 交付各阶段规范文档 | 使用 15 个中英双语阶段门禁模板（覆盖立项到交付 31 种文档），统一各 AI Agent 输出格式，无缝衔接 Comet 阶段产物与活体文档 |
 | **代码评审 / 合并前质量门禁** | `open-code-review` + `requesting-code-review` | 完成功能或合并前 | 规则先行、行号锚定、全量覆盖；`ocr` CLI 已装走 Tier A 委托，否则走 Tier B 方法论 |
 | **任务收尾 / 完工声明** | `verification-before-completion` | 任务收尾阶段自动触发 | 未出示真实可复现的验证依据（测试输出片段或运行结果）前，绝不可声称任务完成 |
 
@@ -624,18 +624,18 @@ cat tasks/lessons.md
 
 ### 5. 跨工具部署与参考文档索引：
 - 统一工程流水线执行脚本：
-  - Windows：[`run-pipeline.ps1`](run-pipeline.ps1) / [`pipeline.ps1`](pipeline.ps1)
-  - Linux/macOS：[`run-pipeline.sh`](run-pipeline.sh) / [`pipeline.sh`](pipeline.sh)
+  - Windows：[`run-pipeline.ps1`](../../run-pipeline.ps1) / [`pipeline.ps1`](../../pipeline.ps1)
+  - Linux/macOS：[`run-pipeline.sh`](../../run-pipeline.sh) / [`pipeline.sh`](../../pipeline.sh)
 - 一键自动化部署脚本：
-  - Windows：[`deploy-agents.ps1`](deploy-agents.ps1)
-  - Linux/macOS：[`deploy-agents.sh`](deploy-agents.sh)
+  - Windows：[`deploy-agents.ps1`](../../deploy-agents.ps1)
+  - Linux/macOS：[`deploy-agents.sh`](../../deploy-agents.sh)
 - 运维与辅助工具集：
-  - 终端交互组件：[`tools/tui.py`](tools/tui.py)
-  - 外部技能同步：[`tools/sync-skills.py`](tools/sync-skills.py)
-  - 活体文档质检：[`tools/doc-impact.py`](tools/doc-impact.py)
+  - 终端交互组件：[`tools/tui.py`](../../tools/tui.py)
+  - 外部技能同步：[`tools/sync-skills.py`](../../tools/sync-skills.py)
+  - 活体文档质检：[`tools/doc-impact.py`](../../tools/doc-impact.py)
 - 跨工具部署与配置专著：
   - 👉 [`多工具部署配置指南.zh.md`](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md)
 - 规则中枢文件：
-  - 全局宪法：[`Global AGENTS.md`](Global%20AGENTS.md)
-  - 项目枢纽：[`Project AGENTS.md`](Project%20AGENTS.md)
-  - 目录补丁：[`Directory AGENTS.md`](Directory%20AGENTS.md)
+  - 全局宪法：[`Global AGENTS.md`](../../Global%20AGENTS.md)
+  - 项目枢纽：[`Project AGENTS.md`](../../Project%20AGENTS.md)
+  - 目录补丁：[`Directory AGENTS.md`](../../Directory%20AGENTS.md)
