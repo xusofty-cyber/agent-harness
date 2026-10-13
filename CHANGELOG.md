@@ -6,6 +6,8 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 ### Changed
+- **模板目录整理**：15 个 AGENTS 模板（Global/Project/Directory × 5 语言）
+  移入 `templates/agents/`；deploy 双脚本路径同步；根目录 38→23 文件。
 - **可访问性提升**：Hook 报错双语化（EN+ZH）；新增 `docs/glossary.md` 术语表；
   README 5 语言加 30 秒上手 TL;DR + mermaid 架构图。
 - **专家遗留项收尾**：Guide 5 语言加触发语过宽警告（ponytail/using-superpowers，

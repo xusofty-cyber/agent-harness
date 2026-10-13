@@ -278,11 +278,12 @@ $LangSuffix = switch -Regex ($NormLang) {
 }
 
 function Resolve-TemplateFile([string]$BaseName, [string]$Suffix) {
+    $templateDir = Join-Path $ScriptDir "templates/agents"
     if ($Suffix) {
-        $candidate = Join-Path $ScriptDir "$BaseName$Suffix.md"
+        $candidate = Join-Path $templateDir "$BaseName$Suffix.md"
         if (Test-Path $candidate) { return $candidate }
     }
-    $fallback = Join-Path $ScriptDir "$BaseName.md"
+    $fallback = Join-Path $templateDir "$BaseName.md"
     if (Test-Path $fallback) { return $fallback }
     return $fallback
 }
