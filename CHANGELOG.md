@@ -6,6 +6,10 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 ### Changed
+- **Hook 安全回归修复**（P0）：`--force-with-lease=<ref>` 带等号值形式绕过 force 检测，
+  改为 `startsWith` 匹配；加回归测试（38/38）。
+- **Hook 性能优化**：`getCurrentBranch()` 单次调用内缓存；`getRepoRoot()` 优先
+  `__dirname` 推导（各省 ~11ms）；无 ReDoS 风险。
 - **模板目录整理**：15 个 AGENTS 模板（Global/Project/Directory × 5 语言）
   移入 `templates/agents/`；deploy 双脚本路径同步；根目录 38→23 文件。
 - **可访问性提升**：Hook 报错双语化（EN+ZH）；新增 `docs/glossary.md` 术语表；
