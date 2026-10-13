@@ -30,6 +30,11 @@ if (toolName !== "Bash") {
   process.exit(0);
 }
 
+// Named constants for magic values
+const GIT_TIMEOUT_MS = 5000;  // git subprocess timeout
+const MIN_ABBREV_LEN = 6;     // min length for --force abbreviations (--forc)
+const MIN_ABBREV_LONG_LEN = 8; // min length for --force-with-lease abbreviations
+
 // === Helper: get current git branch (optionally in a specific dir) ===
 // Cached per hook invocation to avoid duplicate git spawns.
 const _branchCache = new Map();
@@ -40,7 +45,7 @@ function getCurrentBranch(cwd) {
   try {
     branch = execSync("git branch --show-current", {
       encoding: "utf-8",
-      timeout: 5000,
+      timeout: GIT_TIMEOUT_MS,
       cwd: cwd || process.cwd(),
     }).trim();
   } catch {
@@ -262,7 +267,7 @@ function getRepoRoot() {
   try {
     _repoRoot = execSync("git rev-parse --show-toplevel", {
       encoding: "utf-8",
-      timeout: 5000,
+      timeout: GIT_TIMEOUT_MS,
     }).trim();
   } catch {
     _repoRoot = derived;
@@ -332,7 +337,7 @@ function stagedFiles() {
   try {
     return execSync("git diff --cached --name-only", {
       encoding: "utf-8",
-      timeout: 5000,
+      timeout: GIT_TIMEOUT_MS,
       stdio: ["pipe", "pipe", "ignore"],
     })
       .split("\n")
@@ -348,7 +353,7 @@ function pushedFiles() {
   try {
     return execSync("git diff --name-only @{u}...HEAD", {
       encoding: "utf-8",
-      timeout: 5000,
+      timeout: GIT_TIMEOUT_MS,
       stdio: ["pipe", "pipe", "ignore"],
     })
       .split("\n")
@@ -360,7 +365,7 @@ function pushedFiles() {
       try {
         return execSync(`git diff --name-only ${base}...HEAD`, {
           encoding: "utf-8",
-          timeout: 5000,
+          timeout: GIT_TIMEOUT_MS,
           stdio: ["pipe", "pipe", "ignore"],
         })
           .split("\n")
@@ -374,7 +379,7 @@ function pushedFiles() {
     try {
       return execSync("git show -m --name-only --pretty=format: HEAD", {
         encoding: "utf-8",
-        timeout: 5000,
+        timeout: GIT_TIMEOUT_MS,
         stdio: ["pipe", "pipe", "ignore"],
       })
         .split("\n")
@@ -412,9 +417,9 @@ function isForcePush(inv) {
     // Check both directions: a starts with --force (e.g. --force-with-lease=),
     // or --force starts with a (abbreviation, e.g. --forc). Minimum 5 chars to avoid --fo matching --format.
     if (a.startsWith("--force")) return true;
-    if (a.startsWith("--") && "--force".startsWith(a) && a.length >= 6) return true;
+    if (a.startsWith("--") && "--force".startsWith(a) && a.length >= MIN_ABBREV_LEN) return true;
     // Same for --force-with-lease and --force-if-includes abbreviations
-    if (a.startsWith("--") && ("--force-with-lease".startsWith(a) || "--force-if-includes".startsWith(a)) && a.length >= 8) return true;
+    if (a.startsWith("--") && ("--force-with-lease".startsWith(a) || "--force-if-includes".startsWith(a)) && a.length >= MIN_ABBREV_LONG_LEN) return true;
     // Bundled short flags: -vf, -fv, -f → contains 'f' as a short flag
     if (/^-[a-zA-Z]+$/.test(a) && !a.startsWith("--") && a.includes("f")) return true;
     // +refspec prefix = force update for that ref
