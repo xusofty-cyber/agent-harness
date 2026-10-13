@@ -19,6 +19,18 @@ Claude Code 通过两种方式决定加载 skill：
 
 ## Skill 分类速查
 
+> | 领域 | Skills | 用途 |
+> |---|---|---|
+> | `openspec` | 17 | OpenSpec 工作流家族 |
+> | `superpowers` | 16 | obra/superpowers 方法论家族 |
+> | `local` | 6 | 仓库自研（engineering-docs、living-documentation、open-code-review、option-review、cross-tool-memory、git-advanced） |
+> | `document` | 2 | 文档处理（docx、pdf） |
+> | `integration` | 2 | 外部工具整合（comet、codegraph） |
+> | `utility` | 3 | 单一用途工具（caveman、ponytail、rtk） |
+>
+> **数量说明**：`skills-lock.json` 有 46 个条目，但本目录只列 44 个 skill。
+> 多出的 2 个（`openspec`、`superpowers`）是来源仓库的 meta 条目——仅作来源标记，非可安装 skill。
+
 ### 1. 工作流与流程控制
 
 | Skill | 触发 | 命令 | 作用 | 使用时机 |

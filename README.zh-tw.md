@@ -19,7 +19,7 @@
 2. **Claude Code 客戶端鉤子（[`.claude/settings.json`](.claude/settings.json) + [`.claude/hooks/`](.claude/hooks/)）**：
    - 僅針對 Claude Code 中相符的工具呼叫執行，非作業系統層級防護；
    - 使用 Node.js 守衛指令碼透過 stdin JSON 讀取工具輸入（Claude Code 官方協定），以 `exit 2` / `permissionDecision: deny` 實現可靠阻斷；
-   - 永久硬攔截（`exit 2`）：受保護分支（`develop`/`master`/`main`/`release*`）直接提交、`git push --force`、刪除受保護遠端分支、受保護分支 rebase；
+   - 永久硬攔截（`exit 2`）：受保護分支（`develop`/`master`/`main`/`release*`/`staging`）直接提交、`git push --force`、刪除受保護遠端分支、受保護分支 rebase；
    - 部分命令會直接拒絕，其他情況提供非阻斷警告；正則檢查無法涵蓋所有命令變形，亦無法取代 Git 伺服器端分支保護。
 
 3. **44 個可複用技能目錄（[`.agents/skills/`](.agents/skills/)）**：

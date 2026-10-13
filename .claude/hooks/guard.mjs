@@ -30,12 +30,13 @@ if (toolName !== "Bash") {
   process.exit(0);
 }
 
-// === Helper: get current git branch ===
-function getCurrentBranch() {
+// === Helper: get current git branch (optionally in a specific dir) ===
+function getCurrentBranch(cwd) {
   try {
     return execSync("git branch --show-current", {
       encoding: "utf-8",
       timeout: 5000,
+      cwd: cwd || process.cwd(),
     }).trim();
   } catch {
     return "";
@@ -79,10 +80,146 @@ function isProtectedBranch(branch) {
   return false;
 }
 
+// ============================================================
+// COMMAND NORMALIZATION (red-team hardening)
+// ------------------------------------------------------------
+// Attackers evade string matching via:
+//   - quotes/escapes: "git" push, 'git' push, g\it push, gi''t push
+//   - global options between git and subcommand: git -c x=y push, git -C dir push
+//   - command substitution: $(which git) push
+// We normalize the command into argv tokens before matching.
+// ============================================================
+
+// Minimal shell word splitter: handles single/double quotes and backslash
+// escapes well enough for security matching (not a full POSIX parser).
+function shellSplit(cmd) {
+  const tokens = [];
+  let cur = "";
+  let i = 0;
+  let inSingle = false;
+  let inDouble = false;
+  while (i < cmd.length) {
+    const c = cmd[i];
+    if (inSingle) {
+      if (c === "'") inSingle = false;
+      else cur += c;
+    } else if (inDouble) {
+      if (c === '"') inDouble = false;
+      else if (c === "\\" && i + 1 < cmd.length && '"\\$`'.includes(cmd[i + 1])) {
+        cur += cmd[i + 1];
+        i++;
+      } else cur += c;
+    } else {
+      if (c === "'") inSingle = true;
+      else if (c === '"') inDouble = true;
+      else if (c === "\\" && i + 1 < cmd.length) {
+        cur += cmd[i + 1];
+        i++;
+      } else if (/\s/.test(c)) {
+        if (cur) { tokens.push(cur); cur = ""; }
+      } else if (c === ";" || c === "&" || c === "|" || c === "(" || c === ")") {
+        // Command separator: treat each segment independently.
+        // For security, we analyze segments separately (split here).
+        if (cur) { tokens.push(cur); cur = ""; }
+        tokens.push("\x00SEP\x00");
+      } else cur += c;
+    }
+    i++;
+  }
+  if (cur) tokens.push(cur);
+  return tokens;
+}
+
+// Split command into segments at separators, return array of token arrays.
+function commandSegments(cmd) {
+  const tokens = shellSplit(cmd);
+  const segments = [];
+  let cur = [];
+  for (const t of tokens) {
+    if (t === "\x00SEP\x00") {
+      if (cur.length) segments.push(cur);
+      cur = [];
+    } else cur.push(t);
+  }
+  if (cur.length) segments.push(cur);
+  return segments;
+}
+
+// Git global options that consume the next token as a value.
+const GIT_GLOBAL_OPTS_WITH_VALUE = new Set([
+  "-c", "--config",
+  "-C",
+  "--git-dir", "--work-tree", "--namespace", "--super-prefix",
+]);
+
+// Normalize one segment: if it invokes git, return { subcommand, args, gitDir }
+// or null if not a git invocation.
+function parseGitInvocation(tokens) {
+  if (!tokens.length) return null;
+  // Resolve argv[0]: strip path, handle env/command prefixes.
+  let idx = 0;
+  let prog = tokens[0].split("/").pop();
+  // Skip "env VAR=x" style prefixes and "command"/"sudo" wrappers.
+  while ((prog === "env" || prog === "command" || prog === "sudo") && idx + 1 < tokens.length) {
+    idx++;
+    // skip VAR=value assignments after env
+    while (idx < tokens.length && /^[A-Za-z_][A-Za-z0-9_]*=/.test(tokens[idx])) idx++;
+    if (idx >= tokens.length) return null;
+    prog = tokens[idx].split("/").pop();
+  }
+  if (prog !== "git") return null;
+  idx++;
+  // Skip global options (and their values) to find the subcommand.
+  let gitDir = null;
+  while (idx < tokens.length) {
+    const t = tokens[idx];
+    if (t === "-C") {
+      gitDir = tokens[idx + 1];
+      idx += 2;
+      continue;
+    }
+    if (t.startsWith("--git-dir=")) {
+      gitDir = t.slice("--git-dir=".length);
+      idx++;
+      continue;
+    }
+    if (t === "--git-dir" || t === "--work-tree") {
+      gitDir = tokens[idx + 1]; // work-tree implies repo context too
+      idx += 2;
+      continue;
+    }
+    if (GIT_GLOBAL_OPTS_WITH_VALUE.has(t)) { idx += 2; continue; }
+    if (t.startsWith("-") && t !== "-") { idx++; continue; }
+    break;
+  }
+  if (idx >= tokens.length) return null;
+  return {
+    subcommand: tokens[idx],
+    args: tokens.slice(idx + 1),
+    gitDir: gitDir || null,
+  };
+}
+
+// Check all segments; return list of git invocations.
+function findGitInvocations(cmd) {
+  const out = [];
+  for (const seg of commandSegments(cmd)) {
+    const inv = parseGitInvocation(seg);
+    if (inv) out.push(inv);
+  }
+  return out;
+}
+
+const gitInvocations = findGitInvocations(command);
+const hasGitSubcommand = (sub) =>
+  gitInvocations.some((g) => g.subcommand === sub);
+// Branch check follows -C/--git-dir when present.
+function branchFor(inv) {
+  return getCurrentBranch(inv.gitDir || undefined);
+}
+
 // === Sensitive-path review advisory (open-code-review Phase 2) ===
-// When committing/pushing files under sensitive paths, emit a non-blocking
-// warning suggesting the open-code-review skill. Deterministic only —
-// no LLM calls inside the hook.
+// (unchanged — see original file for full implementation)
 import { readFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
@@ -217,63 +354,108 @@ function pushedFiles() {
 
 // ============================================================
 // HARD BLOCKS (exit 2 — unconditionally denied)
+// Operate on NORMALIZED git invocations, not raw strings.
 // ============================================================
 
 // 1. Direct commit on protected branches
-if (/\bgit\s+commit\b/.test(command)) {
-  const branch = getCurrentBranch();
-  if (isProtectedBranch(branch)) {
+for (const inv of gitInvocations) {
+  if (inv.subcommand === "commit") {
+    const branch = branchFor(inv);
+    if (isProtectedBranch(branch)) {
+      deny(
+        `[SECURITY-HOOK] ❌ 禁止在受保护分支 ${branch} 上直接 commit！` +
+          `新改动必须在临时分支提交，再经 merge 合入。`
+      );
+    }
+  }
+}
+
+// 2. Force push (any form) — includes +refspec and bundled -f flags
+function isForcePush(inv) {
+  if (inv.subcommand !== "push") return false;
+  for (const a of inv.args) {
+    if (a === "--force" || a === "--force-with-lease" || a === "--force-if-includes") return true;
+    // Bundled short flags: -vf, -fv, -f → contains 'f' as a short flag
+    if (/^-[a-zA-Z]+$/.test(a) && !a.startsWith("--") && a.includes("f")) return true;
+    // +refspec prefix = force update for that ref
+    if (a.startsWith("+")) return true;
+  }
+  return false;
+}
+
+for (const inv of gitInvocations) {
+  if (isForcePush(inv)) {
     deny(
-      `[SECURITY-HOOK] ❌ 禁止在受保护分支 ${branch} 上直接 commit！` +
-        `新改动必须在临时分支提交，再经 merge 合入。`
+      `[SECURITY-HOOK] ❌ force push / +refspec 强制更新（历史改写）永久禁止！`
     );
   }
 }
 
-// 2. Force push (any form)
-if (
-  /\bgit\s+push\b/.test(command) &&
-  (/--force\b/.test(command) ||
-    /--force-with-lease\b/.test(command) ||
-    /\s-f\b/.test(command))
-) {
-  deny(
-    `[SECURITY-HOOK] ❌ force push / force-with-lease（历史改写）永久禁止！`
-  );
-}
-
 // 3. Delete protected remote branches
-if (/\bgit\s+push\b/.test(command)) {
-  const deletedBranch = new RegExp(
-    `--delete(?:=|\\s+)(${PROTECTED_BRANCH_PATTERN})(?=\\s|$)`
-  ).exec(command);
-  const deletedRef = new RegExp(
-    `(?:^|\\s):(?:refs/heads/)?(${PROTECTED_BRANCH_PATTERN})(?=\\s|$)`
-  ).exec(command);
-  if (deletedBranch || deletedRef) {
-    deny(
-      `[SECURITY-HOOK] ❌ 删除受保护远程分支（${(deletedBranch || deletedRef)[1]}）永久禁止！`
-    );
+const PROTECTED_REF_RE = new RegExp(`^(?:refs/heads/)?${PROTECTED_BRANCH_PATTERN}$`);
+for (const inv of gitInvocations) {
+  if (inv.subcommand !== "push") continue;
+  const args = inv.args;
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    // --delete <branch> / --delete=<branch>
+    if (a === "--delete" || a === "-d") {
+      const target = args[i + 1];
+      if (target && PROTECTED_REF_RE.test(target)) {
+        deny(`[SECURITY-HOOK] ❌ 删除受保护远程分支（${target}）永久禁止！`);
+      }
+    } else if (a.startsWith("--delete=")) {
+      const target = a.slice("--delete=".length);
+      if (PROTECTED_REF_RE.test(target)) {
+        deny(`[SECURITY-HOOK] ❌ 删除受保护远程分支（${target}）永久禁止！`);
+      }
+    }
+    // :<branch> / :refs/heads/<branch> refspec deletion
+    else if (/^:(?!\/)/.test(a)) {
+      const target = a.slice(1);
+      if (target && PROTECTED_REF_RE.test(target)) {
+        deny(`[SECURITY-HOOK] ❌ 删除受保护远程分支（${target}）永久禁止！`);
+      }
+    }
   }
 }
 
 // 3b. git clean with -d/-f (destroys untracked files)
-if (
-  /\bgit\s+clean\b/.test(command) &&
-  /-[a-z]*[df]/i.test(command)
-) {
-  deny(
-    `[SECURITY-HOOK] ❌ git clean -d/-f（删除未跟踪文件）永久禁止！`
-  );
+for (const inv of gitInvocations) {
+  if (inv.subcommand === "clean") {
+    const hasDestructive = inv.args.some((a) => {
+      if (/^-[a-zA-Z]+$/.test(a) && !a.startsWith("--")) {
+        return /[dfDF]/.test(a); // -d, -f (also -D, -F)
+      }
+      return a === "--force";
+    });
+    if (hasDestructive) {
+      deny(`[SECURITY-HOOK] ❌ git clean -d/-f（删除未跟踪文件）永久禁止！`);
+    }
+  }
+}
+
+// 3c. git update-ref touching protected refs
+for (const inv of gitInvocations) {
+  if (inv.subcommand === "update-ref") {
+    for (const a of inv.args) {
+      // ref is typically args[0] (or after -m msg / --no-deref)
+      if (PROTECTED_REF_RE.test(a)) {
+        deny(`[SECURITY-HOOK] ❌ git update-ref 直接改写受保护 ref（${a}）永久禁止！`);
+      }
+    }
+  }
 }
 
 // 4. Rebase on protected branches
-if (/\bgit\s+rebase\b/.test(command)) {
-  const branch = getCurrentBranch();
-  if (isProtectedBranch(branch)) {
-    deny(
-      `[SECURITY-HOOK] ❌ 禁止在受保护分支 ${branch} 上执行 rebase！请使用 merge。`
-    );
+for (const inv of gitInvocations) {
+  if (inv.subcommand === "rebase") {
+    const branch = branchFor(inv);
+    if (isProtectedBranch(branch)) {
+      deny(
+        `[SECURITY-HOOK] ❌ 禁止在受保护分支 ${branch} 上执行 rebase！请使用 merge。`
+      );
+    }
   }
 }
 
@@ -282,28 +464,36 @@ if (/\bgit\s+rebase\b/.test(command)) {
 // ============================================================
 
 // 5. Merge/push on protected branches (needs human authorization)
-if (/\bgit\s+(merge|push)\b/.test(command)) {
-  const branch = getCurrentBranch();
-  if (isProtectedBranch(branch)) {
-    warn(
-      `受保护分支 ${branch} 上的 merge/push —— 必须经人类明确授权方可执行；未授权请停下确认。`
-    );
+for (const inv of gitInvocations) {
+  if (inv.subcommand === "merge" || inv.subcommand === "push") {
+    const branch = branchFor(inv);
+    if (isProtectedBranch(branch)) {
+      warn(
+        `受保护分支 ${branch} 上的 merge/push —— 必须经人类明确授权方可执行；未授权请停下确认。`
+      );
+      break;
+    }
   }
 }
 
 // Push arguments can target a protected branch even when the current branch is not protected.
-const pushArguments = /\bgit\s+push\b([\s\S]*)/.exec(command)?.[1] || "";
-if (
-  new RegExp(
-    `(?:^|\\s)(?:[^\\s:]+:)?(?:refs/heads/)?${PROTECTED_BRANCH_PATTERN}(?=\\s|$)`
-  ).test(pushArguments)
-) {
-  warn("push refspec 目标可能是受保护分支——请先确认目标并取得明确授权。");
+for (const inv of gitInvocations) {
+  if (inv.subcommand !== "push") continue;
+  const hit = inv.args.some((a) => {
+    // strip leading + (force) for target matching; force itself already denied above
+    const t = a.startsWith("+") ? a.slice(1) : a;
+    // refspec forms: <src>:<dst>, :<dst> (delete), <dst>
+    const dst = t.includes(":") ? t.split(":").pop() : t;
+    return dst && PROTECTED_REF_RE.test(dst);
+  });
+  if (hit) {
+    warn("push refspec 目标可能是受保护分支——请先确认目标并取得明确授权。");
+    break;
+  }
 }
 
 // 6. Recursive delete
 // NOTE: flag bundle allows any mix of rm short flags containing r/R
-// (old pattern `-r\s` also missed `rm -r` at end-of-command).
 if (/\brm\s+(?:-(?:[fidrRv]*[rR][fidrRv]*)(?!\S)|--recursive\b)/.test(command)) {
   warn(
     `检测到 rm -rf 递归删除，请确认目标路径非核心系统/项目源码目录！`
@@ -311,41 +501,49 @@ if (/\brm\s+(?:-(?:[fidrRv]*[rR][fidrRv]*)(?!\S)|--recursive\b)/.test(command)) 
 }
 
 // 7. git reset --hard
-if (/\bgit\s+reset\s+--hard\b/.test(command)) {
+if (hasGitSubcommand("reset") && gitInvocations.some((g) =>
+  g.subcommand === "reset" && g.args.includes("--hard"))) {
   warn(
     `git reset --hard 会永久丢弃工作区改动！未确认请勿执行。`
   );
 }
 
 // 8. Blind git add
-// NOTE: `\.` must not be followed by `\b` — there is no word boundary after
-// "." at end-of-command or before a space, so the old pattern never matched
-// `git add .`. `(?!\S)` requires end-of-command or whitespace instead.
-// `--all` is the long form of `-A` and is covered too.
-if (/\bgit\s+add\s+(?:(?:-A|--all)(?!\S)|\.(?!\S))/.test(command)) {
-  warn(
-    `严禁 git add . 全量盲目暂存（防止误带入编译产物与临时文件），请改用 git add <明确路径>！`
-  );
+for (const inv of gitInvocations) {
+  if (inv.subcommand === "add") {
+    const blind = inv.args.some((a) =>
+      a === "." || a === "-A" || a === "--all");
+    if (blind) {
+      warn(
+        `严禁 git add . 全量盲目暂存（防止误带入编译产物与临时文件），请改用 git add <明确路径>！`
+      );
+      break;
+    }
+  }
 }
 
 // 9. Delete temporary remote branches (non-protected)
-if (
-  /\bgit\s+push\b/.test(command) &&
-  (/--delete\b/.test(command) || /\s:/.test(command))
-) {
-  // If we haven't already denied (protected branches handled above), just warn
-  warn(
-    `删除临时远程分支——必须经人类明确授权并确认已合并。`
-  );
+for (const inv of gitInvocations) {
+  if (inv.subcommand === "push") {
+    const deletes = inv.args.some((a) =>
+      a === "--delete" || a === "-d" || a.startsWith("--delete=") || /^\S*:\S*$/.test(a));
+    if (deletes) {
+      // If we haven't already denied (protected branches handled above), just warn
+      warn(
+        `删除临时远程分支——必须经人类明确授权并确认已合并。`
+      );
+      break;
+    }
+  }
 }
 
 // 10. Sensitive-path commit/push advisory (open-code-review)
 // Non-blocking: suggest the open-code-review skill when staged/pushed
 // files match sensitive-path patterns. Deterministic only.
-if (/\bgit\s+(commit|push)\b/.test(command)) {
+if (hasGitSubcommand("commit") || hasGitSubcommand("push")) {
   const patterns = loadSensitivePatterns();
   if (patterns.length > 0) {
-    const isPush = /\bgit\s+push\b/.test(command);
+    const isPush = hasGitSubcommand("push");
     const files = isPush ? pushedFiles() : stagedFiles();
     const regexes = patterns.map(globToRegExp);
     const hits = files.filter((f) => regexes.some((re) => re.test(f)));

@@ -209,3 +209,47 @@ test("warns on push touching sensitive paths even without upstream tracking bran
   assert.match(r.stderr, /敏感路径/);
   assert.match(r.stderr, /open-code-review/);
 });
+
+// --- Red-team regression: bypass variants must be denied ---
+test("denies quoted git force push", () => {
+  const r = runHook('"git" push --force origin main');
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies escaped git force push", () => {
+  const r = runHook("g\\it push --force origin main");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies git -c global option force push", () => {
+  const r = runHook("git -c user.name=x push --force origin main");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies git --git-dir force push", () => {
+  const r = runHook("git --git-dir=.git push --force origin main");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies +refspec force push (no -f flag)", () => {
+  const r = runHook("git push origin +main:main");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies bundled -vf force push", () => {
+  const r = runHook("git push -vf origin main");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies git update-ref on protected ref", () => {
+  const r = runHook("git update-ref refs/heads/main abc123def456");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies commit on protected branch via -C", () => {
+  const mainRepo = makeRepo("main");
+  const featureRepo = makeRepo("feature/x");
+  // Run from feature repo but target main repo via -C
+  const r = runHook(`git -C ${mainRepo} commit -m evil`, featureRepo);
+  assert.equal(r.exitCode, 2);
+});

@@ -19,7 +19,7 @@ Dieses Repository bietet globale, projekt- und verzeichnisbezogene Regelsätze, 
 2. **Claude Code Sicherheits-Hooks ([`.claude/settings.json`](.claude/settings.json) + [`.claude/hooks/`](.claude/hooks/))**:
    - Werden ausschließlich vor passenden Toolaufrufen in Claude Code ausgeführt;
    - Node.js Guard-Skripte verarbeiten JSON über stdin für zuverlässige Blockaden (`exit 2`);
-   - Permanente Blockaden: Direkte Commits auf geschützte Branches (`develop`/`master`/`main`/`release*`), `git push --force`, Löschen geschützter Remote-Branches, Rebase auf geschützten Branches.
+   - Permanente Blockaden: Direkte Commits auf geschützte Branches (`develop`/`master`/`main`/`release*`/`staging`), `git push --force`, Löschen geschützter Remote-Branches, Rebase auf geschützten Branches.
 
 3. **44 wiederverwendbare Skills ([`.agents/skills/`](.agents/skills/))**:
    - **Comet Integrationsleitfaden**: Einstiegspunkt für Comet-Workflows;

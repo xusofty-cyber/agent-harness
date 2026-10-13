@@ -3,6 +3,14 @@
 > **适用场景**：任何 Git 操作、分支管理、代码提交与远端推送。
 > **核心原则**：**AI 仅被允许在本地修改与临时分支上操作；触碰共享远端（Push / Merge / 删除远端分支）一律必须人类明确授权。**
 >
+> **读者说明**：本文面向 AI Agent；人类贡献者同样遵守约束条款——其中的"人类明确授权"
+> 即指你本人确认，AI 专属动作步骤（如"向人类出具 Diff 概览"）可忽略。
+> 人类快速通道：`git checkout -b feature/xxx` → 改代码 → `git commit` →
+> `git push origin feature/xxx` → GitHub 网页开 PR。
+>
+> **术语**：`<protected>` = 受保护分支（`develop`/`master`/`main`/`release*`/`staging`）；
+> `<DEFAULT_BRANCH>` = 本仓库主干（此处为 `main`；其他项目以其 `Project AGENTS.md` 为准）。
+>
 > 本文件只收录**常驻约束**（每次会话必须遵守）。低频操作手册
 > （冲突解决、cherry-pick、bisect 等）已拆分为按需加载的 `git-advanced` skill。
 >
@@ -19,7 +27,7 @@
 | **本地分支** | `git checkout -b <type>/xxx` | 否 | 放行（新需求一律走临时分支） |
 | **临时分支提交** | 在临时分支改代码 / `git commit` | 按用户指令与项目政策 | 用户已明确要求提交时直接执行；否则交付 Diff，不把每次提交默认设为确认门 |
 | **本地冲突处理** | 临时分支上 `git merge origin/<protected>` | 否（本地） | 放行（**严禁在受保护分支上解冲突**） |
-| **受保护分支直改** | **在 develop / master / main / release* 上直接 commit** | — | **永久禁止（Hook 硬拦截）** |
+| **受保护分支直改** | **在 develop / master / main / release* / staging 上直接 commit** | — | **永久禁止（Hook 硬拦截）** |
 | **推送/合入共享分支** | 推送到受保护分支或合入受保护分支 | **必须人类明确授权，或用户当前指令已明确授权** | 看清目标分支和 refspec；仅在当前分支判断不足以确认目标 |
 | **临时分支推送** | 推送本地临时分支到共享远端 | **必须人类明确授权，或用户当前指令已明确授权** | 仅保留本地直到获授权 |
 | **历史改写** | **`git push --force` / `-f` / `--force-with-lease`** | — | **永久禁止（Hook + 规则硬拦截）** |

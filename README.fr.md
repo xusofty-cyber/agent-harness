@@ -19,7 +19,7 @@ Ce dépôt fournit des modèles de règles aux niveaux global, projet et répert
 2. **Crochets de sécurité Claude Code ([`.claude/settings.json`](.claude/settings.json) + [`.claude/hooks/`](.claude/hooks/))** :
    - Exécutés uniquement lors des appels d'outils correspondants dans Claude Code ;
    - Scripts de garde Node.js traitant les entrées JSON sur stdin pour un blocage strict (`exit 2`) ;
-   - Blocages permanents : commit direct sur branche protégée (`develop`/`master`/`main`/`release*`), `git push --force`, suppression de branche distante protégée, rebase sur branche protégée.
+   - Blocages permanents : commit direct sur branche protégée (`develop`/`master`/`main`/`release*`/`staging`), `git push --force`, suppression de branche distante protégée, rebase sur branche protégée.
 
 3. **44 compétences réutilisables ([`.agents/skills/`](.agents/skills/))** :
    - **Guide Comet** : point d'entrée pour les flux Comet ;
