@@ -335,7 +335,7 @@ $SourceRulesDir = Join-Path $ScriptDir ".agents\rules"
 $SourceSkillsDir = Join-Path $ScriptDir ".agents\skills"
 $SourceSkillsLock = Join-Path $ScriptDir "skills-lock.json"
 $SourceClaudeSettings = Join-Path $ScriptDir ".claude\settings.json"
-$SourceAiMemoryExample = Join-Path $ScriptDir ".ai-memory.toml.example"
+$SourceAiMemoryExample = Join-Path $ScriptDir "templates/ai-memory.toml.example"
 $SourceReviewSensitivePaths = Join-Path $ScriptDir ".agents\review-sensitive-paths.json"
 
 function Backup-ManagedPath([string]$Path) {
