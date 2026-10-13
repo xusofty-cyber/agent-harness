@@ -221,7 +221,7 @@ agent-harness/
     docker.io/akitaonrails/ai-memory:latest
   ```
 
-### 3. 線上更新規範與技能庫
+### 4. 線上更新規範與技能庫
 
 當上游規則或 GitHub 技能發生更新時，直接在專案根目錄執行：
 ```powershell
