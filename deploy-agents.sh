@@ -512,7 +512,7 @@ SOURCE_RULES_DIR="${SCRIPT_DIR}/.agents/rules"
 SOURCE_SKILLS_DIR="${SCRIPT_DIR}/.agents/skills"
 SOURCE_SKILLS_LOCK="${SCRIPT_DIR}/skills-lock.json"
 SOURCE_CLAUDE_SETTINGS="${SCRIPT_DIR}/.claude/settings.json"
-SOURCE_AI_MEMORY_EXAMPLE="${SCRIPT_DIR}/.ai-memory.toml.example"
+SOURCE_AI_MEMORY_EXAMPLE="${SCRIPT_DIR}/templates/ai-memory.toml.example"
 SOURCE_REVIEW_SENSITIVE_PATHS="${SCRIPT_DIR}/.agents/review-sensitive-paths.json"
 
 # Back up managed target paths before an explicit update replaces them.
