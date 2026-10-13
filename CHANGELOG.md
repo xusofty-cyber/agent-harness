@@ -5,6 +5,11 @@ All notable changes to this project are documented here. Format follows
 Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
+### Added
+- **git-workflow.md 大幅增强**（借鉴 liangxin-lrjcs/skill-git-workflow 的策略，改编为通用模板）：
+  新增 Commit/Push 自查清单、冲突协同解决协议、Cherry-pick 与回退矩阵（含 revert-the-revert
+  陷阱）、Bisect/Reflog 指南、分支命名规范、提交信息正文纪律、禁止操作速查、常用命令速查。
+
 
 ### Changed
 - **Project renamed `agents-living` → `agent-harness`**: 27 references updated
