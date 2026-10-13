@@ -321,3 +321,8 @@ test("allows git push with -v (not force)", () => {
   const r = runHook("git push -v origin feature/x");
   assert.equal(r.exitCode, 0);
 });
+
+test("denies --force-with-lease=<ref> form", () => {
+  const r = runHook("git push --force-with-lease=main:abc123 origin main");
+  assert.equal(r.exitCode, 2);
+});

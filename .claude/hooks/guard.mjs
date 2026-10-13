@@ -374,7 +374,7 @@ for (const inv of gitInvocations) {
 function isForcePush(inv) {
   if (inv.subcommand !== "push") return false;
   for (const a of inv.args) {
-    if (a === "--force" || a === "--force-with-lease" || a === "--force-if-includes") return true;
+    if (a === "--force" || a.startsWith("--force-with-lease") || a === "--force-if-includes") return true;
     // Bundled short flags: -vf, -fv, -f → contains 'f' as a short flag
     if (/^-[a-zA-Z]+$/.test(a) && !a.startsWith("--") && a.includes("f")) return true;
     // +refspec prefix = force update for that ref
