@@ -36,40 +36,40 @@ function runHook(toolName, filePath) {
 test("warns on package.json", () => {
   const r = runHook("Write", "/project/package.json");
   assert.equal(r.exitCode, 0); // warnings are non-blocking
-  assert.match(r.stderr, /高风险文件/);
+  assert.match(r.stderr, /high-risk files/i);
 });
 
 test("warns on CMakeLists.txt (case-insensitive)", () => {
   const r = runHook("Edit", "/project/CMakeLists.txt");
   assert.equal(r.exitCode, 0);
-  assert.match(r.stderr, /高风险文件/);
+  assert.match(r.stderr, /high-risk files/i);
 });
 
 test("warns on Cargo.toml", () => {
   const r = runHook("Write", "/project/Cargo.toml");
-  assert.match(r.stderr, /高风险文件/);
+  assert.match(r.stderr, /high-risk files/i);
 });
 
 test("warns on LICENSE", () => {
   const r = runHook("Edit", "/project/LICENSE");
-  assert.match(r.stderr, /高风险文件/);
+  assert.match(r.stderr, /high-risk files/i);
 });
 
 // --- Credential patterns ---
 test("warns on .pem file", () => {
   const r = runHook("Write", "/project/certs/server.pem");
   assert.equal(r.exitCode, 0);
-  assert.match(r.stderr, /敏感凭证/);
+  assert.match(r.stderr, /Credential protection/i);
 });
 
 test("warns on id_rsa", () => {
   const r = runHook("Write", "/home/user/.ssh/id_rsa");
-  assert.match(r.stderr, /敏感凭证/);
+  assert.match(r.stderr, /Credential protection/i);
 });
 
 test("warns on credentials in path", () => {
   const r = runHook("Edit", "/project/config/credentials.json");
-  assert.match(r.stderr, /敏感凭证/);
+  assert.match(r.stderr, /Credential protection/i);
 });
 
 // --- Normal files: no warnings ---
@@ -106,5 +106,5 @@ test("handles Edit tool with path field", () => {
     encoding: "utf-8",
   });
   assert.equal(res.status, 0);
-  assert.match(res.stderr || "", /高风险文件/);
+  assert.match(res.stderr || "", /high-risk files/i);
 });
