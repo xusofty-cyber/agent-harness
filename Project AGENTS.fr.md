@@ -55,7 +55,7 @@
 3. **Isolation de la configuration** : Toute configuration doit être lue via des variables d'environnement ou un module centralisé ; interdiction formelle de coder en dur des valeurs dans le code.
 4. **Anonymisation des logs** : Tout champ sensible envoyé à la console ou consigné dans les logs (PII, tokens, mots de passe) doit être masqué.
 5. **Classification des risques** : Différencier rappels, notifications simples et autorisations obligatoires selon `.agents/rules/security-boundary.md` ; le nombre de fichiers modifiés ne constitue pas en soi un motif de blocage.
-6. **Isolation des branches Git protégées** : Interdiction absolue de modifier le code directement sur les branches protégées (develop/master/main). Toute modification s'opère sur une branche temporaire.
+6. **Isolation des branches Git protégées** : Interdiction absolue de modifier le code directement sur les branches protégées (develop/master/main/release*/staging). Toute modification s'opère sur une branche temporaire.
 
 ## Matrice de routage des règles secondaires et compétences (Activation à la demande)
 
