@@ -212,17 +212,17 @@ Skill discovery and context costs depend on the host agent and its configuration
 
 | Scenario | Rule / Skill | Trigger / Keyword | Expected Behavior |
 |---|---|---|---|
-| **Branching / Commit / Push** | [`git-workflow.md`](.agents/rules/git-workflow.md) | `git commit` / `git push` | Commit only on temp branches; no `git add .`; human authorization required for remote push |
-| **High-Risk Operations** | [`security-boundary.md`](.agents/rules/security-boundary.md) | Modifying build configs, protocols, public structs | Pause and confirm impact with human |
-| **Complex Requirements** | [`engineering-spec.md`](.agents/rules/engineering-spec.md) + `comet` / `openspec` | `/comet` or "use openspec" | Propose change under `docs/openspec/changes/`; wait for confirmation |
-| **Symbol Discovery** | [`token-discipline.md`](.agents/rules/token-discipline.md) + optional `codegraph` | CodeGraph MCP when configured; otherwise scoped `rg` | Do not assume CodeGraph is installed or available |
+| **Branching / Commit / Push** | [`git-workflow.md`](../../.agents/rules/git-workflow.md) | `git commit` / `git push` | Commit only on temp branches; no `git add .`; human authorization required for remote push |
+| **High-Risk Operations** | [`security-boundary.md`](../../.agents/rules/security-boundary.md) | Modifying build configs, protocols, public structs | Pause and confirm impact with human |
+| **Complex Requirements** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `comet` / `openspec` | `/comet` or "use openspec" | Propose change under `docs/openspec/changes/`; wait for confirmation |
+| **Symbol Discovery** | [`token-discipline.md`](../../.agents/rules/token-discipline.md) + optional `codegraph` | CodeGraph MCP when configured; otherwise scoped `rg` | Do not assume CodeGraph is installed or available |
 | **Feature Implementation** | `ponytail` + `test-driven-development` | Consult loaded Skills as appropriate | Understand current code, then choose the smallest correct implementation and suitable validation |
 | **Bug Investigation** | `systematic-debugging` | Error trace pasted | Gather evidence $\rightarrow$ form hypothesis $\rightarrow$ minimal repro $\rightarrow$ fix |
 | **Long Terminal Output** | optional `rtk` | Only when installed and its agent hook is configured | Otherwise use native concise flags; keep required validation and preserve relevant logs |
 | **Token Conservation** | `caveman` | Only when the host loads the Skill or plugin | Be concise while preserving necessary context, technical accuracy, and safety details |
 | **Document Processing** | `docx` / `pdf` | Mentions `.docx` or `.pdf` | Professional formatting without running code test suites |
-| **Living Docs & Traceability** | [`engineering-spec.md`](.agents/rules/engineering-spec.md) + `living-documentation` | `/living-documentation` / sync trace docs | Maintain 4-tier docs (specs/architecture/reference/guides) via L0/L1/L2 impact thresholds and frontmatter traceability |
-| **Phase Gate Docs / Templates** | [`engineering-spec.md`](.agents/rules/engineering-spec.md) + `engineering-docs` | `/engineering-docs` / SRS/HLD/spec requests | Standardize AI agent outputs across phases using 15 bilingual phase-gate templates, connecting Comet artifacts with living documentation |
+| **Living Docs & Traceability** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `living-documentation` | `/living-documentation` / sync trace docs | Maintain 4-tier docs (specs/architecture/reference/guides) via L0/L1/L2 impact thresholds and frontmatter traceability |
+| **Phase Gate Docs / Templates** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `engineering-docs` | `/engineering-docs` / SRS/HLD/spec requests | Standardize AI agent outputs across phases using 15 bilingual phase-gate templates, connecting Comet artifacts with living documentation |
 | **Code Review & Quality Gate** | `open-code-review` + `requesting-code-review` | Before merge or after task completion | Rule-first, line-anchored, coverage-mandated; Tier A delegation if `ocr` CLI exists, otherwise Tier B methodology |
 | **Task Completion** | `verification-before-completion` | End of task | Present physical command execution evidence |
 
@@ -448,19 +448,19 @@ Read `tasks/lessons.md` when it is relevant to the task.
 
 ### Reference Documentation:
 - Unified Pipeline Runners:
-  - Windows: [`run-pipeline.ps1`](run-pipeline.ps1) / [`pipeline.ps1`](pipeline.ps1)
-  - Linux / macOS: [`run-pipeline.sh`](run-pipeline.sh) / [`pipeline.sh`](pipeline.sh)
+  - Windows: [`run-pipeline.ps1`](../../run-pipeline.ps1) / [`pipeline.ps1`](../../pipeline.ps1)
+  - Linux / macOS: [`run-pipeline.sh`](../../run-pipeline.sh) / [`pipeline.sh`](../../pipeline.sh)
 - One-Click Deployment Scripts:
-  - Windows: [`deploy-agents.ps1`](deploy-agents.ps1)
-  - Linux / macOS: [`deploy-agents.sh`](deploy-agents.sh)
+  - Windows: [`deploy-agents.ps1`](../../deploy-agents.ps1)
+  - Linux / macOS: [`deploy-agents.sh`](../../deploy-agents.sh)
 - Maintenance Tools:
-  - Terminal UI Library: [`tools/tui.py`](tools/tui.py)
-  - Skill Sync Tool: [`tools/sync-skills.py`](tools/sync-skills.py)
-  - Living Doc Impact Gate: [`tools/doc-impact.py`](tools/doc-impact.py)
+  - Terminal UI Library: [`tools/tui.py`](../../tools/tui.py)
+  - Skill Sync Tool: [`tools/sync-skills.py`](../../tools/sync-skills.py)
+  - Living Doc Impact Gate: [`tools/doc-impact.py`](../../tools/doc-impact.py)
 - Deployment & Configuration Guide:
   - [Multi-Tool Deployment and Configuration Guide (English)](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md)
   - [多工具部署配置指南 (中文)](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md)
 - Rules Architecture:
-  - [`Global AGENTS.md`](Global%20AGENTS.md)
-  - [`Project AGENTS.md`](Project%20AGENTS.md)
-  - [`Directory AGENTS.md`](Directory%20AGENTS.md)
+  - [`Global AGENTS.md`](../../Global%20AGENTS.md)
+  - [`Project AGENTS.md`](../../Project%20AGENTS.md)
+  - [`Directory AGENTS.md`](../../Directory%20AGENTS.md)
