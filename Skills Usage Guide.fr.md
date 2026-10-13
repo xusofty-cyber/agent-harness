@@ -2,7 +2,7 @@
 
 > **Language / 语言**: [English](Skills%20Usage%20Guide.md) | [简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | **Français** | [Deutsch](Skills%20Usage%20Guide.de.md)
 
-Fonctionnement pratique des 43 compétences intégrées : lesquelles se déclenchent automatiquement, lesquelles nécessitent une invocation explicite et quand les utiliser.
+Fonctionnement pratique des 44 compétences intégrées : lesquelles se déclenchent automatiquement, lesquelles nécessitent une invocation explicite et quand les utiliser.
 
 ## Mécanismes de déclenchement des compétences
 
@@ -26,12 +26,12 @@ Si Claude ne charge pas une compétence comme prévu, nommez-la simplement de ma
 > |---|---|---|
 > | `openspec` | 17 | Famille du workflow OpenSpec |
 > | `superpowers` | 16 | Famille méthodologique obra/superpowers |
-> | `local` | 5 | Créés dans le repo (engineering-docs, living-documentation, open-code-review, option-review, cross-tool-memory) |
+> | `local` | 6 | Créés dans le repo (engineering-docs, living-documentation, open-code-review, option-review, cross-tool-memory, git-advanced) |
 > | `document` | 2 | Traitement documentaire (docx, pdf) |
 > | `integration` | 2 | Intégrations d'outils externes (comet, codegraph) |
 > | `utility` | 3 | Utilitaires à usage unique (caveman, ponytail, rtk) |
 >
-> **Note sur les comptes** : `skills-lock.json` contient 45 entrées mais ce catalogue liste 43 skills.
+> **Note sur les comptes** : `skills-lock.json` contient 46 entrées mais ce catalogue liste 44 skills.
 > Les 2 entrées supplémentaires (`openspec`, `superpowers`) sont des méta-entrées des dépôts sources —
 > des marqueurs de provenance, pas des skills installables.
 
@@ -99,6 +99,7 @@ Si Claude ne charge pas une compétence comme prévu, nommez-la simplement de ma
 | `pdf` | Hybride | — | Lit et extrait du texte/tableaux de fichiers PDF. | "Résume ce PDF" ou "extrais les tableaux...". |
 | `caveman` | Hybride | — | Mode de sortie ultra-compressé (économise les tokens). | "Sois concis" / "caveman mode". Niveaux : lite, full, ultra. |
 | `ponytail` | Hybride | — | Impose la solution fonctionnelle la plus simple (anti-suringénierie). | "Reste simple" / lorsque Claude sur-ingénie. |
+| `git-advanced` | Hybride | — | Opérations Git avancées : résolution de conflits, cherry-pick/revert, `git bisect`, `git reflog`, référence. | "Résoudre ce conflit" / "cherry-pick ce correctif". |
 
 ### 6. Méta-compétences
 

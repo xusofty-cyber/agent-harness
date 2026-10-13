@@ -2,7 +2,7 @@
 
 > **Language / 语言**: [English](Skills%20Usage%20Guide.md) | [简体中文](Skills%20Usage%20Guide.zh.md) | **繁體中文** | [Français](Skills%20Usage%20Guide.fr.md) | [Deutsch](Skills%20Usage%20Guide.de.md)
 
-43 個內建 skill 在實戰中如何運作：哪些自動觸發、哪些需要顯式調用，以及各自的使用時機。
+44 個內建 skill 在實戰中如何運作：哪些自動觸發、哪些需要顯式調用，以及各自的使用時機。
 
 ## Skill 觸發機制
 
@@ -26,12 +26,12 @@ Claude Code 透過兩種方式決定載入 skill：
 > |---|---|---|
 > | `openspec` | 17 | OpenSpec 工作流家族 |
 > | `superpowers` | 16 | obra/superpowers 方法論家族 |
-> | `local` | 5 | 倉庫自研（engineering-docs、living-documentation、open-code-review、option-review、cross-tool-memory） |
+> | `local` | 6 | 倉庫自研（engineering-docs、living-documentation、open-code-review、option-review、cross-tool-memory、git-advanced） |
 > | `document` | 2 | 文件處理（docx、pdf） |
 > | `integration` | 2 | 外部工具整合（comet、codegraph） |
 > | `utility` | 3 | 單一用途工具（caveman、ponytail、rtk） |
 >
-> **數量說明**：`skills-lock.json` 有 45 個條目，但本目錄只列 43 個 skill。
+> **數量說明**：`skills-lock.json` 有 46 個條目，但本目錄只列 44 個 skill。
 > 多出的 2 個（`openspec`、`superpowers`）是來源倉庫的 meta 條目——僅作來源標記，非可安裝 skill。
 
 ### 1. 工作流與流程控制
@@ -98,6 +98,7 @@ Claude Code 透過兩種方式決定載入 skill：
 | `pdf` | 混合 | — | 讀取/擷取 PDF 文字/表格。 | 「總結這個 PDF」或「擷取表格」。 |
 | `caveman` | 混合 | — | 超壓縮輸出模式（節省 token）。 | 「簡潔點」/「caveman mode」。分級：lite、full、ultra。 |
 | `ponytail` | 混合 | — | 強制最簡可行方案（反過度設計）。 | 「保持簡單」/ Claude 過度設計時。 |
+| `git-advanced` | 混合 | — | Git 高級操作：衝突協同解決協議、cherry-pick/回退、`git bisect`、`git reflog`、命令速查。 | "解決這個合併衝突"/"cherry-pick 這個修復"/"哪個提交引入的 Bug？"。 |
 
 ### 6. 元技能
 

@@ -2,7 +2,7 @@
 
 > **Language / 语言**: **English** | [简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Français](Skills%20Usage%20Guide.fr.md) | [Deutsch](Skills%20Usage%20Guide.de.md)
 
-How the 43 bundled skills actually work in practice: which ones trigger automatically,
+How the 44 bundled skills actually work in practice: which ones trigger automatically,
 which ones you invoke explicitly, and when to use each.
 
 ## How Skill Triggering Works
@@ -28,12 +28,12 @@ If Claude doesn't pick up a skill when you expect it, just name it explicitly.
 > |---|---|---|
 > | `openspec` | 17 | OpenSpec spec-driven workflow family |
 > | `superpowers` | 16 | obra/superpowers methodology family |
-> | `local` | 5 | In-repo authored (engineering-docs, living-documentation, open-code-review, option-review, cross-tool-memory) |
+> | `local` | 6 | In-repo authored (engineering-docs, living-documentation, open-code-review, option-review, cross-tool-memory, git-advanced) |
 > | `document` | 2 | Document processing (docx, pdf) |
 > | `integration` | 2 | External tool integrations (comet, codegraph) |
 > | `utility` | 3 | Single-purpose utilities (caveman, ponytail, rtk) |
 >
-> **Note on counts**: `skills-lock.json` has 45 entries but this catalog lists 43 skills.
+> **Note on counts**: `skills-lock.json` has 46 entries but this catalog lists 44 skills.
 > The 2 extra entries (`openspec`, `superpowers`) are source-repo meta entries —
 > provenance placeholders for the upstream families, not installable skills.
 
@@ -101,6 +101,7 @@ If Claude doesn't pick up a skill when you expect it, just name it explicitly.
 | `pdf` | Hybrid | — | Reads/extracts text/tables from PDFs. | "Summarize this PDF" or "extract tables from...". |
 | `caveman` | Hybrid | — | Ultra-compressed output mode (saves tokens). | "Be concise" / "caveman mode". Levels: lite, full, ultra. |
 | `ponytail` | Hybrid | — | Forces the simplest working solution (anti-overengineering). | "Keep it simple" / when Claude over-engineers. |
+| `git-advanced` | Hybrid | — | Advanced Git: conflict resolution protocol, cherry-pick/revert, `git bisect`, `git reflog`, command reference. | "Resolve this merge conflict" / "cherry-pick this fix" / "which commit broke this?". |
 
 ### 6. Meta
 

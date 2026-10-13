@@ -21,7 +21,7 @@ Dieses Repository bietet globale, projekt- und verzeichnisbezogene Regelsätze, 
    - Node.js Guard-Skripte verarbeiten JSON über stdin für zuverlässige Blockaden (`exit 2`);
    - Permanente Blockaden: Direkte Commits auf geschützte Branches (`develop`/`master`/`main`/`release*`), `git push --force`, Löschen geschützter Remote-Branches, Rebase auf geschützten Branches.
 
-3. **43 wiederverwendbare Skills ([`.agents/skills/`](.agents/skills/))**:
+3. **44 wiederverwendbare Skills ([`.agents/skills/`](.agents/skills/))**:
    - **Comet Integrationsleitfaden**: Einstiegspunkt für Comet-Workflows;
    - **Lebendige Dokumentation & Technische Dokumentationsvorlagen**: `living-documentation` (4-Stufen-Modell, Frontmatter-Traceability, L0/L1/L2 Impact-Prüfungen) und `engineering-docs` (15 zweisprachige Phasen-Gate-Vorlagen für 31 F&E-Dokumenttypen);
    - **Spezifikationsgetriebene Entwicklung (SDD)**: 16 Skills der `openspec`-Suite;
@@ -30,7 +30,7 @@ Dieses Repository bietet globale, projekt- und verzeichnisbezogene Regelsätze, 
    - **Ausgabe- und Kommunikationssteuerung**: `rtk` (Token Killer) und `caveman` (komprimierte Ausgabe);
    - **Entscheidungsreview vor Umsetzung**: `option-review` und `cross-tool-memory`;
    - **Professionelle Dokumentenverarbeitung**: `docx`- und `pdf`-Skills;
-   - **Skill-Nutzungs- und Trigger-Leitfaden**: Für Trigger-Modi (auto/explizit/hybrid), Kategorisierung und Projektgedächtnis aller 43 Skills siehe [`Skills Usage Guide.de.md`](Skills%20Usage%20Guide.de.md) ([English](Skills%20Usage%20Guide.md) | [简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Français](Skills%20Usage%20Guide.fr.md)).
+   - **Skill-Nutzungs- und Trigger-Leitfaden**: Für Trigger-Modi (auto/explizit/hybrid), Kategorisierung und Projektgedächtnis aller 44 Skills siehe [`Skills Usage Guide.de.md`](Skills%20Usage%20Guide.de.md) ([English](Skills%20Usage%20Guide.md) | [简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Français](Skills%20Usage%20Guide.fr.md)).
 
 4. **Ein-Klick-Bereitstellung, interaktiver Assistent & einheitliche Pipeline (`deploy-agents` & `pipeline`)**:
    - **Schrittweiser interaktiver Terminal-Assistent**: Bei Aufruf ohne Argumente (oder mit `--interactive` / `-Interactive`) startet ein geführter TUI-Assistent (Pfeiltasten, Leertaste zur Mehrfachauswahl, Eingabetaste zur Bestätigung) zur Auswahl von Sprache (`en`, `zh`, `zh-tw`, `fr`, `de`), Bereitstellungsumfang (`project`, `global`, `both`), Projektpfad, 12 Agent-Bridge-Dateien (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy) sowie optionalen Workflows;
@@ -64,7 +64,7 @@ Dieses Repository bietet globale, projekt- und verzeichnisbezogene Regelsätze, 
 agent-harness/
 ├── .agents/
 │   ├── rules/                       # Modulare Sub-Regeln
-│   └── skills/                      # 43 Engineering-Skills
+│   └── skills/                      # 44 Engineering-Skills
 ├── .claude/
 │   ├── settings.json                # PreToolUse Sicherheitskonfiguration
 │   └── hooks/                       # Sicherheits-Hooks
