@@ -253,3 +253,71 @@ test("denies commit on protected branch via -C", () => {
   const r = runHook(`git -C ${mainRepo} commit -m evil`, featureRepo);
   assert.equal(r.exitCode, 2);
 });
+
+// --- P0: dangerous commands in non-first segments ---
+test("denies force push after &&", () => {
+  const r = runHook("npm test && git push --force origin main");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies force push after ;", () => {
+  const r = runHook("echo ok; git push --force origin main");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies delete protected branch after ||", () => {
+  const r = runHook("git status || git push origin --delete main");
+  assert.equal(r.exitCode, 2);
+});
+
+// --- P0: delete protected branch variants ---
+test("denies --delete=main form", () => {
+  const r = runHook("git push origin --delete=main");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies :main refspec deletion", () => {
+  const r = runHook("git push origin :main");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies :refs/heads/main deletion", () => {
+  const r = runHook("git push origin :refs/heads/main");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies quoted git delete protected", () => {
+  const r = runHook('"git" push origin --delete main');
+  assert.equal(r.exitCode, 2);
+});
+
+// --- P1: warning branches ---
+test("warns on push to protected branch", () => {
+  const mainRepo = makeRepo("main");
+  const r = runHook("git push origin main", mainRepo);
+  assert.equal(r.exitCode, 0);
+  assert.match(r.stderr, /受保护分支/);
+});
+
+test("warns on git reset --hard", () => {
+  const r = runHook("git reset --hard HEAD~1");
+  assert.equal(r.exitCode, 0);
+  assert.match(r.stderr, /reset --hard/);
+});
+
+// --- P1: false positives (normal ops must pass) ---
+test("allows push to feature branch", () => {
+  const r = runHook("git push origin feature/my-work");
+  assert.equal(r.exitCode, 0);
+});
+
+test("allows normal push without force flags", () => {
+  const r = runHook("git push origin main");
+  assert.equal(r.exitCode, 0);
+  // Should warn (protected target) but not deny
+});
+
+test("allows git push with -v (not force)", () => {
+  const r = runHook("git push -v origin feature/x");
+  assert.equal(r.exitCode, 0);
+});
