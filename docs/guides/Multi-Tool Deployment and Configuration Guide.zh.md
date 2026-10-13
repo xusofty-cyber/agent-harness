@@ -98,7 +98,7 @@
 
 ### 配置与实现
 
-部署脚本复制 [`.claude/settings.json`](.claude/settings.json) 并部署 [`.claude/hooks/guard.mjs`](.claude/hooks/guard.mjs) 与 [`guard-write.mjs`](.claude/hooks/guard-write.mjs)。请直接检查这些源文件；不要从旧版指南复制示例配置，因为钩子协议和实现会随版本变化。
+部署脚本复制 [`.claude/settings.json`](../../.claude/settings.json) 并部署 [`.claude/hooks/guard.mjs`](../../.claude/hooks/guard.mjs) 与 [`guard-write.mjs`](../../.claude/hooks/guard-write.mjs)。请直接检查这些源文件；不要从旧版指南复制示例配置，因为钩子协议和实现会随版本变化。
 
 ### 其他工具的等效机制（扩展点）
 
@@ -116,8 +116,8 @@ PreToolUse 钩子是 Claude Code 专属机制，部署脚本不会为其他工�
 ## 四、 跨工具一键自动化部署与更新实战（deploy-agents）
 
 代码库提供 Windows 与 Linux/macOS 部署脚本。目标文件的加载行为由各工具决定；`--update` 会覆盖工具管理的同名规则和技能，并先创建备份，不承诺零影响：
-- **Windows PowerShell 自动化脚本**：[`deploy-agents.ps1`](deploy-agents.ps1)
-- **Linux / macOS Bash 自动化脚本**：[`deploy-agents.sh`](deploy-agents.sh)
+- **Windows PowerShell 自动化脚本**：[`deploy-agents.ps1`](../../deploy-agents.ps1)
+- **Linux / macOS Bash 自动化脚本**：[`deploy-agents.sh`](../../deploy-agents.sh)
 
 ### 4.1 脚本核心架构与更新流水线
 
@@ -211,7 +211,7 @@ PreToolUse 钩子是 Claude Code 专属机制，部署脚本不会为其他工�
 | `-Update` | `-u` | 选填 | 使用 `git pull --ff-only` 更新模板仓库，自动调用 `tools/sync-skills.py --check` 扫描外部技能上游变动并提供交互式同步选项，将文件同步到目标项目；更新受管理的项目规则、Hook、技能和元数据前按脚本策略备份。已有全局指令文件不覆盖，而是在显式 `-Global -Update` 时生成旁置审阅模板；不会升级全局 CLI。 |
 | `-CometInit` | `-c` | 选填 | 若系统中已安装 `comet` CLI，自动在目标项目根目录下执行 `comet init` 注册客户端生命周期 Hooks。 |
 | `-AiMemoryInit` | `-m` | 选填 | 自动为目标项目生成 `.ai-memory.toml` 配置文件（智能推导 `workspace` 与 `project`），接入跨工具项目记忆 (ai-memory)。 |
-| `-Pipeline` | 无 | 选填 | 直接将任务调度移交至统一流水线执行脚本 ([`run-pipeline.ps1`](run-pipeline.ps1) / [`pipeline.ps1`](pipeline.ps1))。 |
+| `-Pipeline` | 无 | 选填 | 直接将任务调度移交至统一流水线执行脚本 ([`run-pipeline.ps1`](../../run-pipeline.ps1) / [`pipeline.ps1`](../../pipeline.ps1))。 |
 | `-UpdateSource` | 无 | 选填 | 指定自定义的技能或规则更新上游源。 |
 
 #### 统一工程流水线（Windows 原生执行）：
