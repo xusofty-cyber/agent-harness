@@ -27,9 +27,9 @@ graph TD
 ## 核心特性
 
 1. **三级 AGENTS.md 渐进式披露架构**：
-   - **全局级（[`Global AGENTS.md`](Global%20AGENTS.md)）**：跨项目通用工程宪法，涵盖沟通、实现、上下文与 Git 授权边界。
-   - **项目级（[`Project AGENTS.md`](Project%20AGENTS.md)）**：可裁剪的项目工程模板，提供 CLI 命令、技术栈、架构边界和按需规则索引。
-   - **目录级（[`Directory AGENTS.md`](Directory%20AGENTS.md)）**：Monorepo / 独立子模块的微型边界补丁（In/Out Scope、依赖隔离与极速测试）。
+   - **全局级（[`Global AGENTS.md`](templates/agents/Global%20AGENTS.md)）**：跨项目通用工程宪法，涵盖沟通、实现、上下文与 Git 授权边界。
+   - **项目级（[`Project AGENTS.md`](templates/agents/Project%20AGENTS.md)）**：可裁剪的项目工程模板，提供 CLI 命令、技术栈、架构边界和按需规则索引。
+   - **目录级（[`Directory AGENTS.md`](templates/agents/Directory%20AGENTS.md)）**：Monorepo / 独立子模块的微型边界补丁（In/Out Scope、依赖隔离与极速测试）。
    - **细粒度子规则库（[`.agents/rules/`](.agents/rules/)）**：按需动态查阅，涵盖 `token-discipline.md`、`engineering-spec.md`、`security-boundary.md` 与 `git-workflow.md`。
 
 2. **Claude Code 客户端钩子（[`.claude/settings.json`](.claude/settings.json) + [`.claude/hooks/`](.claude/hooks/)）**：
@@ -267,9 +267,9 @@ ai-memory 采用安全优先的 Fail-closed 门禁，必须显式声明才激活
 - 📖 **实战使用与技能全景**：
   - [简体中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [English](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [繁體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Français](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
 - 📜 **三级规则架构**：
-  - **全局宪法**：[`Global AGENTS.md`](Global%20AGENTS.md)（简体中文）| [`English`](Global%20AGENTS.en.md) | [`繁體中文`](Global%20AGENTS.zh-tw.md) | [`Français`](Global%20AGENTS.fr.md) | [`Deutsch`](Global%20AGENTS.de.md)
-  - **项目规范**：[`Project AGENTS.md`](Project%20AGENTS.md)（简体中文）| [`English`](Project%20AGENTS.en.md) | [`繁體中文`](Project%20AGENTS.zh-tw.md) | [`Français`](Project%20AGENTS.fr.md) | [`Deutsch`](Project%20AGENTS.de.md)
-  - **目录规则**：[`Directory AGENTS.md`](Directory%20AGENTS.md)（简体中文）| [`English`](Directory%20AGENTS.en.md) | [`繁體中文`](Directory%20AGENTS.zh-tw.md) | [`Français`](Directory%20AGENTS.fr.md) | [`Deutsch`](Directory%20AGENTS.de.md)
+  - **全局宪法**：[`Global AGENTS.md`](templates/agents/Global%20AGENTS.md)（简体中文）| [`English`](templates/agents/Global%20AGENTS.en.md) | [`繁體中文`](templates/agents/Global%20AGENTS.zh-tw.md) | [`Français`](templates/agents/Global%20AGENTS.fr.md) | [`Deutsch`](templates/agents/Global%20AGENTS.de.md)
+  - **项目规范**：[`Project AGENTS.md`](templates/agents/Project%20AGENTS.md)（简体中文）| [`English`](templates/agents/Project%20AGENTS.en.md) | [`繁體中文`](templates/agents/Project%20AGENTS.zh-tw.md) | [`Français`](templates/agents/Project%20AGENTS.fr.md) | [`Deutsch`](templates/agents/Project%20AGENTS.de.md)
+  - **目录规则**：[`Directory AGENTS.md`](templates/agents/Directory%20AGENTS.md)（简体中文）| [`English`](templates/agents/Directory%20AGENTS.en.md) | [`繁體中文`](templates/agents/Directory%20AGENTS.zh-tw.md) | [`Français`](templates/agents/Directory%20AGENTS.fr.md) | [`Deutsch`](templates/agents/Directory%20AGENTS.de.md)
 
 ---
 
