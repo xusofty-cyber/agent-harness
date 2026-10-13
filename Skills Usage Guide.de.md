@@ -2,7 +2,7 @@
 
 > **Language / 语言**: [English](Skills%20Usage%20Guide.md) | [简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Français](Skills%20Usage%20Guide.fr.md) | **Deutsch**
 
-Wie die 43 gebündelten Skills in der Praxis funktionieren: welche automatisch auslösen, welche explizit aufgerufen werden und wann man welche einsetzt.
+Wie die 44 gebündelten Skills in der Praxis funktionieren: welche automatisch auslösen, welche explizit aufgerufen werden und wann man welche einsetzt.
 
 ## Funktionsweise der Skill-Trigger
 
@@ -26,12 +26,12 @@ Wenn Claude einen Skill nicht wie erwartet lädt, benennen Sie ihn einfach expli
 > |---|---|---|
 > | `openspec` | 17 | OpenSpec-Workflow-Familie |
 > | `superpowers` | 16 | obra/superpowers-Methodenfamilie |
-> | `local` | 5 | Im Repo erstellt (engineering-docs, living-documentation, open-code-review, option-review, cross-tool-memory) |
+> | `local` | 6 | Im Repo erstellt (engineering-docs, living-documentation, open-code-review, option-review, cross-tool-memory, git-advanced) |
 > | `document` | 2 | Dokumentenverarbeitung (docx, pdf) |
 > | `integration` | 2 | Externe Tool-Integrationen (comet, codegraph) |
 > | `utility` | 3 | Einzelzweck-Utilities (caveman, ponytail, rtk) |
 >
-> **Hinweis zur Zählung**: `skills-lock.json` hat 45 Einträge, dieser Katalog listet 43 Skills.
+> **Hinweis zur Zählung**: `skills-lock.json` hat 46 Einträge, dieser Katalog listet 44 Skills.
 > Die 2 zusätzlichen Einträge (`openspec`, `superpowers`) sind Meta-Einträge der Quell-Repos —
 > Provenienz-Platzhalter, keine installierbaren Skills. nach Kategorien
 
@@ -99,6 +99,7 @@ Wenn Claude einen Skill nicht wie erwartet lädt, benennen Sie ihn einfach expli
 | `pdf` | Hybrid | — | Liest und extrahiert Text/Tabellen aus PDFs. | "Fasse dieses PDF zusammen" oder "extrahiere Tabellen...". |
 | `caveman` | Hybrid | — | Stark komprimierter Ausgabemodus (spart Tokens). | "Sei prägnant" / "caveman mode". Stufen: lite, full, ultra. |
 | `ponytail` | Hybrid | — | Erzwingt die einfachste funktionierende Lösung (Anti-Overengineering). | "Halte es einfach" / wenn Claude überdimensioniert. |
+| `git-advanced` | Hybrid | — | Erweiterte Git-Operationen: Konfliktlösung, Cherry-pick/Revert, `git bisect`, `git reflog`, Befehlsreferenz. | "Diesen Merge-Konflikt lösen" / "diesen Fix cherry-picken". |
 
 ### 6. Meta-Skills
 
