@@ -36,7 +36,7 @@ param (
 
     [Parameter(Mandatory = $false)]
     [Alias('l')]
-    [string]$Lang = "zh",
+    [string]$Lang = "en",
 
     [Parameter(Mandatory = $false)]
     [Alias('k')]

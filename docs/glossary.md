@@ -34,7 +34,7 @@ Model Context Protocol — 技能与外部服务集成的标准协议 / the stan
 ## skills-lock.json
 技能完整性锁定文件，记录每个 skill 的版本与哈希 / skill integrity lockfile recording each skill's version and hash.
 
-## PARITY
+## PARITY (developer)
 sh/ps1 双脚本功能一致性检查 / functional parity check between sh and ps1 scripts.
 
 ## force push

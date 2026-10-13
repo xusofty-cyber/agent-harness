@@ -95,7 +95,7 @@ while [ "$arg_index" -lt "$#" ]; do
         --check|-k)
             DO_CHECK=true
             ;;
-        --interactive|-I)
+        --interactive)
             FORCE_INTERACTIVE=true
             ;;
         --pipeline)
