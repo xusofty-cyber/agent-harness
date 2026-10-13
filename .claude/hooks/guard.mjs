@@ -31,16 +31,23 @@ if (toolName !== "Bash") {
 }
 
 // === Helper: get current git branch (optionally in a specific dir) ===
+// Cached per hook invocation to avoid duplicate git spawns.
+const _branchCache = new Map();
 function getCurrentBranch(cwd) {
+  const key = cwd || ".";
+  if (_branchCache.has(key)) return _branchCache.get(key);
+  let branch = "";
   try {
-    return execSync("git branch --show-current", {
+    branch = execSync("git branch --show-current", {
       encoding: "utf-8",
       timeout: 5000,
       cwd: cwd || process.cwd(),
     }).trim();
   } catch {
-    return "";
+    // leave empty
   }
+  _branchCache.set(key, branch);
+  return branch;
 }
 
 // === Helper: deny with exit 2 + permissionDecision JSON ===
@@ -224,16 +231,29 @@ import { readFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
+// Prefer __dirname derivation (hook lives at .claude/hooks/); only fall back
+// to git when the derived path doesn't look like a repo root.
+let _repoRoot = null;
 function getRepoRoot() {
+  if (_repoRoot) return _repoRoot;
+  const derived = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
   try {
-    return execSync("git rev-parse --show-toplevel", {
+    if (existsSync(join(derived, ".agents")) || existsSync(join(derived, ".git"))) {
+      _repoRoot = derived;
+      return _repoRoot;
+    }
+  } catch {
+    // fall through to git
+  }
+  try {
+    _repoRoot = execSync("git rev-parse --show-toplevel", {
       encoding: "utf-8",
       timeout: 5000,
     }).trim();
   } catch {
-    // Fallback: assume standard layout (.claude/hooks/ two levels below root)
-    return join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+    _repoRoot = derived;
   }
+  return _repoRoot;
 }
 
 // Default sensitive patterns (used when .agents/review-sensitive-paths.json
