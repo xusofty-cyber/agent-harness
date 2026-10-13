@@ -148,6 +148,7 @@ git diff <conflict-file>      # 查看具体冲突内容
 git add <resolved-file>
 git merge --continue          # 或 git rebase --continue / git cherry-pick --continue
 # 放弃：git merge --abort / git rebase --abort / git cherry-pick --abort
+# 注：rebase 相关命令仅限临时分支使用，受保护分支上永久禁止 rebase（见 §1）
 ```
 
 ### 冲突标记含义
@@ -191,6 +192,8 @@ git cherry-pick -n <hash>           # --no-commit：只入暂存区，适合合�
 
 ### 回退矩阵
 
+**一句话决策：已 push → `revert`；未 push → `reset`；只动单个文件 → `restore --source`。**
+
 | 场景 | 推荐操作 | 原因 |
 |---|---|---|
 | 回退已 push 的错误 commit | `git revert <hash>` | 不改写历史，安全 |
@@ -209,32 +212,14 @@ git cherry-pick -n <hash>           # --no-commit：只入暂存区，适合合�
 
 ---
 
-## 9. Bisect 与 Reflog（问题定位与恢复）
+## 9. 高级取证（Bisect / Reflog）
 
-### Git Bisect — 二分定位引入 Bug 的 commit
+定位 Bug 引入提交、恢复误删分支等低频高级操作，已拆分为按需加载的
+`git-forensics` skill（避免每次会话都消耗 token）：
 
-```bash
-git bisect start
-git bisect bad                    # 当前 HEAD 有 bug
-git bisect good <known-good>      # 标记一个已知正常的 commit
-# Git 自动 checkout 中间点，测试后标记 good/bad，重复直到找到 first bad commit
-git bisect reset                   # 结束，回到原分支
-```
+> 需要时调用 skill：**git-forensics** — `git bisect` 二分定位、`git reflog` 灾难恢复。
 
-自动化：`git bisect run ./test.sh`（脚本返回 0=good，非 0=bad，125=skip）。
-
-### Git Reflog — 恢复误操作
-
-Reflog 记录 HEAD/分支的每次移动（commit、reset、rebase、checkout……），即使 commit 已不在任何分支上：
-
-```bash
-git reflog                        # 查看操作历史
-git reset --hard HEAD@{1}         # 回到上一次操作前的状态
-git branch recovery <hash>        # 从 reflog 找回误删分支的 tip
-```
-
-- Reflog 是本地独有，不推送远端；默认保留 90 天；
-- `git reset --hard` 误操作后，第一反应应该是查 reflog 而不是 panic。
+一句话速查：`git bisect start → good/bad 标记 → reset`；`git reflog` 查操作历史。
 
 ---
 
@@ -251,7 +236,8 @@ git clean -xdf                          # 删除 .gitignore 外所有文件
 # ⚠️ 需人类明确确认后才可执行：
 git reset --hard HEAD~N                 # 丢失提交（仅限恢复本地误操作）
 git commit --amend                      # 仅允许修改尚未 push 的提交
-git revert                              # 回滚线上代码的标准方式（优先于 reset）
+git revert                              # 受保护分支上的 revert = 直接修改受保护分支，
+                                        # 永久禁止；临时分支上的 revert 按正常提交流程走
 ```
 
 ---
