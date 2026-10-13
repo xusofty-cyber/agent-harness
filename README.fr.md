@@ -8,7 +8,7 @@ Ce dépôt fournit des modèles de règles aux niveaux global, projet et répert
 
 ---
 
-## Architecture
+## Architecture du système
 
 ```mermaid
 graph TD
