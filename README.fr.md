@@ -1,6 +1,6 @@
 # Agent Harness
 
-> **Language / Langue**: [English](README.md) | [简体中文](README_zh.md) | [繁體中文](README.zh-tw.md) | **Français** | [Deutsch](README.de.md)
+> **Language / Langue**: [English](README.md) | [简体中文](README.zh.md) | [繁體中文](README.zh-tw.md) | **Français** | [Deutsch](README.de.md)
 
 > **Modèles réutilisables de règles de programmation IA, crochets de sécurité Claude Code et scripts de déploiement multi-outils**
 
@@ -30,7 +30,7 @@ Ce dépôt fournit des modèles de règles aux niveaux global, projet et répert
    - **Sortie et communication** : `rtk` (troncature et limitation de tokens) et `caveman` (mode ultra-concis) ;
    - **Revue avant décision & mémoire partagée** : `option-review` et `cross-tool-memory` ;
    - **Documents professionnels** : compétences `docx` et `pdf` ;
-   - **Guide d'utilisation et déclenchement des compétences** : Pour les modes de déclenchement (auto/explicite/hybride), la catégorisation et la mémoire de projet de l'ensemble des 44 compétences, voir [`Skills Usage Guide.fr.md`](Skills%20Usage%20Guide.fr.md) ([English](Skills%20Usage%20Guide.md) | [简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Deutsch](Skills%20Usage%20Guide.de.md)).
+   - **Guide d'utilisation et déclenchement des compétences** : Pour les modes de déclenchement (auto/explicite/hybride), la catégorisation et la mémoire de projet de l'ensemble des 44 compétences, voir [`Skills Usage Guide.fr.md`](docs/guides/Skills%20Usage%20Guide.fr.md) ([English](docs/guides/Skills%20Usage%20Guide.md) | [简体中文](docs/guides/Skills%20Usage%20Guide.zh.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md) | [Deutsch](docs/guides/Skills%20Usage%20Guide.de.md)).
 
 4. **Déploiement en un clic, assistant interactif & pipeline unifié (`deploy-agents` & `pipeline`)** :
    - **Assistant terminal interactif étape par étape** : L'exécution sans argument (ou avec `--interactive` / `-Interactive`) lance un assistant guidé (navigation par flèches, sélection multiple par espace, validation Entrée) pour choisir la langue (`en`, `zh`, `zh-tw`, `fr`, `de`), la portée (`project`, `global`, `both`), le chemin du projet et sélectionner parmi 12 ponts d'outils (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy) ainsi que les workflows optionnels ;
@@ -89,7 +89,7 @@ agent-harness/
 ├── .ai-memory.toml.example          # Exemple de marqueur d'activation locale
 ├── skills-lock.json                 # Métadonnées d'intégrité et sources
 ├── README.md                        # Présentation (English)
-└── README_zh.md                     # Présentation (Chinois simplifié)
+└── README.zh.md                     # Présentation (Chinois simplifié)
 ```
 
 ---
@@ -170,9 +170,9 @@ docker run -d --name ai-memory \
 ## Index documentaire
 
 - 📖 **Déploiement & Configuration** :
-  - [Français](Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [English](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [简体中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [繁體中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [Deutsch](Multi-Tool%20Deployment%20and%20Configuration%20Guide.de.md)
+  - [Français](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [English](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [简体中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [繁體中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [Deutsch](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.de.md)
 - 📖 **Usage pratique & Panorama des compétences** :
-  - [Français](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [简体中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [繁體中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Deutsch](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
+  - [Français](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [English](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [简体中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [繁體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Deutsch](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
 - 📜 **Architecture des règles à trois niveaux** :
   - **Règles globales** : [`Global AGENTS.fr.md`](Global%20AGENTS.fr.md) (Français) | [`English`](Global%20AGENTS.en.md) | [`简体中文`](Global%20AGENTS.md) | [`繁體中文`](Global%20AGENTS.zh-tw.md) | [`Deutsch`](Global%20AGENTS.de.md)
   - **Règles de projet** : [`Project AGENTS.fr.md`](Project%20AGENTS.fr.md) (Français) | [`English`](Project%20AGENTS.en.md) | [`简体中文`](Project%20AGENTS.md) | [`繁體中文`](Project%20AGENTS.zh-tw.md) | [`Deutsch`](Project%20AGENTS.de.md)
