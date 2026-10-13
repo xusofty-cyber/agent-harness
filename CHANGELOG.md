@@ -6,6 +6,8 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 ### Changed
+- **Hook 安全加固**：修复 3 个 P0 旁路——git 缩写选项（`--forc`）、环境变量前缀
+ （`FOO=bar git push`）、内联 alias（`git -c alias.p=push`）；加 4 个回归测试（42/42）。
 - **skills-lock 真版本锁定**：37 个外部 skill 新增 `pinnedCommit` 字段（commit SHA），
   `sync-skills.py` 优先从 pin 的 commit 拉取，不再静默跟随上游 tip；lock 版本升至 v2。
 - **de/fr README 补全**：ai-memory 4 步详细配置完整翻译（此前压缩为 19 行代码块）。
