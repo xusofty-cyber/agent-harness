@@ -38,7 +38,7 @@ for rel in [".claude/settings.json", "skills-lock.json"]:
         check(f"json:{rel}", False, str(e))
 
 # --- 2. TOML example validity (branch-aware: only on branches that have it) ---
-toml_example = ROOT / ".ai-memory.toml.example"
+toml_example = ROOT / "templates" / "ai-memory.toml.example"
 if toml_example.exists():
     try:
         tomllib.loads(toml_example.read_text(encoding="utf-8-sig"))
@@ -302,7 +302,7 @@ PARITY = [
     ("CometInit", "comet-init", "optional Comet init flag"),
     ("comet.config.yaml", "comet.config.yaml", "Comet config template sync"),
     ("AiMemoryInit", "ai-memory-init", "optional ai-memory init flag"),
-    (".ai-memory.toml.example", ".ai-memory.toml.example", "ai-memory config template sync"),
+    ("templates/ai-memory.toml.example", ".ai-memory.toml.example", "ai-memory config template sync"),
     ("LivingDocScaffold", "living-doc-scaffold", "living documentation directory scaffold"),
     ("Open Code Review CLI", "Open Code Review CLI", "optional OCR CLI detection"),
     ("review-sensitive-paths.json", "review-sensitive-paths.json", "sensitive paths config sync"),
