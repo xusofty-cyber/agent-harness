@@ -21,3 +21,21 @@ AI coding assistant infrastructure terms used across agent-harness docs.
 | **Iron Laws** | The 4 non-negotiable Git safety rules (see `.agents/rules/git-workflow.md` §2). |
 | **Skill** | On-demand capability package (`SKILL.md` + scripts), loaded when triggered. |
 | **Hook** | Automated check intercepting tool calls (Claude Code PreToolUse) or file writes. |
+
+## MCP
+Model Context Protocol — 技能与外部服务集成的标准协议 / the standard protocol for skill and external service integration.
+
+## ai-memory
+跨工具记忆服务，为多个 AI 编程工具提供共享的项目记忆 / cross-tool memory service providing shared project memory across AI coding tools.
+
+## PostToolUse
+与 PreToolUse 对应的 Hook 事件，在工具执行完成后触发 / the hook event corresponding to PreToolUse, triggered after tool execution.
+
+## skills-lock.json
+技能完整性锁定文件，记录每个 skill 的版本与哈希 / skill integrity lockfile recording each skill's version and hash.
+
+## PARITY
+sh/ps1 双脚本功能一致性检查 / functional parity check between sh and ps1 scripts.
+
+## force push
+Git 安全红线——强制推送会覆盖远程历史，Hook 永久禁止 / git safety red line — force push overwrites remote history, permanently blocked by hooks.
