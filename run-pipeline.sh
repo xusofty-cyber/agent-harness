@@ -45,7 +45,7 @@ usage() {
     echo ""
     echo -e "${CYAN}配置选项 (Configuration):${NC}"
     echo "  -p, --project <路径>    目标项目根目录 (默认: 当前目录 .)"
-    echo "  -l, --lang <语言>       规则模板语言 (en, zh, zh-tw, fr, de；默认: zh)"
+    echo "  -l, --lang <语言>       规则模板语言 (en, zh, zh-tw, fr, de；默认: en)"
     echo "  -g, --global            部署/更新本机各工具全局规则 (~/.gemini, ~/.codex, ~/.claude)"
     echo "  -u, --update            覆盖更新已有全局规则并备份；同时更新外部 skills"
     echo "  -k, --check-only        只读检查模式 (技能仅检查差异、文档仅分析影响)"
@@ -279,7 +279,7 @@ STAGE_SKILLS=false
 STAGE_DOCS=false
 
 PROJECT_DIR="."
-LANG_OPTION="zh"
+LANG_OPTION="en"
 CHECK_ONLY=false
 APPLY_SKILLS=false
 RUN_GLOBAL=false
