@@ -24,9 +24,9 @@ graph TD
 ## Fonctionnalités clés
 
 1. **Architecture progressive à trois niveaux AGENTS.md** :
-   - **Niveau global ([`Global AGENTS.fr.md`](Global%20AGENTS.fr.md))** : Constitution d'ingénierie transverse, standard de communication concise, règles d'autorisation Git et gouvernance de session.
-   - **Niveau projet ([`Project AGENTS.fr.md`](Project%20AGENTS.fr.md))** : Modèle adaptable pour commandes CLI, stack technique, garde-fous d'architecture et matrice de compétences.
-   - **Niveau répertoire ([`Directory AGENTS.fr.md`](Directory%20AGENTS.fr.md))** : Patch micromodule pour sous-paquets de monorepos ou sous-modules isolés (In/Out scope, isolation des dépendances et tests rapides).
+   - **Niveau global ([`Global AGENTS.fr.md`](templates/agents/Global%20AGENTS.fr.md))** : Constitution d'ingénierie transverse, standard de communication concise, règles d'autorisation Git et gouvernance de session.
+   - **Niveau projet ([`Project AGENTS.fr.md`](templates/agents/Project%20AGENTS.fr.md))** : Modèle adaptable pour commandes CLI, stack technique, garde-fous d'architecture et matrice de compétences.
+   - **Niveau répertoire ([`Directory AGENTS.fr.md`](templates/agents/Directory%20AGENTS.fr.md))** : Patch micromodule pour sous-paquets de monorepos ou sous-modules isolés (In/Out scope, isolation des dépendances et tests rapides).
    - **Sous-règles modulaires ([`.agents/rules/`](.agents/rules/))** : Règles consultées dynamiquement (`token-discipline.md`, `engineering-spec.md`, `security-boundary.md`, `git-workflow.md`).
 
 2. **Crochets de sécurité Claude Code ([`.claude/settings.json`](.claude/settings.json) + [`.claude/hooks/`](.claude/hooks/))** :
@@ -187,9 +187,9 @@ docker run -d --name ai-memory \
 - 📖 **Usage pratique & Panorama des compétences** :
   - [Français](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [English](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [简体中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [繁體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Deutsch](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
 - 📜 **Architecture des règles à trois niveaux** :
-  - **Règles globales** : [`Global AGENTS.fr.md`](Global%20AGENTS.fr.md) (Français) | [`English`](Global%20AGENTS.en.md) | [`简体中文`](Global%20AGENTS.md) | [`繁體中文`](Global%20AGENTS.zh-tw.md) | [`Deutsch`](Global%20AGENTS.de.md)
-  - **Règles de projet** : [`Project AGENTS.fr.md`](Project%20AGENTS.fr.md) (Français) | [`English`](Project%20AGENTS.en.md) | [`简体中文`](Project%20AGENTS.md) | [`繁體中文`](Project%20AGENTS.zh-tw.md) | [`Deutsch`](Project%20AGENTS.de.md)
-  - **Règles de répertoire** : [`Directory AGENTS.fr.md`](Directory%20AGENTS.fr.md) (Français) | [`English`](Directory%20AGENTS.en.md) | [`简体中文`](Directory%20AGENTS.md) | [`繁體中文`](Directory%20AGENTS.zh-tw.md) | [`Deutsch`](Directory%20AGENTS.de.md)
+  - **Règles globales** : [`Global AGENTS.fr.md`](templates/agents/Global%20AGENTS.fr.md) (Français) | [`English`](templates/agents/Global%20AGENTS.en.md) | [`简体中文`](templates/agents/Global%20AGENTS.md) | [`繁體中文`](templates/agents/Global%20AGENTS.zh-tw.md) | [`Deutsch`](templates/agents/Global%20AGENTS.de.md)
+  - **Règles de projet** : [`Project AGENTS.fr.md`](templates/agents/Project%20AGENTS.fr.md) (Français) | [`English`](templates/agents/Project%20AGENTS.en.md) | [`简体中文`](templates/agents/Project%20AGENTS.md) | [`繁體中文`](templates/agents/Project%20AGENTS.zh-tw.md) | [`Deutsch`](templates/agents/Project%20AGENTS.de.md)
+  - **Règles de répertoire** : [`Directory AGENTS.fr.md`](templates/agents/Directory%20AGENTS.fr.md) (Français) | [`English`](templates/agents/Directory%20AGENTS.en.md) | [`简体中文`](templates/agents/Directory%20AGENTS.md) | [`繁體中文`](templates/agents/Directory%20AGENTS.zh-tw.md) | [`Deutsch`](templates/agents/Directory%20AGENTS.de.md)
 
 ---
 
