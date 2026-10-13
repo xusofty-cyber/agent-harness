@@ -46,8 +46,8 @@ const HIGH_RISK_PATTERNS = [
 for (const pattern of HIGH_RISK_PATTERNS) {
   if (filePath.includes(pattern)) {
     warn(
-      `🔴 触碰高风险文件（构建配置/公共结构/协议定义/授权许可）——` +
-        `请先阅读 .agents/rules/security-boundary.md 并向人类确认影响面！`
+      `🔴 Touching high-risk files (build config/public structure/protocol defs/license) —` +
+        `Please read .agents/rules/security-boundary.md and confirm impact with human! / 请先阅读安全边界规则并向人类确认影响面！`
     );
     break;
   }
@@ -58,7 +58,7 @@ const CREDENTIAL_PATTERNS = [".pem", ".key", ".token", "credentials", "id_rsa", 
 
 for (const pattern of CREDENTIAL_PATTERNS) {
   if (filePath.includes(pattern)) {
-    warn(`🔐 敏感凭证防护——严禁在代码与配置中明文硬编码密钥！`);
+    warn(`🔐 Credential protection — never hardcode secrets in code/config! / 严禁在代码与配置中明文硬编码密钥！`);
     break;
   }
 }
