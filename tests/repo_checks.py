@@ -152,6 +152,9 @@ for tier in DOC_TIERS:
     if not tier_dir.is_dir():
         continue
     for f in sorted(tier_dir.rglob("*.md")):
+        # docs/guides/ are user-facing docs, not tiered docs — skip frontmatter check
+        if "docs/guides/" in f.as_posix():
+            continue
         rel = f.relative_to(ROOT).as_posix()
         fm = _parse_simple_frontmatter(f.read_text(encoding="utf-8-sig"))
         check(f"doc:{rel}:frontmatter", fm is not None,
@@ -474,34 +477,34 @@ else:
 # Each translated guide must keep the same ## section count as its source,
 # so the translated structure cannot silently drift from the source.
 MULTILINGUAL_DOC_PAIRS = [
-    ("README.md", "README_zh.md"),
+    ("README.md", "README.zh.md"),
     ("README.md", "README.zh-tw.md"),
     ("README.md", "README.fr.md"),
     ("README.md", "README.de.md"),
-    ("Multi-Tool Deployment and Configuration Guide.md",
-     "Multi-Tool Deployment and Configuration Guide.zh.md"),
-    ("Multi-Tool Deployment and Configuration Guide.md",
-     "Multi-Tool Deployment and Configuration Guide.zh-tw.md"),
-    ("Multi-Tool Deployment and Configuration Guide.md",
-     "Multi-Tool Deployment and Configuration Guide.fr.md"),
-    ("Multi-Tool Deployment and Configuration Guide.md",
-     "Multi-Tool Deployment and Configuration Guide.de.md"),
-    ("Tools Practical Usage and Skills Panorama Guide.md",
-     "Tools Practical Usage and Skills Panorama Guide.zh.md"),
-    ("Tools Practical Usage and Skills Panorama Guide.md",
-     "Tools Practical Usage and Skills Panorama Guide.zh-tw.md"),
-    ("Tools Practical Usage and Skills Panorama Guide.md",
-     "Tools Practical Usage and Skills Panorama Guide.fr.md"),
-    ("Tools Practical Usage and Skills Panorama Guide.md",
-     "Tools Practical Usage and Skills Panorama Guide.de.md"),
-    ("Skills Usage Guide.md",
-     "Skills Usage Guide.zh.md"),
-    ("Skills Usage Guide.md",
-     "Skills Usage Guide.zh-tw.md"),
-    ("Skills Usage Guide.md",
-     "Skills Usage Guide.fr.md"),
-    ("Skills Usage Guide.md",
-     "Skills Usage Guide.de.md"),
+    ("docs/guides/Multi-Tool Deployment and Configuration Guide.md",
+     "docs/guides/Multi-Tool Deployment and Configuration Guide.zh.md"),
+    ("docs/guides/Multi-Tool Deployment and Configuration Guide.md",
+     "docs/guides/Multi-Tool Deployment and Configuration Guide.zh-tw.md"),
+    ("docs/guides/Multi-Tool Deployment and Configuration Guide.md",
+     "docs/guides/Multi-Tool Deployment and Configuration Guide.fr.md"),
+    ("docs/guides/Multi-Tool Deployment and Configuration Guide.md",
+     "docs/guides/Multi-Tool Deployment and Configuration Guide.de.md"),
+    ("docs/guides/Tools Practical Usage and Skills Panorama Guide.md",
+     "docs/guides/Tools Practical Usage and Skills Panorama Guide.zh.md"),
+    ("docs/guides/Tools Practical Usage and Skills Panorama Guide.md",
+     "docs/guides/Tools Practical Usage and Skills Panorama Guide.zh-tw.md"),
+    ("docs/guides/Tools Practical Usage and Skills Panorama Guide.md",
+     "docs/guides/Tools Practical Usage and Skills Panorama Guide.fr.md"),
+    ("docs/guides/Tools Practical Usage and Skills Panorama Guide.md",
+     "docs/guides/Tools Practical Usage and Skills Panorama Guide.de.md"),
+    ("docs/guides/Skills Usage Guide.md",
+     "docs/guides/Skills Usage Guide.zh.md"),
+    ("docs/guides/Skills Usage Guide.md",
+     "docs/guides/Skills Usage Guide.zh-tw.md"),
+    ("docs/guides/Skills Usage Guide.md",
+     "docs/guides/Skills Usage Guide.fr.md"),
+    ("docs/guides/Skills Usage Guide.md",
+     "docs/guides/Skills Usage Guide.de.md"),
 ]
 
 def h2_count(path):
