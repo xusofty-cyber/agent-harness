@@ -514,7 +514,7 @@ def h2_count(path):
 for src, target in MULTILINGUAL_DOC_PAIRS:
     src_n, target_n = h2_count(src), h2_count(target)
     check(f"doc-parity:{src}=={target}", src_n == target_n,
-          f"## section count drift: {src_n} vs {target_n}")
+          f"## count drift: {src} has {src_n}, {target} has {target_n} — sync ## sections in {target}")
 
 # --- 7. Executable bit on entry-point scripts ---
 # The GitHub contents API resets the exec bit to 100644 on every content push,
