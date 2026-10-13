@@ -5,7 +5,7 @@ Checks vendored external skills (sourceType=github in skills-lock.json)
 against their upstream repositories and reports or applies updates.
 
 Usage:
-    python3 tools/sync-skills.py [--check] [--apply] [--skill NAME] [--json]
+    python3 tools/sync-skills.py [--check] [--apply] [--skill NAME] [--json] [--interactive] [--check-only]
 
 - --check (default): report which skills differ from upstream (read-only,
   safe to run in CI).
@@ -42,6 +42,9 @@ from tui import tui_select
 import time
 import urllib.request
 from pathlib import Path
+
+# Rate limiting for GitHub API
+API_RATE_LIMIT_DELAY = 0.3  # seconds between requests
 
 ROOT = Path(__file__).resolve().parent.parent
 LOCK_PATH = ROOT / "skills-lock.json"
@@ -81,7 +84,7 @@ def default_branch(repo: str) -> str:
     if repo not in _branch_cache:
         info = _http_json(f"{API}/repos/{repo}")
         _branch_cache[repo] = (info or {}).get("default_branch", "main")
-        time.sleep(0.3)  # be gentle with rate limits
+        time.sleep(API_RATE_LIMIT_DELAY)  # be gentle with rate limits
     return _branch_cache[repo]
 
 
@@ -97,7 +100,7 @@ def fetch_upstream(repo: str, path: str, pinned_commit: str | None = None) -> by
         data = _http_bytes(f"{RAW}/{repo}/{b}/{path}")
         if data is not None:
             return data
-        time.sleep(0.3)
+        time.sleep(API_RATE_LIMIT_DELAY)
     return None
 
 
