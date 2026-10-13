@@ -461,6 +461,6 @@ Read `tasks/lessons.md` when it is relevant to the task.
   - [Multi-Tool Deployment and Configuration Guide (English)](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md)
   - [多工具部署配置指南 (中文)](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md)
 - Rules Architecture:
-  - [`Global AGENTS.md`](../../Global%20AGENTS.md)
-  - [`Project AGENTS.md`](../../Project%20AGENTS.md)
-  - [`Directory AGENTS.md`](../../Directory%20AGENTS.md)
+  - [`Global AGENTS.md`](../../templates/agents/Global%20AGENTS.md)
+  - [`Project AGENTS.md`](../../templates/agents/Project%20AGENTS.md)
+  - [`Directory AGENTS.md`](../../templates/agents/Directory%20AGENTS.md)
