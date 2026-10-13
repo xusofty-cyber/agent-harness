@@ -55,7 +55,7 @@
 3. **Konfigurationsisolation**: Sämtliche Konfigurationen müssen über zentrale Umgebungsvariablen oder Konfigurationsmodule eingelesen werden; kein Hardcoding im Code.
 4. **Log-Anonymisierung**: Alle vertraulichen Werte in Konsolenausgaben oder Logs (PII, Tokens, Passwörter) müssen maskiert werden.
 5. **Risikoklassifizierung**: Unterscheidung von Hinweisen, Benachrichtigungen und zwingenden Freigaben gemäß `.agents/rules/security-boundary.md`; Dateianzahl allein rechtfertigt kein Anhalten.
-6. **Isolation geschützter Git-Branches**: Direkte Codeänderungen auf geschützten Branches (develop/master/main) sind verboten. Änderungen erfolgen auf temporären Branches.
+6. **Isolation geschützter Git-Branches**: Direkte Codeänderungen auf geschützten Branches (develop/master/main/release*/staging) sind verboten. Änderungen erfolgen auf temporären Branches.
 
 ## Matrix für Teilregeln und Engineering-Skills (Bedarfsgesteuerte Aktivierung)
 

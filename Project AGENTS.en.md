@@ -55,7 +55,7 @@
 3. **Configuration Isolation**: All configuration is read via unified environment variables or configuration modules; never hardcode or read raw env vars deep within modules.
 4. **Log Desensitization**: Any sensitive field printed to the console or logs (PII, tokens, passwords) must be masked and desensitized.
 5. **Risk Classification**: Differentiate alerts, notices, and mandatory authorization per `.agents/rules/security-boundary.md`; file count alone is not an authorization threshold.
-6. **Git Protected Branch Isolation**: Never edit code directly on protected branches (develop/master/main). Changes must use temporary branches. Blind `git add .` is prohibited.
+6. **Git Protected Branch Isolation**: Never edit code directly on protected branches (develop/master/main/release*/staging). Changes must use temporary branches. Blind `git add .` is prohibited.
 
 ## Sub-rule and Engineering Skill Dispatch Matrix (On-Demand Activation)
 
