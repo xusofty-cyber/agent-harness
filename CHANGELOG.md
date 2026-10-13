@@ -9,14 +9,6 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 - **git-workflow.md 瘦身优化**：§9 Bisect/Reflog 拆分为按需加载的 `git-forensics` 本地 skill
   （规则文件 283→~240 行，降低每次会话 token 成本）；§8 新增 revert/reset 一句话决策线；
   修复 3 处内部一致性问题（revert 语义、rebase 上下文、reset --hard 确认提醒）。
-
-### Added
-- **git-workflow.md 大幅增强**（借鉴 liangxin-lrjcs/skill-git-workflow 的策略，改编为通用模板）：
-  新增 Commit/Push 自查清单、冲突协同解决协议、Cherry-pick 与回退矩阵（含 revert-the-revert
-  陷阱）、Bisect/Reflog 指南、分支命名规范、提交信息正文纪律、禁止操作速查、常用命令速查。
-
-
-### Changed
 - **Project renamed `agents-living` → `agent-harness`**: 27 references updated
   across 13 files (READMEs, guides, AGENTS.md, CONTRIBUTING.md, skills-lock.json
   source fields, tool docstrings/User-Agents, CI config). Dated historical
@@ -28,6 +20,7 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 - **Native YAML Frontmatter in 15 `engineering-docs` templates**: Upgraded headers of all 15 Markdown template files in `.agents/skills/engineering-docs/references/templates/` (and generator `gen_templates.py`) to native YAML Frontmatter blocks with schema metadata (`id`, `title`, `type`, `status`, `modules`, `depends_on`, `version`, `last_verified_commit`). Ensures any AI agent copying templates defaults to complete traceability metadata for downstream `living-documentation` and `doc-impact.py` analysis.
 
 ### Added
+- **git-workflow.md 大幅增强**（借鉴 liangxin-lrjcs/skill-git-workflow 的策略，改编为通用模板）：新增 Commit/Push 自查清单、冲突协同解决协议、Cherry-pick 与回退矩阵（含 revert-the-revert 陷阱）、分支命名规范、提交信息正文纪律、禁止操作速查、常用命令速查；Bisect/Reflog 拆分为按需加载的 `git-forensics` skill。
 - **ai-memory Docker deployment guide**: Documented official Docker container deployment patterns and volume mapping guidelines (fixing in-container `/data` mount path, loopback binding for security, and client-server scope decoupling via `.ai-memory.toml`) across deployment guides and READMEs.
 - **Automatic target project `.gitignore` scaffold & protection**:
   Updated `deploy-agents.ps1`, `deploy-agents.sh`, `run-pipeline.ps1`, and `run-pipeline.sh`

@@ -257,6 +257,16 @@ if (/\bgit\s+push\b/.test(command)) {
   }
 }
 
+// 3b. git clean with -d/-f (destroys untracked files)
+if (
+  /\bgit\s+clean\b/.test(command) &&
+  /-[a-z]*[df]/i.test(command)
+) {
+  deny(
+    `[SECURITY-HOOK] ❌ git clean -d/-f（删除未跟踪文件）永久禁止！`
+  );
+}
+
 // 4. Rebase on protected branches
 if (/\bgit\s+rebase\b/.test(command)) {
   const branch = getCurrentBranch();

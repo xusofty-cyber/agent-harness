@@ -227,11 +227,13 @@ git cherry-pick -n <hash>           # --no-commit：只入暂存区，适合合�
 
 ```bash
 # ❌ 永远禁止，无需请示、直接拒绝：
-git push --force / git push -f          # 破坏远端历史
-git push origin main                    # 直接推受保护分支
-git push origin <A>:main                # 绕过式推送到受保护分支
-git push origin --delete main           # 删除受保护远端分支
+git push --force / git push -f          # 破坏远端历史（§1）
+git push origin --delete main           # 删除受保护远端分支（§1）
 git clean -xdf                          # 删除 .gitignore 外所有文件
+
+# 🔒 未经人类明确授权时禁止（授权后按 §2 流程执行）：
+git push origin main                    # 直接推受保护分支（§1：需授权）
+git push origin <A>:main                # 绕过式推送到受保护分支（§1：需授权）
 
 # ⚠️ 需人类明确确认后才可执行：
 git reset --hard HEAD~N                 # 丢失提交（仅限恢复本地误操作）
