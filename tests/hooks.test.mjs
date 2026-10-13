@@ -104,6 +104,21 @@ test("denies force push in any form", () => {
   }
 });
 
+test("denies git clean with -d/-f flags", () => {
+  for (const cmd of [
+    "git clean -xdf",
+    "git clean -fd",
+    "git clean -f",
+  ]) {
+    const r = runHook(cmd);
+    assert.equal(r.exitCode, 2, cmd);
+    assert.match(r.stdout, /deny/);
+  }
+  // dry-run without -d/-f should not be blocked
+  const safe = runHook("git clean -n");
+  assert.notEqual(safe.exitCode, 2, "git clean -n");
+});
+
 test("denies direct commit on protected branches, allows on feature branches", () => {
   const mainRepo = makeRepo("main");
   const denied = runHook("git commit -m 'x'", mainRepo);

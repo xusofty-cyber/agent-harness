@@ -89,12 +89,12 @@
       "computedHash": "8db5a922b242dd4e1bf824cb91c13b3e8d8e8a86d6ceaf7f0774eb9cce909d65",
       "domain": "superpowers"
     },
-    "git-forensics": {
+    "git-advanced": {
       "source": "./agent-harness (authored in-repo)",
       "sourceType": "local",
       "version": "0.1.0",
-      "skillPath": ".agents/skills/git-forensics/SKILL.md",
-      "computedHash": "db8a9a1f3acb99eb16e86d40c0f9db6e747bde4b39741d44577a98104e888f96",
+      "skillPath": ".agents/skills/git-advanced/SKILL.md",
+      "computedHash": "0549d92f9f80aa9b381ba3dc3b4904d1b6ac5ea5e54bf375b26f60fe6c2ccf6f",
       "domain": "local"
     },
     "living-documentation": {

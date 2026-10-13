@@ -2,7 +2,7 @@
 
 > **Language / 语言**: [English](Skills%20Usage%20Guide.md) | **简体中文** | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Français](Skills%20Usage%20Guide.fr.md) | [Deutsch](Skills%20Usage%20Guide.de.md)
 
-43 个内置 skill 在实际中如何工作：哪些自动触发、哪些需要显式调用，以及每个的使用时机。
+44 个内置 skill 在实际中如何工作：哪些自动触发、哪些需要显式调用，以及每个的使用时机。
 
 ## Skill 触发机制
 
@@ -83,6 +83,7 @@ Claude Code 通过两种方式决定加载 skill：
 | `pdf` | 混合 | — | 读取/提取 PDF 文本/表格。 | "总结这个 PDF" 或 "提取表格"。 |
 | `caveman` | 混合 | — | 超压缩输出模式（省 token）。 | "简洁点" / "caveman mode"。分级：lite、full、ultra。 |
 | `ponytail` | 混合 | — | 强制最简可用方案（反过度设计）。 | "保持简单" / Claude 过度设计时。 |
+| `git-advanced` | 混合 | — | Git 高级操作：冲突协同解决协议、cherry-pick/回退、`git bisect`、`git reflog`、命令速查。 | "解决这个合并冲突"/"cherry-pick 这个修复"/"哪个提交引入的 Bug？"。 |
 
 ### 6. 元技能
 
