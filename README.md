@@ -1,6 +1,6 @@
 # Agent Harness
 
-> **Language / 语言**: **English** | [简体中文](README_zh.md) | [繁體中文](README.zh-tw.md) | [Français](README.fr.md) | [Deutsch](README.de.md)
+> **Language / 语言**: **English** | [简体中文](README.zh.md) | [繁體中文](README.zh-tw.md) | [Français](README.fr.md) | [Deutsch](README.de.md)
 
 > **Reusable AI coding-rule templates, Claude Code hooks, and multi-tool deployment scripts**
 
@@ -30,7 +30,7 @@ This repository provides global, project, and directory rule templates, Claude C
    - **Output and communication guidance**: `rtk` (optional Rust Token Killer CLI guide; command-rewrite hooks require setup) and `caveman` (concise-response Skill);
    - **Pre-decision review and shared memory**: `option-review` (isolated 5-dimension candidate approach review matrix) and `cross-tool-memory` (project-scoped long-term memory navigation aid);
    - **Professional Document Processing**: `docx` (Word formatting & manipulation) and `pdf` (structured extraction & analysis). Note: `docx` ships its full OOXML validation toolchain (~1.3 MB, mostly XSD schemas), making it the largest skill in the repo — delete the directory from your target project if you never process Word files;
-   - **Skills Usage & Trigger Guide**: For trigger modes (auto/explicit/hybrid), categorization, and project memory setup of all 44 skills, see [`Skills Usage Guide.md`](Skills%20Usage%20Guide.md) ([简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Français](Skills%20Usage%20Guide.fr.md) | [Deutsch](Skills%20Usage%20Guide.de.md)).
+   - **Skills Usage & Trigger Guide**: For trigger modes (auto/explicit/hybrid), categorization, and project memory setup of all 44 skills, see [`Skills Usage Guide.md`](docs/guides/Skills%20Usage%20Guide.md) ([简体中文](docs/guides/Skills%20Usage%20Guide.zh.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md) | [Français](docs/guides/Skills%20Usage%20Guide.fr.md) | [Deutsch](docs/guides/Skills%20Usage%20Guide.de.md)).
 
 4. **One-Click Deployment, Interactive Wizard & Unified Pipeline (`deploy-agents` & `pipeline`)**:
    - **Interactive Step-by-Step Terminal Wizard**: Running scripts without arguments (or with `--interactive` / `-Interactive`) launches a guided TUI wizard (arrow keys to move, spacebar to toggle, enter to confirm) to select template language (`en`, `zh`, `zh-tw`, `fr`, `de`), deployment scope (`project`, `global`, `both`), target project path, and multi-select agent bridge files (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy) plus optional workflows, preventing CLI mistakes;
@@ -99,7 +99,7 @@ agent-harness/
 ├── .ai-memory.toml.example          # Safe-to-copy local opt-in marker example
 ├── skills-lock.json                 # Skill source and partial integrity metadata
 ├── README.md                        # Repository overview (English default)
-└── README_zh.md                     # 项目中文概览
+└── README.zh.md                     # 项目中文概览
 ```
 
 ---
@@ -246,9 +246,9 @@ When upstream rules or skills are updated, run directly in the repository:
 ## Documentation Index
 
 - 📖 **Deployment & Configuration**:
-  - [English](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [简体中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [繁體中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [Français](Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [Deutsch](Multi-Tool%20Deployment%20and%20Configuration%20Guide.de.md)
+  - [English](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [简体中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [繁體中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [Français](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [Deutsch](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.de.md)
 - 📖 **Practical Usage & Skills Panorama**:
-  - [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [简体中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [繁體中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Français](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
+  - [English](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [简体中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [繁體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Français](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
 - 📜 **Three-Tier Rules Architecture**:
   - **Global Rules**: [`Global AGENTS.en.md`](Global%20AGENTS.en.md) (EN) | [`简体中文`](Global%20AGENTS.md) | [`繁體中文`](Global%20AGENTS.zh-tw.md) | [`Français`](Global%20AGENTS.fr.md) | [`Deutsch`](Global%20AGENTS.de.md)
   - **Project Rules**: [`Project AGENTS.en.md`](Project%20AGENTS.en.md) (EN) | [`简体中文`](Project%20AGENTS.md) | [`繁體中文`](Project%20AGENTS.zh-tw.md) | [`Français`](Project%20AGENTS.fr.md) | [`Deutsch`](Project%20AGENTS.de.md)
