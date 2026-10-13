@@ -5,6 +5,11 @@ All notable changes to this project are documented here. Format follows
 Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
+### Changed
+- **git-workflow.md 瘦身优化**：§9 Bisect/Reflog 拆分为按需加载的 `git-forensics` 本地 skill
+  （规则文件 283→~240 行，降低每次会话 token 成本）；§8 新增 revert/reset 一句话决策线；
+  修复 3 处内部一致性问题（revert 语义、rebase 上下文、reset --hard 确认提醒）。
+
 ### Added
 - **git-workflow.md 大幅增强**（借鉴 liangxin-lrjcs/skill-git-workflow 的策略，改编为通用模板）：
   新增 Commit/Push 自查清单、冲突协同解决协议、Cherry-pick 与回退矩阵（含 revert-the-revert
