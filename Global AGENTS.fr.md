@@ -54,14 +54,12 @@ Charger le contexte selon les besoins de la tâche. Les tâches en plusieurs ét
 
 ## Frontières d'autorisation et règles d'or de sécurité Git
 
-- **Isolation stricte des branches protégées** :
-  - Les commits directs sur `develop` / `master` / `main` / `release*` / `staging` sont formellement interdits ; tout changement doit être effectué sur une branche temporaire (`feature/*`, `fix/*`, `refactor/*`) ;
-- **Autorisation formelle pour toute interaction distante** :
-  - Une autorisation explicite est requise avant d'exécuter `git push`, de fusionner sur une branche protégée ou de supprimer des branches distantes partagées ; si la commande de l'utilisateur précise déjà l'action et la cible, cela vaut autorisation ;
-- **Interdiction permanente des opérations destructrices** :
-  - Interdiction absolue de `git push --force` (ou `-f` / `--force-with-lease`) ; interdiction absolue de `git rebase` sur les branches protégées ; privilégier `git revert -m 1` pour annuler des modifications ;
-- **Garde-fou contre l'indexation accidentelle** :
-  - Interdiction stricte de recourir aveuglément à `git add .` ou `git add -A` ; indexer uniquement via `git add <chemin-explicite>` pour éviter d'embarquer de gros fichiers, des fichiers temporaires, des artefacts de build ou des données sensibles ;
+> Spécification Git complète : `.agents/rules/git-workflow.md`.
+> Seulement les baselines inter-projets ci-dessous :
+
+- **Isolation des branches protégées** : pas de commits directs sur `develop`/`master`/`main`/`release*`/`staging` ; utiliser des branches temporaires ;
+- **Autorisation explicite pour les remotes** : requise avant `git push`, fusions ou suppressions de branches distantes ;
+- **Interdit en permanence** : `git push --force`, `rebase` sur branches protégées, `git add .` aveugle ;
 - **Classification des risques** : Traiter les opérations à fort impact ou irréversibles selon `.agents/rules/security-boundary.md`. Le simple fait de modifier plusieurs fichiers ne justifie pas une interruption ; évaluer les risques, expliquer les impacts et ne solliciter une confirmation que lorsque les règles ou l'utilisateur l'exigent explicitement ;
 - **Zéro fuite d'identifiants** :
   - Interdiction absolue d'inscrire en clair ou de coder en dur des clés API, jetons, mots de passe, certificats, clés privées ou chaînes de connexion sensibles dans le code, les commentaires, l'historique des commits, la documentation ou les journaux d'exécution.
