@@ -26,9 +26,9 @@ graph TD
 ## Key Features
 
 1. **Three-Tier AGENTS.md Progressive Disclosure Architecture**:
-   - **Global Level ([`Global AGENTS.md`](Global%20AGENTS.md))**: Cross-project engineering constitution covering the no-nonsense communication gate, minimal-implementation guidance, Git authorization rules, and contextual workflow guidance.
-   - **Project Level ([`Project AGENTS.md`](Project%20AGENTS.md))**: Adaptable project template for CLI commands, tech stack, architecture boundaries, and on-demand rule references.
-   - **Directory Level ([`Directory AGENTS.md`](Directory%20AGENTS.md))**: Micro-boundary patch for Monorepo packages or isolated submodules (In/Out Scope, dependency boundaries, targeted fast tests, and large-file safety).
+   - **Global Level ([`Global AGENTS.md`](templates/agents/Global%20AGENTS.md))**: Cross-project engineering constitution covering the no-nonsense communication gate, minimal-implementation guidance, Git authorization rules, and contextual workflow guidance.
+   - **Project Level ([`Project AGENTS.md`](templates/agents/Project%20AGENTS.md))**: Adaptable project template for CLI commands, tech stack, architecture boundaries, and on-demand rule references.
+   - **Directory Level ([`Directory AGENTS.md`](templates/agents/Directory%20AGENTS.md))**: Micro-boundary patch for Monorepo packages or isolated submodules (In/Out Scope, dependency boundaries, targeted fast tests, and large-file safety).
    - **Modular Sub-Rules ([`.agents/rules/`](.agents/rules/))**: On-demand progressive rules including `token-discipline.md`, `engineering-spec.md`, `security-boundary.md`, and `git-workflow.md`.
 
 2. **Claude Code client hooks ([`.claude/settings.json`](.claude/settings.json) + [`.claude/hooks/`](.claude/hooks/))**:
@@ -265,9 +265,9 @@ When upstream rules or skills are updated, run directly in the repository:
 - 📖 **Practical Usage & Skills Panorama**:
   - [English](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [简体中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [繁體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Français](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
 - 📜 **Three-Tier Rules Architecture**:
-  - **Global Rules**: [`Global AGENTS.en.md`](Global%20AGENTS.en.md) (EN) | [`简体中文`](Global%20AGENTS.md) | [`繁體中文`](Global%20AGENTS.zh-tw.md) | [`Français`](Global%20AGENTS.fr.md) | [`Deutsch`](Global%20AGENTS.de.md)
-  - **Project Rules**: [`Project AGENTS.en.md`](Project%20AGENTS.en.md) (EN) | [`简体中文`](Project%20AGENTS.md) | [`繁體中文`](Project%20AGENTS.zh-tw.md) | [`Français`](Project%20AGENTS.fr.md) | [`Deutsch`](Project%20AGENTS.de.md)
-  - **Directory Rules**: [`Directory AGENTS.en.md`](Directory%20AGENTS.en.md) (EN) | [`简体中文`](Directory%20AGENTS.md) | [`繁體中文`](Directory%20AGENTS.zh-tw.md) | [`Français`](Directory%20AGENTS.fr.md) | [`Deutsch`](Directory%20AGENTS.de.md)
+  - **Global Rules**: [`Global AGENTS.en.md`](templates/agents/Global%20AGENTS.en.md) (EN) | [`简体中文`](templates/agents/Global%20AGENTS.md) | [`繁體中文`](templates/agents/Global%20AGENTS.zh-tw.md) | [`Français`](templates/agents/Global%20AGENTS.fr.md) | [`Deutsch`](templates/agents/Global%20AGENTS.de.md)
+  - **Project Rules**: [`Project AGENTS.en.md`](templates/agents/Project%20AGENTS.en.md) (EN) | [`简体中文`](templates/agents/Project%20AGENTS.md) | [`繁體中文`](templates/agents/Project%20AGENTS.zh-tw.md) | [`Français`](templates/agents/Project%20AGENTS.fr.md) | [`Deutsch`](templates/agents/Project%20AGENTS.de.md)
+  - **Directory Rules**: [`Directory AGENTS.en.md`](templates/agents/Directory%20AGENTS.en.md) (EN) | [`简体中文`](templates/agents/Directory%20AGENTS.md) | [`繁體中文`](templates/agents/Directory%20AGENTS.zh-tw.md) | [`Français`](templates/agents/Directory%20AGENTS.fr.md) | [`Deutsch`](templates/agents/Directory%20AGENTS.de.md)
 
 ---
 
