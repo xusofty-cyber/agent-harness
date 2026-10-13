@@ -1032,7 +1032,12 @@ if ($ToolClaude -and (Test-Path $SourceClaudeSettings)) {
         New-Item -ItemType Directory -Path $TargetClaudeDir -Force | Out-Null
     }
     $TargetClaudeSettings = Join-Path $TargetClaudeDir "settings.json"
-    if ((Resolve-Path -LiteralPath $SourceClaudeSettings -ErrorAction SilentlyContinue).Path -ne (Resolve-Path -LiteralPath $TargetClaudeSettings -ErrorAction SilentlyContinue).Path) {
+    # PS 5.1 compatible: avoid .Path on $null (Resolve-Path returns $null for missing files)
+    $sourceResolved = Resolve-Path -LiteralPath $SourceClaudeSettings -ErrorAction SilentlyContinue
+    $targetResolved = Resolve-Path -LiteralPath $TargetClaudeSettings -ErrorAction SilentlyContinue
+    $sourcePath = if ($sourceResolved) { $sourceResolved.Path } else { $null }
+    $targetPath = if ($targetResolved) { $targetResolved.Path } else { $null }
+    if ($sourcePath -ne $targetPath) {
         if ($Update -or (-not (Test-Path $TargetClaudeSettings))) {
             if ($Update) { Backup-ManagedPath $TargetClaudeSettings }
             Copy-Item -Path $SourceClaudeSettings -Destination $TargetClaudeSettings -Force
