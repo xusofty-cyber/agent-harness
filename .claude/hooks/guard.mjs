@@ -473,7 +473,7 @@ for (const inv of gitInvocations) {
     const branch = branchFor(inv);
     if (isProtectedBranch(branch)) {
       deny(
-        `[SECURITY-HOOK] ❌ 禁止在受保护分支 ${branch} 上执行 rebase！请使用 merge。`
+        `[SECURITY-HOOK] ❌ Rebase on protected branch '${branch}' is prohibited! Use merge instead. / 禁止在受保护分支上执行 rebase！请使用 merge。`
       );
     }
   }
@@ -516,7 +516,7 @@ for (const inv of gitInvocations) {
 // NOTE: flag bundle allows any mix of rm short flags containing r/R
 if (/\brm\s+(?:-(?:[fidrRv]*[rR][fidrRv]*)(?!\S)|--recursive\b)/.test(command)) {
   warn(
-    `检测到 rm -rf 递归删除，请确认目标路径非核心系统/项目源码目录！`
+    `Detected recursive rm -rf — verify target is not a system/project source directory! / 检测到 rm -rf 递归删除，请确认目标路径！`
   );
 }
 
@@ -524,7 +524,7 @@ if (/\brm\s+(?:-(?:[fidrRv]*[rR][fidrRv]*)(?!\S)|--recursive\b)/.test(command)) 
 if (hasGitSubcommand("reset") && gitInvocations.some((g) =>
   g.subcommand === "reset" && g.args.includes("--hard"))) {
   warn(
-    `git reset --hard 会永久丢弃工作区改动！未确认请勿执行。`
+    `git reset --hard permanently discards working tree changes! Do not run unconfirmed. / 会永久丢弃工作区改动！`
   );
 }
 
@@ -535,7 +535,7 @@ for (const inv of gitInvocations) {
       a === "." || a === "-A" || a === "--all");
     if (blind) {
       warn(
-        `严禁 git add . 全量盲目暂存（防止误带入编译产物与临时文件），请改用 git add <明确路径>！`
+        `Blind 'git add .' is prohibited (may stage build artifacts/temp files); use 'git add <explicit-path>'. / 严禁 git add . 盲目暂存，请改用明确路径。`
       );
       break;
     }
@@ -550,7 +550,7 @@ for (const inv of gitInvocations) {
     if (deletes) {
       // If we haven't already denied (protected branches handled above), just warn
       warn(
-        `删除临时远程分支——必须经人类明确授权并确认已合并。`
+        `Deleting a remote branch requires explicit human authorization and merge confirmation. / 必须经人类明确授权并确认已合并。`
       );
       break;
     }
@@ -572,7 +572,7 @@ if (hasGitSubcommand("commit") || hasGitSubcommand("push")) {
       const more = hits.length > 5 ? ` 等共 ${hits.length} 个文件` : "";
       warn(
         `本次 ${isPush ? "push" : "commit"} 触及敏感路径（${shown}${more}）——` +
-          `建议先运行 open-code-review skill（Tier A 委托 / Tier B 方法论）做一次确定性代码评审，` +
+          `建议先运行 open-code-review skill 做一次代码评审 / run the open-code-review skill first, ` +
           `确认无 Critical/High 问题后再继续。`
       );
     }
