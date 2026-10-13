@@ -326,3 +326,23 @@ test("denies --force-with-lease=<ref> form", () => {
   const r = runHook("git push --force-with-lease=main:abc123 origin main");
   assert.equal(r.exitCode, 2);
 });
+
+test("denies abbreviated --forc", () => {
+  const r = runHook("git push --forc origin main");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies abbreviated --force-w", () => {
+  const r = runHook("git push --force-w origin main");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies env var prefix bypass", () => {
+  const r = runHook("FOO=bar git push --force origin main");
+  assert.equal(r.exitCode, 2);
+});
+
+test("warns on inline git alias", () => {
+  const r = runHook("git -c alias.p=push p --force origin main");
+  assert.match(r.stderr, /alias/i);
+});
