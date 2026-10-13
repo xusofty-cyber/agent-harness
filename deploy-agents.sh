@@ -454,22 +454,23 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 resolve_template() {
     local base_name="$1"
     local suffix="$2"
-    local path="${SCRIPT_DIR}/${base_name}${suffix}.md"
+    local template_dir="${SCRIPT_DIR}/templates/agents"
+    local path="${template_dir}/${base_name}${suffix}.md"
     if [ -n "$suffix" ] && [ -f "$path" ]; then
         echo "$path"
         return
     fi
-    path="${SCRIPT_DIR}/${base_name}.md"
+    path="${template_dir}/${base_name}.md"
     if [ -f "$path" ]; then
         echo "$path"
         return
     fi
-    echo "${SCRIPT_DIR}/${base_name}.md"
+    echo "${template_dir}/${base_name}.md"
 }
 
 GLOBAL_TEMPLATE="$(resolve_template "Global AGENTS" "$LANG_SUFFIX")"
 if [ ! -f "${GLOBAL_TEMPLATE}" ]; then
-    GLOBAL_TEMPLATE="${SCRIPT_DIR}/Global AGENTS.md"
+    GLOBAL_TEMPLATE="${SCRIPT_DIR}/templates/agents/Global AGENTS.md"
     if [ ! -f "${GLOBAL_TEMPLATE}" ]; then
         GLOBAL_TEMPLATE="${SCRIPT_DIR}/全局 AGENTS.md"
     fi
@@ -477,7 +478,7 @@ fi
 
 PROJECT_TEMPLATE="$(resolve_template "Project AGENTS" "$LANG_SUFFIX")"
 if [ ! -f "${PROJECT_TEMPLATE}" ]; then
-    PROJECT_TEMPLATE="${SCRIPT_DIR}/Project AGENTS.md"
+    PROJECT_TEMPLATE="${SCRIPT_DIR}/templates/agents/Project AGENTS.md"
     if [ ! -f "${PROJECT_TEMPLATE}" ]; then
         PROJECT_TEMPLATE="${SCRIPT_DIR}/项目级 AGENTS.md"
     fi
@@ -485,7 +486,7 @@ fi
 
 DIRECTORY_TEMPLATE="$(resolve_template "Directory AGENTS" "$LANG_SUFFIX")"
 if [ ! -f "${DIRECTORY_TEMPLATE}" ]; then
-    DIRECTORY_TEMPLATE="${SCRIPT_DIR}/Directory AGENTS.md"
+    DIRECTORY_TEMPLATE="${SCRIPT_DIR}/templates/agents/Directory AGENTS.md"
 fi
 
 resolve_aux_template() {
