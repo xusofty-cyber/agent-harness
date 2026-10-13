@@ -369,7 +369,7 @@ Ponytail Skill 提供一套实现前决策阶梯。先读懂问题和现有代�
 ### 3.8 Git 授权模型与受保护分支协作流转（版本控制端）
 
 #### 为什么必须采用受保护分支隔离？
-在团队协作与正规工程中，`develop`、`master`、`main`、`release*` 是共享生命线。AI 代理一旦在受保护分支上直接 commit，极易将未测代码、半成品或本地脏配置写入主干。
+在团队协作与正规工程中，`develop`、`master`、`main`、`release*`、`staging` 是共享生命线。AI 代理一旦在受保护分支上直接 commit，极易将未测代码、半成品或本地脏配置写入主干。
 
 #### 核心授权与流转准则：
 1. **新改动一律切临时分支**：所有需求与 Bug 修复必须通过 `git checkout -b {type}/short-description` 切换临时分支；常见类型前缀：`feature/`、`fix/`、`refactor/`、`cleanup/`、`docs/`；

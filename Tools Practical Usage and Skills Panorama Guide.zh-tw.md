@@ -314,7 +314,7 @@ Query the configured CodeGraph MCP tool for `OrderService::calculateDiscount`.
 
 1. **Temporary Branch Isolation**:
    - All work happens in `feature/*`, `fix/*`, `refactor/*`;
-   - Never commit directly to `develop`, `master`, `main`, `release*`.
+   - Never commit directly to `develop`, `master`, `main`, `release*`, `staging`.
 2. **Remote Push Authorization**:
    - AI can create branches and commit locally;
    - Pushing to remote or merging into protected branches requires explicit human confirmation.
