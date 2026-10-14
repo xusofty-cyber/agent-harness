@@ -465,6 +465,17 @@ resolve_template() {
         echo "$path"
         return
     fi
+    # Fallback to SCRIPT_DIR for backwards compatibility
+    path="${SCRIPT_DIR}/${base_name}${suffix}.md"
+    if [ -n "$suffix" ] && [ -f "$path" ]; then
+        echo "$path"
+        return
+    fi
+    path="${SCRIPT_DIR}/${base_name}.md"
+    if [ -f "$path" ]; then
+        echo "$path"
+        return
+    fi
     echo "${template_dir}/${base_name}.md"
 }
 
@@ -513,6 +524,9 @@ SOURCE_SKILLS_DIR="${SCRIPT_DIR}/.agents/skills"
 SOURCE_SKILLS_LOCK="${SCRIPT_DIR}/skills-lock.json"
 SOURCE_CLAUDE_SETTINGS="${SCRIPT_DIR}/.claude/settings.json"
 SOURCE_AI_MEMORY_EXAMPLE="${SCRIPT_DIR}/templates/ai-memory.toml.example"
+if [ ! -f "${SOURCE_AI_MEMORY_EXAMPLE}" ] && [ -f "${SCRIPT_DIR}/.ai-memory.toml.example" ]; then
+    SOURCE_AI_MEMORY_EXAMPLE="${SCRIPT_DIR}/.ai-memory.toml.example"
+fi
 SOURCE_REVIEW_SENSITIVE_PATHS="${SCRIPT_DIR}/.agents/review-sensitive-paths.json"
 
 # Back up managed target paths before an explicit update replaces them.

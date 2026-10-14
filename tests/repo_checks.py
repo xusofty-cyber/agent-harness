@@ -284,6 +284,14 @@ else:
     # Never silently skip: CI installs pyyaml, but local runs may not have it.
     print("  [warn] comet-cfg: PyYAML not installed, validation skipped (pip install pyyaml)")
 
+# --- 3h. templates/agents canonical templates completeness ---
+# All 15 canonical templates (3 types x 5 languages) must exist under templates/agents/
+for tmpl_prefix in ("Global AGENTS", "Project AGENTS", "Directory AGENTS"):
+    for lang_suf in ("", ".en", ".zh-tw", ".fr", ".de"):
+        expected_tmpl = ROOT / "templates" / "agents" / f"{tmpl_prefix}{lang_suf}.md"
+        check(f"template-exists:{tmpl_prefix}{lang_suf}", expected_tmpl.is_file(),
+              f"missing canonical template: {expected_tmpl}")
+
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
 # its counterpart marker must exist in the other. Markers that exist in
@@ -372,6 +380,7 @@ PIPELINE_PARITY = [
     ("CheckOnly", "check-only", "pipeline check-only read-only mode"),
     ("ApplySkills", "apply-skills", "pipeline apply-skills flag"),
     ("gitignore.snippet", "gitignore.snippet", "pipeline gitignore snippet scaffold"),
+    ("Resolve-GlobalTemplate", "resolve_global_template", "pipeline global template resolution"),
 ]
 p_ps1 = (ROOT / "run-pipeline.ps1").read_text(encoding="utf-8-sig")
 p_sh = (ROOT / "run-pipeline.sh").read_text(encoding="utf-8")

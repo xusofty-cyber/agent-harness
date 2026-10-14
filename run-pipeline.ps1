@@ -285,11 +285,21 @@ function Get-LangSuffix([string]$lang) {
 }
 
 function Resolve-GlobalTemplate([string]$suffix) {
-    $path = Join-Path $repoRoot "Global AGENTS$suffix.md"
-    if ($suffix -and (Test-Path $path)) { return $path }
-    $basePath = Join-Path $repoRoot "Global AGENTS.md"
-    if (Test-Path $basePath) { return $basePath }
-    return $basePath
+    $templateDir = Join-Path (Join-Path $repoRoot "templates") "agents"
+    if ($suffix) {
+        $candidate = Join-Path $templateDir "Global AGENTS$suffix.md"
+        if (Test-Path $candidate) { return $candidate }
+    }
+    $fallback = Join-Path $templateDir "Global AGENTS.md"
+    if (Test-Path $fallback) { return $fallback }
+    # Fallback to repoRoot for backwards compatibility
+    if ($suffix) {
+        $rootCand = Join-Path $repoRoot "Global AGENTS$suffix.md"
+        if (Test-Path $rootCand) { return $rootCand }
+    }
+    $rootFallback = Join-Path $repoRoot "Global AGENTS.md"
+    if (Test-Path $rootFallback) { return $rootFallback }
+    return $fallback
 }
 
 function Backup-GlobalFile([string]$path) {
@@ -763,7 +773,10 @@ if ($stageMemory) {
         $summaryDetail += "未检测到 ai-memory CLI"
     } else {
         $tomlPath = Join-Path $targetAbs ".ai-memory.toml"
-        $examplePath = Join-Path $repoRoot ".ai-memory.toml.example"
+        $examplePath = Join-Path (Join-Path $repoRoot "templates") "ai-memory.toml.example"
+        if (-not (Test-Path $examplePath)) {
+            $examplePath = Join-Path $repoRoot ".ai-memory.toml.example"
+        }
         if (-not (Test-Path $tomlPath) -and (Test-Path $examplePath)) {
             Write-Host "目标工程尚未配置 .ai-memory.toml" -ForegroundColor Yellow
             $doCreate = $false
@@ -783,6 +796,10 @@ if ($stageMemory) {
                 $summaryStatus += "SKIP"
                 $summaryDetail += "未配置 .ai-memory.toml"
             }
+        } elseif (-not (Test-Path $tomlPath) -and -not (Test-Path $examplePath)) {
+            Write-Host "↷ 缺少 .ai-memory.toml.example 模板，跳过记忆集成。`n" -ForegroundColor Yellow
+            $summaryStatus += "SKIP"
+            $summaryDetail += "未找到 .ai-memory.toml.example"
         }
 
         if ((Test-Path $tomlPath) -and ((Get-Content $tomlPath -Raw) -notmatch 'replace-with-')) {

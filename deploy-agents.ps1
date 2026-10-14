@@ -278,44 +278,54 @@ $LangSuffix = switch -Regex ($NormLang) {
 }
 
 function Resolve-TemplateFile([string]$BaseName, [string]$Suffix) {
-    $templateDir = Join-Path $ScriptDir "templates/agents"
+    $templateDir = Join-Path (Join-Path $ScriptDir "templates") "agents"
     if ($Suffix) {
         $candidate = Join-Path $templateDir "$BaseName$Suffix.md"
         if (Test-Path $candidate) { return $candidate }
     }
     $fallback = Join-Path $templateDir "$BaseName.md"
     if (Test-Path $fallback) { return $fallback }
+    if ($Suffix) {
+        $rootCand = Join-Path $ScriptDir "$BaseName$Suffix.md"
+        if (Test-Path $rootCand) { return $rootCand }
+    }
+    $rootFallback = Join-Path $ScriptDir "$BaseName.md"
+    if (Test-Path $rootFallback) { return $rootFallback }
     return $fallback
 }
 
 # Template file paths
 $ResolvedGlobalTemplate = Resolve-TemplateFile "Global AGENTS" $LangSuffix
 if (-not (Test-Path $ResolvedGlobalTemplate)) {
-    $ResolvedGlobalTemplate = Join-Path $ScriptDir "Global AGENTS.md"
-    if (-not (Test-Path $ResolvedGlobalTemplate)) {
+    $found = Get-ChildItem -Path (Join-Path (Join-Path $ScriptDir "templates") "agents") -Filter "*Global*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $found) {
         $found = Get-ChildItem -Path $ScriptDir -Filter "*Global*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
-        if (-not $found) {
-            $found = Get-ChildItem -Path $ScriptDir -Filter "*全局*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
-        }
-        if ($found) { $ResolvedGlobalTemplate = $found.FullName }
     }
+    if (-not $found) {
+        $found = Get-ChildItem -Path $ScriptDir -Filter "*全局*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    }
+    if ($found) { $ResolvedGlobalTemplate = $found.FullName }
 }
 
 $ResolvedProjectTemplate = Resolve-TemplateFile "Project AGENTS" $LangSuffix
 if (-not (Test-Path $ResolvedProjectTemplate)) {
-    $ResolvedProjectTemplate = Join-Path $ScriptDir "Project AGENTS.md"
-    if (-not (Test-Path $ResolvedProjectTemplate)) {
+    $found = Get-ChildItem -Path (Join-Path (Join-Path $ScriptDir "templates") "agents") -Filter "*Project*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $found) {
         $found = Get-ChildItem -Path $ScriptDir -Filter "*Project*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
-        if (-not $found) {
-            $found = Get-ChildItem -Path $ScriptDir -Filter "*项目级*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
-        }
-        if ($found) { $ResolvedProjectTemplate = $found.FullName }
     }
+    if (-not $found) {
+        $found = Get-ChildItem -Path $ScriptDir -Filter "*项目级*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    }
+    if ($found) { $ResolvedProjectTemplate = $found.FullName }
 }
 
 $ResolvedDirectoryTemplate = Resolve-TemplateFile "Directory AGENTS" $LangSuffix
 if (-not (Test-Path $ResolvedDirectoryTemplate)) {
-    $ResolvedDirectoryTemplate = Join-Path $ScriptDir "Directory AGENTS.md"
+    $found = Get-ChildItem -Path (Join-Path (Join-Path $ScriptDir "templates") "agents") -Filter "*Directory*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $found) {
+        $found = Get-ChildItem -Path $ScriptDir -Filter "*Directory*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+    }
+    if ($found) { $ResolvedDirectoryTemplate = $found.FullName }
 }
 
 function Resolve-AuxTemplate([string]$BaseName, [string]$Suffix) {
@@ -336,6 +346,9 @@ $SourceSkillsDir = Join-Path $ScriptDir ".agents\skills"
 $SourceSkillsLock = Join-Path $ScriptDir "skills-lock.json"
 $SourceClaudeSettings = Join-Path $ScriptDir ".claude\settings.json"
 $SourceAiMemoryExample = Join-Path $ScriptDir "templates/ai-memory.toml.example"
+if (-not (Test-Path $SourceAiMemoryExample) -and (Test-Path (Join-Path $ScriptDir ".ai-memory.toml.example"))) {
+    $SourceAiMemoryExample = Join-Path $ScriptDir ".ai-memory.toml.example"
+}
 $SourceReviewSensitivePaths = Join-Path $ScriptDir ".agents\review-sensitive-paths.json"
 
 function Backup-ManagedPath([string]$Path) {

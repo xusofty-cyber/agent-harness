@@ -305,7 +305,19 @@ get_lang_suffix() {
 
 resolve_global_template() {
     local suffix="$1"
-    local path="${REPO_ROOT}/Global AGENTS${suffix}.md"
+    local template_dir="${REPO_ROOT}/templates/agents"
+    local path="${template_dir}/Global AGENTS${suffix}.md"
+    if [ -n "$suffix" ] && [ -f "$path" ]; then
+        echo "$path"
+        return
+    fi
+    path="${template_dir}/Global AGENTS.md"
+    if [ -f "$path" ]; then
+        echo "$path"
+        return
+    fi
+    # Fallback to REPO_ROOT for backwards compatibility
+    path="${REPO_ROOT}/Global AGENTS${suffix}.md"
     if [ -n "$suffix" ] && [ -f "$path" ]; then
         echo "$path"
         return
@@ -315,7 +327,7 @@ resolve_global_template() {
         echo "$path"
         return
     fi
-    echo "${REPO_ROOT}/Global AGENTS.md"
+    echo "${template_dir}/Global AGENTS.md"
 }
 
 backup_global_file() {
@@ -855,7 +867,11 @@ if [ "$STAGE_MEMORY" = true ]; then
         # Preflight 2: check .ai-memory.toml in project
         toml_path="$TARGET_ABS/.ai-memory.toml"
         if [ ! -f "$toml_path" ]; then
-            if [ -f "$REPO_ROOT/.ai-memory.toml.example" ]; then
+            example_src="${REPO_ROOT}/templates/ai-memory.toml.example"
+            if [ ! -f "$example_src" ]; then
+                example_src="${REPO_ROOT}/.ai-memory.toml.example"
+            fi
+            if [ -f "$example_src" ]; then
                 echo -e "${YELLOW}目标工程尚未配置 .ai-memory.toml${NC}"
                 do_create=false
                 if [ "$NON_INTERACTIVE" = false ] && [ -t 0 ]; then
@@ -866,13 +882,17 @@ if [ "$STAGE_MEMORY" = true ]; then
                 if [ "$do_create" = true ]; then
                     proj_name="$(basename "$TARGET_ABS")"
                     sed -E "s/replace-with-workspace-(name|id)/workspace-$proj_name/g; s/replace-with-project-(name|id)/$proj_name/g" \
-                        "$REPO_ROOT/.ai-memory.toml.example" > "$toml_path"
+                        "$example_src" > "$toml_path"
                     echo -e "${GREEN}✔ 已生成 $toml_path${NC}"
                 else
                     echo -e "${YELLOW}↷ 缺少 .ai-memory.toml 配置，跳过记忆集成。${NC}\n"
                     SUMMARY_STATUS+=("SKIP")
                     SUMMARY_DETAIL+=("未配置 .ai-memory.toml")
                 fi
+            else
+                echo -e "${YELLOW}↷ 缺少 .ai-memory.toml.example 模板，跳过记忆集成。${NC}\n"
+                SUMMARY_STATUS+=("SKIP")
+                SUMMARY_DETAIL+=("未找到 .ai-memory.toml.example")
             fi
         fi
 
@@ -987,17 +1007,14 @@ if command -v comet >/dev/null 2>&1; then
     fi
 
     echo -e "\n  ${YELLOW}--- 跨平台体检报告 (comet doctor) ---${NC}"
-    local raw_doc
     raw_doc=$(cd "$TARGET_ABS" && comet doctor 2>&1) || true
     if [ "$BRIEF_PROBE" = true ]; then
-        local brief_lines
         brief_lines=$(echo "$raw_doc" | grep -E "✓|✗|⚠" | head -n 15 || true)
         if [ -n "$brief_lines" ]; then
             echo -e "${YELLOW}${brief_lines}${NC}"
             echo -e "  ${DIM}... (已启用 --brief-probe 极简模式，忽略后续详细平台检测)${NC}\n"
         fi
     else
-        local issues passes warn_cnt fail_cnt
         issues=$(echo "$raw_doc" | grep -E "✗|⚠" || true)
         passes=$(echo "$raw_doc" | grep -E "^  ✓" | wc -l || true)
         warn_cnt=$(echo "$raw_doc" | grep -c "⚠" || true)

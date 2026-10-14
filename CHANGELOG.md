@@ -5,6 +5,9 @@ All notable changes to this project are documented here. Format follows
 Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
+### Fixed
+- **流水线模板路径与作用域修复**：修复 `run-pipeline.sh` / `run-pipeline.ps1` 在模板迁移至 `templates/agents/` 后的全局模板解析告警与 `.ai-memory.toml.example` 查找失败；修复 `run-pipeline.sh` 附加探针中顶层非函数作用域使用 `local` 变量的问题；完善 `deploy-agents.sh` / `deploy-agents.ps1` 模板路径回退兼容；`repo_checks.py` 增加 15 个模板完整性校验与流水线全局模板解析对齐校验。
+
 ### Changed
 - **Hook 安全加固**：修复 3 个 P0 旁路——git 缩写选项（`--forc`）、环境变量前缀
  （`FOO=bar git push`）、内联 alias（`git -c alias.p=push`）；加 4 个回归测试（42/42）。
