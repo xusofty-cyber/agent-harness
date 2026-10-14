@@ -171,10 +171,10 @@ The installer copies the repository's skill directories into `.agents/skills/`; 
 3. **Living Documentation Impact Analysis (`tools/doc-impact.py`)**:
    - Analyse l'impact des modifications de code sur la traçabilité de la documentation vivante (`docs/{specs,architecture,reference,guides,adr}/`);
    - Supporte la vérification de l'arbre de travail, les références de commit (`--since`), les listes de fichiers et le mode interactif (`--interactive`).
-4. **Unified Pipeline Runner (`pipeline.sh` / `pipeline.ps1`)**:
+4. **Unified Pipeline Runner (`run-pipeline.sh` / `run-pipeline.ps1`)**:
    - Enchaîne l'ensemble du cycle de vie en une seule exécution par OS (Déploiement → Mémoire IA → Synchronisation des compétences → Impact Living-Doc) ;
-   - Assistant interactif : `./pipeline.sh` (Linux/macOS) ou `.\pipeline.ps1` (Windows) ;
-   - Automatisation sans surveillance : `./pipeline.sh --all -y` ou `.\pipeline.ps1 -All -Yes`.
+   - Assistant interactif : `./run-pipeline.sh` (Linux/macOS) ou `.\run-pipeline.ps1` (Windows) ;
+   - Automatisation sans surveillance : `./run-pipeline.sh --all -y` ou `.\run-pipeline.ps1 -All -Yes`.
 5. **Composant TUI interactif en terminal (`tools/tui.py`)**:
    - Fournit des menus interactifs à sélection unique (flèches + Entrée) et à sélection multiple (flèches + espace pour cocher/décocher + Entrée pour valider) ;
    - Détection intégrée de la compatibilité TTY et ANSI avec repli élégant sur une saisie textuelle numérotée dans les pipelines non interactifs.
@@ -448,8 +448,8 @@ Read `tasks/lessons.md` when it is relevant to the task.
 
 ### Reference Documentation:
 - Unified Pipeline Runners:
-  - Windows: [`run-pipeline.ps1`](../../run-pipeline.ps1) / [`pipeline.ps1`](../../pipeline.ps1)
-  - Linux / macOS: [`run-pipeline.sh`](../../run-pipeline.sh) / [`pipeline.sh`](../../pipeline.sh)
+  - Windows: [`run-pipeline.ps1`](../../run-pipeline.ps1)
+  - Linux / macOS: [`run-pipeline.sh`](../../run-pipeline.sh)
 - One-Click Deployment Scripts:
   - Windows: [`deploy-agents.ps1`](../../deploy-agents.ps1)
   - Linux / macOS: [`deploy-agents.sh`](../../deploy-agents.sh)

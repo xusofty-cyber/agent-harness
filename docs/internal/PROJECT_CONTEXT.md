@@ -10,7 +10,7 @@
 
 - **三层规则模板体系**：`Global AGENTS.md`、`Project AGENTS.md`、`Directory AGENTS.md`，支持多语言（EN, ZH, ZH-TW, FR, DE）及动态事实提取（`-Initialize` / `--initialize` 生成项目和指定目录的规则草稿）。
 - **脚手架与双轨记忆模板**：`templates/PROJECT_CONTEXT.template.*.md` 与 `templates/SESSION_STATE.template.*.md`，覆盖 5 种语言，供流水线自动初始化下游项目记忆。
-- **自动化工程流水线**：`run-pipeline.sh` / `.ps1` 及入口包装器 `pipeline.sh` / `.ps1`，串联规则部署、AI-Memory 记忆服务、外部技能同步锁定与活体文档质检。
+- **自动化工程流水线**：`run-pipeline.sh` / `.ps1`，串联规则部署、AI-Memory 记忆服务、外部技能同步锁定与活体文档质检。
 - **多平台部署脚本**：`deploy-agents.sh` / `deploy-agents.ps1`，具备双脚本 100% 特性对齐（Parity）、交互式 TUI 步骤向导、安全备份与多工具桥接部署能力。
 - **19 款 Agent 工具支持**：覆盖 12 款桥接配置（Claude Code, Antigravity 2.0/CLI/IDE, Codex, Copilot, Cursor, Zed, Gemini CLI, Qwen Code, CodeBuddy, Windsurf, Cline, Roo Code, Kiro, Continue.dev, Trae）与 7 款原生支持工具（OpenCode, Aider, Qoder, Pi 等）。
 - **42 项原生技能与安全钩子**：`.agents/skills/` 存放按需加载技能，`.claude/hooks/guard.mjs` 提供客户端安全操作防护（拦截危险强制推送、分支误删等）。

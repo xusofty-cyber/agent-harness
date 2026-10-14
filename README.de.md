@@ -4,7 +4,7 @@
 
 > **Wiederverwendbare KI-Codierungsrichtlinien, Sicherheits-Hooks für Claude Code und plattformübergreifende Bereitstellungsskripte**
 
-> **⚡ 30-Sekunden-Start**: `git clone https://github.com/xusofty-cyber/agent-harness.git && cd agent-harness && ./pipeline.sh`
+> **⚡ 30-Sekunden-Start**: `git clone https://github.com/xusofty-cyber/agent-harness.git && cd agent-harness && ./run-pipeline.sh`
 > Details siehe [Quick Start](#quick-start). Glossar: [docs/glossary.md](docs/glossary.md).
 
 Dieses Repository bietet globale, projekt- und verzeichnisbezogene Regelsätze, Claude Code PreToolUse Sicherheits-Hooks, Skill-Sammlungen sowie Bereitstellungsskripte für Windows/Linux/macOS. Ladeverhalten und Hook-Funktionalitäten variieren je nach Wirtswerkzeug. Hooks sind clientseitige Schutzmechanismen und stellen keine Betriebssystem- oder serverseitigen Sicherheitsgrenzen dar.
@@ -48,9 +48,9 @@ graph TD
    - **Professionelle Dokumentenverarbeitung**: `docx`- und `pdf`-Skills;
    - **Skill-Nutzungs- und Trigger-Leitfaden**: Für Trigger-Modi (auto/explizit/hybrid), Kategorisierung und Projektgedächtnis aller 44 Skills siehe [`Skills Usage Guide.de.md`](docs/guides/Skills%20Usage%20Guide.de.md) ([English](docs/guides/Skills%20Usage%20Guide.md) | [简体中文](docs/guides/Skills%20Usage%20Guide.zh.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md) | [Français](docs/guides/Skills%20Usage%20Guide.fr.md)).
 
-4. **Ein-Klick-Bereitstellung, interaktiver Assistent & einheitliche Pipeline (`deploy-agents` & `pipeline`)**:
+4. **Ein-Klick-Bereitstellung, interaktiver Assistent & einheitliche Pipeline (`deploy-agents` & `run-pipeline`)**:
    - **Schrittweiser interaktiver Terminal-Assistent**: Bei Aufruf ohne Argumente (oder mit `--interactive` / `-Interactive`) startet ein geführter TUI-Assistent (Pfeiltasten, Leertaste zur Mehrfachauswahl, Eingabetaste zur Bestätigung) zur Auswahl von Sprache (`en`, `zh`, `zh-tw`, `fr`, `de`), Bereitstellungsumfang (`project`, `global`, `both`), Projektpfad, 12 Agent-Bridge-Dateien (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy) sowie optionalen Workflows;
-   - **Plattformübergreifender Unified OS Pipeline-Runner** ([`run-pipeline.sh`](run-pipeline.sh) / [`pipeline.sh`](pipeline.sh) & [`run-pipeline.ps1`](run-pipeline.ps1) / [`pipeline.ps1`](pipeline.ps1)): Führt alle 4 Phasen nacheinander aus (Regel- & Bridge-Bereitstellung → ai-memory Gedächtnis → Skill-Synchronisation → Living-Doc-Qualitätsgate), sowohl interaktiv als auch unbeaufsichtigt (`--all -y` / `-All -Yes`);
+   - **Plattformübergreifender Unified OS Pipeline-Runner** ([`run-pipeline.sh`](run-pipeline.sh) & [`run-pipeline.ps1`](run-pipeline.ps1)): Führt alle 4 Phasen nacheinander aus (Regel- & Bridge-Bereitstellung → ai-memory Gedächtnis → Skill-Synchronisation → Living-Doc-Qualitätsgate), sowohl interaktiv als auch unbeaufsichtigt (`--all -y` / `-All -Yes`);
    - Automatisierte PowerShell- ([`deploy-agents.ps1`](deploy-agents.ps1)) und Bash-Skripte ([`deploy-agents.sh`](deploy-agents.sh)) mit mehrsprachiger Unterstützung (`--lang` / `-Language`);
    - Generierung von `AGENTS.md`, Bridges zu `CLAUDE.md` und GitHub Copilot, sowie Claude Code Hooks;
    - Automatische zeitstempelbasierte Sicherung bei `--global --update`;
@@ -93,8 +93,8 @@ agent-harness/
 ├── Tools Practical Usage and Skills Panorama Guide.md    # Praxisleitfaden (Englisch)
 ├── Skills Usage Guide.de.md                       # Skills-Nutzungsleitfaden (Deutsch)
 ├── Skills Usage Guide.md                          # Skills-Nutzungsleitfaden (Englisch)
-├── run-pipeline.ps1 / pipeline.ps1  # Windows PowerShell Pipeline-Runner
-├── run-pipeline.sh / pipeline.sh   # Linux / macOS Bash Pipeline-Runner
+├── run-pipeline.ps1                 # Windows PowerShell Pipeline-Runner
+├── run-pipeline.sh                  # Linux / macOS Bash Pipeline-Runner
 ├── deploy-agents.ps1                # Windows PowerShell-Skript
 ├── deploy-agents.sh                 # Linux / macOS Bash-Skript
 ├── setup-ai-memory.ps1              # ai-memory Setup (Windows)
@@ -119,17 +119,17 @@ Führen Sie alle Phasen der Toolchain nacheinander über den Pipeline-Runner aus
 - **Linux / macOS (Bash)**:
   ```bash
   # Interaktiver Assistent (schrittweise TUI-Auswahl):
-  ./pipeline.sh
+  ./run-pipeline.sh
   # Vollständige Pipeline ohne Benutzereingriff:
-  ./pipeline.sh --all -y
+  ./run-pipeline.sh --all -y
   ```
 
 - **Windows (PowerShell)**:
   ```powershell
   # Interaktiver Assistent (schrittweise TUI-Auswahl):
-  .\pipeline.ps1
+  .\run-pipeline.ps1
   # Vollständige Pipeline ohne Benutzereingriff:
-  .\pipeline.ps1 -All -Yes
+  .\run-pipeline.ps1 -All -Yes
   ```
 
 ### 2. Eigenständige Bereitstellung & interaktiver Assistent

@@ -4,7 +4,7 @@
 
 > **Reusable AI coding-rule templates, Claude Code hooks, and multi-tool deployment scripts**
 
-> **⚡ 30-second start**: `git clone https://github.com/xusofty-cyber/agent-harness.git && cd agent-harness && ./pipeline.sh --all -y`
+> **⚡ 30-second start**: `git clone https://github.com/xusofty-cyber/agent-harness.git && cd agent-harness && ./run-pipeline.sh --all -y`
 > See [Quick Start](#quick-start) for details. New to the jargon? Check [Glossary](docs/glossary.md).
 
 This repository provides global, project, and directory rule templates, Claude Code PreToolUse hooks, skill files, and Windows/Linux/macOS deployment scripts. Rule loading and hook behavior vary by tool. Hooks are client-side mechanisms, not operating-system or server-side security boundaries.
@@ -53,9 +53,9 @@ graph TD
    - **Professional Document Processing**: `docx` (Word formatting & manipulation) and `pdf` (structured extraction & analysis). Note: `docx` ships its full OOXML validation toolchain (~1.3 MB, mostly XSD schemas), making it the largest skill in the repo — delete the directory from your target project if you never process Word files;
    - **Skills Usage & Trigger Guide**: For trigger modes (auto/explicit/hybrid), categorization, and project memory setup of all 44 skills, see [`Skills Usage Guide.md`](docs/guides/Skills%20Usage%20Guide.md) ([简体中文](docs/guides/Skills%20Usage%20Guide.zh.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md) | [Français](docs/guides/Skills%20Usage%20Guide.fr.md) | [Deutsch](docs/guides/Skills%20Usage%20Guide.de.md)).
 
-4. **One-Click Deployment, Interactive Wizard & Unified Pipeline (`deploy-agents` & `pipeline`)**:
+4. **One-Click Deployment, Interactive Wizard & Unified Pipeline (`deploy-agents` & `run-pipeline`)**:
    - **Interactive Step-by-Step Terminal Wizard**: Running scripts without arguments (or with `--interactive` / `-Interactive`) launches a guided TUI wizard (arrow keys to move, spacebar to toggle, enter to confirm) to select template language (`en`, `zh`, `zh-tw`, `fr`, `de`), deployment scope (`project`, `global`, `both`), target project path, and multi-select agent bridge files (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy) plus optional workflows, preventing CLI mistakes;
-   - **Unified OS Pipeline Runner** ([`run-pipeline.sh`](run-pipeline.sh) / [`pipeline.sh`](pipeline.sh) & [`run-pipeline.ps1`](run-pipeline.ps1) / [`pipeline.ps1`](pipeline.ps1)): Orchestrates the entire agent lifecycle in 4 sequential stages (Deploy rules & bridges → Setup AI memory → Sync external skills → Living documentation impact gate) with both interactive wizard and unattended (`--all -y` / `-All -Yes`) modes;
+   - **Unified OS Pipeline Runner** ([`run-pipeline.sh`](run-pipeline.sh) & [`run-pipeline.ps1`](run-pipeline.ps1)): Orchestrates the entire agent lifecycle in 4 sequential stages (Deploy rules & bridges → Setup AI memory → Sync external skills → Living documentation impact gate) with both interactive wizard and unattended (`--all -y` / `-All -Yes`) modes;
    - PowerShell automation ([`deploy-agents.ps1`](deploy-agents.ps1)) with automatic Directory Junctions for non-admin permission penetration and Bash automation ([`deploy-agents.sh`](deploy-agents.sh));
    - The project script creates `AGENTS.md` when absent, Claude Code and Copilot bridges, and Claude Code hooks; see the support matrix for the actual scope;
    - `--global` configures Claude Code, Antigravity, and Codex global rule files; `--global --update` backs up replaced files;
@@ -99,17 +99,10 @@ agent-harness/
 │   └── hooks/                       # Security hook scripts (Node.js, reads stdin JSON)
 │       ├── guard.mjs                # Bash tool guard (exit 2 for hard blocks)
 │       └── guard-write.mjs          # Write/Edit tool guard (warnings)
-├── Global AGENTS.md                 # Global rule template (deploy to each tool's global entry point)
-├── Project AGENTS.md                # Project root template & central router
-├── Directory AGENTS.md              # Monorepo / submodule micro-boundary patch
-├── Multi-Tool Deployment and Configuration Guide.md # Comprehensive deployment & configuration guide (English)
-├── Multi-Tool Deployment and Configuration Guide.zh.md              # 跨工具部署与配置指南（中文）
-├── Tools Practical Usage and Skills Panorama Guide.md # Practical usage, token economics & skills panorama (English)
-├── Tools Practical Usage and Skills Panorama Guide.zh.md     # 各工具实战使用与技能全景指南（中文）
-├── Skills Usage Guide.md                          # How each skill triggers & when to use it (English)
-├── Skills Usage Guide.zh.md                       # 各 skill 触发方式与使用时机说明（中文）
-├── run-pipeline.ps1 / pipeline.ps1  # Windows PowerShell unified pipeline runner
-├── run-pipeline.sh / pipeline.sh   # Linux / macOS Bash unified pipeline runner
+├── templates/
+│   └── agents/                      # 15 Canonical rule templates (Global/Project/Directory x 5 langs)
+├── run-pipeline.ps1                 # Windows PowerShell unified pipeline runner
+├── run-pipeline.sh                  # Linux / macOS Bash unified pipeline runner
 ├── deploy-agents.ps1                # Windows PowerShell one-click deploy & update script
 ├── deploy-agents.sh                 # Linux / macOS Bash one-click deploy & update script
 ├── setup-ai-memory.ps1              # Explicit ai-memory setup for one opted-in project/client
@@ -134,17 +127,17 @@ Run all lifecycle stages in sequence via the unified OS pipeline runner (Deploy 
 - **Linux / macOS (Bash)**:
   ```bash
   # Interactive wizard (step-by-step TUI selection):
-  ./pipeline.sh
+  ./run-pipeline.sh
   # Unattended full pipeline:
-  ./pipeline.sh --all -y
+  ./run-pipeline.sh --all -y
   ```
 
 - **Windows (PowerShell)**:
   ```powershell
   # Interactive wizard (step-by-step TUI selection):
-  .\pipeline.ps1
+  .\run-pipeline.ps1
   # Unattended full pipeline:
-  .\pipeline.ps1 -All -Yes
+  .\run-pipeline.ps1 -All -Yes
   ```
 
 ### 2. Standalone Deployment & Interactive Wizard

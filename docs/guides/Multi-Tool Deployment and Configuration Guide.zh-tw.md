@@ -188,18 +188,18 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 - `-Update` (`-u`): Fast-forwards the template repository, automatically invokes `tools/sync-skills.py --check` to scan external skills for upstream updates with interactive confirmation, and syncs files to the target. Combined with `-Global`, it backs up and replaces existing global rule files. Codex's non-empty `$CODEX_HOME/AGENTS.override.md` takes precedence and is updated as the active file. Existing project-managed rules, hooks, skills, and lock metadata follow their documented backup/update behavior. It does not upgrade global CLIs.
 - `-CometInit` (`-c`): Automatically executes `comet init` in the target project if Comet CLI is installed.
 - `-AiMemoryInit` (`-m`): Automatically initializes `.ai-memory.toml` in the target project (inferring `workspace` and `project`) for cross-tool ai-memory integration.
-- `-Pipeline`: 直接將任務調度移交至統一流水線執行指令碼 ([`run-pipeline.ps1`](../../run-pipeline.ps1) / [`pipeline.ps1`](../../pipeline.ps1))。
+- `-Pipeline`: 直接將任務調度移交至統一流水線執行指令碼 ([`run-pipeline.ps1`](../../run-pipeline.ps1))。
 
 **統一工程流水線（Windows 原生執行）**:
 ```powershell
 # 互動式精靈模式（單選語言、多選階段、選擇細化模式）：
-.\pipeline.ps1
+.\run-pipeline.ps1
 
 # 無人值守一鍵全量流水線（全階段按序貫通）：
-.\pipeline.ps1 -All -Yes
+.\run-pipeline.ps1 -All -Yes
 
 # 指定部分階段執行：
-.\pipeline.ps1 -Stages "deploy,skills,docs"
+.\run-pipeline.ps1 -Stages "deploy,skills,docs"
 ```
 
 **Examples**:
@@ -234,7 +234,7 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 ### 4.3 Linux / macOS Deployment (`deploy-agents.sh`)
 
 ```bash
-chmod +x ./deploy-agents.sh ./run-pipeline.sh ./pipeline.sh
+chmod +x ./deploy-agents.sh ./run-pipeline.sh
 
 # 互動式精靈模式（零參數啟動）
 ./deploy-agents.sh
@@ -258,14 +258,14 @@ chmod +x ./deploy-agents.sh ./run-pipeline.sh ./pipeline.sh
 **統一工程流水線（Linux / macOS 原生執行）**:
 ```bash
 # 互動式逐步選擇精靈：
-./pipeline.sh
+./run-pipeline.sh
 
 # 無人值守一鍵全量流水線：
-./pipeline.sh --all -y
+./run-pipeline.sh --all -y
 
 # 指定階段組合執行：
 ```bash
-./pipeline.sh --stages deploy,skills,docs
+./run-pipeline.sh --stages deploy,skills,docs
 ```
 
 ### Deploy with ai-memory init

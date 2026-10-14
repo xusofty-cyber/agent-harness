@@ -45,9 +45,9 @@ graph TD
    - **Documents professionnels** : compétences `docx` et `pdf` ;
    - **Guide d'utilisation et déclenchement des compétences** : Pour les modes de déclenchement (auto/explicite/hybride), la catégorisation et la mémoire de projet de l'ensemble des 44 compétences, voir [`Skills Usage Guide.fr.md`](docs/guides/Skills%20Usage%20Guide.fr.md) ([English](docs/guides/Skills%20Usage%20Guide.md) | [简体中文](docs/guides/Skills%20Usage%20Guide.zh.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md) | [Deutsch](docs/guides/Skills%20Usage%20Guide.de.md)).
 
-4. **Déploiement en un clic, assistant interactif & pipeline unifié (`deploy-agents` & `pipeline`)** :
+4. **Déploiement en un clic, assistant interactif & pipeline unifié (`deploy-agents` & `run-pipeline`)** :
    - **Assistant terminal interactif étape par étape** : L'exécution sans argument (ou avec `--interactive` / `-Interactive`) lance un assistant guidé (navigation par flèches, sélection multiple par espace, validation Entrée) pour choisir la langue (`en`, `zh`, `zh-tw`, `fr`, `de`), la portée (`project`, `global`, `both`), le chemin du projet et sélectionner parmi 12 ponts d'outils (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy) ainsi que les workflows optionnels ;
-   - **Exécuteur de pipeline d'OS unifié** ([`run-pipeline.sh`](run-pipeline.sh) / [`pipeline.sh`](pipeline.sh) & [`run-pipeline.ps1`](run-pipeline.ps1) / [`pipeline.ps1`](pipeline.ps1)) : Orchestre les 4 étapes du cycle de vie en séquence (Déploiement des règles et ponts → Mémoire IA partagée → Synchronisation des compétences → Porte de qualité living-doc), avec mode interactif ou sans surveillance (`--all -y` / `-All -Yes`) ;
+   - **Exécuteur de pipeline d'OS unifié** ([`run-pipeline.sh`](run-pipeline.sh) & [`run-pipeline.ps1`](run-pipeline.ps1)) : Orchestre les 4 étapes du cycle de vie en séquence (Déploiement des règles et ponts → Mémoire IA partagée → Synchronisation des compétences → Porte de qualité living-doc), avec mode interactif ou sans surveillance (`--all -y` / `-All -Yes`) ;
    - Scripts automatisés pour PowerShell ([`deploy-agents.ps1`](deploy-agents.ps1)) et Bash ([`deploy-agents.sh`](deploy-agents.sh)) avec support multilingue (`--lang` / `-Language`) ;
    - Génération de `AGENTS.md`, ponts vers `CLAUDE.md` et Copilot, et crochets Claude Code ;
    - Sauvegarde préalable avec horodatage lors de `--global --update` ;
@@ -81,17 +81,10 @@ agent-harness/
 ├── .claude/
 │   ├── settings.json                # Configuration PreToolUse Claude Code
 │   └── hooks/                       # Scripts de garde et interception
-├── Global AGENTS.md                 # Modèle de règles globales
-├── Project AGENTS.md                # Modèle racine du projet & routeur
-├── Directory AGENTS.md              # Patch de frontière pour sous-modules
-├── Multi-Tool Deployment and Configuration Guide.fr.md # Guide de déploiement (Français)
-├── Multi-Tool Deployment and Configuration Guide.md    # Guide de déploiement (Anglais)
-├── Tools Practical Usage and Skills Panorama Guide.fr.md # Panorama des outils (Français)
-├── Tools Practical Usage and Skills Panorama Guide.md    # Panorama des outils (Anglais)
-├── Skills Usage Guide.fr.md                       # Guide d'utilisation des compétences (Français)
-├── Skills Usage Guide.md                          # Guide d'utilisation des compétences (Anglais)
-├── run-pipeline.ps1 / pipeline.ps1  # Exécuteur de pipeline unifié Windows PowerShell
-├── run-pipeline.sh / pipeline.sh   # Exécuteur de pipeline unifié Linux / macOS Bash
+├── templates/
+│   └── agents/                      # Modèles de règles canoniques (Global/Project/Directory x 5 langues)
+├── run-pipeline.ps1                 # Exécuteur de pipeline unifié Windows PowerShell
+├── run-pipeline.sh                  # Exécuteur de pipeline unifié Linux / macOS Bash
 ├── deploy-agents.ps1                # Script Windows PowerShell
 ├── deploy-agents.sh                 # Script Linux / macOS Bash
 ├── setup-ai-memory.ps1              # Script de configuration ai-memory (Windows)
@@ -116,17 +109,17 @@ Exécutez toutes les étapes du cycle de vie de manière séquentielle via le pi
 - **Linux / macOS (Bash)** :
   ```bash
   # Mode interactif (assistant guidé par étapes) :
-  ./pipeline.sh
+  ./run-pipeline.sh
   # Exécution complète sans surveillance :
-  ./pipeline.sh --all -y
+  ./run-pipeline.sh --all -y
   ```
 
 - **Windows (PowerShell)** :
   ```powershell
   # Mode interactif (assistant guidé par étapes) :
-  .\pipeline.ps1
+  .\run-pipeline.ps1
   # Exécution complète sans surveillance :
-  .\pipeline.ps1 -All -Yes
+  .\run-pipeline.ps1 -All -Yes
   ```
 
 ### 2. Déploiement autonome & assistant interactif

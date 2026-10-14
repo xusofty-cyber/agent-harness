@@ -168,14 +168,14 @@
 3. **活体文档影响分析与质检门禁 (`tools/doc-impact.py`)**：
    - 针对代码变更自动分析对 `docs/{specs,architecture,reference,guides,adr}/` 活体文档的溯源影响；
    - 支持工作区当前变更扫描、指定基线对比（`--since`）、文件列表传入以及交互式向导模式（`--interactive`）。
-4. **统一工程流水线执行器 (`pipeline.sh` / `pipeline.ps1`)**：
+4. **统一工程流水线执行器 (`run-pipeline.sh` / `run-pipeline.ps1`)**：
    - 统合全部运维与部署阶段，按操作系统提供一键式流转：
      - 阶段 1：规则分发与跨工具桥接部署 (`deploy-agents`)
      - 阶段 2：AI 跨工具长效记忆与 MCP 配置 (`setup-ai-memory`)
      - 阶段 3：外部技能锁定状态校验与更新 (`tools/sync-skills.py`)
      - 阶段 4：活体文档溯源影响分析与门禁质检 (`tools/doc-impact.py`)
-   - 交互向导：`./pipeline.sh` (Linux/macOS) 或 `.\pipeline.ps1` (Windows)；
-   - 无人值守：`./pipeline.sh --all -y` 或 `.\pipeline.ps1 -All -Yes`。
+   - 交互向导：`./run-pipeline.sh` (Linux/macOS) 或 `.\run-pipeline.ps1` (Windows)；
+   - 无人值守：`./run-pipeline.sh --all -y` 或 `.\run-pipeline.ps1 -All -Yes`。
 5. **终端交互式 TUI 核心组件 (`tools/tui.py`)**：
    - 提供基于终端原生键盘导航的单选菜单（上下方向键移动光标，Enter 确认）与多选菜单（上下方向键移动光标，空格键切选复选框，Enter 确认提交）；
    - 内置 TTY 与 ANSI 兼容性自检，当处于非交互管道或无 ANSI 终端时自动优雅降级为带编号文本输入，作为底层交互基座驱动所有部署脚本与维护工具。
@@ -624,8 +624,8 @@ cat tasks/lessons.md
 
 ### 5. 跨工具部署与参考文档索引：
 - 统一工程流水线执行脚本：
-  - Windows：[`run-pipeline.ps1`](../../run-pipeline.ps1) / [`pipeline.ps1`](../../pipeline.ps1)
-  - Linux/macOS：[`run-pipeline.sh`](../../run-pipeline.sh) / [`pipeline.sh`](../../pipeline.sh)
+  - Windows：[`run-pipeline.ps1`](../../run-pipeline.ps1)
+  - Linux/macOS：[`run-pipeline.sh`](../../run-pipeline.sh)
 - 一键自动化部署脚本：
   - Windows：[`deploy-agents.ps1`](../../deploy-agents.ps1)
   - Linux/macOS：[`deploy-agents.sh`](../../deploy-agents.sh)

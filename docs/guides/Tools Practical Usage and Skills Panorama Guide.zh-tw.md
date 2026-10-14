@@ -171,10 +171,10 @@ The installer copies the repository's skill directories into `.agents/skills/`; 
 3. **Living Documentation Impact Analysis (`tools/doc-impact.py`)**:
    - Analyzes code changes against living documentation traceability metadata (`docs/{specs,architecture,reference,guides,adr}/`);
    - Supports working tree inspection, commit baselines (`--since`), explicit file lists, and interactive wizard mode (`--interactive`).
-4. **Unified Pipeline Runner (`pipeline.sh` / `pipeline.ps1`)**:
+4. **Unified Pipeline Runner (`run-pipeline.sh` / `run-pipeline.ps1`)**:
    - Chains the full workflow into a single execution per OS (Deploy → AI Memory → Skills Sync → Living Doc Impact);
-   - Interactive wizard: `./pipeline.sh` (Linux/macOS) or `.\pipeline.ps1` (Windows);
-   - Unattended automation: `./pipeline.sh --all -y` or `.\pipeline.ps1 -All -Yes`.
+   - Interactive wizard: `./run-pipeline.sh` (Linux/macOS) or `.\run-pipeline.ps1` (Windows);
+   - Unattended automation: `./run-pipeline.sh --all -y` or `.\run-pipeline.ps1 -All -Yes`.
 5. **終端互動式 TUI 核心組件 (`tools/tui.py`)**:
    - 提供基於終端原生鍵盤導航的單選選單（上下方向鍵移動游標，Enter 確認）與多選選單（上下方向鍵移動游標，空白鍵切選複選框，Enter 確認提交）；
    - 內建 TTY 與 ANSI 相容性自檢，當處於非互動管道或無 ANSI 終端時自動優雅降級為帶編號文字輸入，作為底層互動基座驅動所有部署指令碼與維護工具。
@@ -448,8 +448,8 @@ Read `tasks/lessons.md` when it is relevant to the task.
 
 ### Reference Documentation:
 - Unified Pipeline Runners:
-  - Windows: [`run-pipeline.ps1`](../../run-pipeline.ps1) / [`pipeline.ps1`](../../pipeline.ps1)
-  - Linux / macOS: [`run-pipeline.sh`](../../run-pipeline.sh) / [`pipeline.sh`](../../pipeline.sh)
+  - Windows: [`run-pipeline.ps1`](../../run-pipeline.ps1)
+  - Linux / macOS: [`run-pipeline.sh`](../../run-pipeline.sh)
 - One-Click Deployment Scripts:
   - Windows: [`deploy-agents.ps1`](../../deploy-agents.ps1)
   - Linux / macOS: [`deploy-agents.sh`](../../deploy-agents.sh)

@@ -4,7 +4,7 @@
 
 > **可复用的 AI 编程规范模板、Claude Code 安全钩子与多工具部署脚本**
 
-> **⚡ 30 秒上手**：`git clone https://github.com/xusofty-cyber/agent-harness.git && cd agent-harness && ./pipeline.sh`
+> **⚡ 30 秒上手**：`git clone https://github.com/xusofty-cyber/agent-harness.git && cd agent-harness && ./run-pipeline.sh`
 > 详情见 [快速开始](#快速开始)。术语不懂？查 [术语表](docs/glossary.md)。
 
 本项目提供全局、项目和目录级规范模板、Claude Code PreToolUse 钩子、技能文件，以及 Windows/Linux/macOS 部署脚本。各工具的规则加载方式和钩子能力不同；请以支持矩阵和部署脚本实际行为为准。钩子属于客户端机制，不是操作系统或服务端安全边界。
@@ -49,9 +49,9 @@ graph TD
    - **专业文档处理**：`docx`（Word 专业排版）、`pdf`（结构化抽取与分析）；
    - **技能使用与触发时机指南**：各 skill 的触发机制（自动/显式/混合）、分类速查与项目记忆使用说明详见 [`Skills Usage Guide.zh.md`](docs/guides/Skills%20Usage%20Guide.zh.md)（[English](docs/guides/Skills%20Usage%20Guide.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md) | [Français](docs/guides/Skills%20Usage%20Guide.fr.md) | [Deutsch](docs/guides/Skills%20Usage%20Guide.de.md)）。
 
-4. **一键部署、交互向导与统一流水线（`deploy-agents` & `pipeline`）**：
+4. **一键部署、交互向导与统一流水线（`deploy-agents` & `run-pipeline`）**：
    - **交互式终端逐步选择向导**：执行脚本时不带任何参数（或显式指定 `--interactive` / `-Interactive`）将自动拉起向导（上下方向键选择、空格键切选、Enter 确认），引导完成规则模板语言（`en`, `zh`, `zh-tw`, `fr`, `de`）、部署范围（`project`, `global`, `both`）、目标项目路径、12 种 Agent 桥接文件多选（Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy）以及可选工作流开关，彻底杜绝命令行参数遗漏与拼写错误；
-   - **跨平台统一工程流水线执行器**（[`run-pipeline.sh`](run-pipeline.sh) / [`pipeline.sh`](pipeline.sh) 与 [`run-pipeline.ps1`](run-pipeline.ps1) / [`pipeline.ps1`](pipeline.ps1)）：一键按序贯通 4 大工程生命周期阶段（规则分发与桥接部署 → AI 跨工具长效记忆配置 → 外部技能同步与哈希锁定 → 活体文档溯源分析与质检门禁），同时支持交互式自选与全自动无人值守（`--all -y` / `-All -Yes`）模式；
+   - **跨平台统一工程流水线执行器**（[`run-pipeline.sh`](run-pipeline.sh) 与 [`run-pipeline.ps1`](run-pipeline.ps1)）：一键按序贯通 4 大工程生命周期阶段（规则分发与桥接部署 → AI 跨工具长效记忆配置 → 外部技能同步与哈希锁定 → 活体文档溯源分析与质检门禁），同时支持交互式自选与全自动无人值守（`--all -y` / `-All -Yes`）模式；
    - Windows PowerShell（[`deploy-agents.ps1`](deploy-agents.ps1)，内置 UTF-8 兼容与 Junction 权限免提权穿透）与 Linux/macOS Bash（[`deploy-agents.sh`](deploy-agents.sh)）；
    - 项目脚本创建 `AGENTS.md`（若不存在）、Claude Code 与 Copilot 桥接，并部署 Claude Code Hook；其他工具的具体加载行为以支持矩阵为准；
    - `--global` 配置 Claude Code、Antigravity 与 Codex 全局规则；`--global --update` 覆盖前备份；
@@ -93,17 +93,10 @@ agent-harness/
 │   └── hooks/                       # 安全钩子脚本（Node.js，读取 stdin JSON）
 │       ├── guard.mjs                # Bash 工具守卫（exit 2 硬阻断）
 │       └── guard-write.mjs          # Write/Edit 工具守卫（高危预警）
-├── Global AGENTS.md                 # 全局规则模板（需部署到各工具的全局入口）
-├── Project AGENTS.md                # 项目根目录标准模板与中枢路由器
-├── Directory AGENTS.md              # Monorepo / 子模块边界隔离微型补丁
-├── Multi-Tool Deployment and Configuration Guide.zh.md              # 跨工具适配原理、安全钩子与部署更新专著（中文）
-├── Multi-Tool Deployment and Configuration Guide.md # 英文版部署配置指南
-├── Tools Practical Usage and Skills Panorama Guide.zh.md     # 44 个技能详解、Token 经济学与实战流转（中文）
-├── Tools Practical Usage and Skills Panorama Guide.md # 英文版技能实战指南
-├── Skills Usage Guide.zh.md                       # 各 skill 触发方式与使用时机说明（中文）
-├── Skills Usage Guide.md                          # 各 skill 触发方式与使用时机说明（英文）
-├── run-pipeline.ps1 / pipeline.ps1  # Windows PowerShell 统一流水线执行脚本
-├── run-pipeline.sh / pipeline.sh   # Linux / macOS Bash 统一流水线执行脚本
+├── templates/
+│   └── agents/                      # 15 个规范规则模板（全局/项目级/目录级 × 5 语言）
+├── run-pipeline.ps1                 # Windows PowerShell 统一流水线执行脚本
+├── run-pipeline.sh                  # Linux / macOS Bash 统一流水线执行脚本
 ├── deploy-agents.ps1                # Windows 一键部署与在线更新自动化脚本
 ├── deploy-agents.sh                 # Linux / macOS 一键部署与在线更新自动化脚本
 ├── setup-ai-memory.ps1              # 单项目/单客户端显式安装辅助脚本
@@ -130,17 +123,17 @@ agent-harness/
 - **Linux / macOS 环境 (Bash)**:
   ```bash
   # 交互式向导模式（单选语言、多选阶段、选择执行模式）：
-  ./pipeline.sh
+  ./run-pipeline.sh
   # 无人值守一键全量流水线：
-  ./pipeline.sh --all -y
+  ./run-pipeline.sh --all -y
   ```
 
 - **Windows 环境 (PowerShell)**:
   ```powershell
   # 交互式向导模式：
-  .\pipeline.ps1
+  .\run-pipeline.ps1
   # 无人值守一键全量流水线：
-  .\pipeline.ps1 -All -Yes
+  .\run-pipeline.ps1 -All -Yes
   ```
 
 ### 2. 独立部署规范与交互式向导

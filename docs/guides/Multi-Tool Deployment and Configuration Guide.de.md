@@ -188,18 +188,18 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 - `-Update` (`-u`): Fast-forwards the template repository, automatically invokes `tools/sync-skills.py --check` to scan external skills for upstream updates with interactive confirmation, and syncs files to the target. Combined with `-Global`, it backs up and replaces existing global rule files. Codex's non-empty `$CODEX_HOME/AGENTS.override.md` takes precedence and is updated as the active file. Existing project-managed rules, hooks, skills, and lock metadata follow their documented backup/update behavior. It does not upgrade global CLIs.
 - `-CometInit` (`-c`): Automatically executes `comet init` in the target project if Comet CLI is installed.
 - `-AiMemoryInit` (`-m`): Automatically initializes `.ai-memory.toml` in the target project (inferring `workspace` and `project`) for cross-tool ai-memory integration.
-- `-Pipeline`: Delegiert die Ausführung direkt an den Unified Pipeline-Runner ([`run-pipeline.ps1`](../../run-pipeline.ps1) / [`pipeline.ps1`](../../pipeline.ps1)).
+- `-Pipeline`: Delegiert die Ausführung direkt an den Unified Pipeline-Runner ([`run-pipeline.ps1`](../../run-pipeline.ps1)).
 
 **Unified Pipeline-Runner (Windows)**:
 ```powershell
 # Interaktiver Schritt-für-Schritt-Assistent (Sprache, Projekt, Phasen, Modus):
-.\pipeline.ps1
+.\run-pipeline.ps1
 
 # Vollständige Pipeline ohne Benutzereingriff:
-.\pipeline.ps1 -All -Yes
+.\run-pipeline.ps1 -All -Yes
 
 # Bestimmte Phasen ausführen:
-.\pipeline.ps1 -Stages "deploy,skills,docs"
+.\run-pipeline.ps1 -Stages "deploy,skills,docs"
 ```
 
 **Examples**:
@@ -234,7 +234,7 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 ### 4.3 Linux / macOS Deployment (`deploy-agents.sh`)
 
 ```bash
-chmod +x ./deploy-agents.sh ./run-pipeline.sh ./pipeline.sh
+chmod +x ./deploy-agents.sh ./run-pipeline.sh
 
 # Interaktiver Assistent (Aufruf ohne Argumente)
 ./deploy-agents.sh
@@ -258,14 +258,14 @@ chmod +x ./deploy-agents.sh ./run-pipeline.sh ./pipeline.sh
 **Unified Pipeline-Runner (Linux / macOS)**:
 ```bash
 # Interaktiver Assistent:
-./pipeline.sh
+./run-pipeline.sh
 
 # Vollständige Pipeline ohne Benutzereingriff:
-./pipeline.sh --all -y
+./run-pipeline.sh --all -y
 
 # Bestimmte Phasen ausführen:
 ```bash
-./pipeline.sh --stages deploy,skills,docs
+./run-pipeline.sh --stages deploy,skills,docs
 ```
 
 ### Deploy with ai-memory init

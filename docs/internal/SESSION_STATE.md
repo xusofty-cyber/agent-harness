@@ -12,8 +12,8 @@
    - 桥接工具（TUI 向导可勾选）：Claude Code、Antigravity 2.0/CLI/IDE、Codex、GitHub Copilot、Cursor、Zed、Gemini CLI、Qwen Code、CodeBuddy、Windsurf、Cline、Roo Code、Kiro、Continue.dev、Trae。
    - 原生读取支持：OpenCode、Aider、Qoder、Pi 等自动识别 `AGENTS.md` 无需额外桥接。
 
-3. **全流程交互式向导与工程流水线 (`run-pipeline` / `pipeline`)**：
-   - 实现 `run-pipeline.sh` / `.ps1` 及便捷入口 `pipeline.sh` / `.ps1`，串联规则部署、AI-Memory 服务、外部技能同步校验与活体文档分析 4 大阶段。
+3. **全流程交互式向导与工程流水线 (`run-pipeline`)**：
+   - 实现 `run-pipeline.sh` / `.ps1`，串联规则部署、AI-Memory 服务、外部技能同步校验与活体文档分析 4 大阶段。
    - 所有脚本均支持 TUI 交互式选择向导（上下键移动、空格勾选、回车确认）及非交互命令行参数静默执行。
 
 4. **项目长期事实与会话断点自动初始化 (`PROJECT_CONTEXT.md` / `SESSION_STATE.md`)**：

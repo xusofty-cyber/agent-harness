@@ -211,19 +211,19 @@ PreToolUse 钩子是 Claude Code 专属机制，部署脚本不会为其他工�
 | `-Update` | `-u` | 选填 | 使用 `git pull --ff-only` 更新模板仓库，自动调用 `tools/sync-skills.py --check` 扫描外部技能上游变动并提供交互式同步选项，将文件同步到目标项目；更新受管理的项目规则、Hook、技能和元数据前按脚本策略备份。已有全局指令文件不覆盖，而是在显式 `-Global -Update` 时生成旁置审阅模板；不会升级全局 CLI。 |
 | `-CometInit` | `-c` | 选填 | 若系统中已安装 `comet` CLI，自动在目标项目根目录下执行 `comet init` 注册客户端生命周期 Hooks。 |
 | `-AiMemoryInit` | `-m` | 选填 | 自动为目标项目生成 `.ai-memory.toml` 配置文件（智能推导 `workspace` 与 `project`），接入跨工具项目记忆 (ai-memory)。 |
-| `-Pipeline` | 无 | 选填 | 直接将任务调度移交至统一流水线执行脚本 ([`run-pipeline.ps1`](../../run-pipeline.ps1) / [`pipeline.ps1`](../../pipeline.ps1))。 |
+| `-Pipeline` | 无 | 选填 | 直接将任务调度移交至统一流水线执行脚本 ([`run-pipeline.ps1`](../../run-pipeline.ps1))。 |
 | `-UpdateSource` | 无 | 选填 | 指定自定义的技能或规则更新上游源。 |
 
 #### 统一工程流水线（Windows 原生执行）：
 ```powershell
 # 交互式向导模式（单选语言、多选阶段、选择细化模式）：
-.\pipeline.ps1
+.\run-pipeline.ps1
 
 # 无人值守一键全量流水线（按序执行 规则部署 -> AI记忆 -> 技能同步 -> 文档质检）：
-.\pipeline.ps1 -All -Yes
+.\run-pipeline.ps1 -All -Yes
 
 # 指定部分阶段执行：
-.\pipeline.ps1 -Stages "deploy,skills,docs"
+.\run-pipeline.ps1 -Stages "deploy,skills,docs"
 ```
 
 #### 实战命令示例（Windows）：
@@ -261,7 +261,7 @@ PreToolUse 钩子是 Claude Code 专属机制，部署脚本不会为其他工�
 
 #### 首次赋予执行权限：
 ```bash
-chmod +x ./deploy-agents.sh ./run-pipeline.sh ./pipeline.sh
+chmod +x ./deploy-agents.sh ./run-pipeline.sh
 ```
 
 #### 语法格式（Linux/macOS）：
@@ -272,13 +272,13 @@ chmod +x ./deploy-agents.sh ./run-pipeline.sh ./pipeline.sh
 #### 统一工程流水线（Linux / macOS 原生执行）：
 ```bash
 # 交互式逐步选择向导：
-./pipeline.sh
+./run-pipeline.sh
 
 # 无人值守一键全量流水线（全阶段贯通）：
-./pipeline.sh --all -y
+./run-pipeline.sh --all -y
 
 # 指定阶段组合执行：
-./pipeline.sh --stages deploy,skills,docs
+./run-pipeline.sh --stages deploy,skills,docs
 ```
 
 #### 实战命令示例（Linux/macOS）：
