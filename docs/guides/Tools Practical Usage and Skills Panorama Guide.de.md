@@ -1,184 +1,184 @@
-# Practical Guide to AI Tooling and Skills Panorama (Claude Code / Codex / Antigravity IDE / Zed IDE)
+# Praktische Anleitung zu AI-Tooling und Skills-Panorama (Claude Code / Codex / Antigravity IDE / Zed IDE)
 
 > **Language / Sprache**: [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [简体中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [繁體中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Français](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | **Deutsch**
 
-This guide provides a comprehensive handbook for software engineering and technical documentation with AI agents: **which skills and Harness tools to install, underlying token economics, tool configuration and wiring, when and how to invoke core slash commands (e.g., `/comet`, `/plan`, `/opsx`, `codegraph`), and an end-to-end practical walkthrough.**
+Diese Anleitung bietet ein umfassendes Handbuch für Softwareentwicklung und technische Dokumentation mit AI-Agents: **welche Skills und Harness-Tools zu installieren sind, zugrundeliegende Token-Ökonomie, Tool-Konfiguration und -Verdrahtung, wann und wie zentrale Slash Commands aufzurufen sind (z. B. `/comet`, `/plan`, `/opsx`, `codegraph`), sowie ein End-to-End-Praxis-Walkthrough.**
 
 ---
 
-## Table of Contents
+## Inhaltsverzeichnis
 
-1. [Core Architecture & Tool Matrix (Who Manages What)](#1-core-architecture--tool-matrix-who-manages-what)
-2. [Skills & Ecosystem Tools Inventory](#2-skills--ecosystem-tools-inventory)
-   - 2.1 44 Integrated Native Skills Categorized
-   - 2.2 Version Locking, Online Updates & Skill Sync (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
-   - 2.3 Optional Harness CLI Tools
-   - 2.4 Token Economics of Skills (Why 40+ Skills Do NOT Blow Up Context)
-   - 2.5 Engineering Skills & Rules Dispatching Matrix
-3. [Deep Dive into Core Harness Tools & Slash Commands](#3-deep-dive-into-core-harness-tools--slash-commands)
-   - 3.1 Comet: Versioned Workflow Entry Point
-   - 3.2 OpenSpec: Spec-Driven Development (`/opsx:propose`, `/opsx:apply`, etc.)
-   - 3.3 Superpowers: TDD, Systematic Debugging & Verification Gate
-   - 3.4 CodeGraph: Optional MCP Code-Graph Integration
-   - 3.5 Ponytail: Minimal Implementation Ladder (Generation Gate)
-   - 3.6 Caveman: Ultra-Compressed Output (Communication Gate)
-   - 3.7 RTK: Output Truncation & Log Shielding (Execution Gate)
-   - 3.8 Git Authorization Model & Protected Branch Workflow
-   - 3.9 3-Step Session Ceremony & Dynamic Memory Loop
-   - 3.10 8 High-Risk Operations Protection Matrix
-4. [Platform-Specific Native Commands & Best Practices](#4-platform-specific-native-commands--best-practices)
+1. [Kernarchitektur & Tool-Matrix (wer verwaltet was)](#1-core-architecture--tool-matrix-who-manages-what)
+2. [Skills- & Ökosystem-Tool-Inventar](#2-skills--ecosystem-tools-inventory)
+   - 2.1 44 integrierte native Skills kategorisiert
+   - 2.2 Versions-Locking, Online-Updates & Skill-Sync (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
+   - 2.3 Optionale Harness-CLI-Tools
+   - 2.4 Token-Ökonomie der Skills (warum 40+ Skills den Kontext NICHT sprengen)
+   - 2.5 Engineering-Skills- & Regel-Dispatching-Matrix
+3. [Vertiefung in zentrale Harness-Tools & Slash Commands](#3-deep-dive-into-core-harness-tools--slash-commands)
+   - 3.1 Comet: Versionierter Workflow-Einstiegspunkt
+   - 3.2 OpenSpec: Spezifikationsgetriebene Entwicklung (`/opsx:propose`, `/opsx:apply`, etc.)
+   - 3.3 Superpowers: TDD, systematisches Debugging & Verifikations-Gate
+   - 3.4 CodeGraph: Optionale MCP-Code-Graph-Integration
+   - 3.5 Ponytail: Minimale Implementierungsleiter (Generierungs-Gate)
+   - 3.6 Caveman: Ultra-komprimierte Ausgabe (Kommunikations-Gate)
+   - 3.7 RTK: Ausgabe-Kürzung & Log-Abschirmung (Ausführungs-Gate)
+   - 3.8 Git-Autorisierungsmodell & Protected-Branch-Workflow
+   - 3.9 3-Schritte-Sitzungszeremonie & dynamische Memory-Schleife
+   - 3.10 8-Hochrisiko-Operationen-Schutzmatrix
+4. [Plattformspezifische native Befehle & Best Practices](#4-platform-specific-native-commands--best-practices)
    - 4.1 Google Antigravity IDE
-   - 4.2 Claude Code & PreToolUse Hooks
+   - 4.2 Claude Code & PreToolUse-Hooks
    - 4.3 OpenAI Codex / GitHub Copilot
    - 4.4 Zed IDE
-5. [End-to-End Practical Walkthrough (Real-World Feature Development)](#5-end-to-end-practical-walkthrough-real-world-feature-development)
-6. [Daily Health Checks & Troubleshooting](#6-daily-health-checks--troubleshooting)
+5. [End-to-End-Praxis-Walkthrough (reale Feature-Entwicklung)](#5-end-to-end-practical-walkthrough-real-world-feature-development)
+6. [Tägliche Health Checks & Troubleshooting](#6-daily-health-checks--troubleshooting)
 
 ---
 
-## 1. Core Architecture & Tool Matrix (Who Manages What)
+## 1. Kernarchitektur & Tool-Matrix (wer verwaltet was)
 
-Without physical boundaries, AI-assisted development frequently drifts, over-engineers, or breaks backward compatibility. Our Harness architecture enforces five consecutive gates:
+Ohne physische Grenzen driftet AI-unterstützte Entwicklung häufig, over-engineered oder bricht die Rückwärtskompatibilität. Unsere Harness-Architektur setzt fünf aufeinanderfolgende Gates durch:
 
 ```text
-       [ User Request ]
+       [ Benutzeranfrage ]
               │
        ┌──────▼─────────────────────────────────────────────────┐
-       │ 1. Process & State Gate: Comet (/comet) + OpenSpec SDD │
+       │ 1. Prozess- & Zustands-Gate: Comet (/comet) + OpenSpec SDD │
        └──────┬─────────────────────────────────────────────────┘
-              │ Scope locked; begin exploration & discovery
+              │ Umfang fixiert; Exploration & Discovery beginnen
        ┌──────▼─────────────────────────────────────────────────┐
-       │ 2. Optional semantic retrieval: CodeGraph MCP, if configured │
+       │ 2. Optionales semantisches Retrieval: CodeGraph MCP, falls konfiguriert │
        └──────┬─────────────────────────────────────────────────┘
-              │ Symbol dependencies clear; design & code
+              │ Symbolabhängigkeiten klar; Design & Code
        ┌──────▼─────────────────────────────────────────────────┐
-       │ 3. Code Gate: Superpowers (TDD red-green) + Ponytail   │
+       │ 3. Code-Gate: Superpowers (TDD Red-Green) + Ponytail   │
        └──────┬─────────────────────────────────────────────────┘
-              │ Run tests & build commands
+              │ Tests & Build-Befehle ausführen
        ┌──────▼─────────────────────────────────────────────────┐
-       │ 4. Optional command filtering: RTK CLI + agent hook          │
+       │ 4. Optionale Befehlsfilterung: RTK CLI + Agent-Hook          │
        └──────┬─────────────────────────────────────────────────┘
-              │ Deliver & commit
+              │ Liefern & Committen
        ┌──────▼─────────────────────────────────────────────────┐
-       │ 5. Communication & Git: Caveman guidance (if loaded) + Git  │
+       │ 5. Kommunikation & Git: Caveman-Anleitung (falls geladen) + Git  │
        └────────────────────────────────────────────────────────┘
 ```
 
-### Responsibility Matrix
+### Verantwortungsmatrix
 
-| Component | Core Responsibility | Pain Point Solved | Interface |
+| Komponente | Kernverantwortung | Gelöster Schmerzpunkt | Schnittstelle |
 |---|---|---|---|
-| **Comet** | Versioned Native/Classic workflows | Resumable, verifiable task workflows | Follow installed version and `.comet/config.yaml` |
-| **OpenSpec** | Spec-Driven Development (SDD) | Requirement amnesia, untracked delta changes | `/opsx:propose`, `docs/openspec/` live docs |
-| **Superpowers** | TDD & Verification evidence gate | Hallucinated task completion, missing physical proof | Red test $\rightarrow$ Green test $\rightarrow$ Verification report |
-| **CodeGraph** | Optional semantic code-search integration | Requires CLI, agent MCP wiring, and a project index | Query through configured CodeGraph MCP tools |
-| **Ponytail** | Minimal-implementation guidance Skill | Unneeded dependencies and abstractions | Guidance only when the host loads the Skill |
-| **Caveman** | Concise-communication guidance Skill | Overlong responses | Style guidance when loaded; preserve clarity and safety details |
-| **RTK** | Optional Rust Token Killer CLI | Verbose terminal output | Requires CLI installation and a supported agent hook |
-| **Git Auth** | Protected branch guidance plus limited client hook checks | Preventing accidental shared-branch operations | Rules, Claude Code client hook, and server-side branch protection |
+| **Comet** | Versionierte Native/Classic-Workflows | Fortsetzbare, verifizierbare Task-Workflows | Installierter Version und `.comet/config.yaml` folgen |
+| **OpenSpec** | Spezifikationsgetriebene Entwicklung (SDD) | Anforderungsamnesie, ungetrackte Delta-Änderungen | `/opsx:propose`, `docs/openspec/` Live-Docs |
+| **Superpowers** | TDD- & Verifikationsevidenz-Gate | Halluzinierte Task-Fertigstellung, fehlender physischer Nachweis | Roter Test $\rightarrow$ Grüner Test $\rightarrow$ Verifikationsbericht |
+| **CodeGraph** | Optionale semantische Code-Such-Integration | Erfordert CLI, Agent-MCP-Verdrahtung und Projektindex | Abfrage über konfigurierte CodeGraph-MCP-Tools |
+| **Ponytail** | Minimal-Implementierungs-Anleitungs-Skill | Unnötige Abhängigkeiten und Abstraktionen | Nur Anleitung, wenn der Host den Skill lädt |
+| **Caveman** | Prägnanz-Anleitungs-Skill | Überlange Antworten | Stilanleitung bei Laden; Klarheit und Sicherheitsdetails erhalten |
+| **RTK** | Optionale Rust Token Killer CLI | Wortreiche Terminal-Ausgabe | Erfordert CLI-Installation und unterstützten Agent-Hook |
+| **Git Auth** | Protected-Branch-Anleitung plus begrenzte Client-Hook-Prüfungen | Verhindern versehentlicher Shared-Branch-Operationen | Regeln, Claude Code Client-Hook und serverseitiger Branch-Schutz |
 
-### Rule and Memory Scope by Coding Tool
+### Regel- und Memory-Umfang pro Coding-Tool
 
-| Tool/surface | Instruction entry point | Memory scope |
+| Tool/Oberfläche | Anweisungseinstiegspunkt | Memory-Umfang |
 |---|---|---|
-| Codex desktop app | Project `AGENTS.md`; ai-memory can use the local Codex integration where the installed app exposes configured MCP/hooks | Verify the exact desktop version; ChatGPT web conversation memory is separate |
-| Codex CLI | Codex home and `AGENTS.md` files from repository root through the current directory; ai-memory upstream installer supports MCP/hooks | Project context/checkpoint files remain repository-managed |
-| Claude Code | User/project/directory `CLAUDE.md` or supported `AGENTS.md` | Optional Auto memory is machine-local and Claude-specific; `/memory` opens its controls |
-| Antigravity CLI | Global, workspace, and directory `AGENTS.md` / `.agents/rules/*.md`; ai-memory upstream supports MCP/hooks | Run setup in the same environment as the CLI |
-| Antigravity IDE | Project Markdown rules/skills plus a manually configured ai-memory MCP server | MCP provides explicit retrieval/write tools; no automatic lifecycle capture is claimed |
+| Codex Desktop-App | Projekt-`AGENTS.md`; ai-memory kann die lokale Codex-Integration nutzen, wo die installierte App konfigurierte MCP/Hooks exponiert | Exakte Desktop-Version verifizieren; ChatGPT-Web-Konversationsmemory ist separat |
+| Codex CLI | Codex-Home und `AGENTS.md`-Dateien vom Repository-Root bis zum aktuellen Verzeichnis; ai-memory-Upstream-Installer unterstützt MCP/Hooks | Projektkontext-/Checkpoint-Dateien bleiben repository-verwaltet |
+| Claude Code | Benutzer-/Projekt-/Verzeichnis-`CLAUDE.md` oder unterstütztes `AGENTS.md` | Optionales Auto-Memory ist maschinenlokal und Claude-spezifisch; `/memory` öffnet seine Controls |
+| Antigravity CLI | Globale, Workspace- und Verzeichnis-`AGENTS.md` / `.agents/rules/*.md`; ai-memory-Upstream unterstützt MCP/Hooks | Setup in derselben Umgebung wie die CLI ausführen |
+| Antigravity IDE | Projekt-Markdown-Regeln/Skills plus manuell konfigurierter ai-memory-MCP-Server | MCP bietet explizite Retrieval-/Schreib-Tools; keine automatische Lifecycle-Erfassung wird behauptet |
 
-The deployment scripts write paths; check each host's current documentation and loaded context before assuming a file was consumed.
-
----
-
-## 2. Skills & Ecosystem Tools Inventory
-
-### 2.1 44 Integrated Native Skills Categorized
-
-The installer copies the repository's skill directories into `.agents/skills/`; actual discovery depends on the host tool and its configuration.
-
-#### 1. Versioned Workflow Entry Point
-- **`comet`**: The Comet CLI provides versioned Native and Classic workflows. This repository ships an entry-point guide only; it does not implement Comet phase guards.
-
-#### 2. OpenSpec Specification-Driven Suite (16 skills)
-- **`openspec`**: Core architecture.
-- **`openspec-propose`**: Proposes changes with design, specs, and tasks in one step.
-- **`openspec-new-change`**: Step-by-step artifact creation.
-- **`openspec-continue-change`**: Advances change to next artifact.
-- **`openspec-ff-change`**: Fast-forwards through artifact generation.
-- **`openspec-apply-change`**: Implements tasks from an active change.
-- **`openspec-verify-change`**: Verifies code against delta specifications.
-- **`openspec-sync-specs`**: Syncs delta specs into main specs.
-- **`openspec-archive-change`**: Archives completed change.
-- **`openspec-bulk-archive-change`**: Archives multiple changes in parallel.
-- **`openspec-explore`**: Interactive thinking partner before creating changes.
-- **`openspec-onboard`**: Guided interactive walkthrough.
-- **`write-openspec-docs`**: Writes docs in house style.
-- **`draft-openspec-docs`**: Collaborative section-by-section drafting.
-- **`verify-openspec-docs`**: Fact-checks documentation claims.
-- **`release-openspec`**: Release audit and changeset management.
-
-#### 3. Superpowers Engineering Quality Suite (15 skills)
-- **`superpowers`**: Quality constitution.
-- **`using-superpowers`**: Skills discovery and invocation guard.
-- **`brainstorming`**: Design exploration before implementation.
-- **`writing-plans`**: Step-by-step execution planning.
-- **`executing-plans`**: Strict plan execution.
-- **`test-driven-development`**: TDD red-green cycle.
-- **`systematic-debugging`**: Root-cause analysis before code modification.
-- **`verification-before-completion`**: Mandatory proof before claiming completion.
-- **`dispatching-parallel-agents`**: Spawns isolated concurrent subagents.
-- **`subagent-driven-development`**: Subagent plan execution harness.
-- **`using-git-worktrees`**: Isolated physical workspaces.
-- **`finishing-a-development-branch`**: Merge and integration decisions.
-- **`requesting-code-review`**: Pre-merge review verification.
-- **`open-code-review`**: Deterministic code review — rule-first, line-anchored, coverage-mandated. Tier A via `ocr` CLI delegation, Tier B methodology without it.
-- **`receiving-code-review`**: Technical evaluation of human review comments.
-- **`writing-skills`**: Skill creator and validator.
-- **`diagnosing-superpowers`**: Audits session drift or cost.
-
-#### 4. Minimal Code & Syntax Graph
-- **`ponytail`**: Minimal implementation ladder (stdlib first, YAGNI).
-- **`codegraph`**: optional CodeGraph CLI/MCP setup guidance; installation and agent wiring are separate.
-
-#### 5. Output Filtering & Concise Delivery
-- **`rtk`**: optional Rust Token Killer CLI guidance; command rewriting requires a configured agent hook.
-- **`caveman`**: Ultra-compressed telegraphic output.
-
-#### 6. Professional Document Processing
-- **`docx`**: Word document generation, editing, and styling.
-- **`pdf`**: PDF text/table extraction and processing.
-
-#### 7. Pre-Decision Review, Cross-Tool Memory & Living Documentation (In-Repo Skills)
-- **`cross-tool-memory`**: Cross-tool project-scoped memory navigation and recall aid (pairs with local ai-memory backend).
-- **`option-review`**: Pre-decision multi-option review generating an isolated 5-dimension decision matrix.
-- **`living-documentation`**: 4-tier living documentation suite (specs/architecture/reference/guides) with frontmatter-based code-doc bidirectional traceability, supporting L0/L1/L2 change impact thresholds.
-- **`engineering-docs`**: R&D lifecycle document templates (31 document types, 15 bilingual phase-gate templates) ensuring consistent output across AI agents and seamless integration with Comet phase gates and living documentation.
+Die Deployment-Skripte schreiben Pfade; vor der Annahme, dass eine Datei konsumiert wurde, die aktuelle Dokumentation und den geladenen Kontext jedes Hosts prüfen.
 
 ---
 
-### 2.2 Version Locking, Online Updates & Skill Sync (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
+## 2. Skills- & Ökosystem-Tool-Inventar
+
+### 2.1 44 integrierte native Skills kategorisiert
+
+Der Installer kopiert die Skill-Verzeichnisse des Repositorys nach `.agents/skills/`; die tatsächliche Erkennung hängt vom Host-Tool und seiner Konfiguration ab.
+
+#### 1. Versionierter Workflow-Einstiegspunkt
+- **`comet`**: Die Comet CLI bietet versionierte Native- und Classic-Workflows. Dieses Repository liefert nur eine Einstiegspunkt-Anleitung; es implementiert keine Comet-Phase-Guards.
+
+#### 2. OpenSpec-Spezifikationsgetriebene Suite (16 Skills)
+- **`openspec`**: Kernarchitektur.
+- **`openspec-propose`**: Schlägt Änderungen mit Design, Specs und Tasks in einem Schritt vor.
+- **`openspec-new-change`**: Schrittweise Artefakterstellung.
+- **`openspec-continue-change`**: Führt Change zum nächsten Artefakt fort.
+- **`openspec-ff-change`**: Fast-Forward durch Artefaktgenerierung.
+- **`openspec-apply-change`**: Implementiert Tasks aus einem aktiven Change.
+- **`openspec-verify-change`**: Verifiziert Code gegen Delta-Spezifikationen.
+- **`openspec-sync-specs`**: Synct Delta-Specs in Haupt-Specs.
+- **`openspec-archive-change`**: Archiviert abgeschlossenen Change.
+- **`openspec-bulk-archive-change`**: Archiviert mehrere Changes parallel.
+- **`openspec-explore`**: Interaktiver Denkpartner vor Change-Erstellung.
+- **`openspec-onboard`**: Geführter interaktiver Walkthrough.
+- **`write-openspec-docs`**: Schreibt Docs im Hausstil.
+- **`draft-openspec-docs`**: Kollaboratives abschnittsweises Drafting.
+- **`verify-openspec-docs`**: Faktencheck von Dokumentationsbehauptungen.
+- **`release-openspec`**: Release-Audit und Changeset-Management.
+
+#### 3. Superpowers-Engineering-Qualitätssuite (15 Skills)
+- **`superpowers`**: Qualitätsverfassung.
+- **`using-superpowers`**: Skill-Erkennung und Aufruf-Guard.
+- **`brainstorming`**: Design-Exploration vor Implementierung.
+- **`writing-plans`**: Schrittweise Ausführungsplanung.
+- **`executing-plans`**: Strikte Planausführung.
+- **`test-driven-development`**: TDD-Red-Green-Zyklus.
+- **`systematic-debugging`**: Root-Cause-Analyse vor Codemodifikation.
+- **`verification-before-completion`**: Obligatorischer Nachweis vor Fertigstellungsbehauptung.
+- **`dispatching-parallel-agents`**: Spawnt isolierte konkurrierende Subagents.
+- **`subagent-driven-development`**: Subagent-Plan-Ausführungsharness.
+- **`using-git-worktrees`**: Isolierte physische Workspaces.
+- **`finishing-a-development-branch`**: Merge- und Integrationsentscheidungen.
+- **`requesting-code-review`**: Pre-Merge-Review-Verifizierung.
+- **`open-code-review`**: Deterministisches Code-Review — regelzuerst, zeilenverankert, coverage-verpflichtend. Tier A via `ocr`-CLI-Delegation, Tier-B-Methodik ohne.
+- **`receiving-code-review`**: Technische Bewertung menschlicher Review-Kommentare.
+- **`writing-skills`**: Skill-Ersteller und -Validator.
+- **`diagnosing-superpowers`**: Auditiert Sitzungsdrift oder Kosten.
+
+#### 4. Minimaler Code & Syntaxgraph
+- **`ponytail`**: Minimale Implementierungsleiter (Stdlib zuerst, YAGNI).
+- **`codegraph`**: Optionale CodeGraph-CLI/MCP-Setup-Anleitung; Installation und Agent-Verdrahtung sind separat.
+
+#### 5. Ausgabefilterung & prägnante Lieferung
+- **`rtk`**: Optionale Rust-Token-Killer-CLI-Anleitung; Befehls-Rewriting erfordert einen konfigurierten Agent-Hook.
+- **`caveman`**: Ultra-komprimierte telegrafische Ausgabe.
+
+#### 6. Professionelle Dokumentenverarbeitung
+- **`docx`**: Word-Dokumentenerzeugung, -bearbeitung und -styling.
+- **`pdf`**: PDF-Text-/Tabellenextraktion und -verarbeitung.
+
+#### 7. Pre-Decision-Review, toolübergreifendes Memory & Living Documentation (In-Repo-Skills)
+- **`cross-tool-memory`**: Toolübergreifende projektspezifische Memory-Navigations- und Recall-Hilfe (paart mit lokalem ai-memory-Backend).
+- **`option-review`**: Pre-Decision-Multi-Options-Review generiert eine isolierte 5-Dimensionen-Entscheidungsmatrix.
+- **`living-documentation`**: 4-stufige Living-Documentation-Suite (specs/architecture/reference/guides) mit Frontmatter-basierter Code-Doc-bidirektionaler Traceability, unterstützt L0/L1/L2-Change-Impact-Schwellen.
+- **`engineering-docs`**: F&E-Lebenszyklus-Dokumententemplates (31 Dokumenttypen, 15 bilinguale Phase-Gate-Templates) gewährleisten konsistente Ausgabe über AI-Agents und nahtlose Integration mit Comet-Phase-Gates und Living Documentation.
+
+---
+
+### 2.2 Versions-Locking, Online-Updates & Skill-Sync (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
 
 1. **`skills-lock.json`**:
-   - Records upstream sources and LF-normalized SHA256 integrity hashes for vendored external skills;
-   - Distinguishes locally-authored core skills (`sourceType: local`) from external upstream skills (`sourceType: github`).
-2. **External Skill Upstream Sync (`tools/sync-skills.py`)**:
-   - Built-in updater for vendored external skills;
-   - **Check mode**: `python3 tools/sync-skills.py --check` (read-only, compares local and upstream `SKILL.md` hashes, reports 🟢 in-sync / 🟡 outdated);
-   - **Apply mode**: `python3 tools/sync-skills.py --apply` (updates outdated `SKILL.md` files in-place and refreshes lock hashes; locally-authored skills are strictly protected);
-   - Interaktive Terminal-Benutzeroberfläche via `tools/tui.py` ohne Argumente;
-   - Supports `--skill <name>` for targeted updates and `--json` for automation.
-3. **Living Documentation Impact Analysis (`tools/doc-impact.py`)**:
-   - Analysiert Codeänderungen im Hinblick auf Living-Documentation-Traceability (`docs/{specs,architecture,reference,guides,adr}/`);
-   - Unterstützt Arbeitsverzeichnis-Prüfung, Commit-Baselines (`--since`), explizite Dateilisten und interaktiven Assistenten (`--interactive`).
-4. **Unified Pipeline Runner (`run-pipeline.sh` / `run-pipeline.ps1`)**:
-   - Verkettet alle Toolchain-Phasen in einem einzigen Lauf pro Betriebssystem (Deploy → AI Memory → Skills Sync → Living Doc Impact);
+   - Zeichnet Upstream-Quellen und LF-normalisierte SHA256-Integritätshashes für vendored externe Skills auf;
+   - Unterscheidet lokal verfasste Core-Skills (`sourceType: local`) von externen Upstream-Skills (`sourceType: github`).
+2. **Externer Skill-Upstream-Sync (`tools/sync-skills.py`)**:
+   - Eingebauter Updater für vendored externe Skills;
+   - **Check-Modus**: `python3 tools/sync-skills.py --check` (read-only, vergleicht lokale und Upstream-`SKILL.md`-Hashes, meldet 🟢 in-sync / 🟡 outdated);
+   - **Apply-Modus**: `python3 tools/sync-skills.py --apply` (aktualisiert veraltete `SKILL.md`-Dateien in-place und refresht Lock-Hashes; lokal verfasste Skills sind strikt geschützt);
+   - Interaktive Terminal-UI powered by `tools/tui.py` bei argumentlosem Aufruf;
+   - Unterstützt `--skill <name>` für gezielte Updates und `--json` für Automatisierung.
+3. **Living-Documentation-Impact-Analyse (`tools/doc-impact.py`)**:
+   - Analysiert Code-Änderungen gegen Living-Documentation-Traceability-Metadaten (`docs/{specs,architecture,reference,guides,adr}/`);
+   - Unterstützt Working-Tree-Inspektion, Commit-Baselines (`--since`), explizite Dateilisten und interaktiven Wizard-Modus (`--interactive`).
+4. **Einheitlicher Pipeline-Runner (`run-pipeline.sh` / `run-pipeline.ps1`)**:
+   - Verkettet den vollständigen Workflow zu einer einzigen Ausführung pro OS (Deploy → AI Memory → Skills Sync → Living Doc Impact);
    - Interaktiver Assistent: `./run-pipeline.sh` (Linux/macOS) oder `.\run-pipeline.ps1` (Windows);
-   - Automatisierung ohne Benutzereingriff: `./run-pipeline.sh --all -y` oder `.\run-pipeline.ps1 -All -Yes`.
-5. **Interaktive Terminal-TUI-Komponente (`tools/tui.py`)**:
-   - Bietet tastaturgesteuerte Menüs für Einzelauswahl (Pfeiltasten + Enter) und Mehrfachauswahl (Pfeiltasten + Leertaste zum Umschalten von Checkboxen + Enter zum Bestätigen);
-   - Integrierte TTY- und ANSI-Erkennung mit sauberem Fallback auf nummerierte Texteingabe in nicht-interaktiven Pipelines.
-6. **Integrated Online Update Flow**:
+   - Unbeaufsichtigte Automatisierung: `./run-pipeline.sh --all -y` oder `.\run-pipeline.ps1 -All -Yes`.
+5. **Terminal-interaktive TUI-Komponente (`tools/tui.py`)**:
+   - Bietet tastaturgesteuerte Einfachauswahl (Pfeiltasten + Enter) und Mehrfachauswahl (Pfeiltasten + Leertaste-Checkbox-Toggle + Enter zur Bestätigung) interaktive Menüs;
+   - Features eingebaute TTY- und ANSI-Kompatibilitätserkennung mit graceful Fallback auf nummerierte Text-Prompts in nicht-interaktiven oder nicht-ANSI-Pipelines, als Grundlage aller Deployment- und Wartungstools.
+6. **Integrierter Online-Update-Flow**:
    ```powershell
    # Windows
    .\deploy-agents.ps1 -ProjectPath "." -Update
@@ -186,281 +186,281 @@ The installer copies the repository's skill directories into `.agents/skills/`; 
    # Linux / macOS
    ./deploy-agents.sh . --update
    ```
-   - The deployment scripts fast-forward the template repository, prompt to check/apply external skill updates, and sync managed files to target projects with `.bak.<timestamp>` backups.
+   - Die Deployment-Skripte aktualisieren das Template-Repository per Fast-Forward, fragen zum Prüfen/Anwenden externer Skill-Updates und synchronisieren verwaltete Dateien zu Zielprojekten mit `.bak.<timestamp>`-Backups.
 
 ---
 
-### 2.3 Optional Harness CLI Tools
+### 2.3 Optionale Harness-CLI-Tools
 
-Skill availability depends on the host tool and its configuration. Terminal-level CLI tools are optional:
-- **Comet CLI**: install via `npm install -g @rpamis/comet`; provides native/classic workflow execution and `--comet-init` initialization.
-- **CodeGraph CLI**: macOS/Linux: `curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.sh | sh`; Windows PowerShell: `irm https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.ps1 | iex`. Run `codegraph install` to wire agents and `codegraph init` in the project.
-- **RTK (Rust Token Killer) CLI**: macOS/Linux: `curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh`; Windows: `winget install rtk-ai.rtk`. Verify with `rtk gain`. Run `rtk init` in the project to configure agent hooks.
-- **Open Code Review (OCR) CLI**: install via `npm install -g @alibaba-group/open-code-review`; enables Tier A zero-LLM-cost delegation review via the `open-code-review` skill.
+Die Skill-Verfügbarkeit hängt vom Host-Tool und seiner Konfiguration ab. Terminal-Level-CLI-Tools sind optional:
+- **Comet CLI**: Installieren via `npm install -g @rpamis/comet`; bietet Native/Classic-Workflow-Ausführung und `--comet-init`-Initialisierung.
+- **CodeGraph CLI**: macOS/Linux: `curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.sh | sh`; Windows PowerShell: `irm https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.ps1 | iex`. `codegraph install` ausführen, um Agents zu verdrahten, und `codegraph init` im Projekt.
+- **RTK (Rust Token Killer) CLI**: macOS/Linux: `curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh`; Windows: `winget install rtk-ai.rtk`. Mit `rtk gain` verifizieren. `rtk init` im Projekt ausführen, um Agent-Hooks zu konfigurieren.
+- **Open Code Review (OCR) CLI**: Installieren via `npm install -g @alibaba-group/open-code-review`; ermöglicht Tier-A-Zero-LLM-Cost-Delegations-Review via dem `open-code-review`-Skill.
 
-The deployment scripts automatically detect these optional CLIs during initial setup and guide installation where appropriate.
-
----
-
-### 2.4 Skill Loading and Optional CLI Setup
-
-Skill discovery and context costs depend on the host agent and its configuration. File presence alone does not guarantee that a Skill is loaded. Ponytail and Caveman are guidance Skills copied with the project; CodeGraph and RTK also need their separate CLI and agent integration steps. Their effectiveness depends on the project, host, and setup, so this guide makes no fixed token-savings claims.
+Die Deployment-Skripte erkennen diese optionalen CLIs während des initialen Setups automatisch und leiten die Installation an, wo angemessen.
 
 ---
 
-### 2.5 Engineering Skills & Rules Dispatching Matrix
+### 2.4 Skill-Laden und optionales CLI-Setup
 
-| Scenario | Rule / Skill | Trigger / Keyword | Expected Behavior |
+Skill-Erkennung und Kontextkosten hängen vom Host-Agent und seiner Konfiguration ab. Allein die Dateiexistenz garantiert nicht, dass ein Skill geladen wird. Ponytail und Caveman sind Anleitungs-Skills, die mit dem Projekt kopiert werden; CodeGraph und RTK brauchen zusätzlich ihre separaten CLI- und Agent-Integrationsschritte. Ihre Effektivität hängt von Projekt, Host und Setup ab, daher macht diese Anleitung keine festen Token-Einsparungsbehauptungen.
+
+---
+
+### 2.5 Engineering-Skills- & Regel-Dispatching-Matrix
+
+| Szenario | Regel / Skill | Trigger / Keyword | Erwartetes Verhalten |
 |---|---|---|---|
-| **Branching / Commit / Push** | [`git-workflow.md`](../../.agents/rules/git-workflow.md) | `git commit` / `git push` | Commit only on temp branches; no `git add .`; human authorization required for remote push |
-| **High-Risk Operations** | [`security-boundary.md`](../../.agents/rules/security-boundary.md) | Modifying build configs, protocols, public structs | Pause and confirm impact with human |
-| **Complex Requirements** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `comet` / `openspec` | `/comet` or "use openspec" | Propose change under `docs/openspec/changes/`; wait for confirmation |
-| **Symbol Discovery** | [`token-discipline.md`](../../.agents/rules/token-discipline.md) + optional `codegraph` | CodeGraph MCP when configured; otherwise scoped `rg` | Do not assume CodeGraph is installed or available |
-| **Feature Implementation** | `ponytail` + `test-driven-development` | Consult loaded Skills as appropriate | Understand current code, then choose the smallest correct implementation and suitable validation |
-| **Bug Investigation** | `systematic-debugging` | Error trace pasted | Gather evidence $\rightarrow$ form hypothesis $\rightarrow$ minimal repro $\rightarrow$ fix |
-| **Long Terminal Output** | optional `rtk` | Only when installed and its agent hook is configured | Otherwise use native concise flags; keep required validation and preserve relevant logs |
-| **Token Conservation** | `caveman` | Only when the host loads the Skill or plugin | Be concise while preserving necessary context, technical accuracy, and safety details |
-| **Document Processing** | `docx` / `pdf` | Mentions `.docx` or `.pdf` | Professional formatting without running code test suites |
-| **Living Docs & Traceability** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `living-documentation` | `/living-documentation` / sync trace docs | Maintain 4-tier docs (specs/architecture/reference/guides) via L0/L1/L2 impact thresholds and frontmatter traceability |
-| **Phase Gate Docs / Templates** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `engineering-docs` | `/engineering-docs` / SRS/HLD/spec requests | Standardize AI agent outputs across phases using 15 bilingual phase-gate templates, connecting Comet artifacts with living documentation |
-| **Code Review & Quality Gate** | `open-code-review` + `requesting-code-review` | Before merge or after task completion | Rule-first, line-anchored, coverage-mandated; Tier A delegation if `ocr` CLI exists, otherwise Tier B methodology |
-| **Task Completion** | `verification-before-completion` | End of task | Present physical command execution evidence |
+| **Branching / Commit / Push** | [`git-workflow.md`](../../.agents/rules/git-workflow.md) | `git commit` / `git push` | Nur auf temporären Branches committen; kein `git add .`; menschliche Autorisierung für Remote-Push erforderlich |
+| **Hochrisiko-Operationen** | [`security-boundary.md`](../../.agents/rules/security-boundary.md) | Ändern von Build-Konfigurationen, Protokollen, öffentlichen Structs | Pausieren und Impact mit Mensch bestätigen |
+| **Komplexe Anforderungen** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `comet` / `openspec` | `/comet` oder "use openspec" | Change unter `docs/openspec/changes/` vorschlagen; auf Bestätigung warten |
+| **Symbol-Discovery** | [`token-discipline.md`](../../.agents/rules/token-discipline.md) + optionales `codegraph` | CodeGraph MCP wenn konfiguriert; sonst scoped `rg` | Nicht annehmen, dass CodeGraph installiert oder verfügbar ist |
+| **Feature-Implementierung** | `ponytail` + `test-driven-development` | Geladene Skills nach Bedarf konsultieren | Aktuellen Code verstehen, dann kleinste korrekte Implementierung und geeignete Validierung wählen |
+| **Bug-Untersuchung** | `systematic-debugging` | Error-Trace eingefügt | Evidenz sammeln $\rightarrow$ Hypothese bilden $\rightarrow$ minimales Repro $\rightarrow$ fixen |
+| **Lange Terminal-Ausgabe** | optionales `rtk` | Nur wenn installiert und sein Agent-Hook konfiguriert | Sonst native prägnante Flags nutzen; erforderliche Validierung beibehalten und relevante Logs erhalten |
+| **Token-Schonung** | `caveman` | Nur wenn der Host den Skill oder das Plugin lädt | Prägnant sein unter Erhalt notwendigen Kontexts, technischer Genauigkeit und Sicherheitsdetails |
+| **Dokumentenverarbeitung** | `docx` / `pdf` | Erwähnt `.docx` oder `.pdf` | Professionelle Formatierung ohne Ausführen von Code-Test-Suites |
+| **Living Docs & Traceability** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `living-documentation` | `/living-documentation` / Trace-Docs syncen | 4-stufige Docs (specs/architecture/reference/guides) via L0/L1/L2-Impact-Schwellen und Frontmatter-Traceability pflegen |
+| **Phase-Gate-Docs / Templates** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `engineering-docs` | `/engineering-docs` / SRS/HLD/Spec-Anfragen | AI-Agent-Ausgaben über Phasen standardisieren mit 15 bilingualen Phase-Gate-Templates, Comet-Artefakte mit Living Documentation verbinden |
+| **Code-Review & Qualitäts-Gate** | `open-code-review` + `requesting-code-review` | Vor Merge oder nach Task-Abschluss | Regel-zuerst, zeilenverankert, coverage-verpflichtend; Tier-A-Delegation wenn `ocr`-CLI existiert, sonst Tier-B-Methodik |
+| **Task-Abschluss** | `verification-before-completion` | Task-Ende | Physische Befehlsausführungs-Evidenz präsentieren |
 
 ---
 
-## 3. Deep Dive into Core Harness Tools & Slash Commands
+## 3. Vertiefung in zentrale Harness-Tools & Slash Commands
 
-### 3.1 Comet: Versioned workflow entry point
+### 3.1 Comet: Versionierter Workflow-Einstiegspunkt
 
-Comet is an independently versioned workflow tool. Check the project's `.comet/config.yaml` and installed CLI version, then follow the Native or Classic workflow supported by that version. This repository's Comet skill is an entry-point guide; it does not create Comet state files or enforce phase guards. If Comet is not installed or configured, use the project's existing process or make a task-appropriate plan. When paired with `engineering-docs`, each phase (Open, Design, Build, Verify, Archive) uses standardized gate templates for consistent deliverables.
+Comet ist ein unabhängig versioniertes Workflow-Tool. Die `.comet/config.yaml` des Projekts und die installierte CLI-Version prüfen, dann dem von dieser Version unterstützten Native- oder Classic-Workflow folgen. Der Comet-Skill dieses Repositorys ist eine Einstiegspunkt-Anleitung; er erstellt keine Comet-State-Dateien und setzt keine Phase-Guards durch. Wenn Comet nicht installiert oder konfiguriert ist, den vorhandenen Projektprozess nutzen oder einen task-angemessenen Plan erstellen. Gepaart mit `engineering-docs` nutzt jede Phase (Open, Design, Build, Verify, Archive) standardisierte Gate-Templates für konsistente Deliverables.
 
 ```text
 /comet Add date-range filtered CSV export for the order service
 ```
 
-Use Comet's current upstream documentation for version-specific entry points, configuration, artifact paths, and archive behavior.
+Die aktuelle Upstream-Dokumentation von Comet für versionsspezifische Einstiegspunkte, Konfiguration, Artefaktpfade und Archivverhalten nutzen.
 
 ---
 
-### 3.2 OpenSpec: Spec-Driven Development
+### 3.2 OpenSpec: Spezifikationsgetriebene Entwicklung
 
-- `/opsx:propose <name>`: Proposes new change under `docs/openspec/changes/`;
-- `/opsx:apply`: Implements approved change;
-- `/opsx:verify`: Compares actual implementation with delta specification;
-- `/opsx:sync`: Syncs delta specifications into main docs;
-- `/opsx:archive`: Moves finished change to `docs/openspec/changes/archive/`.
-
----
-
-### 3.3 Superpowers: TDD, Systematic Debugging & Verification Gate
-
-1. **TDD Red-Green Cycle**:
-   - Write failing test based on specification scenario;
-   - Run test and observe the expected failure;
-   - Write minimal code to pass;
-   - Refactor and run verification.
-2. **Systematic Debugging**:
-   - Step 1: Trace collection;
-   - Step 2: Form hypothesis;
-   - Step 3: Minimal reproduction test;
-   - Step 4: Fix root cause and verify.
-3. **Verification Evidence Gate**:
-   - No task is complete without physical terminal output evidence.
+- `/opsx:propose <name>`: Schlägt neuen Change unter `docs/openspec/changes/` vor;
+- `/opsx:apply`: Implementiert genehmigten Change;
+- `/opsx:verify`: Vergleicht tatsächliche Implementierung mit Delta-Spezifikation;
+- `/opsx:sync`: Synct Delta-Spezifikationen in Haupt-Docs;
+- `/opsx:archive`: Verschiebt fertigen Change nach `docs/openspec/changes/archive/`.
 
 ---
 
-### 3.4 CodeGraph: Optional MCP Code-Graph Integration
+### 3.3 Superpowers: TDD, systematisches Debugging & Verifikations-Gate
+
+1. **TDD-Red-Green-Zyklus**:
+   - Fehlschlagenden Test basierend auf Spezifikationsszenario schreiben;
+   - Test ausführen und erwarteten Fehlschlag beobachten;
+   - Minimalen Code schreiben, um zu bestehen;
+   - Refactoren und Verifikation ausführen.
+2. **Systematisches Debugging**:
+   - Schritt 1: Trace-Sammlung;
+   - Schritt 2: Hypothese bilden;
+   - Schritt 3: Minimaler Reproduktionstest;
+   - Schritt 4: Root Cause fixen und verifizieren.
+3. **Verifikationsevidenz-Gate**:
+   - Kein Task ist ohne physische Terminal-Ausgabe-Evidenz abgeschlossen.
+
+---
+
+### 3.4 CodeGraph: Optionale MCP-Code-Graph-Integration
 
 ```bash
-# Explore call chains and architecture
-Query the CodeGraph MCP tool configured for the current agent: “User authentication and JWT token flow”.
+# Call-Chains und Architektur explorieren
+Das für den aktuellen Agent konfigurierte CodeGraph-MCP-Tool abfragen: „User authentication and JWT token flow".
 
-# Find definitions and all call references
-Query the configured CodeGraph MCP tool for `OrderService::calculateDiscount`.
+# Definitionen und alle Aufruf-referenzen finden
+Das konfigurierte CodeGraph-MCP-Tool für `OrderService::calculateDiscount` abfragen.
 ```
 
 ---
 
-### 3.5 Ponytail: Minimal Implementation Ladder
+### 3.5 Ponytail: Minimale Implementierungsleiter
 
-1. Does this feature need to exist? (YAGNI);
-2. Is there an existing utility to reuse?
-3. Can the language standard library do this?
-4. Change 1 line before rewriting 10 lines;
-5. Never opportunistic refactor during bug fixes.
-
----
-
-### 3.6 Caveman: Ultra-Compressed Output
-
-- Eliminates fluff: "Sure, I'll do that for you", "Note that this requires caution";
-- Delivers: Conclusion & Impact $\rightarrow$ Diff $\rightarrow$ Verification evidence.
+1. Muss dieses Feature existieren? (YAGNI);
+2. Gibt es ein vorhandenes Utility zur Wiederverwendung?
+3. Kann die Sprach-Standardbibliothek das?
+4. 1 Zeile ändern, bevor 10 Zeilen rewritten werden;
+5. Niemals opportunistisches Refactoring während Bugfixes.
 
 ---
 
-### 3.7 RTK: Optional Rust Token Killer CLI
+### 3.6 Caveman: Ultra-komprimierte Ausgabe
 
-- RTK rewrites supported commands only when installed and integrated with the active agent. The repository Skill alone does not filter terminal output.
-- Verify the correct product with `rtk gain`; initialize supported project hooks with `rtk init`.
-- If RTK is not configured, use native concise flags and bounded log handling.
-
-- Never run bare verbose commands;
-- Always use `git status -s`, `pytest -q`, `ctest --output-on-failure`;
-- Redirect multi-hundred line logs to local scratch files and slice only the failure traces.
+- Eliminiert Fluff: "Sure, I'll do that for you", "Note that this requires caution";
+- Liefert: Fazit & Impact $\rightarrow$ Diff $\rightarrow$ Verifikationsevidenz.
 
 ---
 
-### 3.8 Git Authorization Model & Protected Branch Workflow
+### 3.7 RTK: Optionale Rust-Token-Killer-CLI
 
-1. **Temporary Branch Isolation**:
-   - All work happens in `feature/*`, `fix/*`, `refactor/*`;
-   - Never commit directly to `develop`, `master`, `main`, `release*`, `staging`.
-2. **Remote Push Authorization**:
-   - AI can create branches and commit locally;
-   - Pushing to remote or merging into protected branches requires explicit human confirmation.
-3. **Iron Laws**:
-   - `git push --force` is permanently forbidden;
-   - Rebasing protected branches is permanently forbidden;
-   - Blind staging via `git add .` is forbidden (use `git add <explicit-path>`);
-   - Commit message standard: `{type}: {description}`.
+- RTK rewritet unterstützte Befehle nur, wenn installiert und mit dem aktiven Agent integriert. Der Repository-Skill allein filtert keine Terminal-Ausgabe.
+- Das korrekte Produkt mit `rtk gain` verifizieren; unterstützte Projekt-Hooks mit `rtk init` initialisieren.
+- Wenn RTK nicht konfiguriert ist, native prägnante Flags und begrenztes Log-Handling nutzen.
+
+- Niemals bloße verbose Befehle ausführen;
+- Immer `git status -s`, `pytest -q`, `ctest --output-on-failure` nutzen;
+- Mehrere hundert Zeilen Logs in lokale Scratch-Dateien umleiten und nur die Failure-Traces slicen.
 
 ---
 
-### 3.9 Project Memory and Session Checkpoint (`PROJECT_CONTEXT.md` / `SESSION_STATE.md`)
+### 3.8 Git-Autorisierungsmodell & Protected-Branch-Workflow
 
-Treat memory as a verifiable summary and navigation aid, not as a replacement for code or maintained documentation:
-1. **Task start:** Read `PROJECT_CONTEXT.md` (verified durable project facts) and `SESSION_STATE.md` (current checkpoint) only when present and relevant; verify branch, configuration, and implementation facts that affect the task.
-2. **During work:** Keep plans when useful for multi-step work. Do not add automatic capture of prompts, tool inputs/outputs, source files, or terminal commands.
-3. **Meaningful closeout:** Update `SESSION_STATE.md` with completed work, actual verification evidence, remaining steps, and still-relevant risks; remove stale items. Update `PROJECT_CONTEXT.md` only when durable architecture, constraints, or confirmed decisions change. No-op sessions need no empty update.
-4. **Sources and conflicts:** Label uncertainty and date/source facts likely to change. Current user instructions and current code/configuration/reproducible evidence take precedence over memory summaries.
-5. **Privacy:** Do not record credentials, private keys, raw personal data, full conversation/tool logs, or unnecessary personal information. Shared global templates must not contain private user preferences.
-6. **Directory scope:** A directory `AGENTS.md` contains only local boundaries and constraints. Do not create directory memory files by default; keep project facts and checkpoints in their root files.
-
-**Claude Code native Auto memory** is a separate machine-local project memory that can be inspected, edited, or deleted with `/memory`. It is not shared across tools or machines and does not replace the project files above. Claude Code manages this feature; this repository's deployer does not enable, disable, or capture it. See the [Claude Code memory docs](https://code.claude.com/docs/en/memory).
-
-#### Optional cross-agent memory: ai-memory
-
-This repository selects only [ai-memory](https://github.com/akitaonrails/ai-memory) as an optional cross-agent backend. Its local Markdown and full-text search path uses no LLM, embedding provider, or API key. The repository does not install or start it automatically.
-
-To opt in one repository, copy `.ai-memory.toml.example` to the ignored `.ai-memory.toml`, replace the workspace/project names, then run `setup-ai-memory.ps1 -Agent <claude-code|codex|antigravity-cli>` or `./setup-ai-memory.sh <claude-code|codex|antigravity-cli>`. The helper requires an existing ai-memory install and delegates configuration to its upstream merge-aware commands. Review the hook capability output; allowlist mode is effective only for hooks that enforce native capture policy.
-
-The setup includes Claude Code and Codex CLI MCP/hooks, plus Antigravity CLI MCP/hooks. Codex desktop support depends on the installed desktop version exposing the local Codex integration; verify it in the app. Antigravity IDE is MCP-only: add `http://127.0.0.1:49374/mcp` as `serverUrl` through its MCP settings or the documented config file. For Docker deployment, run `docker run -d --name ai-memory --restart unless-stopped -p 127.0.0.1:49374:49374 -v "${HOME}/env/ai-memory-data:/data" docker.io/akitaonrails/ai-memory:latest` (the container storage path is fixed to `/data`). ChatGPT web uses manual Markdown handoff in the free local setup.
-
-Windows supports both WSL2 and native modes upstream. Install and configure ai-memory in the same environment that launches the agent; see the [Windows guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/windows.md). Path exclusions do not redact arbitrary prompt text. Back up with `ai-memory --data-dir <data-dir> backup --to <archive-path>`; uninstall removes integrations but not data. Stop the service and verify the configured data directory before intentionally deleting it. See the [marker reference](https://github.com/akitaonrails/ai-memory/blob/main/docs/marker-file.md) and [installation guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md) for platform paths and Docker commands.
-
-### 3.10 8 High-Risk Operations Protection Matrix
-
-Human confirmation is mandatory before:
-- [ ] 1. Modifying build configs (`package.json`, `CMakeLists.txt`, `.pro`, `Cargo.toml`);
-- [ ] 2. Adding new third-party dependencies;
-- [ ] 3. Modifying global public data structures (`public_struct.h`, `types.ts`);
-- [ ] 4. Modifying core dispatch singletons or public service APIs;
-- [ ] 5. Changing wire protocols or serialization contracts (`protofile/`);
-- [ ] 6. Altering license, cryptography, or auth code;
-- [ ] 7. Modifying `.gitignore` or CI/CD pipelines;
-- [ ] 8. High-impact cross-module changes that affect shared contracts or require broad coordination (file count alone is not a risk trigger).
+1. **Temporäre-Branch-Isolation**:
+   - Alle Arbeit findet in `feature/*`, `fix/*`, `refactor/*` statt;
+   - Niemals direkt auf `develop`, `master`, `main`, `release*`, `staging` committen.
+2. **Remote-Push-Autorisierung**:
+   - AI kann Branches erstellen und lokal committen;
+   - Push zu Remote oder Merge in geschützte Branches erfordert explizite menschliche Bestätigung.
+3. **Eiserne Gesetze**:
+   - `git push --force` ist permanent verboten;
+   - Rebase geschützter Branches ist permanent verboten;
+   - Blindes Staging via `git add .` ist verboten (`git add <explicit-path>` nutzen);
+   - Commit-Message-Standard: `{type}: {description}`.
 
 ---
 
-## 4. Platform-Specific Native Commands & Best Practices
+### 3.9 Projekt-Memory und Sitzungs-Checkpoint (`PROJECT_CONTEXT.md` / `SESSION_STATE.md`)
 
-### 4.1 Google Antigravity CLI and IDE
-- The CLI runs as `agy`; the desktop IDE is a separate surface. Both document file-based workspace/global rules, but CLI slash commands and IDE controls are surface-specific.
-- `/plan`: Structured task planning for $\ge 3$ steps;
-- `/goal`: Unattended autonomous loop until verified completion;
-- `/grill-me`: Interactive discovery interview when requirements are ambiguous;
-- `/learn`: Captures lessons learned into `tasks/lessons.md`;
-- `/schedule`: Background timers and recurring cron monitoring.
+Memory als verifizierbare Zusammenfassung und Navigationshilfe behandeln, nicht als Ersatz für Code oder gepflegte Dokumentation:
+1. **Task-Start:** `PROJECT_CONTEXT.md` (verifizierte dauerhafte Projektfakten) und `SESSION_STATE.md` (aktueller Checkpoint) nur lesen, wenn vorhanden und relevant; Branch, Konfiguration und Implementierungsfakten verifizieren, die den Task betreffen.
+2. **Während der Arbeit:** Pläne bei Bedarf für mehrstufige Arbeit behalten. Keine automatische Erfassung von Prompts, Tool-Inputs/Outputs, Quelldateien oder Terminal-Befehlen hinzufügen.
+3. **Sinnvoller Abschluss:** `SESSION_STATE.md` mit abgeschlossener Arbeit, tatsächlicher Verifikationsevidenz, verbleibenden Schritten und noch relevanten Risiken aktualisieren; veraltete Items entfernen. `PROJECT_CONTEXT.md` nur aktualisieren, wenn sich dauerhafte Architektur, Constraints oder bestätigte Entscheidungen ändern. No-op-Sitzungen brauchen kein leeres Update.
+4. **Quellen und Konflikte:** Unsicherheit kennzeichnen und Fakten mit Datum/Quelle versehen, die sich wahrscheinlich ändern. Aktuelle Benutzeranweisungen und aktueller Code/Konfiguration/reproduzierbare Evidenz haben Vorrang vor Memory-Zusammenfassungen.
+5. **Privatsphäre:** Keine Credentials, privaten Schlüssel, rohen persönlichen Daten, vollständigen Konversations-/Tool-Logs oder unnötigen persönlichen Informationen aufzeichnen. Geteilte globale Templates dürfen keine privaten Benutzerpräferenzen enthalten.
+6. **Verzeichnisumfang:** Ein Verzeichnis-`AGENTS.md` enthält nur lokale Grenzen und Constraints. Standardmäßig keine Verzeichnis-Memory-Dateien erstellen; Projektfakten und Checkpoints in ihren Root-Dateien halten.
 
-### 4.2 Claude Code and PreToolUse Client Hook
-- `/compact`: Compresses conversation history when token count is high;
-- `/cost`: Real-time session token usage;
-- `/review`: Reviews working copy diffs;
-- `@<path>`: Dynamically loads specific rules on demand.
-- **Security hook**: `.claude/settings.json` runs Claude Code client-side checks for matching tool calls. It can reject selected patterns or warn; it is not an operating-system control or memory collector.
+**Claude Code natives Auto-Memory** ist ein separates maschinenlokales Projekt-Memory, das mit `/memory` eingesehen, editiert oder gelöscht werden kann. Es wird nicht tool- oder maschinenübergreifend geteilt und ersetzt nicht die obigen Projektdateien. Claude Code verwaltet dieses Feature; der Deployer dieses Repositorys aktiviert, deaktiviert oder erfasst es nicht. Siehe die [Claude Code Memory-Docs](https://code.claude.com/docs/en/memory).
 
-### 4.3 Codex in ChatGPT, Codex CLI, and GitHub Copilot
-- Codex CLI documents `AGENTS.md` discovery from Codex home and the repository path to the current directory. Do not infer that exact behavior for ChatGPT/desktop; check its current product behavior and configuration.
-- `/hooks`: Inspects and trusts lifecycle hooks;
-- `$comet`: Triggers Comet state machine in Codex CLI;
-- `@workspace`: Scans workspace context in VS Code.
+#### Optionales toolübergreifendes Memory: ai-memory
+
+Dieses Repository wählt nur [ai-memory](https://github.com/akitaonrails/ai-memory) als optionales toolübergreifendes Backend. Sein lokaler Markdown- und Volltextsuchpfad nutzt kein LLM, keinen Embedding-Provider und keinen API-Key. Das Repository installiert oder startet es nicht automatisch.
+
+Zum Opt-in eines Repositorys `.ai-memory.toml.example` nach dem ignorierten `.ai-memory.toml` kopieren, die Workspace-/Projektnamen ersetzen, dann `setup-ai-memory.ps1 -Agent <claude-code|codex|antigravity-cli>` oder `./setup-ai-memory.sh <claude-code|codex|antigravity-cli>` ausführen. Der Helfer erfordert eine vorhandene ai-memory-Installation und delegiert die Konfiguration an seine Upstream-merge-bewussten Befehle. Die Hook-Fähigkeitsausgabe prüfen; der Allowlist-Modus ist nur für Hooks wirksam, die native Capture-Policy durchsetzen.
+
+Das Setup umfasst Claude Code- und Codex-CLI-MCP/Hooks plus Antigravity-CLI-MCP/Hooks. Codex-Desktop-Support hängt von der installierten Desktop-Version ab, die die lokale Codex-Integration exponiert; in der App verifizieren. Antigravity IDE ist MCP-only: `http://127.0.0.1:49374/mcp` als `serverUrl` über seine MCP-Einstellungen oder die dokumentierte Konfigurationsdatei hinzufügen. Für Docker-Bereitstellung `docker run -d --name ai-memory --restart unless-stopped -p 127.0.0.1:49374:49374 -v "${HOME}/env/ai-memory-data:/data" docker.io/akitaonrails/ai-memory:latest` ausführen (der Container-Speicherpfad ist fix `/data`). ChatGPT Web nutzt manuellen Markdown-Handoff im kostenlosen lokalen Setup.
+
+Windows unterstützt sowohl WSL2- als auch native Modi upstream. ai-memory in derselben Umgebung installieren und konfigurieren, die den Agent startet; siehe die [Windows-Anleitung](https://github.com/akitaonrails/ai-memory/blob/main/docs/windows.md). Pfadausschlüsse redigieren keinen beliebigen Prompt-Text. Sichern mit `ai-memory --data-dir <data-dir> backup --to <archive-path>`; Deinstallation entfernt Integrationen, aber keine Daten. Den Dienst stoppen und das konfigurierte Datenverzeichnis verifizieren, bevor es absichtlich gelöscht wird. Siehe die [Marker-Referenz](https://github.com/akitaonrails/ai-memory/blob/main/docs/marker-file.md) und [Installationsanleitung](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md) für Plattformpfade und Docker-Befehle.
+
+### 3.10 8-Hochrisiko-Operationen-Schutzmatrix
+
+Menschliche Bestätigung ist obligatorisch vor:
+- [ ] 1. Ändern von Build-Konfigurationen (`package.json`, `CMakeLists.txt`, `.pro`, `Cargo.toml`);
+- [ ] 2. Hinzufügen neuer Drittanbieter-Abhängigkeiten;
+- [ ] 3. Ändern globaler öffentlicher Datenstrukturen (`public_struct.h`, `types.ts`);
+- [ ] 4. Ändern von Core-Dispatch-Singletons oder öffentlichen Service-APIs;
+- [ ] 5. Ändern von Wire-Protokollen oder Serialisierungs-Contracts (`protofile/`);
+- [ ] 6. Ändern von Lizenz-, Kryptografie- oder Auth-Code;
+- [ ] 7. Ändern von `.gitignore` oder CI/CD-Pipelines;
+- [ ] 8. Hochwirksame modulübergreifende Änderungen, die geteilte Contracts betreffen oder breite Koordination erfordern (allein die Dateianzahl ist kein Risiko-Trigger).
+
+---
+
+## 4. Plattformspezifische native Befehle & Best Practices
+
+### 4.1 Google Antigravity CLI und IDE
+- Die CLI läuft als `agy`; die Desktop-IDE ist eine separate Oberfläche. Beide dokumentieren dateibasierte Workspace-/globale Regeln, aber CLI-Slash-Commands und IDE-Controls sind oberflächenspezifisch.
+- `/plan`: Strukturierte Task-Planung für $\ge 3$ Schritte;
+- `/goal`: Unbeaufsichtigte autonome Schleife bis zur verifizierten Fertigstellung;
+- `/grill-me`: Interaktives Discovery-Interview bei unklaren Anforderungen;
+- `/learn`: Erfasst gelernte Lektionen in `tasks/lessons.md`;
+- `/schedule`: Hintergrund-Timer und wiederkehrendes Cron-Monitoring.
+
+### 4.2 Claude Code und PreToolUse-Client-Hook
+- `/compact`: Komprimiert Konversationshistorie bei hoher Token-Anzahl;
+- `/cost`: Echtzeit-Sitzungs-Token-Nutzung;
+- `/review`: Reviewed Working-Copy-Diffs;
+- `@<path>`: Lädt spezifische Regeln dynamisch bei Bedarf.
+- **Sicherheits-Hook**: `.claude/settings.json` führt Claude Code-clientseitige Prüfungen für passende Tool-Aufrufe aus. Er kann ausgewählte Muster ablehnen oder warnen; er ist keine Betriebssystemkontrolle und kein Memory-Collector.
+
+### 4.3 Codex in ChatGPT, Codex CLI und GitHub Copilot
+- Codex CLI dokumentiert `AGENTS.md`-Erkennung vom Codex-Home und dem Repository-Pfad bis zum aktuellen Verzeichnis. Nicht auf exaktes Verhalten für ChatGPT/Desktop schließen; dessen aktuelles Produktverhalten und Konfiguration prüfen.
+- `/hooks`: Inspiziert und vertraut Lifecycle-Hooks;
+- `$comet`: Triggert Comet-State-Machine in Codex CLI;
+- `@workspace`: Scannt Workspace-Kontext in VS Code.
 
 ### 4.4 Zed IDE
-- Reuse the project `AGENTS.md`; this installer does not create a Zed-specific file;
-- `Ctrl+Enter` (Inline Assist) with `follow ponytail principles`;
-- Assistant Panel (`Ctrl+?`) for multi-turn architectural planning.
+- Projekt-`AGENTS.md` wiederverwenden; dieser Installer erstellt keine Zed-spezifische Datei;
+- `Ctrl+Enter` (Inline Assist) mit `follow ponytail principles`;
+- Assistant Panel (`Ctrl+?`) für mehrstufige Architekturplanung.
 
 ---
 
-## 5. End-to-End Practical Walkthrough (Real-World Feature Development)
+## 5. End-to-End-Praxis-Walkthrough (reale Feature-Entwicklung)
 
-**Requirement**: "Add a CSV export endpoint with date range filtering to the order service."
+**Anforderung**: „Einen CSV-Export-Endpunkt mit Datumsbereichsfilterung zum Order-Service hinzufügen."
 
 ```text
-Step 1: Session Ceremony & Breakpoint Awareness (Session Start)
-  ├─ Prioritize reading PROJECT_CONTEXT.md & SESSION_STATE.md to restore architecture & resume from breakpoint
-  ├─ Check tasks/lessons.md and tasks/todo.md (if present)
+Schritt 1: Sitzungszeremonie & Breakpoint-Awareness (Sitzungsstart)
+  ├─ Prioritär PROJECT_CONTEXT.md & SESSION_STATE.md lesen, um Architektur wiederherzustellen & vom Breakpoint fortzusetzen
+  ├─ tasks/lessons.md und tasks/todo.md prüfen (falls vorhanden)
   └─ git checkout -b feature/order-csv-export
 
-Step 2: Scoping & Change Creation (Comet + OpenSpec SDD)
+Schritt 2: Scoping & Change-Erstellung (Comet + OpenSpec SDD)
   ├─ /comet Add date range CSV export endpoint
-  ├─ Generated: docs/openspec/changes/add-csv-export/
-  └─ Confirm Proposal with human
+  ├─ Generiert: docs/openspec/changes/add-csv-export/
+  └─ Proposal mit Mensch bestätigen
 
-Step 3: Optional semantic retrieval (CodeGraph, if configured)
-  ├─ Prohibited: grep -rn "export" .
-  └─ Query configured CodeGraph MCP; otherwise use scoped code search
-      └─ Located: router.py, order_repo.py, types.ts
+Schritt 3: Optionales semantisches Retrieval (CodeGraph, falls konfiguriert)
+  ├─ Verboten: grep -rn "export" .
+  └─ Konfiguriertes CodeGraph-MCP abfragen; sonst scoped Code-Suche nutzen
+      └─ Gefunden: router.py, order_repo.py, types.ts
 
-Step 4: Red Test (Superpowers TDD)
-  ├─ tests/test_export.py: Write failing test with invalid date range check
-  └─ pytest tests/test_export.py -q -> FAILED (Red)
+Schritt 4: Roter Test (Superpowers TDD)
+  ├─ tests/test_export.py: Fehlschlagenden Test mit ungültiger Datumsbereichsprüfung schreiben
+  └─ pytest tests/test_export.py -q -> FAILED (Rot)
 
-Step 5: Minimal Implementation (Ponytail)
-  ├─ Python stdlib: import csv, datetime (no heavy export package)
-  └─ Add filter condition in order_repo.py and route in router.py
+Schritt 5: Minimale Implementierung (Ponytail)
+  ├─ Python-Stdlib: import csv, datetime (kein schweres Export-Paket)
+  └─ Filterbedingung in order_repo.py und Route in router.py hinzufügen
 
-Step 6: Green Verification (RTK)
-  ├─ pytest tests/test_export.py -q -> PASSED (Green, 2 passed in 0.3s)
+Schritt 6: Grüne Verifikation (RTK)
+  ├─ pytest tests/test_export.py -q -> PASSED (Grün, 2 passed in 0.3s)
   └─ npm test -- packages/order --reporter=dot
 
-Step 7: Delivery, Safe Commit & Selective Memory Closeout (Session Finish)
-  ├─ Output: Concise diff and passing test evidence
+Schritt 7: Lieferung, sicherer Commit & selektiver Memory-Abschluss (Sitzungsende)
+  ├─ Ausgabe: Prägnanter Diff und bestandene Testevidenz
   ├─ git add tests/test_export.py api/router.py repo/order_repo.py
   ├─ git commit -m "feat: add date-range CSV export endpoint"
-  ├─ Ask human before git push
-  ├─ Selective memory closeout:
-  │   ├─ Update SESSION_STATE.md at meaningful task boundaries with actual evidence and remaining work
-  │   └─ Update PROJECT_CONTEXT.md only when durable project facts change; skip empty updates
-  ├─ Update tasks/todo.md
-  └─ Archive OpenSpec change
+  ├─ Mensch vor git push fragen
+  ├─ Selektiver Memory-Abschluss:
+  │   ├─ SESSION_STATE.md an sinnvollen Task-Grenzen mit tatsächlicher Evidenz und verbleibender Arbeit aktualisieren
+  │   └─ PROJECT_CONTEXT.md nur aktualisieren, wenn sich dauerhafte Projektfakten ändern; leere Updates überspringen
+  ├─ tasks/todo.md aktualisieren
+  └─ OpenSpec-Change archivieren
 ```
 
 ---
 
-## 6. Daily Health Checks & Troubleshooting
+## 6. Tägliche Health Checks & Troubleshooting
 
-### Daily Health Check:
+### Täglicher Health Check:
 ```bash
-Check the installed Comet version and project configuration before using Comet-specific commands.
-Read `tasks/lessons.md` when it is relevant to the task.
+Die installierte Comet-Version und Projektkonfiguration vor Nutzung Comet-spezifischer Befehle prüfen.
+`tasks/lessons.md` lesen, wenn es für den Task relevant ist.
 ```
 
-### Reference Documentation:
-- Unified Pipeline Runners:
+### Referenzdokumentation:
+- Einheitliche Pipeline-Runner:
   - Windows: [`run-pipeline.ps1`](../../run-pipeline.ps1)
   - Linux / macOS: [`run-pipeline.sh`](../../run-pipeline.sh)
-- One-Click Deployment Scripts:
+- One-Click-Deployment-Skripte:
   - Windows: [`deploy-agents.ps1`](../../deploy-agents.ps1)
   - Linux / macOS: [`deploy-agents.sh`](../../deploy-agents.sh)
-- Maintenance Tools:
-  - Terminal UI Library: [`tools/tui.py`](../../tools/tui.py)
-  - Skill Sync Tool: [`tools/sync-skills.py`](../../tools/sync-skills.py)
-  - Living Doc Impact Gate: [`tools/doc-impact.py`](../../tools/doc-impact.py)
-- Deployment & Configuration Guide:
+- Wartungstools:
+  - Terminal-UI-Bibliothek: [`tools/tui.py`](../../tools/tui.py)
+  - Skill-Sync-Tool: [`tools/sync-skills.py`](../../tools/sync-skills.py)
+  - Living-Doc-Impact-Gate: [`tools/doc-impact.py`](../../tools/doc-impact.py)
+- Bereitstellungs- & Konfigurationsanleitung:
   - [Multi-Tool Deployment and Configuration Guide (English)](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md)
   - [多工具部署配置指南 (中文)](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md)
-- Rules Architecture:
+- Regelarchitektur:
   - [`Global AGENTS.md`](../../templates/agents/Global%20AGENTS.md)
   - [`Project AGENTS.md`](../../templates/agents/Project%20AGENTS.md)
   - [`Directory AGENTS.md`](../../templates/agents/Directory%20AGENTS.md)

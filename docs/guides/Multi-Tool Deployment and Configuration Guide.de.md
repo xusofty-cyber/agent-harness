@@ -2,316 +2,315 @@
 
 > **Language / Sprache**: [English](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [简体中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [繁體中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [Français](Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | **Deutsch**
 
-This guide provides an end-to-end specification on how to deploy, configure, and collaboratively utilize the **Three-Tier AGENTS.md Architecture** (Global, Project, and Directory levels) across **OpenAI Codex / GitHub Copilot**, **Claude Code**, **Google Antigravity IDE**, and **Zed IDE**, tailored for real-world scenarios emphasizing software engineering while supporting professional technical documentation.
+Diese Anleitung bietet eine End-to-End-Spezifikation für die Bereitstellung, Konfiguration und kollaborative Nutzung der **dreistufigen AGENTS.md-Architektur** (Global-, Projekt- und Verzeichnisebene) über **OpenAI Codex / GitHub Copilot**, **Claude Code**, **Google Antigravity IDE** und **Zed IDE**, zugeschnitten auf reale Szenarien mit Schwerpunkt Softwareentwicklung bei gleichzeitiger Unterstützung professioneller technischer Dokumentation.
 
 ---
 
-## Table of Contents
+## Inhaltsverzeichnis
 
-1. [Architecture & Layered Positioning (Harness + Progressive Disclosure)](#1-architecture--layered-positioning-harness--progressive-disclosure)
-2. [Configuration Scope by Tool](#2-configuration-scope-by-tool)
-3. [Claude Code Client Hooks: PreToolUse (.claude/settings.json)](#3-claude-code-client-hooks-pretooluse-claudesettingsjson)
-4. [Cross-Tool Deployment & Template Updates (deploy-agents)](#4-cross-tool-deployment--template-updates-deploy-agents)
-   - 4.1 Script Core Architecture & Pipeline
-   - 4.2 Windows Deployment (`deploy-agents.ps1`)
-   - 4.3 Linux / macOS Deployment (`deploy-agents.sh`)
-   - 4.4 Symlink vs. Directory Junction Mechanics
-5. Deep Dive into the Four Rule Layers
-   - 5.1 Global Constitution: `Global AGENTS.md`
-   - 5.2 Project Router: `Project AGENTS.md`
-   - 5.3 Modular Sub-Rules: `.agents/rules/`
-   - 5.4 Micro-Boundary Patch: `Directory AGENTS.md`
-6. Dual-Track Practical Workflow: "Engineering First, Documentation Second"
-7. Frequently Asked Questions & Best Practices (FAQ)
-8. Practical Usage & Skills Panorama Guide Reference
+1. [Architektur & Schichtenpositionierung (Harness + Progressive Disclosure)](#1-architecture--layered-positioning-harness--progressive-disclosure)
+2. [Konfigurationsumfang pro Tool](#2-configuration-scope-by-tool)
+3. [Claude Code Client-Hooks: PreToolUse (.claude/settings.json)](#3-claude-code-client-hooks-pretooluse-claudesettingsjson)
+4. [Toolübergreifende Bereitstellung & Template-Updates (deploy-agents)](#4-cross-tool-deployment--template-updates-deploy-agents)
+   - 4.1 Kernarchitektur & Pipeline des Skripts
+   - 4.2 Windows-Bereitstellung (`deploy-agents.ps1`)
+   - 4.3 Linux- / macOS-Bereitstellung (`deploy-agents.sh`)
+   - 4.4 Symlink- vs. Verzeichnis-Junction-Mechanik
+5. Vertiefung in die vier Regelebenen
+   - 5.1 Globale Verfassung: `Global AGENTS.md`
+   - 5.2 Projekt-Router: `Project AGENTS.md`
+   - 5.3 Modulare Unterregeln: `.agents/rules/`
+   - 5.4 Mikro-Grenz-Patch: `Directory AGENTS.md`
+6. Zweigleisiger Praxis-Workflow: „Engineering zuerst, Dokumentation danach"
+7. Häufig gestellte Fragen & Best Practices (FAQ)
+8. Referenz: Praxis- & Skills-Panorama-Anleitung
 
 ---
 
-## 1. Architecture & Layered Positioning (Harness + Progressive Disclosure)
+## 1. Architektur & Schichtenpositionierung (Harness + Progressive Disclosure)
 
-This repository organizes reusable rules as a **project entry point plus on-demand sub-rules** so teams can adapt the baseline and avoid loading unrelated guidance. Actual discovery and context cost depend on the host tool:
+Dieses Repository organisiert wiederverwendbare Regeln als **Projekteinstiegspunkt plus bedarfsgesteuerte Unterregeln**, damit Teams die Basislinie anpassen können, ohne irrelevante Anleitungen zu laden. Die tatsächliche Erkennung und die Kontextkosten hängen vom Host-Tool ab:
 
 ```text
 ┌────────────────────────────────────────────────────────────────────────┐
-│ 1. Global Level (Global AGENTS.md)                                     │
-│    - Role: Cross-project engineering constitution & security baseline │
-│    - Content: Reusable engineering baseline, Git safety, concise communication │
-│    - Scope: System-wide resident across all user projects (~1000 Tok) │
+│ 1. Globale Ebene (Global AGENTS.md)                                    │
+│    - Rolle: Projektübergreifende Engineering-Verfassung & Sicherheitsbasis │
+│    - Inhalt: Wiederverwendbare Engineering-Basis, Git-Sicherheit, präzise Kommunikation │
+│    - Umfang: Systemweit resident über alle Benutzerprojekte (~1000 Tok) │
 └───────────────────────────────────┬────────────────────────────────────┘
-                                    │ Inherited (non-redundant)
+                                    │ Vererbt (nicht redundant)
 ┌───────────────────────────────────▼────────────────────────────────────┐
-│ 2. Project Root Level (Project AGENTS.md)                              │
-│    - Role: Deterministic engineering context & sub-rule/skill router   │
-│    - Content: Concrete CLI slots, tech stack, red lines, state memory  │
-│    - Scope: Repository-wide; loading depends on the host tool          │
+│ 2. Projekt-Root-Ebene (Project AGENTS.md)                              │
+│    - Rolle: Deterministischer Engineering-Kontext & Unterregel-/Skill-Router │
+│    - Inhalt: Konkrete CLI-Slots, Tech-Stack, rote Linien, Zustandsmemory │
+│    - Umfang: Repository-weit; Laden hängt vom Host-Tool ab             │
 │    - Bridges: CLAUDE.md / .github/copilot-instructions.md              │
 └──────────────────┬─────────────────────────────────┬───────────────────┘
-                   │ Progressive On-Demand Reading   │ Only as needed in submodules
+                   │ Progressive On-Demand-Lesung    │ Nur bei Bedarf in Submodulen
 ┌──────────────────▼───────────────┐ ┌───────────────▼───────────────────┐
-│ 3. Sub-Rules (.agents/rules/)    │ │ 4. Directory Level (Directory AGENTS.md)│
-│  - token-discipline.md           │ │    - Role: Micro-boundary patch   │
-│  - engineering-spec.md (SDD/TDD) │ │    - Content: In/Out scope, isolated│
-│  - security-boundary.md          │ │            dependencies, fast tests│
-│  - git-workflow.md (Auth model)  │ └───────────────────────────────────┘
+│ 3. Unterregeln (.agents/rules/)  │ │ 4. Verzeichnisebene (Directory AGENTS.md)│
+│  - token-discipline.md           │ │    - Rolle: Mikro-Grenz-Patch     │
+│  - engineering-spec.md (SDD/TDD) │ │    - Inhalt: In/Out-Umfang, isolierte│
+│  - security-boundary.md          │ │            Abhängigkeiten, schnelle Tests│
+│  - git-workflow.md (Auth-Modell) │ └───────────────────────────────────┘
 └──────────────────────────────────┘
 ```
 
-### Core Advantages
-1. **Shared baseline**: Keep reusable rules in Markdown templates and use tool-specific bridges where supported; verify each host's discovery behavior instead of assuming every tool loads the same file.
+### Kernvorteile
+1. **Gemeinsame Basislinie**: Wiederverwendbare Regeln in Markdown-Templates halten und tool-spezifische Bridges verwenden, wo unterstützt; das Erkennungsverhalten jedes Hosts verifizieren, statt anzunehmen, dass jedes Tool dieselbe Datei lädt.
 2. **Progressive Disclosure**:
-   - Rules are loaded dynamically when specific scenarios are triggered.
-   - Skill discovery, loading, and prompt-cache behavior depend on the host tool and its configuration; deploying files does not guarantee automatic loading.
-3. **Client-Side Risk Guardrails**: Claude Code hooks can reject selected matching tool calls or emit warnings. They are client-side checks, not operating-system or server-side security controls.
+   - Regeln werden dynamisch geladen, wenn bestimmte Szenarien ausgelöst werden.
+   - Skill-Erkennung, -Laden und Prompt-Cache-Verhalten hängen vom Host-Tool und seiner Konfiguration ab; das Bereitstellen von Dateien garantiert kein automatisches Laden.
+3. **Clientseitige Risiko-Leitplanken**: Claude Code-Hooks können ausgewählte passende Tool-Aufrufe ablehnen oder Warnungen ausgeben. Es handelt sich um clientseitige Prüfungen, nicht um Betriebssystem- oder serverseitige Sicherheitskontrollen.
 
 ---
 
-## 2. Configuration Scope by Tool
+## 2. Konfigurationsumfang pro Tool
 
-Rule discovery, inheritance, global settings, and memory mechanisms vary by product and version. This table separates paths written by the scripts from host discovery; file deployment is not a loading verification.
+Regelerkennung, Vererbung, globale Einstellungen und Memory-Mechanismen variieren je nach Produkt und Version. Diese Tabelle trennt Pfade, die von den Skripten geschrieben werden, von der Host-Erkennung; die Dateibereitstellung ist keine Ladeverifizierung.
 
-| Tool/surface | Provided or written by this repository | Loading notes |
+| Tool/Oberfläche | Von diesem Repository bereitgestellt oder geschrieben | Ladehinweise |
 | :--- | :--- | :--- |
-| Codex (local app / IDE / CLI) | Global `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`); project and directory `AGENTS.md` | `-Global` creates the global file; `-Global -Update` backs up and replaces the active global instruction file. Codex uses a non-empty `AGENTS.override.md` in Codex home in preference to `AGENTS.md` |
-| Claude Code | `CLAUDE.md` bridge, `~/.claude/CLAUDE.md`, project hooks/skills | `CLAUDE.md` is an instruction entry point; Claude Auto memory is a separate optional machine-local project memory, not shared across tools |
-| Antigravity 2.0 | Project `AGENTS.md` / `GEMINI.md` / `.agents/rules/`; global `~/.gemini/AGENTS.md` and `GEMINI.md` compatibility pointer | Current docs list both global names; older releases can follow the pointer to the canonical file |
-| Antigravity CLI | Project/directory rules; global `~/.gemini/AGENTS.md` and `GEMINI.md` compatibility pointer; optional `~/.gemini/antigravity-cli/rules/*.md` | Common rules use the canonical entry; configure CLI-only rules separately |
-| Antigravity IDE / extensions | Project/directory rules; global `~/.gemini/AGENTS.md` and `GEMINI.md` compatibility pointer | Current IDE supports both global names; older IDE generations can follow the pointer |
-| GitHub Copilot | `.github/copilot-instructions.md` bridge | Confirm loading in Copilot's current product settings/docs |
-| Zed / Pi / OpenCode | Reusable Markdown only; no dedicated setup from this repository | Do not infer automatic discovery or global loading from file presence |
+| Codex (lokale App / IDE / CLI) | Globales `$CODEX_HOME/AGENTS.md` (Standard `~/.codex/AGENTS.md`); Projekt- und Verzeichnis-`AGENTS.md` | `-Global` erstellt die globale Datei; `-Global -Update` sichert und ersetzt die aktive globale Anweisungsdatei. Codex bevorzugt eine nicht leere `AGENTS.override.md` im Codex-Home gegenüber `AGENTS.md` |
+| Claude Code | `CLAUDE.md`-Bridge, `~/.claude/CLAUDE.md`, Projekt-Hooks/Skills | `CLAUDE.md` ist ein Anweisungseinstiegspunkt; Claude Auto Memory ist ein separates optionales maschinenlokales Projekt-Memory, das nicht toolübergreifend geteilt wird |
+| Antigravity 2.0 | Projekt-`AGENTS.md` / `GEMINI.md` / `.agents/rules/`; globales `~/.gemini/AGENTS.md` und `GEMINI.md`-Kompatibilitätszeiger | Aktuelle Docs listen beide globale Namen; ältere Releases können dem Zeiger zur kanonischen Datei folgen |
+| Antigravity CLI | Projekt-/Verzeichnisregeln; globales `~/.gemini/AGENTS.md` und `GEMINI.md`-Kompatibilitätszeiger; optional `~/.gemini/antigravity-cli/rules/*.md` | Gemeinsame Regeln nutzen den kanonischen Einstieg; CLI-spezifische Regeln separat konfigurieren |
+| Antigravity IDE / Extensions | Projekt-/Verzeichnisregeln; globales `~/.gemini/AGENTS.md` und `GEMINI.md`-Kompatibilitätszeiger | Aktuelle IDE unterstützt beide globale Namen; ältere IDE-Generationen können dem Zeiger folgen |
+| GitHub Copilot | `.github/copilot-instructions.md`-Bridge | Laden in den aktuellen Copilot-Produkteinstellungen/Dokumentation bestätigen |
+| Zed / Pi / OpenCode | Nur wiederverwendbares Markdown; kein dediziertes Setup aus diesem Repository | Keine automatische Erkennung oder globales Laden aus der Dateiexistenz ableiten |
 
-References: [Codex AGENTS.md](https://developers.openai.com/codex/guides/agents-md), [Claude Code memory](https://code.claude.com/docs/en/memory), [Antigravity rules](https://www.antigravity.google/docs/rules/).
-
----
-
-## 3. Claude Code Client Hooks: PreToolUse (.claude/settings.json)
-
-### Capability boundaries
-The hooks in `.claude/settings.json` are Claude Code-specific and run only before matching tool calls. `guard.mjs` rejects selected command patterns; many other cases only emit a warning. Regex matching cannot identify every shell wrapper, alias, or command form, so this is not a complete security boundary. The hooks do not collect or transmit memory data. Claude Code Auto memory is a separate machine-local project feature that users can inspect/manage with `/memory`; this repository does not configure it. Use server-side branch protection and least-privilege credentials for shared repositories.
-
-### Configuration and implementation
-
-The installer copies [`.claude/settings.json`](../../.claude/settings.json) and deploys [`.claude/hooks/guard.mjs`](../../.claude/hooks/guard.mjs) plus [`guard-write.mjs`](../../.claude/hooks/guard-write.mjs). Inspect those source files directly; do not copy hook examples from older guide versions because the protocol and implementation can change.
-
-### Equivalents on other tools (extension point)
-
-PreToolUse hooks are Claude Code-specific; the installer does not install interceptors for other tools. For equivalent protection, wire up each tool's own hook/approval mechanism: the decision logic in `guard.mjs` (protected branches, dangerous command patterns) is plain Node.js — reuse its regexes and branch table and adapt them to the target tool's hook entry point. Whichever layer you hook, it never replaces server-side branch protection; client-side interception is only one layer of defense in depth.
+Referenzen: [Codex AGENTS.md](https://developers.openai.com/codex/guides/agents-md), [Claude Code memory](https://code.claude.com/docs/en/memory), [Antigravity rules](https://www.antigravity.google/docs/rules/).
 
 ---
 
-## 4. Cross-Tool Deployment & Template Updates (deploy-agents)
+## 3. Claude Code Client-Hooks: PreToolUse (.claude/settings.json)
 
-The scripts deploy files to configured paths. Tool-specific loading behavior is not guaranteed by file deployment. `-Global` initializes missing global rule files and preserves existing ones. Combining `-Global -Update` first creates a timestamped backup, then replaces the active global rule with the current template. Antigravity receives the canonical `~/.gemini/AGENTS.md` plus a small `GEMINI.md` compatibility pointer instead of a duplicate full rule set. Codex uses `$CODEX_HOME` when set (otherwise `~/.codex`); if a non-empty `AGENTS.override.md` exists there, that active file is backed up and updated instead of `AGENTS.md`:
+### Fähigkeitsgrenzen
+Die Hooks in `.claude/settings.json` sind Claude Code-spezifisch und laufen nur vor passenden Tool-Aufrufen. `guard.mjs` lehnt ausgewählte Befehlsmuster ab; viele andere Fälle geben nur eine Warnung aus. Regex-Matching kann nicht jede Shell-Wrapper-, Alias- oder Befehlsform identifizieren, daher ist dies keine vollständige Sicherheitsgrenze. Die Hooks sammeln oder übertragen keine Memory-Daten. Claude Code Auto Memory ist ein separates maschinenlokales Projekt-Feature, das Benutzer mit `/memory` einsehen/verwalten können; dieses Repository konfiguriert es nicht. Serverseitigen Branch-Schutz und Least-Privilege-Credentials für geteilte Repositories verwenden.
+
+### Konfiguration und Implementierung
+
+Der Installer kopiert [`.claude/settings.json`](../../.claude/settings.json) und stellt [`.claude/hooks/guard.mjs`](../../.claude/hooks/guard.mjs) plus [`guard-write.mjs`](../../.claude/hooks/guard-write.mjs) bereit. Diese Quelldateien direkt prüfen; keine Hook-Beispiele aus älteren Anleitungsversionen kopieren, da sich Protokoll und Implementierung ändern können.
+
+### Entsprechungen bei anderen Tools (Erweiterungspunkt)
+
+PreToolUse-Hooks sind Claude Code-spezifisch; der Installer installiert keine Interceptors für andere Tools. Für gleichwertigen Schutz den eigenen Hook-/Genehmigungsmechanismus jedes Tools verdrahten: Die Entscheidungslogik in `guard.mjs` (geschützte Branches, gefährliche Befehlsmuster) ist reines Node.js — ihre Regexes und Branch-Tabelle wiederverwenden und an den Hook-Einstiegspunkt des Ziel-Tools anpassen. Unabhängig von der gehookten Schicht ersetzt sie niemals serverseitigen Branch-Schutz; clientseitiges Abfangen ist nur eine Schicht der Defense in Depth.
+
+---
+
+## 4. Toolübergreifende Bereitstellung & Template-Updates (deploy-agents)
+
+Die Skripte stellen Dateien an konfigurierten Pfaden bereit. Tool-spezifisches Ladeverhalten wird durch die Dateibereitstellung nicht garantiert. `-Global` initialisiert fehlende globale Regeldateien und erhält vorhandene. Die Kombination `-Global -Update` erstellt zuerst ein zeitgestempeltes Backup und ersetzt dann die aktive globale Regel durch das aktuelle Template. Antigravity erhält das kanonische `~/.gemini/AGENTS.md` plus einen kleinen `GEMINI.md`-Kompatibilitätszeiger statt eines doppelten vollständigen Regelsatzes. Codex verwendet `$CODEX_HOME`, wenn gesetzt (sonst `~/.codex`); existiert dort eine nicht leere `AGENTS.override.md`, wird diese aktive Datei gesichert und aktualisiert statt `AGENTS.md`:
 - **Windows PowerShell**: [`deploy-agents.ps1`](../../deploy-agents.ps1)
 - **Linux / macOS Bash**: [`deploy-agents.sh`](../../deploy-agents.sh)
 
-### 4.1 Script Core Architecture & Pipeline
+### 4.1 Kernarchitektur & Pipeline des Skripts
 
 ```text
-[ Execute Deployment Script ]
+[ Deployment-Skript ausführen ]
        │
-       ├─ [Aufruf ohne Argumente im Terminal ODER mit -Interactive / --interactive]
+       ├─ [Keine Argumente im Terminal ODER mit -Interactive / --interactive]
        │       ▼
-       │  Phase 0: Schrittweiser interaktiver Terminal-Assistent (TUI Pfeiltasten & Checkboxen)
-       │    ├─ [1/5] Vorlagensprache wählen (English / 简体中文 / 繁體中文 / Français / Deutsch)
+       │  Phase 0: Interaktiver Schritt-für-Schritt-Terminal-Assistent (TUI Pfeiltasten & Checkboxen)
+       │    ├─ [1/5] Template-Sprache wählen (English / 简体中文 / 繁體中文 / Français / Deutsch)
        │    ├─ [2/5] Bereitstellungsumfang wählen (Nur Zielprojekt / Nur globale Regeln / Beides)
        │    ├─ [3/5] Zielprojektpfad eingeben (Standard: aktuelles Verzeichnis [.])
        │    │        (Hinweis: Codex, Antigravity, Zed lesen AGENTS.md nativ ohne Bridges)
-       │    ├─ [4/5] Agent-Bridge-Dateien mehrfach auswählen (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy)
-       │    └─ [5/5] Optionale Workflows auswählen (Update-Modus / Faktenprüfung / ai-memory / Comet)
+       │    ├─ [4/5] Agent-Bridge-Dateien mehrfach wählen (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy)
+       │    └─ [5/5] Optionale Workflows mehrfach wählen (Update-Modus / Projektfaktenscan / ai-memory / Comet)
        │
        ▼
- Phase 1: Template Repository Update (-Update)
-   └─ Fast-forward update of this template repository (`git pull --ff-only`); no global CLI upgrade or third-party updater in the caller directory
+ Phase 1: Template-Repository-Update (-Update)
+   └─ Fast-Forward-Update dieses Template-Repositorys (`git pull --ff-only`); kein globales CLI-Upgrade oder Drittanbieter-Updater im Aufruferverzeichnis
        │
        ▼
- Phase 2: User Global Rules (-Global)
-   ├─ Initialize Claude Code (~/.claude/CLAUDE.md) only if the target is absent
-   ├─ Initialize Antigravity (~/.gemini/AGENTS.md) only if the target is absent
-   └─ Preserve existing files; with -Update write adjacent *.template.md files for manual merge
+ Phase 2: Globale Benutzerregeln (-Global)
+   ├─ Claude Code initialisieren (~/.claude/CLAUDE.md) nur wenn Ziel fehlt
+   ├─ Antigravity initialisieren (~/.gemini/AGENTS.md) nur wenn Ziel fehlt
+   └─ Vorhandene Dateien erhalten; mit -Update benachbarte *.template.md-Dateien zum manuellen Mergen schreiben
        │
        ▼
- Phase 3: Project Rules & Cross-Tool Bridges
-   ├─ Root AGENTS.md (generates AGENTS.template.md if already exists)
-   ├─ CLAUDE.md -> AGENTS.md (symlink/reference)
+ Phase 3: Projektregeln & Toolübergreifende Bridges
+   ├─ Root AGENTS.md (generiert AGENTS.template.md wenn bereits vorhanden)
+   ├─ CLAUDE.md -> AGENTS.md (Symlink/Referenz)
    ├─ .github/copilot-instructions.md -> ../AGENTS.md
-   ├─ Zed uses the provided AGENTS.md; no Zed-specific configuration is created
-   └─ Claude Code PreToolUse client hooks: .claude/settings.json
+   ├─ Zed nutzt das bereitgestellte AGENTS.md; keine Zed-spezifische Konfiguration wird erstellt
+   └─ Claude Code PreToolUse Client-Hooks: .claude/settings.json
        │
        ▼
- Phase 4: Sub-Rules (.agents/rules/*.md)
+ Phase 4: Unterregeln (.agents/rules/*.md)
        │
        ▼
- Phase 5: Skills Library (.agents/skills/ & .claude/skills/)
-   ├─ Copy skills to .agents/skills/
-   ├─ Link to .claude/skills/ (Windows: Junction, Linux/macOS: Symlink)
-   └─ Copy skills-lock.json metadata
+ Phase 5: Skills-Bibliothek (.agents/skills/ & .claude/skills/)
+   ├─ Skills nach .agents/skills/ kopieren
+   ├─ Nach .claude/skills/ verlinken (Windows: Junction, Linux/macOS: Symlink)
+   └─ skills-lock.json-Metadaten kopieren
        │
        ▼
- Phase 6: Dynamic Task Tracking Scaffold
-   ├─ tasks/lessons.md (mistake notebook)
-   └─ tasks/todo.md (checklist)
+ Phase 6: Dynamisches Task-Tracking-Gerüst
+   ├─ tasks/lessons.md (Fehlernotizbuch)
+   └─ tasks/todo.md (Checkliste)
        │
        ▼
- Phase 7: OpenSpec Scaffold (docs/openspec/changes/)
+ Phase 7: OpenSpec-Gerüst (docs/openspec/changes/)
        │
        ▼
- Phase 8: Optional Comet CLI Init (-CometInit)
-   └─ Runs `comet init` only when explicitly requested
+ Phase 8: Optionaler Comet CLI Init (-CometInit)
+   └─ Führt `comet init` nur bei expliziter Anforderung aus
        │
        ▼
- Phase 9: Optional ai-memory Init (-AiMemoryInit)
-   └─ Initializes .ai-memory.toml for cross-tool memory when explicitly requested
+ Phase 9: Optionaler ai-memory Init (-AiMemoryInit)
+   └─ Initialisiert .ai-memory.toml für toolübergreifendes Memory bei expliziter Anforderung
        │
        ▼
- Phase 10: Probe Optional CLIs & Interactive Prompts
-   ├─ Offer CodeGraph / RTK / Open Code Review (ocr) / Comet install if missing
-   ├─ Ask whether to wire CodeGraph agents / index project
-   ├─ Ask whether to run rtk init; skipped in non-interactive mode
-   ├─ Installing ocr enables Tier A delegation review; Tier B works offline without it
-   └─ Installing Comet CLI enables subsequent workflow initialization via --comet-init
+ Phase 10: Optionale CLIs prüfen & interaktive Prompts
+   ├─ CodeGraph / RTK / Open Code Review (ocr) / Comet-Installation anbieten falls fehlend
+   ├─ Fragen ob CodeGraph-Agents verdrahtet / Projekt indexiert werden soll
+   ├─ Fragen ob rtk init ausgeführt werden soll; im nicht-interaktiven Modus übersprungen
+   ├─ ocr-Installation ermöglicht Tier-A-Delegations-Review; Tier B funktioniert offline ohne
+   └─ Comet CLI-Installation ermöglicht anschließende Workflow-Initialisierung via --comet-init
 ```
 
 ---
 
-### 4.2 Windows Deployment (`deploy-agents.ps1`)
+### 4.2 Windows-Bereitstellung (`deploy-agents.ps1`)
 
-**Usage**:
+**Verwendung**:
 ```powershell
 .\deploy-agents.ps1 [[-ProjectPath] <target-path>] [-Global] [-Update] [-Interactive] [-CometInit] [-AiMemoryInit] [-Pipeline]
 ```
 
-**Parameters**:
-- `-ProjectPath` (Positional 0): Path to target project. If omitted with `-Global`, only updates user global rules.
-- `-Global` (`-g`): Initializes missing `~/.claude/CLAUDE.md`, `~/.gemini/AGENTS.md`, and Codex `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`). Existing files are preserved without `-Update`.
-- `-Language` (`-l`): Selects template language (`en`, `zh`, `zh-tw`, `fr`, `de`; defaults to `en`).
-- `-Interactive` (`-i`): Startet den schrittweisen interaktiven Terminal-Assistenten (Sprache, Umfang, Agent-Bridges und Workflows). Startet im Terminal ohne Argumente automatisch.
-- `-Update` (`-u`): Fast-forwards the template repository, automatically invokes `tools/sync-skills.py --check` to scan external skills for upstream updates with interactive confirmation, and syncs files to the target. Combined with `-Global`, it backs up and replaces existing global rule files. Codex's non-empty `$CODEX_HOME/AGENTS.override.md` takes precedence and is updated as the active file. Existing project-managed rules, hooks, skills, and lock metadata follow their documented backup/update behavior. It does not upgrade global CLIs.
-- `-CometInit` (`-c`): Automatically executes `comet init` in the target project if Comet CLI is installed.
-- `-AiMemoryInit` (`-m`): Automatically initializes `.ai-memory.toml` in the target project (inferring `workspace` and `project`) for cross-tool ai-memory integration.
-- `-Pipeline`: Delegiert die Ausführung direkt an den Unified Pipeline-Runner ([`run-pipeline.ps1`](../../run-pipeline.ps1)).
+**Parameter**:
+- `-ProjectPath` (Position 0): Pfad zum Zielprojekt. Wenn mit `-Global` weggelassen, werden nur globale Benutzerregeln aktualisiert.
+- `-Global` (`-g`): Initialisiert fehlende `~/.claude/CLAUDE.md`, `~/.gemini/AGENTS.md` und Codex `$CODEX_HOME/AGENTS.md` (Standard `~/.codex/AGENTS.md`). Vorhandene Dateien bleiben ohne `-Update` erhalten.
+- `-Language` (`-l`): Wählt Template-Sprache (`en`, `zh`, `zh-tw`, `fr`, `de`; Standard `en`).
+- `-Interactive` (`-i`): Startet den interaktiven Schritt-für-Schritt-Auswahlassistenten (Einfachauswahl Sprache & Umfang, Mehrfachauswahl Agent-Bridges und Optionen). Wird automatisch ausgelöst bei argumentloser Ausführung in einem interaktiven Terminal.
+- `-Update` (`-u`): Aktualisiert das Template-Repository per Fast-Forward, ruft automatisch `tools/sync-skills.py --check` auf, um externe Skills mit interaktiver Bestätigung auf Upstream-Updates zu prüfen, und synchronisiert Dateien zum Ziel. Kombiniert mit `-Global` werden vorhandene globale Regeldateien gesichert und ersetzt. Codex' nicht leere `$CODEX_HOME/AGENTS.override.md` hat Vorrang und wird als aktive Datei aktualisiert. Vorhandene projektverwaltete Regeln, Hooks, Skills und Lock-Metadaten folgen ihrem dokumentierten Backup-/Update-Verhalten. Es werden keine globalen CLIs upgegradet.
+- `-CometInit` (`-c`): Führt automatisch `comet init` im Zielprojekt aus, wenn Comet CLI installiert ist.
+- `-AiMemoryInit` (`-m`): Initialisiert automatisch `.ai-memory.toml` im Zielprojekt (leitet `workspace` und `project` ab) für toolübergreifende ai-memory-Integration.
+- `-Pipeline`: Delegiert die Ausführung direkt an den einheitlichen Pipeline-Runner ([`run-pipeline.ps1`](../../run-pipeline.ps1)).
 
-**Unified Pipeline-Runner (Windows)**:
+**Einheitlicher Pipeline-Runner (Windows)**:
 ```powershell
 # Interaktiver Schritt-für-Schritt-Assistent (Sprache, Projekt, Phasen, Modus):
 .\run-pipeline.ps1
 
-# Vollständige Pipeline ohne Benutzereingriff:
+# Unbeaufsichtigte vollständige Pipeline-Ausführung in einem Durchgang:
 .\run-pipeline.ps1 -All -Yes
 
 # Bestimmte Phasen ausführen:
 .\run-pipeline.ps1 -Stages "deploy,skills,docs"
 ```
 
-**Examples**:
+**Beispiele**:
 ```powershell
-# Interaktiver Assistent (Aufruf ohne Argumente)
+# Szenario 0: Interaktiver Assistent (argumentlose Ausführung)
 .\deploy-agents.ps1
 
-# Deploy to a new project
+# In einem neuen Projekt bereitstellen
 .\deploy-agents.ps1 "D:\Projects\my-project"
 
-# Deploy project and update global rules
+# Projekt bereitstellen und globale Regeln aktualisieren
 .\deploy-agents.ps1 "D:\Projects\my-project" -Global
 
-# Online update skills and sub-rules
+# Skills und Unterregeln online aktualisieren
 .\deploy-agents.ps1 "D:\Projects\my-project" -Global -Update
 
-# Initialize with Comet terminal hooks
+# Mit Comet-Terminal-Hooks initialisieren
 .\deploy-agents.ps1 "D:\Projects\my-project" -CometInit
 
-# Initialize with cross-tool ai-memory configuration
+# Mit toolübergreifender ai-memory-Konfiguration initialisieren
 .\deploy-agents.ps1 "D:\Projects\my-project" -AiMemoryInit
 
-# Launch unified pipeline directly
+# Einheitliche Pipeline direkt starten
 .\deploy-agents.ps1 -Pipeline
 
-# Update global rules only
+# Nur globale Regeln aktualisieren
 .\deploy-agents.ps1 -Global -Update
 ```
 
 ---
 
-### 4.3 Linux / macOS Deployment (`deploy-agents.sh`)
+### 4.3 Linux- / macOS-Bereitstellung (`deploy-agents.sh`)
 
 ```bash
 chmod +x ./deploy-agents.sh ./run-pipeline.sh
 
-# Interaktiver Assistent (Aufruf ohne Argumente)
+# Szenario 0: Interaktiver Assistent (argumentlose Ausführung)
 ./deploy-agents.sh
 
-# Deploy to project
+# In Projekt bereitstellen
 ./deploy-agents.sh /path/to/my-project
 
-# Deploy and update global rules
+# Bereitstellen und globale Regeln aktualisieren
 ./deploy-agents.sh /path/to/my-project --global
 
-# Online update
+# Online-Update
 ./deploy-agents.sh /path/to/my-project --global --update
 
-# Deploy with Comet CLI init
+# Mit Comet CLI-Init bereitstellen
 ./deploy-agents.sh /path/to/my-project --comet-init
 
-# Launch unified pipeline directly
+# Einheitliche Pipeline direkt starten
 ./deploy-agents.sh --pipeline
 ```
 
-**Unified Pipeline-Runner (Linux / macOS)**:
+**Einheitlicher Pipeline-Runner (Linux / macOS)**:
 ```bash
-# Interaktiver Assistent:
+# Interaktiver Schritt-für-Schritt-Assistent (Sprache, Projekt, Phasen, Modus):
 ./run-pipeline.sh
 
-# Vollständige Pipeline ohne Benutzereingriff:
+# Unbeaufsichtigte vollständige Pipeline-Ausführung in einem Durchgang:
 ./run-pipeline.sh --all -y
 
 # Bestimmte Phasen ausführen:
-```bash
 ./run-pipeline.sh --stages deploy,skills,docs
 ```
 
-### Deploy with ai-memory init
+### Bereitstellung mit ai-memory-Init
 ```bash
 ./deploy-agents.sh /path/to/my-project --ai-memory-init
 ```
 
 ---
 
-### 4.4 Symlink vs. Directory Junction Mechanics
+### 4.4 Symlink- vs. Verzeichnis-Junction-Mechanik
 
-To enable Claude Code to discover skills located in `.agents/skills/`:
-- **Linux / macOS**: Uses standard relative symbolic links:
+Damit Claude Code Skills in `.agents/skills/` entdecken kann:
+- **Linux / macOS**: Verwendet standardmäßige relative symbolische Links:
   `ln -sf "../../.agents/skills/${name}" ".claude/skills/${name}"`
-- **Windows**: Normal user accounts cannot create Directory Symbolic Links without Developer Mode or administrator privileges. `deploy-agents.ps1` resolves this by using **NTFS Directory Junctions**:
+- **Windows**: Normale Benutzerkonten können keine Verzeichnis-Symboliklinks ohne Entwicklermodus oder Administratorrechte erstellen. `deploy-agents.ps1` löst dies durch **NTFS-Verzeichnis-Junctions**:
   `New-Item -ItemType Junction -Path ".claude\skills\$name" -Target ".agents\skills\$name"`
-  - Works without elevation;
-  - Real-time directory reflection without file duplication;
-  - Automatically falls back to recursive copy if junctions are unsupported.
+  - Funktioniert ohne erhöhte Rechte;
+  - Echtzeit-Verzeichnisspiegelung ohne Dateiduplizierung;
+  - Automatischer Fallback auf rekursives Kopieren, wenn Junctions nicht unterstützt werden.
 
 ---
 
-## 5. Deep Dive into the Four Rule Layers
+## 5. Vertiefung in die vier Regelebenen
 
-### 5.1 Global Rules Template: `Global AGENTS.md`
-- **Purpose:** A reusable cross-project engineering baseline. Whether a host loads it, and at what precedence, depends on that host and the user's configuration.
-- **Sharing boundary:** Keep the shared template generic; do not put personal preferences, project facts, or sensitive information in it. Save personal preferences only in a user-controlled machine-local location when explicitly requested.
-- **Memory layers:**
-  1. At task start, read `PROJECT_CONTEXT.md` (verified durable project facts) and `SESSION_STATE.md` (current checkpoint) when relevant, then verify facts that affect the work.
-  2. At a meaningful task/session boundary, update `SESSION_STATE.md` and remove stale status. Update `PROJECT_CONTEXT.md` only when durable project knowledge changes; no-op sessions do not need empty updates.
-  3. `PROJECT_CONTEXT.md` is a project summary and navigation aid, not a single source of truth over code, configuration, or maintained documentation. Current user instructions and reproducible evidence take precedence over memory.
-  4. Label uncertainty and date/source facts likely to change. Never store credentials, private keys, raw personal data, full conversation/tool logs, or unnecessary personal information.
+### 5.1 Globale Regelvorlage: `Global AGENTS.md`
+- **Zweck:** Eine wiederverwendbare projektübergreifende Engineering-Basislinie. Ob ein Host sie lädt und mit welcher Priorität, hängt vom Host und der Benutzerkonfiguration ab.
+- **Teilungsgrenze:** Die geteilte Vorlage generisch halten; keine persönlichen Präferenzen, Projektfakten oder sensiblen Informationen hineinlegen. Persönliche Präferenzen nur an einem benutzerkontrollierten maschinenlokalen Ort speichern, wenn explizit angefordert.
+- **Memory-Schichten:**
+  1. Bei Task-Start `PROJECT_CONTEXT.md` (verifizierte dauerhafte Projektfakten) und `SESSION_STATE.md` (aktueller Checkpoint) lesen, wenn relevant, dann Fakten verifizieren, die die Arbeit betreffen.
+  2. An einer sinnvollen Task-/Sitzungsgrenze `SESSION_STATE.md` aktualisieren und veralteten Status entfernen. `PROJECT_CONTEXT.md` nur aktualisieren, wenn sich dauerhaftes Projektwissen ändert; No-op-Sitzungen brauchen keine leeren Updates.
+  3. `PROJECT_CONTEXT.md` ist eine Projektzusammenfassung und Navigationshilfe, keine Single Source of Truth über Code, Konfiguration oder gepflegte Dokumentation. Aktuelle Benutzeranweisungen und reproduzierbare Evidenz haben Vorrang vor Memory.
+  4. Unsicherheit kennzeichnen und Fakten mit Datum/Quelle versehen, die sich wahrscheinlich ändern. Niemals Credentials, private Schlüssel, rohe persönliche Daten, vollständige Konversations-/Tool-Logs oder unnötige persönliche Informationen speichern.
 
-**Selected optional backend: [ai-memory](https://github.com/akitaonrails/ai-memory).** Its local mode provides Markdown-backed project memory, full-text retrieval, and cross-agent handoff without an LLM or API key. It is not required for ordinary use. This repository supplies an explicit setup helper but never installs or starts the backend, creates a local opt-in marker, or changes tool configuration during normal deployment.
+**Ausgewähltes optionales Backend: [ai-memory](https://github.com/akitaonrails/ai-memory).** Sein lokaler Modus bietet Markdown-basiertes Projekt-Memory, Volltext-Retrieval und toolübergreifende Handoffs ohne LLM oder API-Key. Für den normalen Gebrauch nicht erforderlich. Dieses Repository liefert einen expliziten Setup-Helfer, installiert oder startet das Backend aber niemals, erstellt keinen lokalen Opt-in-Marker und ändert keine Tool-Konfiguration während der normalen Bereitstellung.
 
-> **Supply-chain note**: ai-memory is a third-party native binary with prompt-reading hooks. Download it only from the official Releases page and verify the published SHA256 checksums (for `cargo install`, confirm the crate name is `ai-memory`). `setup-ai-memory.*` deliberately never downloads it for you, verifies it is a native executable (rejecting wrapper scripts) before configuring anything, and pins the validated version (currently **v2.6.0** — a mismatch refuses to configure). Check upstream release notes before upgrading, and re-verify the install flags before bumping the pin.
+> **Supply-Chain-Hinweis**: ai-memory ist eine native Drittanbieter-Binärdatei mit Prompt-lesenden Hooks. Nur von der offiziellen Releases-Seite herunterladen und die veröffentlichten SHA256-Prüfsummen verifizieren (bei `cargo install` den Crate-Namen `ai-memory` bestätigen). `setup-ai-memory.*` lädt es bewusst niemals für Sie herunter, verifiziert vor jeder Konfiguration, dass es eine native ausführbare Datei ist (lehnt Wrapper-Skripte ab), und pinnt die validierte Version (aktuell **v2.6.0** — eine Abweichung verweigert die Konfiguration). Vor Upgrades die Upstream-Release-Notes prüfen und vor dem Bump des Pins die Install-Flags erneut verifizieren.
 
-#### Explicit project opt-in and setup
+#### Explizites Projekt-Opt-in und Setup
 
-1. Install and start ai-memory separately by following its [official installation guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md). Leave LLM and embedding providers unconfigured for the free, zero-key path.
-2. Review `.ai-memory.toml.example`, copy it to `.ai-memory.toml`, and replace both names. `.ai-memory.toml` is ignored by Git; committing this opt-in is intentionally avoided.
-3. Run `./setup-ai-memory.sh <claude-code|codex|antigravity|antigravity-ide|antigravity-cli>` on Linux/macOS/WSL2, or the equivalent `-Agent` value in PowerShell. Use `antigravity` for Antigravity 2.0 and `antigravity-ide` for the IDE; both configure MCP and managed instructions. The CLI target additionally installs allowlist hooks. Native executable and hook-mode preflight applies to hook targets; MCP-only targets do not need it. The helper does not download software or start the server.
-4. Keep the server bound to loopback for same-machine use. Default data locations are `~/.local/share/ai-memory` on Linux, `~/Library/Application Support/ai-memory` on macOS, and typically `%LOCALAPPDATA%\ai-memory` on Windows; `AI_MEMORY_DATA_DIR` can override them.
+1. ai-memory separat installieren und starten gemäß seiner [offiziellen Installationsanleitung](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md). LLM- und Embedding-Provider für den kostenlosen Zero-Key-Pfad unkonfiguriert lassen.
+2. `.ai-memory.toml.example` prüfen, nach `.ai-memory.toml` kopieren und beide Namen ersetzen. `.ai-memory.toml` wird von Git ignoriert; ein Commit dieses Opt-ins wird bewusst vermieden.
+3. `./setup-ai-memory.sh <claude-code|codex|antigravity|antigravity-ide|antigravity-cli>` unter Linux/macOS/WSL2 ausführen, oder den entsprechenden `-Agent`-Wert in PowerShell. `antigravity` für Antigravity 2.0 und `antigravity-ide` für die IDE verwenden; beide konfigurieren MCP und verwaltete Anweisungen. Das CLI-Target installiert zusätzlich Allowlist-Hooks. Nativer Executable- und Hook-Mode-Preflight gilt für Hook-Targets; MCP-only-Targets brauchen ihn nicht. Der Helfer lädt keine Software herunter und startet keinen Server.
+4. Den Server für Same-Machine-Nutzung an Loopback binden. Standard-Datenorte sind `~/.local/share/ai-memory` unter Linux, `~/Library/Application Support/ai-memory` unter macOS und typischerweise `%LOCALAPPDATA%\ai-memory` unter Windows; `AI_MEMORY_DATA_DIR` kann sie überschreiben.
    - **Docker-Bereitstellung (für Antigravity IDE HTTP MCP)**:
      ```bash
-     # Der Datenpfad im Container ist fest auf /data gesetzt; bindet an 127.0.0.1
+     # In-Container-Speicherpfad muss /data sein; bindet an Loopback 127.0.0.1
      mkdir -p "${HOME}/env/ai-memory-data"
      docker run -d --name ai-memory \
        --restart unless-stopped \
@@ -319,90 +318,90 @@ To enable Claude Code to discover skills located in `.agents/skills/`:
        -v "${HOME}/env/ai-memory-data:/data" \
        docker.io/akitaonrails/ai-memory:latest
      ```
-     *Hinweis: Der Container muss die Projektverzeichnisse nicht einbinden; die Antigravity IDE übergibt den Kontext (`workspace`/`project`) über MCP-Toolaufrufe.*
-   - Back up with `ai-memory --data-dir <data-dir> backup --to <archive-path>` (for Docker deployments, use the upstream container command). `ai-memory uninstall --apply` removes managed client integrations but does not delete the data. To erase memory, stop the service and remove its configured data directory only after confirming the backup and target. See the [official installation/operations guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md).
+     *Hinweis: Der Docker-Container muss keine Repository-Bäume oder `.ai-memory.toml` mounten. Antigravity IDE übergibt Projektkontext (`workspace`/`project`) über MCP-Tool-Aufrufe.*
+   - Sichern mit `ai-memory --data-dir <data-dir> backup --to <archive-path>` (für Docker-Bereitstellungen den Upstream-Container-Befehl verwenden). `ai-memory uninstall --apply` entfernt verwaltete Client-Integrationen, löscht aber keine Daten. Zum Löschen von Memory den Dienst stoppen und erst nach Bestätigung von Backup und Ziel das konfigurierte Datenverzeichnis entfernen. Siehe die [offizielle Installations-/Betriebsanleitung](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md).
 
-#### Host boundaries
+#### Host-Grenzen
 
-- **Claude Code:** upstream MCP/hooks; ai-memory owns only its entries and preserves unrelated hooks. The existing Claude `PreToolUse` security hook remains separate. Claude Code's default auto-memory is also separate and machine-local.
-- **Codex CLI:** upstream `--client codex` / `--agent codex` integration. **Codex desktop:** uses the local Codex configuration surface where supported; verify the installed app's hook/MCP availability instead of assuming every CLI version behaves identically.
-- **Antigravity CLI:** upstream `antigravity-cli` MCP/hooks. On Windows, run setup in the same environment that launches the agent.
-- **Antigravity 2.0 and IDE:** the helper uses the upstream Antigravity MCP installer to write the shared `~/.gemini/config/mcp_config.json` and managed project instructions. The current ai-memory upstream has no dedicated 2.0/IDE lifecycle-hook target, so this is MCP-only and does not automatically capture session events. Manual MCP setup uses `serverUrl=http://127.0.0.1:49374/mcp`; see [Antigravity MCP docs](https://www.antigravity.google/docs/mcp).
-- **ChatGPT web:** the no-key, loopback setup has no direct connection to a remote web chat. Use a concise Markdown handoff manually. Remote MCP/write access is outside this free local setup.
-- **Windows:** upstream documents both WSL2 and native Windows. Install and configure ai-memory in the same environment that launches each agent; do not mix WSL and Windows hook paths. Review the [Windows guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/windows.md) for client-specific support.
+- **Claude Code:** Upstream-MCP/Hooks; ai-memory besitzt nur seine Einträge und erhält unzugehörige Hooks. Der vorhandene Claude-`PreToolUse`-Sicherheits-Hook bleibt separat. Claude Codes Standard-Auto-Memory ist ebenfalls separat und maschinenlokal.
+- **Codex CLI:** Upstream-`--client codex`-/`--agent codex`-Integration. **Codex Desktop:** nutzt die lokale Codex-Konfigurationsoberfläche, wo unterstützt; die Hook-/MCP-Verfügbarkeit der installierten App verifizieren, statt anzunehmen, dass jede CLI-Version sich identisch verhält.
+- **Antigravity CLI:** Upstream-`antigravity-cli`-MCP/Hooks. Unter Windows das Setup in derselben Umgebung ausführen, die den Agent startet.
+- **Antigravity 2.0 und IDE:** Der Helfer nutzt den Upstream-Antigravity-MCP-Installer, um die gemeinsame `~/.gemini/config/mcp_config.json` und verwaltete Projektanweisungen zu schreiben. Das aktuelle ai-memory-Upstream hat kein dediziertes 2.0/IDE-Lifecycle-Hook-Target, daher ist dies MCP-only und erfasst Sitzungsereignisse nicht automatisch. Manuelles MCP-Setup nutzt `serverUrl=http://127.0.0.1:49374/mcp`; siehe [Antigravity MCP-Docs](https://www.antigravity.google/docs/mcp).
+- **ChatGPT Web:** Das No-Key-Loopback-Setup hat keine direkte Verbindung zu einem Remote-Web-Chat. Einen prägnanten Markdown-Handoff manuell verwenden. Remote-MCP-/Schreibzugriff liegt außerhalb dieses kostenlosen lokalen Setups.
+- **Windows:** Upstream dokumentiert sowohl WSL2 als auch natives Windows. ai-memory in derselben Umgebung installieren und konfigurieren, die jeden Agent startet; WSL- und Windows-Hook-Pfade nicht mischen. Die [Windows-Anleitung](https://github.com/akitaonrails/ai-memory/blob/main/docs/windows.md) für client-spezifischen Support prüfen.
 
-ai-memory allowlist mode only guarantees no capture for repositories without a marker when the installed native hook enforces capture policy. Its path exclusions do not redact arbitrary prompt text; never include secrets in prompts. See the [marker-file reference](https://github.com/akitaonrails/ai-memory/blob/main/docs/marker-file.md).
+Der ai-memory-Allowlist-Modus garantiert nur dann keine Erfassung für Repositories ohne Marker, wenn der installierte native Hook die Capture-Policy durchsetzt. Seine Pfadausschlüsse redigieren keinen beliebigen Prompt-Text; niemals Secrets in Prompts aufnehmen. Siehe die [Marker-File-Referenz](https://github.com/akitaonrails/ai-memory/blob/main/docs/marker-file.md).
 
-### 5.2 Project Router: `Project AGENTS.md`
-- Adaptable repository-level template.
-- Add `-Initialize` / `--initialize` to deployment to generate a draft from verifiable local facts and a pending-items checklist. `-DirectoryPath <relative-path>` / `--directory <relative-path>` also initializes an existing module directory. The scripts do not guess project purpose, owners, or module boundaries. Existing `AGENTS.md` files are preserved; generated review copies use `AGENTS.generated.md`.
-- Detected `package.json` scripts and common framework/storage dependencies appear as review suggestions, not verified facts; confirm them before relying on those commands or boundaries.
-- Run `-Check` / `--check` (optionally with the directory parameter) to scan for unresolved template fields before adopting the generated rules; the command returns a nonzero exit status when it finds any.
-- Provides standard CLI command slots (install, dev, build, targeted test, lint, format, migration), architecture red lines, the **Rule & Skill Dispatching Matrix**, selective Markdown memory rules, and optional ai-memory integration guidance.
-
----
-
-### 5.3 Modular Sub-Rules: `.agents/rules/`
-Loaded progressively on-demand:
-- **`token-discipline.md`**: Restricts reading, fetching, and speaking; mandates AST index over blind grep;
-- **`engineering-spec.md`**: SDD spec-first (In/Out scope), TDD verification gate (physical proof required);
-- **`security-boundary.md`**: 8 high-risk operations confirmation matrix, zero credentials leak, large file safety;
-- **`git-workflow.md`**: Protected branch isolation (zero direct commits), mandatory authorization for remote push, commit format `{type}: {description}`.
+### 5.2 Projekt-Router: `Project AGENTS.md`
+- Anpassbare Template auf Repository-Ebene.
+- `-Initialize` / `--initialize` zur Bereitstellung hinzufügen, um einen Entwurf aus verifizierbaren lokalen Fakten und einer Checkliste offener Punkte zu generieren. `-DirectoryPath <relative-path>` / `--directory <relative-path>` initialisiert zusätzlich ein vorhandenes Modulverzeichnis. Die Skripte erraten weder Projektzweck, Owner noch Modulgrenzen. Vorhandene `AGENTS.md`-Dateien bleiben erhalten; generierte Review-Kopien nutzen `AGENTS.generated.md`.
+- Erkannte `package.json`-Skripte und gängige Framework-/Storage-Abhängigkeiten erscheinen als Review-Vorschläge, nicht als verifizierte Fakten; vor Verlass auf diese Befehle oder Grenzen bestätigen.
+- `-Check` / `--check` ausführen (optional mit Verzeichnisparameter), um vor Übernahme der generierten Regeln auf ungelöste Template-Felder zu prüfen; der Befehl gibt einen Nonzero-Exit-Status zurück, wenn er welche findet.
+- Bietet Standard-CLI-Befehlsslots (install, dev, build, gezielter Test, lint, format, migration), Architektur-Rote-Linien, die **Regel- & Skill-Dispatching-Matrix**, selektive Markdown-Memory-Regeln und optionale ai-memory-Integrationsanleitung.
 
 ---
 
-### 5.4 Micro-Boundary Patch: `Directory AGENTS.md`
-- Created **only when necessary** in monorepo packages (`packages/*`) or isolated submodules.
-- Generate one with `-Initialize -DirectoryPath <relative-path>` (PowerShell) or `--initialize --directory <relative-path>` (Bash); the target must already exist inside the project root. Module path/name are detected, while responsibility and boundaries remain explicit review items.
-- Defines In/Out scope, permitted/forbidden dependencies, and targeted local test commands (e.g., `pytest tests/submodule -q`).
+### 5.3 Modulare Unterregeln: `.agents/rules/`
+Werden progressiv bei Bedarf geladen:
+- **`token-discipline.md`**: Beschränkt Lesen, Abrufen und Sprechen; schreibt AST-Index statt blindem grep vor;
+- **`engineering-spec.md`**: SDD Spec-first (In/Out-Umfang), TDD-Verifikationsgate (physischer Nachweis erforderlich);
+- **`security-boundary.md`**: 8 Hochrisiko-Operationen-Bestätigungsmatrix, null Credentials-Leak, Sicherheit großer Dateien;
+- **`git-workflow.md`**: Geschützte-Branch-Isolation (null direkte Commits), obligatorische Autorisierung für Remote-Push, Commit-Format `{type}: {description}`.
 
 ---
 
-## 6. Dual-Track Practical Workflow: "Engineering First, Documentation Second"
-
-### 1. Software Engineering Track (Strict Gate)
-- Scope: APIs, features, bug fixes, refactoring.
-- Rules:
-  - Read `PROJECT_CONTEXT.md` and `SESSION_STATE.md` at task start only when present and relevant, then verify material facts;
-  - Always work on temporary branches (`feature/*`, `fix/*`);
-  - TDD red-green cycle, verify with actual test runs;
-  - Follow Git authorization model;
-  - **Selective memory updates**: Update `SESSION_STATE.md` at meaningful closeout; update `PROJECT_CONTEXT.md` only when durable project facts change.
-
-### 2. Technical Documentation Track (Lightweight Bypass)
-- Scope: Markdown documentation, READMEs, API specifications, Word/PDF reports.
-- Rules: **Exempt from running test suites**; leverage specialized skills (`docx`, `pdf`, `write-openspec-docs`); maintain GitHub Flavored Markdown standards.
+### 5.4 Mikro-Grenz-Patch: `Directory AGENTS.md`
+- Wird **nur bei Bedarf** in Monorepo-Paketen (`packages/*`) oder isolierten Submodulen erstellt.
+- Eines generieren mit `-Initialize -DirectoryPath <relative-path>` (PowerShell) oder `--initialize --directory <relative-path>` (Bash); das Ziel muss bereits innerhalb des Projekt-Roots existieren. Modulpfad/-name werden erkannt, während Verantwortung und Grenzen explizite Review-Punkte bleiben.
+- Definiert In/Out-Umfang, erlaubte/verbotene Abhängigkeiten und gezielte lokale Testbefehle (z. B. `pytest tests/submodule -q`).
 
 ---
 
-## 7. Frequently Asked Questions & Best Practices (FAQ)
+## 6. Zweigleisiger Praxis-Workflow: „Engineering zuerst, Dokumentation danach"
 
-### Q1: Why not put all project commands into `Global AGENTS.md`?
-> **Answer**: Global rules are resident across all sessions on the machine. Adding project-specific commands creates cross-project context pollution and wastes prompt tokens.
+### 1. Software-Engineering-Track (striktes Gate)
+- Umfang: APIs, Features, Bugfixes, Refactoring.
+- Regeln:
+  - `PROJECT_CONTEXT.md` und `SESSION_STATE.md` bei Task-Start nur lesen, wenn vorhanden und relevant, dann materielle Fakten verifizieren;
+  - Immer auf temporären Branches arbeiten (`feature/*`, `fix/*`);
+  - TDD-Red-Green-Zyklus, mit tatsächlichen Testläufen verifizieren;
+  - Git-Autorisierungsmodell befolgen;
+  - **Selektive Memory-Updates**: `SESSION_STATE.md` bei sinnvollem Abschluss aktualisieren; `PROJECT_CONTEXT.md` nur aktualisieren, wenn sich dauerhafte Projektfakten ändern.
 
-### Q2: How does online update (`-Update`) protect custom project configurations?
-> **Answer**: Existing project `AGENTS.md` is preserved and an `AGENTS.template.md` is generated for review. `-Global` initializes missing Claude Code, Antigravity, and Codex global instructions while preserving existing files. Combining `-Global -Update` makes timestamped backups and replaces those global files with the current template; Codex's active non-empty `AGENTS.override.md` is updated in place of `AGENTS.md`.
-
-### Q3: How do 40+ skills avoid blowing up the context window?
-> **Answer**: It depends on how the host discovers and loads Skills. Do not assume fixed metadata costs or cache discounts; keep only useful Skills enabled and verify behavior in the target host.
-
-### Q4: What is the 8 High-Risk Operations Protection Matrix?
-> **Answer**: Defined in `security-boundary.md`, requiring human confirmation before:
-> 1. Modifying build configs (`package.json`, `CMakeLists.txt`, `.pro`, `Cargo.toml`);
-> 2. Introducing new third-party dependencies;
-> 3. Modifying global public data structures (`public_struct.h`, `types.ts`);
-> 4. Changing core dispatch singletons or public service interfaces;
-> 5. Modifying communication protocols or wire contracts (`protofile/`);
-> 6. Altering license, cryptography, or auth code;
-> 7. Modifying `.gitignore` or CI/CD pipelines;
-> 8. High-impact cross-module changes affecting shared contracts or requiring broad coordination; file count alone is not a risk trigger.
-
-### Q5: When should `PROJECT_CONTEXT.md` and `SESSION_STATE.md` be updated?
-> At meaningful task/session boundaries, update `SESSION_STATE.md` with completed work, actual verification evidence, remaining steps, and still-relevant risks. Update `PROJECT_CONTEXT.md` only when durable architecture, constraints, or confirmed decisions change. Do not create no-op updates. Both files summarize project memory; they do not override current user instructions, code, configuration, or reproducible evidence. Never store credentials, raw personal data, or full conversation/tool logs.
+### 2. Technische-Dokumentation-Track (leichtgewichtiger Bypass)
+- Umfang: Markdown-Dokumentation, READMEs, API-Spezifikationen, Word-/PDF-Berichte.
+- Regeln: **Befreit vom Ausführen von Test-Suites**; spezialisierte Skills nutzen (`docx`, `pdf`, `write-openspec-docs`); GitHub Flavored Markdown-Standards einhalten.
 
 ---
 
-## 8. Practical Usage & Skills Panorama Guide Reference
+## 7. Häufig gestellte Fragen & Best Practices (FAQ)
 
-For detailed tutorials on Slash Commands (`/comet`, `/plan`, `/opsx`), CodeGraph, TDD, and full end-to-end execution walkthroughs, see:
+### Q1: Warum nicht alle Projektbefehle in `Global AGENTS.md` legen?
+> **Antwort**: Globale Regeln sind maschinenweit über alle Sitzungen resident. Projektspezifische Befehle erzeugen toolübergreifende Kontextverschmutzung und verschwenden Prompt-Tokens.
+
+### Q2: Wie schützt das Online-Update (`-Update`) angepasste Projektkonfigurationen?
+> **Antwort**: Vorhandenes Projekt-`AGENTS.md` bleibt erhalten und ein `AGENTS.template.md` wird zur Review generiert. `-Global` initialisiert fehlende Claude Code-, Antigravity- und Codex-globale Anweisungen und erhält vorhandene Dateien. Die Kombination `-Global -Update` erstellt zeitgestempelte Backups und ersetzt diese globalen Dateien durch das aktuelle Template; Codex' aktive nicht leere `AGENTS.override.md` wird anstelle von `AGENTS.md` aktualisiert.
+
+### Q3: Wie vermeiden 40+ Skills das Sprengen des Kontextfensters?
+> **Antwort**: Es hängt davon ab, wie der Host Skills erkennt und lädt. Keine festen Metadatenkosten oder Cache-Rabatte annehmen; nur nützliche Skills aktiviert lassen und Verhalten im Ziel-Host verifizieren.
+
+### Q4: Was ist die 8-Hochrisiko-Operationen-Schutzmatrix?
+> **Antwort**: Definiert in `security-boundary.md`, erfordert menschliche Bestätigung vor:
+> 1. Ändern von Build-Konfigurationen (`package.json`, `CMakeLists.txt`, `.pro`, `Cargo.toml`);
+> 2. Einführen neuer Drittanbieter-Abhängigkeiten;
+> 3. Ändern globaler öffentlicher Datenstrukturen (`public_struct.h`, `types.ts`);
+> 4. Ändern von Core-Dispatch-Singletons oder öffentlichen Service-Schnittstellen;
+> 5. Ändern von Kommunikationsprotokollen oder Wire-Contracts (`protofile/`);
+> 6. Ändern von Lizenz-, Kryptografie- oder Auth-Code;
+> 7. Ändern von `.gitignore` oder CI/CD-Pipelines;
+> 8. Hochwirksame modulübergreifende Änderungen, die geteilte Contracts betreffen oder breite Koordination erfordern; allein die Dateianzahl ist kein Risiko-Trigger.
+
+### Q5: Wann sollten `PROJECT_CONTEXT.md` und `SESSION_STATE.md` aktualisiert werden?
+> An sinnvollen Task-/Sitzungsgrenzen `SESSION_STATE.md` mit abgeschlossener Arbeit, tatsächlicher Verifikationsevidenz, verbleibenden Schritten und noch relevanten Risiken aktualisieren. `PROJECT_CONTEXT.md` nur aktualisieren, wenn sich dauerhafte Architektur, Constraints oder bestätigte Entscheidungen ändern. Keine No-op-Updates erstellen. Beide Dateien fassen Projekt-Memory zusammen; sie überschreiben nicht aktuelle Benutzeranweisungen, Code, Konfiguration oder reproduzierbare Evidenz. Niemals Credentials, rohe persönliche Daten oder vollständige Konversations-/Tool-Logs speichern.
+
+---
+
+## 8. Referenz: Praxis- & Skills-Panorama-Anleitung
+
+Für detaillierte Tutorials zu Slash Commands (`/comet`, `/plan`, `/opsx`), CodeGraph, TDD und vollständigen End-to-End-Ausführungs-Walkthroughs siehe:
 👉 [Tools Practical Usage and Skills Panorama Guide (English)](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [中文说明](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md)
