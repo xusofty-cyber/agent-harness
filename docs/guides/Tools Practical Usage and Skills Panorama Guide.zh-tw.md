@@ -1,12 +1,12 @@
-# Practical Guide to AI Tooling and Skills Panorama (Claude Code / Codex / Antigravity IDE / Zed IDE)
+# AI 工具與技能全景實戰指南（Claude Code / Codex / Antigravity IDE / Zed IDE）
 
-> **Language / 語言**: [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [簡體中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | **繁體中文** | [Français](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
+> **Language / 語言**: [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [简体中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | **繁體中文** | [Français](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
 
-This guide provides a comprehensive handbook for software engineering and technical documentation with AI agents: **which skills and Harness tools to install, underlying token economics, tool configuration and wiring, when and how to invoke core slash commands (e.g., `/comet`, `/plan`, `/opsx`, `codegraph`), and an end-to-end practical walkthrough.**
+本指南為使用 AI 代理進行軟體工程與技術文件撰寫提供全面的手冊：**應安裝哪些 skills 和 Harness 工具、底層的 token 經濟學、工具配置與接線、何時以及如何呼叫核心斜線命令（例如 `/comet`、`/plan`、`/opsx`、`codegraph`），以及端到端的實戰演練。**
 
 ---
 
-## Table of Contents
+## 目錄
 
 1. [Core Architecture & Tool Matrix (Who Manages What)](#1-core-architecture--tool-matrix-who-manages-what)
 2. [Skills & Ecosystem Tools Inventory](#2-skills--ecosystem-tools-inventory)
@@ -36,9 +36,9 @@ This guide provides a comprehensive handbook for software engineering and techni
 
 ---
 
-## 1. Core Architecture & Tool Matrix (Who Manages What)
+## 1. 核心架構與工具矩陣（誰負責什麼）
 
-Without physical boundaries, AI-assisted development frequently drifts, over-engineers, or breaks backward compatibility. Our Harness architecture enforces five consecutive gates:
+若無實體邊界，AI 輔助開發經常會偏離方向、過度工程化或破壞向後相容性。我們的 Harness 架構強制執行五道連續的閘門：
 
 ```text
        [ User Request ]
@@ -64,9 +64,9 @@ Without physical boundaries, AI-assisted development frequently drifts, over-eng
        └────────────────────────────────────────────────────────┘
 ```
 
-### Responsibility Matrix
+### 責任矩陣
 
-| Component | Core Responsibility | Pain Point Solved | Interface |
+| 元件 | 核心責任 | 解決的痛點 | 介面 |
 |---|---|---|---|
 | **Comet** | Versioned Native/Classic workflows | Resumable, verifiable task workflows | Follow installed version and `.comet/config.yaml` |
 | **OpenSpec** | Spec-Driven Development (SDD) | Requirement amnesia, untracked delta changes | `/opsx:propose`, `docs/openspec/` live docs |
@@ -77,9 +77,9 @@ Without physical boundaries, AI-assisted development frequently drifts, over-eng
 | **RTK** | Optional Rust Token Killer CLI | Verbose terminal output | Requires CLI installation and a supported agent hook |
 | **Git Auth** | Protected branch guidance plus limited client hook checks | Preventing accidental shared-branch operations | Rules, Claude Code client hook, and server-side branch protection |
 
-### Rule and Memory Scope by Coding Tool
+### 各程式設計工具的規則與記憶範圍
 
-| Tool/surface | Instruction entry point | Memory scope |
+| 工具/介面 | 指示進入點 | 記憶範圍 |
 |---|---|---|
 | Codex desktop app | Project `AGENTS.md`; ai-memory can use the local Codex integration where the installed app exposes configured MCP/hooks | Verify the exact desktop version; ChatGPT web conversation memory is separate |
 | Codex CLI | Codex home and `AGENTS.md` files from repository root through the current directory; ai-memory upstream installer supports MCP/hooks | Project context/checkpoint files remain repository-managed |
@@ -87,98 +87,98 @@ Without physical boundaries, AI-assisted development frequently drifts, over-eng
 | Antigravity CLI | Global, workspace, and directory `AGENTS.md` / `.agents/rules/*.md`; ai-memory upstream supports MCP/hooks | Run setup in the same environment as the CLI |
 | Antigravity IDE | Project Markdown rules/skills plus a manually configured ai-memory MCP server | MCP provides explicit retrieval/write tools; no automatic lifecycle capture is claimed |
 
-The deployment scripts write paths; check each host's current documentation and loaded context before assuming a file was consumed.
+部署腳本負責寫入路徑；在假設檔案已被取用之前，請先查閱各宿主的最新文件和已載入的上下文。
 
 ---
 
-## 2. Skills & Ecosystem Tools Inventory
+## 2. Skills 與生態系工具盤點
 
-### 2.1 44 Integrated Native Skills Categorized
+### 2.1 44 個內建原生 Skills 分類
 
-The installer copies the repository's skill directories into `.agents/skills/`; actual discovery depends on the host tool and its configuration.
+安裝程式將倉庫的 skill 目錄複製到 `.agents/skills/`；實際的探索行為取決於宿主工具及其配置。
 
-#### 1. Versioned Workflow Entry Point
-- **`comet`**: The Comet CLI provides versioned Native and Classic workflows. This repository ships an entry-point guide only; it does not implement Comet phase guards.
+#### 1. 版本化工作流程進入點
+- **`comet`**：Comet CLI 提供版本化的 Native 和 Classic 工作流程。本倉庫僅提供進入點指南；不實作 Comet 階段守衛。
 
-#### 2. OpenSpec Specification-Driven Suite (16 skills)
-- **`openspec`**: Core architecture.
-- **`openspec-propose`**: Proposes changes with design, specs, and tasks in one step.
-- **`openspec-new-change`**: Step-by-step artifact creation.
-- **`openspec-continue-change`**: Advances change to next artifact.
-- **`openspec-ff-change`**: Fast-forwards through artifact generation.
-- **`openspec-apply-change`**: Implements tasks from an active change.
-- **`openspec-verify-change`**: Verifies code against delta specifications.
-- **`openspec-sync-specs`**: Syncs delta specs into main specs.
-- **`openspec-archive-change`**: Archives completed change.
-- **`openspec-bulk-archive-change`**: Archives multiple changes in parallel.
-- **`openspec-explore`**: Interactive thinking partner before creating changes.
-- **`openspec-onboard`**: Guided interactive walkthrough.
-- **`write-openspec-docs`**: Writes docs in house style.
-- **`draft-openspec-docs`**: Collaborative section-by-section drafting.
-- **`verify-openspec-docs`**: Fact-checks documentation claims.
-- **`release-openspec`**: Release audit and changeset management.
+#### 2. OpenSpec 規格驅動套件（16 個 skills）
+- **`openspec`**：核心架構。
+- **`openspec-propose`**：一次性提出包含設計、規格和任務的變更。
+- **`openspec-new-change`**：逐步建立產物。
+- **`openspec-continue-change`**：將變更推進到下一個產物。
+- **`openspec-ff-change`**：快速推進產物生成。
+- **`openspec-apply-change`**：實作作用中變更的任務。
+- **`openspec-verify-change`**：依據增量規格驗證程式碼。
+- **`openspec-sync-specs`**：將增量規格同步到主規格。
+- **`openspec-archive-change`**：封存已完成的變更。
+- **`openspec-bulk-archive-change`**：平行封存多個變更。
+- **`openspec-explore`**：建立變更前的互動式思考夥伴。
+- **`openspec-onboard`**：引導式互動演練。
+- **`write-openspec-docs`**：以內部風格撰寫文件。
+- **`draft-openspec-docs`**：協作式逐節起草。
+- **`verify-openspec-docs`**：事實查核文件聲明。
+- **`release-openspec`**：發行稽核與變更集管理。
 
-#### 3. Superpowers Engineering Quality Suite (15 skills)
-- **`superpowers`**: Quality constitution.
-- **`using-superpowers`**: Skills discovery and invocation guard.
-- **`brainstorming`**: Design exploration before implementation.
-- **`writing-plans`**: Step-by-step execution planning.
-- **`executing-plans`**: Strict plan execution.
-- **`test-driven-development`**: TDD red-green cycle.
-- **`systematic-debugging`**: Root-cause analysis before code modification.
-- **`verification-before-completion`**: Mandatory proof before claiming completion.
-- **`dispatching-parallel-agents`**: Spawns isolated concurrent subagents.
-- **`subagent-driven-development`**: Subagent plan execution harness.
-- **`using-git-worktrees`**: Isolated physical workspaces.
-- **`finishing-a-development-branch`**: Merge and integration decisions.
-- **`requesting-code-review`**: Pre-merge review verification.
-- **`open-code-review`**: Deterministic code review — rule-first, line-anchored, coverage-mandated. Tier A via `ocr` CLI delegation, Tier B methodology without it.
-- **`receiving-code-review`**: Technical evaluation of human review comments.
-- **`writing-skills`**: Skill creator and validator.
-- **`diagnosing-superpowers`**: Audits session drift or cost.
+#### 3. Superpowers 工程品質套件（15 個 skills）
+- **`superpowers`**：品質憲法。
+- **`using-superpowers`**：Skills 探索與呼叫守衛。
+- **`brainstorming`**：實作前的設計探索。
+- **`writing-plans`**：逐步執行規劃。
+- **`executing-plans`**：嚴格執行計畫。
+- **`test-driven-development`**：TDD 紅綠循環。
+- **`systematic-debugging`**：修改程式碼前的根本原因分析。
+- **`verification-before-completion`**：聲稱完成前的強制證明。
+- **`dispatching-parallel-agents`**：產生隔離的並行子代理。
+- **`subagent-driven-development`**：子代理計畫執行框架。
+- **`using-git-worktrees`**：隔離的實體工作區。
+- **`finishing-a-development-branch`**：合併與整合決策。
+- **`requesting-code-review`**：合併前審查驗證。
+- **`open-code-review`**：確定性程式碼審查——規則優先、行錨定、覆蓋率強制。Tier A 透過 `ocr` CLI 委派，Tier B 為純方法論。
+- **`receiving-code-review`**：對人工審查意見的技術評估。
+- **`writing-skills`**：Skill 建立器與驗證器。
+- **`diagnosing-superpowers`**：稽核工作階段漂移或成本。
 
-#### 4. Minimal Code & Syntax Graph
-- **`ponytail`**: Minimal implementation ladder (stdlib first, YAGNI).
-- **`codegraph`**: optional CodeGraph CLI/MCP setup guidance; installation and agent wiring are separate.
+#### 4. 極簡程式碼與語法圖
+- **`ponytail`**：最小實作階梯（標準函式庫優先，YAGNI）。
+- **`codegraph`**：可選的 CodeGraph CLI/MCP 設定指引；安裝和代理接線是獨立步驟。
 
-#### 5. Output Filtering & Concise Delivery
-- **`rtk`**: optional Rust Token Killer CLI guidance; command rewriting requires a configured agent hook.
-- **`caveman`**: Ultra-compressed telegraphic output.
+#### 5. 輸出過濾與簡潔交付
+- **`rtk`**：可選的 Rust Token Killer CLI 指引；命令重寫需要已配置的代理 hook。
+- **`caveman`**：超壓縮電報式輸出。
 
-#### 6. Professional Document Processing
-- **`docx`**: Word document generation, editing, and styling.
-- **`pdf`**: PDF text/table extraction and processing.
+#### 6. 專業文件處理
+- **`docx`**：Word 文件生成、編輯與樣式設定。
+- **`pdf`**：PDF 文字/表格擷取與處理。
 
-#### 7. Pre-Decision Review, Cross-Tool Memory & Living Documentation (In-Repo Skills)
-- **`cross-tool-memory`**: Cross-tool project-scoped memory navigation and recall aid (pairs with local ai-memory backend).
-- **`option-review`**: Pre-decision multi-option review generating an isolated 5-dimension decision matrix.
-- **`living-documentation`**: 4-tier living documentation suite (specs/architecture/reference/guides) with frontmatter-based code-doc bidirectional traceability, supporting L0/L1/L2 change impact thresholds.
-- **`engineering-docs`**: R&D lifecycle document templates (31 document types, 15 bilingual phase-gate templates) ensuring consistent output across AI agents and seamless integration with Comet phase gates and living documentation.
+#### 7. 決策前審查、跨工具記憶與活文件（倉庫內 Skills）
+- **`cross-tool-memory`**：跨工具專案範圍記憶導航與回憶輔助（搭配本地 ai-memory 後端）。
+- **`option-review`**：決策前多選項審查，生成隔離的五維度決策矩陣。
+- **`living-documentation`**：四層活文件套件（specs/architecture/reference/guides），具備基於 frontmatter 的程式碼-文件雙向追溯，支援 L0/L1/L2 變更影響閾值。
+- **`engineering-docs`**：研發生命週期文件範本（31 種文件類型，15 個雙語階段閘門範本），確保跨 AI 代理的一致輸出，並與 Comet 階段閘門和活文件無縫整合。
 
 ---
 
-### 2.2 Version Locking, Online Updates & Skill Sync (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
+### 2.2 版本鎖定、線上更新與 Skill 同步（`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`）
 
-1. **`skills-lock.json`**:
-   - Records upstream sources and LF-normalized SHA256 integrity hashes for vendored external skills;
-   - Distinguishes locally-authored core skills (`sourceType: local`) from external upstream skills (`sourceType: github`).
-2. **External Skill Upstream Sync (`tools/sync-skills.py`)**:
-   - Built-in updater for vendored external skills;
+1. **`skills-lock.json`**：
+   - 記錄外部 vendored skills 的上游來源與經 LF 正規化的 SHA256 完整性雜湊；
+   - 區分本地撰寫的核心 skills（`sourceType: local`）與外部上游 skills（`sourceType: github`）。
+2. **外部 Skill 上游同步（`tools/sync-skills.py`）**：
+   - 內建的外部 vendored skills 更新器；
    - **Check mode**: `python3 tools/sync-skills.py --check` (read-only, compares local and upstream `SKILL.md` hashes, reports 🟢 in-sync / 🟡 outdated);
    - **Apply mode**: `python3 tools/sync-skills.py --apply` (updates outdated `SKILL.md` files in-place and refreshes lock hashes; locally-authored skills are strictly protected);
    - Interactive terminal UI powered by `tools/tui.py` when invoked without arguments;
    - Supports `--skill <name>` for targeted updates and `--json` for automation.
-3. **Living Documentation Impact Analysis (`tools/doc-impact.py`)**:
-   - Analyzes code changes against living documentation traceability metadata (`docs/{specs,architecture,reference,guides,adr}/`);
-   - Supports working tree inspection, commit baselines (`--since`), explicit file lists, and interactive wizard mode (`--interactive`).
-4. **Unified Pipeline Runner (`run-pipeline.sh` / `run-pipeline.ps1`)**:
-   - Chains the full workflow into a single execution per OS (Deploy → AI Memory → Skills Sync → Living Doc Impact);
-   - Interactive wizard: `./run-pipeline.sh` (Linux/macOS) or `.\run-pipeline.ps1` (Windows);
-   - Unattended automation: `./run-pipeline.sh --all -y` or `.\run-pipeline.ps1 -All -Yes`.
-5. **終端互動式 TUI 核心組件 (`tools/tui.py`)**:
-   - 提供基於終端原生鍵盤導航的單選選單（上下方向鍵移動游標，Enter 確認）與多選選單（上下方向鍵移動游標，空白鍵切選複選框，Enter 確認提交）；
-   - 內建 TTY 與 ANSI 相容性自檢，當處於非互動管道或無 ANSI 終端時自動優雅降級為帶編號文字輸入，作為底層互動基座驅動所有部署指令碼與維護工具。
-6. **Integrated Online Update Flow**:
+3. **活文件影響分析（`tools/doc-impact.py`）**：
+   - 依據活文件追溯中繼資料分析程式碼變更（`docs/{specs,architecture,reference,guides,adr}/`）；
+   - 支援工作樹檢查、提交基準線（`--since`）、明確檔案清單和互動式精靈模式（`--interactive`）。
+4. **統一流水線執行器（`run-pipeline.sh` / `run-pipeline.ps1`）**：
+   - 將完整工作流程串連為各作業系統的單次執行（部署 → AI 記憶 → Skills 同步 → 活文件影響）；
+   - 互動式精靈：`./run-pipeline.sh`（Linux/macOS）或 `.\run-pipeline.ps1`（Windows）；
+   - 無人值守自動化：`./run-pipeline.sh --all -y` 或 `.\run-pipeline.ps1 -All -Yes`。
+5. **終端互動式 TUI 元件（`tools/tui.py`）**：
+   - 提供鍵盤驅動的單選（方向鍵 + Enter）和多選（方向鍵 + 空白鍵核取方塊切換 + Enter 確認）互動式選單；
+   - 內建 TTY 和 ANSI 相容性偵測，在非互動式或非 ANSI 管道中優雅地退回為編號文字提示，作為所有部署和維護工具的基礎。
+6. **整合式線上更新流程**：
    ```powershell
    # Windows
    .\deploy-agents.ps1 -ProjectPath "." -Update
@@ -186,31 +186,31 @@ The installer copies the repository's skill directories into `.agents/skills/`; 
    # Linux / macOS
    ./deploy-agents.sh . --update
    ```
-   - The deployment scripts fast-forward the template repository, prompt to check/apply external skill updates, and sync managed files to target projects with `.bak.<timestamp>` backups.
+   - 部署腳本會快轉範本倉庫，提示檢查/套用外部 skill 更新，並將受管檔案同步到目標專案，同時建立 `.bak.<timestamp>` 備份。
 
 ---
 
-### 2.3 Optional Harness CLI Tools
+### 2.3 可選的 Harness CLI 工具
 
-Skill availability depends on the host tool and its configuration. Terminal-level CLI tools are optional:
-- **Comet CLI**: install via `npm install -g @rpamis/comet`; provides native/classic workflow execution and `--comet-init` initialization.
+Skill 的可用性取決於宿主工具及其配置。終端層級的 CLI 工具為可選：
+- **Comet CLI**：透過 `npm install -g @rpamis/comet` 安裝；提供 native/classic 工作流程執行和 `--comet-init` 初始化。
 - **CodeGraph CLI**: macOS/Linux: `curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.sh | sh`; Windows PowerShell: `irm https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.ps1 | iex`. Run `codegraph install` to wire agents and `codegraph init` in the project.
 - **RTK (Rust Token Killer) CLI**: macOS/Linux: `curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh`; Windows: `winget install rtk-ai.rtk`. Verify with `rtk gain`. Run `rtk init` in the project to configure agent hooks.
-- **Open Code Review (OCR) CLI**: install via `npm install -g @alibaba-group/open-code-review`; enables Tier A zero-LLM-cost delegation review via the `open-code-review` skill.
+- **Open Code Review (OCR) CLI**：透過 `npm install -g @alibaba-group/open-code-review` 安裝；透過 `open-code-review` skill 啟用 Tier A 零 LLM 成本委派審查。
 
-The deployment scripts automatically detect these optional CLIs during initial setup and guide installation where appropriate.
-
----
-
-### 2.4 Skill Loading and Optional CLI Setup
-
-Skill discovery and context costs depend on the host agent and its configuration. File presence alone does not guarantee that a Skill is loaded. Ponytail and Caveman are guidance Skills copied with the project; CodeGraph and RTK also need their separate CLI and agent integration steps. Their effectiveness depends on the project, host, and setup, so this guide makes no fixed token-savings claims.
+部署腳本在初始設定期間會自動偵測這些可選的 CLI，並在適當時機引導安裝。
 
 ---
 
-### 2.5 Engineering Skills & Rules Dispatching Matrix
+### 2.4 Skill 載入與可選 CLI 設定
 
-| Scenario | Rule / Skill | Trigger / Keyword | Expected Behavior |
+Skill 的探索與上下文成本取決於宿主代理及其配置。僅有檔案存在並不保證 Skill 會被載入。Ponytail 和 Caveman 是隨專案複製的指引型 Skills；CodeGraph 和 RTK 還需要各自獨立的 CLI 和代理整合步驟。其效果取決於專案、宿主和設定，因此本指南不做固定的 token 節省承諾。
+
+---
+
+### 2.5 工程 Skills 與規則分派矩陣
+
+| 場景 | 規則 / Skill | 觸發條件 / 關鍵字 | 預期行為 |
 |---|---|---|---|
 | **Branching / Commit / Push** | [`git-workflow.md`](../../.agents/rules/git-workflow.md) | `git commit` / `git push` | Commit only on temp branches; no `git add .`; human authorization required for remote push |
 | **High-Risk Operations** | [`security-boundary.md`](../../.agents/rules/security-boundary.md) | Modifying build configs, protocols, public structs | Pause and confirm impact with human |
@@ -228,21 +228,21 @@ Skill discovery and context costs depend on the host agent and its configuration
 
 ---
 
-## 3. Deep Dive into Core Harness Tools & Slash Commands
+## 3. 核心 Harness 工具與斜線命令深度解析
 
-### 3.1 Comet: Versioned workflow entry point
+### 3.1 Comet：版本化工作流程進入點
 
-Comet is an independently versioned workflow tool. Check the project's `.comet/config.yaml` and installed CLI version, then follow the Native or Classic workflow supported by that version. This repository's Comet skill is an entry-point guide; it does not create Comet state files or enforce phase guards. If Comet is not installed or configured, use the project's existing process or make a task-appropriate plan. When paired with `engineering-docs`, each phase (Open, Design, Build, Verify, Archive) uses standardized gate templates for consistent deliverables.
+Comet 是獨立版本化的工作流程工具。請查看專案的 `.comet/config.yaml` 和已安裝的 CLI 版本，然後遵循該版本支援的 Native 或 Classic 工作流程。本倉庫的 Comet skill 僅為進入點指南；它不會建立 Comet 狀態檔或強制執行階段閘門。若未安裝或配置 Comet，請使用專案現有流程或制定適合任務的計畫。當與 `engineering-docs` 搭配使用時，每個階段（Open、Design、Build、Verify、Archive）都使用標準化的閘門範本以確保交付物的一致性。
 
 ```text
 /comet Add date-range filtered CSV export for the order service
 ```
 
-Use Comet's current upstream documentation for version-specific entry points, configuration, artifact paths, and archive behavior.
+有關版本特定的進入點、配置、產物路徑和封存行為，請參閱 Comet 最新的上游文件。
 
 ---
 
-### 3.2 OpenSpec: Spec-Driven Development
+### 3.2 OpenSpec：規格驅動開發
 
 - `/opsx:propose <name>`: Proposes new change under `docs/openspec/changes/`;
 - `/opsx:apply`: Implements approved change;
@@ -252,24 +252,24 @@ Use Comet's current upstream documentation for version-specific entry points, co
 
 ---
 
-### 3.3 Superpowers: TDD, Systematic Debugging & Verification Gate
+### 3.3 Superpowers：TDD、系統化除錯與驗證閘門
 
-1. **TDD Red-Green Cycle**:
-   - Write failing test based on specification scenario;
-   - Run test and observe the expected failure;
-   - Write minimal code to pass;
-   - Refactor and run verification.
-2. **Systematic Debugging**:
-   - Step 1: Trace collection;
-   - Step 2: Form hypothesis;
-   - Step 3: Minimal reproduction test;
-   - Step 4: Fix root cause and verify.
-3. **Verification Evidence Gate**:
-   - No task is complete without physical terminal output evidence.
+1. **TDD 紅綠循環**：
+   - 根據規格場景撰寫失敗的測試；
+   - 執行測試並觀察預期的失敗；
+   - 撰寫最小程式碼使其通過；
+   - 重構並執行驗證。
+2. **系統化除錯**：
+   - 步驟 1：追蹤收集；
+   - 步驟 2：形成假設；
+   - 步驟 3：最小重現測試；
+   - 步驟 4：修復根本原因並驗證。
+3. **驗證證據閘門**：
+   - 沒有實體終端輸出證據，任務就不算完成。
 
 ---
 
-### 3.4 CodeGraph: Optional MCP Code-Graph Integration
+### 3.4 CodeGraph：可選的 MCP 程式碼圖整合
 
 ```bash
 # Explore call chains and architecture
@@ -281,54 +281,54 @@ Query the configured CodeGraph MCP tool for `OrderService::calculateDiscount`.
 
 ---
 
-### 3.5 Ponytail: Minimal Implementation Ladder
+### 3.5 Ponytail：最小實作階梯
 
-1. Does this feature need to exist? (YAGNI);
-2. Is there an existing utility to reuse?
-3. Can the language standard library do this?
-4. Change 1 line before rewriting 10 lines;
-5. Never opportunistic refactor during bug fixes.
-
----
-
-### 3.6 Caveman: Ultra-Compressed Output
-
-- Eliminates fluff: "Sure, I'll do that for you", "Note that this requires caution";
-- Delivers: Conclusion & Impact $\rightarrow$ Diff $\rightarrow$ Verification evidence.
+1. 這個功能真的需要存在嗎？（YAGNI）；
+2. 是否有現成的工具可以重用？
+3. 語言標準函式庫能做到嗎？
+4. 重寫 10 行之前先改 1 行；
+5. 修復錯誤時絕不順手重構。
 
 ---
 
-### 3.7 RTK: Optional Rust Token Killer CLI
+### 3.6 Caveman：極致壓縮輸出
 
-- RTK rewrites supported commands only when installed and integrated with the active agent. The repository Skill alone does not filter terminal output.
-- Verify the correct product with `rtk gain`; initialize supported project hooks with `rtk init`.
-- If RTK is not configured, use native concise flags and bounded log handling.
-
-- Never run bare verbose commands;
-- Always use `git status -s`, `pytest -q`, `ctest --output-on-failure`;
-- Redirect multi-hundred line logs to local scratch files and slice only the failure traces.
+- 消除廢話：「好的，我來幫您處理」、「請注意這需要謹慎」；
+- 交付：結論與影響 $\rightarrow$ Diff $\rightarrow$ 驗證證據。
 
 ---
 
-### 3.8 Git Authorization Model & Protected Branch Workflow
+### 3.7 RTK：可選的 Rust Token Killer CLI
 
-1. **Temporary Branch Isolation**:
-   - All work happens in `feature/*`, `fix/*`, `refactor/*`;
-   - Never commit directly to `develop`, `master`, `main`, `release*`, `staging`.
-2. **Remote Push Authorization**:
-   - AI can create branches and commit locally;
-   - Pushing to remote or merging into protected branches requires explicit human confirmation.
-3. **Iron Laws**:
-   - `git push --force` is permanently forbidden;
-   - Rebasing protected branches is permanently forbidden;
-   - Blind staging via `git add .` is forbidden (use `git add <explicit-path>`);
-   - Commit message standard: `{type}: {description}`.
+- RTK 僅在已安裝並與作用中代理整合時才重寫支援的命令。僅有倉庫中的 Skill 並不會過濾終端輸出。
+- 使用 `rtk gain` 驗證產品正確性；使用 `rtk init` 初始化支援的專案 hooks。
+- 若未配置 RTK，請使用原生的簡潔旗標和有界的日誌處理。
+
+- 絕不執行未加修飾的冗長命令；
+- 始終使用 `git status -s`、`pytest -q`、`ctest --output-on-failure`；
+- 將數百行的日誌重定向到本地暫存檔，僅截取失敗的追蹤部分。
 
 ---
 
-### 3.9 Project Memory and Session Checkpoint (`PROJECT_CONTEXT.md` / `SESSION_STATE.md`)
+### 3.8 Git 授權模型與受保護分支工作流程
 
-Treat memory as a verifiable summary and navigation aid, not as a replacement for code or maintained documentation:
+1. **臨時分支隔離**：
+   - 所有工作都在 `feature/*`、`fix/*`、`refactor/*` 中進行；
+   - 絕不直接提交到 `develop`、`master`、`main`、`release*`、`staging`。
+2. **遠端推送授權**：
+   - AI 可以建立分支並在本地提交；
+   - 推送到遠端或合併到受保護分支需要明確的人工確認。
+3. **鐵律**：
+   - `git push --force` 被永久禁止；
+   - 禁止對受保護分支執行 rebase；
+   - 禁止使用 `git add .` 進行盲目暫存（請使用 `git add <明確路徑>`）；
+   - 提交訊息規範：`{type}: {description}`。
+
+---
+
+### 3.9 專案記憶與工作階段檢查點（`PROJECT_CONTEXT.md` / `SESSION_STATE.md`）
+
+將記憶視為可驗證的摘要和導航輔助，而非程式碼或維護中文件的替代品：
 1. **Task start:** Read `PROJECT_CONTEXT.md` (verified durable project facts) and `SESSION_STATE.md` (current checkpoint) only when present and relevant; verify branch, configuration, and implementation facts that affect the task.
 2. **During work:** Keep plans when useful for multi-step work. Do not add automatic capture of prompts, tool inputs/outputs, source files, or terminal commands.
 3. **Meaningful closeout:** Update `SESSION_STATE.md` with completed work, actual verification evidence, remaining steps, and still-relevant risks; remove stale items. Update `PROJECT_CONTEXT.md` only when durable architecture, constraints, or confirmed decisions change. No-op sessions need no empty update.
@@ -348,9 +348,9 @@ The setup includes Claude Code and Codex CLI MCP/hooks, plus Antigravity CLI MCP
 
 Windows supports both WSL2 and native modes upstream. Install and configure ai-memory in the same environment that launches the agent; see the [Windows guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/windows.md). Path exclusions do not redact arbitrary prompt text. Back up with `ai-memory --data-dir <data-dir> backup --to <archive-path>`; uninstall removes integrations but not data. Stop the service and verify the configured data directory before intentionally deleting it. See the [marker reference](https://github.com/akitaonrails/ai-memory/blob/main/docs/marker-file.md) and [installation guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md) for platform paths and Docker commands.
 
-### 3.10 8 High-Risk Operations Protection Matrix
+### 3.10 8 項高風險操作保護矩陣
 
-Human confirmation is mandatory before:
+在以下操作前必須經過人工確認：
 - [ ] 1. Modifying build configs (`package.json`, `CMakeLists.txt`, `.pro`, `Cargo.toml`);
 - [ ] 2. Adding new third-party dependencies;
 - [ ] 3. Modifying global public data structures (`public_struct.h`, `types.ts`);
@@ -362,9 +362,9 @@ Human confirmation is mandatory before:
 
 ---
 
-## 4. Platform-Specific Native Commands & Best Practices
+## 4. 平台特定的原生命令與最佳實踐
 
-### 4.1 Google Antigravity CLI and IDE
+### 4.1 Google Antigravity CLI 與 IDE
 - The CLI runs as `agy`; the desktop IDE is a separate surface. Both document file-based workspace/global rules, but CLI slash commands and IDE controls are surface-specific.
 - `/plan`: Structured task planning for $\ge 3$ steps;
 - `/goal`: Unattended autonomous loop until verified completion;
@@ -372,14 +372,14 @@ Human confirmation is mandatory before:
 - `/learn`: Captures lessons learned into `tasks/lessons.md`;
 - `/schedule`: Background timers and recurring cron monitoring.
 
-### 4.2 Claude Code and PreToolUse Client Hook
+### 4.2 Claude Code 與 PreToolUse 用戶端 Hook
 - `/compact`: Compresses conversation history when token count is high;
 - `/cost`: Real-time session token usage;
 - `/review`: Reviews working copy diffs;
 - `@<path>`: Dynamically loads specific rules on demand.
 - **Security hook**: `.claude/settings.json` runs Claude Code client-side checks for matching tool calls. It can reject selected patterns or warn; it is not an operating-system control or memory collector.
 
-### 4.3 Codex in ChatGPT, Codex CLI, and GitHub Copilot
+### 4.3 ChatGPT 中的 Codex、Codex CLI 與 GitHub Copilot
 - Codex CLI documents `AGENTS.md` discovery from Codex home and the repository path to the current directory. Do not infer that exact behavior for ChatGPT/desktop; check its current product behavior and configuration.
 - `/hooks`: Inspects and trusts lifecycle hooks;
 - `$comet`: Triggers Comet state machine in Codex CLI;
@@ -392,9 +392,9 @@ Human confirmation is mandatory before:
 
 ---
 
-## 5. End-to-End Practical Walkthrough (Real-World Feature Development)
+## 5. 端到端實戰演練（真實功能開發）
 
-**Requirement**: "Add a CSV export endpoint with date range filtering to the order service."
+**需求**：「為訂單服務新增一個支援日期範圍篩選的 CSV 匯出端點。」
 
 ```text
 Step 1: Session Ceremony & Breakpoint Awareness (Session Start)
@@ -438,29 +438,29 @@ Step 7: Delivery, Safe Commit & Selective Memory Closeout (Session Finish)
 
 ---
 
-## 6. Daily Health Checks & Troubleshooting
+## 6. 每日健康檢查與故障排除
 
-### Daily Health Check:
+### 每日健康檢查：
 ```bash
 Check the installed Comet version and project configuration before using Comet-specific commands.
 Read `tasks/lessons.md` when it is relevant to the task.
 ```
 
-### Reference Documentation:
-- Unified Pipeline Runners:
+### 參考文件：
+- 統一流水線執行器：
   - Windows: [`run-pipeline.ps1`](../../run-pipeline.ps1)
   - Linux / macOS: [`run-pipeline.sh`](../../run-pipeline.sh)
-- One-Click Deployment Scripts:
+- 一鍵部署腳本：
   - Windows: [`deploy-agents.ps1`](../../deploy-agents.ps1)
   - Linux / macOS: [`deploy-agents.sh`](../../deploy-agents.sh)
-- Maintenance Tools:
-  - Terminal UI Library: [`tools/tui.py`](../../tools/tui.py)
-  - Skill Sync Tool: [`tools/sync-skills.py`](../../tools/sync-skills.py)
-  - Living Doc Impact Gate: [`tools/doc-impact.py`](../../tools/doc-impact.py)
-- Deployment & Configuration Guide:
+- 維護工具：
+  - 終端 UI 函式庫： [`tools/tui.py`](../../tools/tui.py)
+  - Skill 同步工具： [`tools/sync-skills.py`](../../tools/sync-skills.py)
+  - 活文件影響閘門： [`tools/doc-impact.py`](../../tools/doc-impact.py)
+- 部署與配置指南：
   - [Multi-Tool Deployment and Configuration Guide (English)](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md)
   - [多工具部署配置指南 (中文)](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md)
-- Rules Architecture:
+- 規則架構：
   - [`Global AGENTS.md`](../../templates/agents/Global%20AGENTS.md)
   - [`Project AGENTS.md`](../../templates/agents/Project%20AGENTS.md)
   - [`Directory AGENTS.md`](../../templates/agents/Directory%20AGENTS.md)
