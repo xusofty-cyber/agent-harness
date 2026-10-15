@@ -635,6 +635,8 @@ cat tasks/lessons.md
   - 活体文档质检：[`tools/doc-impact.py`](../../tools/doc-impact.py)
 - 跨工具部署与配置专著：
   - 👉 [`多工具部署配置指南.zh.md`](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md)
+- 常见问题与排障指南：
+  - 👉 [`Agent 正确触发与常见问题排查指南 (FAQ).zh.md`](Agent%20Triggering%20and%20FAQ%20Guide.zh.md)
 - 规则中枢文件：
   - 全局宪法：[`Global AGENTS.md`](../../templates/agents/Global%20AGENTS.md)
   - 项目枢纽：[`Project AGENTS.md`](../../templates/agents/Project%20AGENTS.md)

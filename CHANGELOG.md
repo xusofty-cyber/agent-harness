@@ -5,6 +5,9 @@ All notable changes to this project are documented here. Format follows
 Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
+### Added
+- **Agent 正确触发与常见问题排查指南 (FAQ)**：新增 `docs/guides/Agent Triggering and FAQ Guide.zh.md`（及软链 `docs/FAQ.zh.md`），系统梳理代码审查工具错配、AI 记忆占位符跳过、Comet 状态机唤醒、TDD/科学调试与证据门实践等核心高频问题，并提供开箱即用的精准 Prompt 模板速查库。
+
 ### Removed
 - **冗余流水线包装脚本收敛**：移除 `pipeline.sh` 和 `pipeline.ps1` 包装入口，统一保留功能完备、参数全面的标准执行器 `run-pipeline.sh` 与 `run-pipeline.ps1`；同步清理 5 语言 README、多工具部署与全景实战指南中的历史引用。
 
