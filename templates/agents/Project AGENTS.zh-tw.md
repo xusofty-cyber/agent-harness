@@ -55,7 +55,7 @@
 3. **配置隔離**：所有配置透過統一環境變數/配置模組讀取，嚴禁深層硬編碼或直接讀取原生 env。
 4. **日誌去敏**：任何印出到終端機或日誌的敏感欄位（PII、Token、密碼）必須遮罩去敏。
 5. **風險分級**：按 `.agents/rules/security-boundary.md` 區分提醒、告知與必須授權的操作；文件數量本身不構成確認門檻。
-6. **Git 受保護分支隔離**：禁止在受保護分支（develop/master/main/release*/staging）直接改程式碼，改動一律切臨時分支，嚴禁 `git add .` 防誤提交。
+6. **Git 安全**：見 Global AGENTS.md「授權邊界與 Git 安全鐵律」。
 
 ## 研發全生命週期角色協同與工件流轉（Lifecycle & Phase Gates）
 
@@ -70,8 +70,7 @@
 | **5. 測試驗證** | 🧪 **QA (測試工程師)** | 測試用例設計、邊界驗證、Bug 複測與驗證報告 | `verification-before-completion`, `systematic-debugging` | 跑通測試套件，提供客觀真實執行證據 |
 | **6. 交付歸檔** | 📦 **Release Team** | 活體文檔與追溯同步、版本標記、變更歸檔 | `living-documentation`, `finishing-a-development-branch`, `comet-archive` | 程式碼與活體文檔雙向追溯同步 |
 
-### 專家團隊評審執行契約
-調用專家團隊進行全方位評審時，必須強制啟動 **架構 (Architect)、安全 (Security)、實現 (Developer)、測試 (QA)**（方案期含 **產品 (PM)**）等法定視角，輸出必須攜帶 `檔案:行號 (File:Line)` 證據與明確裁決（PASS/REJECT），嚴禁無行號程式碼的泛泛文字腦補。
+> 專家團隊評審規範見 Global AGENTS.md「專家團隊評審法定席位」章節。
 
 ## 子級規則與工程技能調度矩陣（按需查閱與喚醒）
 
