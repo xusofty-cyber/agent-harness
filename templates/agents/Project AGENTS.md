@@ -55,7 +55,7 @@
 3. **配置隔离**：所有配置通过统一环境变量/配置模块读取，严禁深层硬编码或直接读取原生 env。
 4. **日志脱敏**：任何打印到控制台或日志的敏感字段（PII、Token、密码）必须掩码脱敏。
 5. **风险分级**：按 `.agents/rules/security-boundary.md` 区分提醒、告知与必须授权的操作；文件数量本身不构成确认门槛。
-6. **Git 受保护分支隔离**：禁止在受保护分支（develop/master/main/release*/staging）直接改代码，改动一律切临时分支，严禁 `git add .` 防误提交。
+6. **Git 安全**：见 Global AGENTS.md「授权边界与 Git 安全铁律」。
 
 ## 研发全生命周期角色协同与工件流转（Lifecycle & Phase Gates）
 
@@ -70,8 +70,7 @@
 | **5. 测试验证** | 🧪 **QA (测试工程师)** | 测试用例设计、边界验证、Bug 复测与验证报告 | `verification-before-completion`, `systematic-debugging` | 跑通测试套件，提供客观真实运行证据 |
 | **6. 交付归档** | 📦 **Release Team** | 活体文档与追溯同步、版本标记、变更归档 | `living-documentation`, `finishing-a-development-branch`, `comet-archive` | 代码与活体文档双向追溯同步 |
 
-### 专家团队评审执行契约
-调用专家团队进行全方位评审时，必须强制激活 **架构 (Architect)、安全 (Security)、实现 (Developer)、测试 (QA)**（方案期含 **产品 (PM)**）等法定视角，输出必须携带 `文件:行号 (File:Line)` 证据与明确裁决（PASS/REJECT），严禁无行号代码的泛泛文本脑补。
+> 专家团队评审规范见 Global AGENTS.md「专家团队评审法定席位」章节。
 
 ## 子级规则与工程技能调度矩阵（按需查阅与唤醒）
 
