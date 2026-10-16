@@ -28,7 +28,7 @@ Claude Code 通过两种方式决定加载 skill：
 > | `integration` | 2 | 外部工具整合（comet、codegraph） |
 > | `utility` | 3 | 单一用途工具（caveman、ponytail、rtk） |
 >
-> **数量说明**：`skills-lock.json` 有 46 个条目，但本目录只列 44 个 skill。
+> **数量说明**：`skills-lock.json` 有 42 个条目，但本目录只列 40 个 skill。
 > 多出的 2 个（`openspec`、`superpowers`）是来源仓库的 meta 条目——仅作来源标记，非可安装 skill。
 
 ### 1. 工作流与流程控制
@@ -48,10 +48,6 @@ Claude Code 通过两种方式决定加载 skill：
 | `openspec-bulk-archive-change` | 自动 | — | 批量归档多个已完成变更。 | 批量清理。 |
 | `openspec-ff-change` | 自动 | — | 快进跳过制品创建。 | 想跳过仪式感、直接开干。 |
 | `openspec-onboard` | 混合 | — | OpenSpec 工作流引导。 | 第一次用："onboard me to openspec"。 |
-| `draft-openspec-docs` | 混合 | — | OpenSpec 文档协作起草模式。 | 起草 OpenSpec 文档页面时。 |
-| `write-openspec-docs` | 混合 | — | OpenSpec 文档写作模式（含风格指南）。 | 写 OpenSpec 用户文档时。 |
-| `verify-openspec-docs` | 混合 | — | 用全新上下文 subagent 核查 OpenSpec 文档。 | 验证 OpenSpec 文档声明时。 |
-| `release-openspec` | 混合 | — | 审计已合并工作以发布 OpenSpec。 | 发布 OpenSpec 版本时。 |
 | `living-documentation` | 混合 | — | 维护规格/架构/参考/指南，带追溯关系。 | 持续。文档任务自动激活；说"update living docs"强制触发。 |
 
 ### 2. 代码质量与评审
