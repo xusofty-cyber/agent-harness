@@ -1085,12 +1085,19 @@ if [ "$TOOL_COPILOT" = true ]; then
     fi
 fi
 
-# Cursor bridge (.cursorrules -> AGENTS.md)
+# Cursor bridge (.cursorrules -> AGENTS.md + .cursor/rules/*.mdc for v0.40+)
 if [ "$TOOL_CURSOR" = true ]; then
     TARGET_CURSOR="${TARGET_PROJECT_DIR}/.cursorrules"
     if [ ! -e "${TARGET_CURSOR}" ]; then
         ln -sf "AGENTS.md" "${TARGET_CURSOR}" 2>/dev/null || echo "@AGENTS.md" > "${TARGET_CURSOR}"
         echo -e "  ${GREEN}[√] 已建立 Cursor 规则桥接: .cursorrules -> AGENTS.md${NC}"
+    # P1 fix: modern Cursor (v0.40+) prefers .cursor/rules/*.mdc
+    CURSOR_RULES_DIR="${TARGET_PROJECT_DIR}/.cursor/rules"
+    mkdir -p "${CURSOR_RULES_DIR}"
+    CURSOR_MDC="${CURSOR_RULES_DIR}/agent-harness.mdc"
+    if [ ! -e "${CURSOR_MDC}" ]; then
+        printf -- '---\nalwaysApply: true\n---\n\n@AGENTS.md\n' > "${CURSOR_MDC}"
+        echo -e "  ${GREEN}[√] 已建立 Cursor 规则桥接: .cursor/rules/agent-harness.mdc${NC}"
     else
         echo "  [i] 目标项目已存在 .cursorrules，跳过。"
     fi
@@ -1157,7 +1164,18 @@ if [ "$TOOL_ROO" = true ]; then
 fi
 
 if [ "$TOOL_KIRO" = true ]; then
-    bridge_rule_dir "Kiro" ".kiro/steering" "agent-harness.md"
+    # P1 fix: Kiro steering needs frontmatter for auto-load (not a bare symlink)
+    if [ "$TOOL_KIRO" = true ]; then
+        kiro_dir="${TARGET_PROJECT_DIR}/.kiro/steering"
+        mkdir -p "${kiro_dir}"
+        kiro_file="${kiro_dir}/agent-harness.md"
+        if [ ! -e "${kiro_file}" ]; then
+            printf -- '---\ninclusion: always\n---\n\n@AGENTS.md\n' > "${kiro_file}"
+            echo -e "  ${GREEN}[√] 已建立 Kiro 规则桥接: .kiro/steering/agent-harness.md (with frontmatter)${NC}"
+        else
+            echo "  [i] 目标项目已存在 .kiro/steering/agent-harness.md，跳过。"
+        fi
+    fi
 fi
 
 if [ "$TOOL_CONTINUE" = true ]; then
@@ -1178,6 +1196,10 @@ if [ "$TOOL_CLAUDE" = true ] && [ -f "${SOURCE_CLAUDE_SETTINGS}" ]; then
     if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_CLAUDE_SETTINGS}" ]; then
         if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_CLAUDE_SETTINGS}"; fi
         cp -f "${SOURCE_CLAUDE_SETTINGS}" "${TARGET_CLAUDE_SETTINGS}"
+        # P0 fix: codegraph.cmd is Windows-only; use codegraph on Unix
+        if [ "$(uname)" != "Windows_NT" ] && [ "$(uname -o 2>/dev/null)" != "Msys" ]; then
+            sed -i 's/codegraph\.cmd/codegraph/g' "${TARGET_CLAUDE_SETTINGS}"
+        fi
         echo -e "  ${GREEN}[√] 已部署 Claude Code 安全拦截钩子: .claude/settings.json${NC}"
     else
         echo "  [i] 目标项目已存在 .claude/settings.json，跳过。"
