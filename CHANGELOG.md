@@ -6,6 +6,8 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 ### Added
+- **研发全生命周期角色协同与阶段门禁（Phase Gates）**：在 `Global AGENTS` 与 `Project AGENTS`（5 种语言模板）中全面引入五大核心角色（PM、架构师、程序员、代码审查员、QA）的协同闭环，规范“需求 ➔ 架构 ➔ 编码 ➔ 审查 ➔ 测试 ➔ 交付”的环环相扣准出门禁。
+- **专家团队评审法定席位（Mandatory Expert Panel）**：在模板中确立多专家评审执行契约，强制要求架构师、安全审计员、技术实现专家、QA 测试专家（需求阶段含产品经理）必须出席并出具 `File:Line` 行级证据与明确裁决，杜绝大模型无依据的泛泛角色扮演。
 - **Agent 正确触发与常见问题排查指南 (FAQ)**：新增 `docs/guides/Agent Triggering and FAQ Guide.zh.md`（及软链 `docs/FAQ.zh.md`），系统梳理代码审查工具错配、AI 记忆占位符跳过、Comet 状态机唤醒、TDD/科学调试与证据门实践等核心高频问题，并提供开箱即用的精准 Prompt 模板速查库。
 
 ### Removed

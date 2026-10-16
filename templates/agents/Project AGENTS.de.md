@@ -57,6 +57,22 @@
 5. **Risikoklassifizierung**: Unterscheidung von Hinweisen, Benachrichtigungen und zwingenden Freigaben gemäß `.agents/rules/security-boundary.md`; Dateianzahl allein rechtfertigt kein Anhalten.
 6. **Isolation geschützter Git-Branches**: Direkte Codeänderungen auf geschützten Branches (develop/master/main/release*/staging) sind verboten. Änderungen erfolgen auf temporären Branches.
 
+## Engineering-Lebenszyklus und Phasen-Gates (Lifecycle & Phase Gates)
+
+Dieses Projekt erfordert einen strikt geschlossenen Entwicklungsregelkreis. Features, Anforderungsänderungen und Bugfixes müssen die Phasen sequenziell durchlaufen, ohne Gates zu überspringen:
+
+| Phase | Kernrolle | Aufgaben und Artefakte | Zugeordnete Regeln & Skills | Exit Gate |
+|---|---|---|---|---|
+| **1. Anforderungen** | 🎯 **Product Manager (PM)** | Anforderungskonzeption, User Stories, PRD und Akzeptanzkriterien | `brainstorming`, `engineering-docs` (PRD), `openspec` | Eindeutige Akzeptanzkriterien, unmissverständliche Fachgrenzen |
+| **2. Architektur** | 🏗️ **Architekt** | Lösungsentwurf, Architekturbilder, Technologieauswahl (HLD/LLD) | `option-review`, `codegraph`, `engineering-docs` (HLD/LLD) | Mehrdimensionale Abwägung erfolgt, keine Einbahnstraßenrisiken |
+| **3. Implementierung**| 💻 **Entwickler** | Produktivcode, Unit-Tests, saubere Codeoptimierung | `test-driven-development`, `ponytail`, `writing-plans` | Test-First (Rot-Grün-Zyklus), minimale saubere Lösung |
+| **4. Code-Review** | 🔍 **Reviewer** | Deterministischer Reviewbericht, Sicherheitsaudit, Mängelliste | `open-code-review`, `requesting-code-review` | Zeilengenaue Verankerung, keine Critical/High-Mängel |
+| **5. Verifikation** | 🧪 **QA (Test-Ingenieur)** | Testfalldesign, Grenzprüfungen, Fehlernachtests, Testbericht | `verification-before-completion`, `systematic-debugging` | Komplette Testsuite erfolgreich mit echten Konsolenausgaben |
+| **6. Auslieferung** | 📦 **Release Team** | Living-Doc-/Code-Traceability-Sync, Tagging, Archivierung | `living-documentation`, `finishing-a-development-branch`, `comet-archive` | Bidirektionale Nachvollziehbarkeit zwischen Code und Docs |
+
+### Protokoll für obligatorische Expertengremien
+Bei einem umfassenden Review durch ein Expertenteam müssen die Rollen **Architekt, Sicherheit, Entwickler und QA** (bei Konzepten inkl. **PM**) zwingend einbezogen werden. Die Ausgaben müssen zeilengenaue Nachweise (`Datei:Zeile`) und eindeutige Verdikte (`PASS`/`REJECT`) enthalten; oberflächliches Rollenspiel ist unzulässig.
+
 ## Matrix für Teilregeln und Engineering-Skills (Bedarfsgesteuerte Aktivierung)
 
 Um Kontextaufblähung zu vermeiden, befinden sich spezifische Vorgaben in `.agents/rules/` und `.agents/skills/`. Skills mit externen CLI/MCP-Werkzeugen arbeiten nur bei vorliegender Installation:

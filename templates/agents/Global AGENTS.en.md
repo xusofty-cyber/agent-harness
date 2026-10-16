@@ -52,6 +52,33 @@ Load context as needed by the task. Multi-step tasks should use structured plans
 - Cross-tool memory services are enabled explicitly on a per-project basis; global rules neither configure nor enable personal-level auto-capture. When no memory service is present, continue using project conventions and Markdown files.
 - Automated capture must be explicitly enabled by operators, with host capture gating and data scope confirmed; path exclusion does not redact arbitrary prompt text. Storing credentials and private data in prompts or memories is strictly prohibited.
 
+## Engineering Lifecycle and Phase Gates
+
+R&D projects must enforce a tightly-knit engineering closed loop across all phases. Skipping front-loaded design to jump straight into code or claiming delivery without verification is strictly forbidden:
+1. **Five Core Roles Collaboration Loop**:
+   - 🎯 **Product Manager (PM)**: Requirement analysis, user stories, PRD/SRS, and acceptance criteria; defines "what to build and business boundaries";
+   - 🏗️ **Architect**: Technical solution design, system architecture diagrams, tech stack evaluation/selection (HLD/LLD); defines "system decoupling and evolution roadmap";
+   - 💻 **Developer**: Implementation per technical designs, unit testing, and code optimization; strictly observes TDD and Ponytail minimal implementation;
+   - 🔍 **Reviewer**: Deterministic code review, architectural guardrails, best practices, and security audits; enforces pre-merge quality gates;
+   - 🧪 **QA (Test Engineer)**: Test case design, boundary/edge injection, automated verification, and defect tracking; provides objective quality proof.
+2. **Phase Gates**:
+   - **Requirements ➔ Architecture**: Do not initiate major technical design without clear business value and testable acceptance criteria;
+   - **Architecture ➔ Implementation**: Complex features and refactorings require technical design and trade-off matrices before touching production code;
+   - **Implementation ➔ Review**: Completed code must undergo line-anchored review; blocking issues and security risks must reach zero before merge;
+   - **Review ➔ Verification**: Following review approval, execute test suites from a QA perspective and provide verifiable, objective terminal execution evidence;
+   - **Verification ➔ Delivery**: Code may be archived and delivered only after all tests turn green and living documentation traceability is synchronized.
+
+### Mandatory Expert Panel for Reviews
+
+When requested to conduct a review with an "expert panel", LLMs must not engage in generic, unanchored persona roleplay. **The following expert roles must be mandatorily present and provide independent verdicts**:
+- 🏗️ **[Architect] Architecture Expert**: Evaluates module decoupling, unidirectional dependencies, tech selection, and backward compatibility;
+- 🛡️ **[Security Auditor] Security Auditor**: Audits authorization, injection vectors, secrets/credentials exposure, and attack surfaces;
+- 💻 **[Lead Developer] Engineering Implementation Expert**: Evaluates code smells, concurrency/thread safety, resource lifecycles, and error robustness;
+- 🧪 **[QA Specialist] Quality & Testability Expert**: Audits test authenticity (rejecting pure-mock sham tests), edge cases, resilience, and testability;
+- 🎯 **[Product Manager] Product Value Expert** (mandatory during requirement & proposal review): Validates alignment with requirements, blocking scope creep and over-engineering.
+
+**Review Output Mandate**: Every expert role must produce an independent verdict containing: ① review scope; ② **line-anchored empirical findings (`File:Line`)**; ③ severity rating (`Critical` / `Important` / `Minor`); ④ explicit verdict (`PASS` / `REJECT` / `CONDITIONAL PASS`). Any unaddressed `Critical` finding serves as an absolute veto blocking delivery.
+
 ## Authorization Boundaries and Git Safety Ironclad Rules
 
 > Full Git spec: `.agents/rules/git-workflow.md` (authorization matrix, iron laws, never list).

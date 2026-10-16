@@ -57,6 +57,22 @@
 5. **Risk Classification**: Differentiate alerts, notices, and mandatory authorization per `.agents/rules/security-boundary.md`; file count alone is not an authorization threshold.
 6. **Git Protected Branch Isolation**: Never edit code directly on protected branches (develop/master/main/release*/staging). Changes must use temporary branches. Blind `git add .` is prohibited.
 
+## Engineering Lifecycle Roles and Phase Gates
+
+This project enforces a tightly-knit engineering closed loop across all phases. Feature work, change requests, and bug fixes must advance sequentially without skipping gates:
+
+| Lifecycle Phase | Core Role | Responsibilities & Artifacts | Linked Rules & Skills | Exit Gate |
+|---|---|---|---|---|
+| **1. Requirements** | 🎯 **Product Manager (PM)** | Requirement elicitation, user stories, PRD, and acceptance criteria | `brainstorming`, `engineering-docs` (PRD), `openspec` | Clear acceptance criteria; unambiguous scope and value |
+| **2. Architecture** | 🏗️ **Architect** | Technical design, architecture diagrams, stack selection, risk analysis (HLD/LLD) | `option-review`, `codegraph`, `engineering-docs` (HLD/LLD) | Multi-angle review complete; zero irreversible one-way doors |
+| **3. Implementation**| 💻 **Developer** | Production code, unit tests, clean refactoring | `test-driven-development`, `ponytail`, `writing-plans` | Test-first (red-green loop); minimal clean implementation |
+| **4. Code Review** | 🔍 **Reviewer** | Deterministic review reports, security audit, remediation list | `open-code-review`, `requesting-code-review` | Line-anchored findings; zero Critical/High defects |
+| **5. Verification** | 🧪 **QA (Test Engineer)** | Test case design, boundary testing, bug retests, test report | `verification-before-completion`, `systematic-debugging` | Full test suite passing with authentic terminal evidence |
+| **6. Delivery** | 📦 **Release Team** | Living doc & code traceability sync, release tagging, archiving | `living-documentation`, `finishing-a-development-branch`, `comet-archive` | Bidirectional living doc and code traceability verified |
+
+### Mandatory Expert Panel Review Protocol
+When triggering an expert panel for comprehensive review, the agent must mandatorily activate **Architect, Security, Developer, and QA** perspectives (plus **PM** during proposals/designs). Outputs must include concrete `File:Line` evidence and unambiguous verdicts (`PASS` / `REJECT`), strictly avoiding unanchored text roleplay.
+
 ## Sub-rule and Engineering Skill Dispatch Matrix (On-Demand Activation)
 
 To avoid context explosion, fine-grained rules and skills reside in `.agents/rules/` and `.agents/skills/`. Skills requiring external CLI / MCP operate only when installed and configured:

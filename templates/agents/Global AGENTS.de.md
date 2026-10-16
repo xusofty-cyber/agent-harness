@@ -52,6 +52,33 @@ Kontext nur nach Bedarf laden. Mehrstufige Aufgaben erfordern strukturierte Plä
 - Werkzeugübergreifende Speicherdienste werden ausschließlich pro Projekt explizit aktiviert. Ohne Speicherdienst weiter die Projektkonventionen und Markdown-Dateien nutzen.
 - Automatische Erfassung muss vom Betreiber explizit aktiviert werden; Pfadausschlüsse filtern keinen Freitext in Prompts. Keine sensiblen Daten in Prompts oder Speichern ablegen.
 
+## Engineering-Lebenszyklus und Phasen-Gates (Phase Gates)
+
+F&E-Projekte müssen einen strikt geschlossenen Entwicklungsregelkreis über alle Phasen einhalten. Das Überspringen der vorgelagerten Konzeption zugunsten voreiliger Implementierung sowie Behauptungen über erfolgreiche Fertigstellung ohne Prüfbelege sind untersagt:
+1. **Kollaborationsschleife der fünf Kernrollen**:
+   - 🎯 **Product Manager (PM)**: Anforderungsanalyse, User Stories, PRD/SRS und Akzeptanzkriterien; definiert den Leistungsumfang und die fachlichen Grenzen;
+   - 🏗️ **Architekt**: Technischer Lösungsentwurf, Architekturskizzen, Technologieauswahl (HLD/LLD); definiert Entkopplung und Evolutionspfade;
+   - 💻 **Entwickler**: Implementierung gemäß Designvorgaben, Unit-Tests und Codeoptimierung; folgt strikt TDD und der Ponytail-Minimalentscheidungsleiter;
+   - 🔍 **Reviewer**: Deterministisches Code-Review, Einhaltung von Architekturregeln und Sicherheitsaudit; Qualitätstor vor dem Merge;
+   - 🧪 **QA (Test-Ingenieur)**: Testfalldesign, Grenzfallprüfungen, automatisierte Verifikation und Fehlermanagement; liefert objektive Qualitätsnachweise.
+2. **Phasen-Gates (Phase Gates)**:
+   - **Anforderung ➔ Architektur**: Keine weitreichende Architekturkonzeption ohne klare Akzeptanzkriterien und messbaren Nutzen;
+   - **Architektur ➔ Implementierung**: Komplexe Features und Refactorings erfordern einen dokumentierten Lösungsentwurf mit Abwägungsmatrix vor dem Coden;
+   - **Implementierung ➔ Review**: Fertiger Code muss zeilengenau geprüft werden; kritische Mängel und Sicherheitsrisiken müssen vor dem Merge behoben sein;
+   - **Review ➔ Test & QA**: Nach Freigabe durch den Reviewer führt QA Tests durch und weist echte Konsolenausgaben als Nachweis vor;
+   - **Test ➔ Auslieferung**: Erst nach erfolgreichen Gesamttests und synchronisierter Living Documentation erfolgt Freigabe und Archivierung.
+
+### Obligatorisches Expertengremium für Reviews (Mandatory Expert Panel)
+
+Wird ein Review durch ein „Expertenteam“ verlangt, darf sich der Agent nicht in oberflächlichem Rollenspiel verlieren. **Die folgenden Fachrollen müssen verpflichtend vertreten sein und getrennt urteilen**:
+- 🏗️ **[Architekt] Architekturexperte**: Entkopplung, unidirektionale Abhängigkeiten, Technologieangemessenheit und Rückwärtskompatibilität;
+- 🛡️ **[Sicherheitsauditor] Sicherheitsexperte**: Berechtigungen, Injection-Gefahren, Schutz von Secrets/Credentials und Angriffsflächen;
+- 💻 **[Lead Developer] Implementierungsexperte**: Code Smells, Parallelität, Ressourcenfreigabe und Robustheit der Fehlerbehandlung;
+- 🧪 **[QA-Spezialist] Qualität & Testbarkeit**: Echtheit der Tests (Verbot reiner Schein-Mocks), Grenzfälle und Stabilität;
+- 🎯 **[Product Manager] Produktwertexperte** (obligatorisch bei Anforderungs- und Entwurfsreviews): Zwecktreue, Unterbindung von Scope Creep und Over-Engineering.
+
+**Review-Ausgabevorschrift**: Jede Expertenrolle muss ein eigenständiges Urteil abgeben: ① Prüfumfang; ② **zeilengenaue Belege (`File:Line`)**; ③ Schweregrad (`Critical` / `Important` / `Minor`); ④ klares Verdikt (`PASS` / `REJECT` / `CONDITIONAL PASS`). Ein ungelöstes `Critical`-Problem wirkt als absolutes Veto gegen die Auslieferung.
+
 ## Autorisierungsgrenzen und eiserne Git-Sicherheitsregeln
 
 > Vollständige Git-Spezifikation: `.agents/rules/git-workflow.md`.

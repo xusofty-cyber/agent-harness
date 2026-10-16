@@ -57,6 +57,22 @@
 5. **风险分级**：按 `.agents/rules/security-boundary.md` 区分提醒、告知与必须授权的操作；文件数量本身不构成确认门槛。
 6. **Git 受保护分支隔离**：禁止在受保护分支（develop/master/main/release*/staging）直接改代码，改动一律切临时分支，严禁 `git add .` 防误提交。
 
+## 研发全生命周期角色协同与工件流转（Lifecycle & Phase Gates）
+
+本工程遵循环环相扣的研发生命周期闭环，开发、需求变更与缺陷修复必须依序流转，严禁越级操作：
+
+| 研发阶段 | 核心角色 | 阶段职责与产出工件 | 关联规则与技能 (Skills) | 准出门禁 (Exit Gate) |
+|---|---|---|---|---|
+| **1. 需求分析** | 🎯 **PM (产品经理)** | 需求梳理、用户故事、PRD 与验收标准 | `brainstorming`, `engineering-docs` (PRD), `openspec` | 验收标准清晰，业务目标与边界无歧义 |
+| **2. 架构设计** | 🏗️ **Architect (架构师)** | 技术方案设计、架构图、选型与风险评估 (HLD/LLD) | `option-review`, `codegraph`, `engineering-docs` (HLD/LLD) | 方案经多维评审，无单向门风险与架构债务 |
+| **3. 编码实现** | 💻 **Developer (程序员)** | 业务代码实现、单元测试、局部代码优化 | `test-driven-development`, `ponytail`, `writing-plans` | 测试先行（红绿循环），最小清晰实现 |
+| **4. 代码审查** | 🔍 **Reviewer (审查员)** | 确定性审查报告、安全审计、修改清单 | `open-code-review`, `requesting-code-review` | 行号锚定，Critical / High 缺陷零残留 |
+| **5. 测试验证** | 🧪 **QA (测试工程师)** | 测试用例设计、边界验证、Bug 复测与验证报告 | `verification-before-completion`, `systematic-debugging` | 跑通测试套件，提供客观真实运行证据 |
+| **6. 交付归档** | 📦 **Release Team** | 活体文档与追溯同步、版本标记、变更归档 | `living-documentation`, `finishing-a-development-branch`, `comet-archive` | 代码与活体文档双向追溯同步 |
+
+### 专家团队评审执行契约
+调用专家团队进行全方位评审时，必须强制激活 **架构 (Architect)、安全 (Security)、实现 (Developer)、测试 (QA)**（方案期含 **产品 (PM)**）等法定视角，输出必须携带 `文件:行号 (File:Line)` 证据与明确裁决（PASS/REJECT），严禁无行号代码的泛泛文本脑补。
+
 ## 子级规则与工程技能调度矩阵（按需查阅与唤醒）
 
 为避免上下文单次加载膨胀，以下细粒度规约与专业技能存放在 `.agents/rules/` 与 `.agents/skills/`，相关场景按需查阅或调用；需要外部 CLI / MCP 的技能仅在其已安装并配置后可运行：

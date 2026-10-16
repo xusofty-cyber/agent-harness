@@ -57,6 +57,22 @@
 5. **Classification des risques** : Différencier rappels, notifications simples et autorisations obligatoires selon `.agents/rules/security-boundary.md` ; le nombre de fichiers modifiés ne constitue pas en soi un motif de blocage.
 6. **Isolation des branches Git protégées** : Interdiction absolue de modifier le code directement sur les branches protégées (develop/master/main/release*/staging). Toute modification s'opère sur une branche temporaire.
 
+## Cycle de vie de l'ingénierie et portes d'étape (Lifecycle & Phase Gates)
+
+Ce projet impose une boucle fermée d'ingénierie où chaque étape s'enchaîne rigoureusement. Le développement, les évolutions de besoins et les corrections de bugs doivent avancer dans l'ordre sans sauter de portes :
+
+| Phase | Rôle principal | Responsabilités et livrables | Règles et compétences associées | Porte de sortie (Exit Gate) |
+|---|---|---|---|---|
+| **1. Besoins** | 🎯 **Product Manager (PM)** | Expression des besoins, user stories, PRD et critères d'acceptation | `brainstorming`, `engineering-docs` (PRD), `openspec` | Critères d'acceptation clairs, objectifs métier sans ambiguïté |
+| **2. Architecture** | 🏗️ **Architecte** | Conception technique, diagrammes, choix et risques (HLD/LLD) | `option-review`, `codegraph`, `engineering-docs` (HLD/LLD) | Conception multi-angulaire validée, zéro porte unidirectionnelle |
+| **3. Implémentation**| 💻 **Développeur** | Code de production, tests unitaires, refactoring ciblé | `test-driven-development`, `ponytail`, `writing-plans` | Tests d'abord (boucle rouge-vert), implémentation minimale et propre |
+| **4. Revue de code** | 🔍 **Réviseur (Reviewer)** | Rapport déterministe, audit de sécurité, liste des correctifs | `open-code-review`, `requesting-code-review` | Constats ancrés à la ligne, zéro défaut critique/majeur |
+| **5. Vérification** | 🧪 **QA (Ingénieur Test)** | Conception des cas de test, validation des limites, rapport | `verification-before-completion`, `systematic-debugging` | Suite complète au vert avec preuves tangibles en console |
+| **6. Livraison** | 📦 **Release Team** | Synchronisation living doc/code, étiquetage, archivage | `living-documentation`, `finishing-a-development-branch`, `comet-archive` | Traçabilité bidirectionnelle documentation et code validée |
+
+### Protocole obligatoire pour les comités d'experts
+Lors d'une revue complète par un collège d'experts, l'agent doit impérativement mobiliser les perspectives **Architecte, Sécurité, Développeur et QA** (plus **PM** lors des revues de spécifications). Les livrables doivent inclure des preuves `Fichier:Ligne (File:Line)` concrètes et un verdict tranché (`PASS`/`REJECT`), excluant tout jeu de rôle non fondé.
+
 ## Matrice de routage des règles secondaires et compétences (Activation à la demande)
 
 Afin d'éviter la saturation du contexte, les spécifications fines et compétences résident dans `.agents/rules/` et `.agents/skills/`. Les compétences nécessitant des CLI/MCP externes ne fonctionnent que si elles sont installées et configurées :

@@ -57,6 +57,22 @@
 5. **風險分級**：按 `.agents/rules/security-boundary.md` 區分提醒、告知與必須授權的操作；文件數量本身不構成確認門檻。
 6. **Git 受保護分支隔離**：禁止在受保護分支（develop/master/main/release*/staging）直接改程式碼，改動一律切臨時分支，嚴禁 `git add .` 防誤提交。
 
+## 研發全生命週期角色協同與工件流轉（Lifecycle & Phase Gates）
+
+本工程遵循環環相扣的研發生命週期閉環，開發、需求變更與缺陷修復必須依序流轉，嚴禁越級操作：
+
+| 研發階段 | 核心角色 | 階段職責與產出工件 | 關聯規則與技能 (Skills) | 准出門禁 (Exit Gate) |
+|---|---|---|---|---|
+| **1. 需求分析** | 🎯 **PM (產品經理)** | 需求梳理、使用者故事、PRD 與驗收標準 | `brainstorming`, `engineering-docs` (PRD), `openspec` | 驗收標準清晰，業務目標與邊界無歧義 |
+| **2. 架構設計** | 🏗️ **Architect (架構師)** | 技術方案設計、架構圖、選型與風險評估 (HLD/LLD) | `option-review`, `codegraph`, `engineering-docs` (HLD/LLD) | 方案經多維評審，無單向門風險與架構債務 |
+| **3. 編碼實現** | 💻 **Developer (程式設計師)** | 業務程式碼實現、單元測試、局部程式碼優化 | `test-driven-development`, `ponytail`, `writing-plans` | 測試先行（紅綠循環），最小清晰實現 |
+| **4. 程式碼審查** | 🔍 **Reviewer (審查員)** | 確定性審查報告、安全審計、修改清單 | `open-code-review`, `requesting-code-review` | 行號錨定，Critical / High 缺陷零殘留 |
+| **5. 測試驗證** | 🧪 **QA (測試工程師)** | 測試用例設計、邊界驗證、Bug 複測與驗證報告 | `verification-before-completion`, `systematic-debugging` | 跑通測試套件，提供客觀真實執行證據 |
+| **6. 交付歸檔** | 📦 **Release Team** | 活體文檔與追溯同步、版本標記、變更歸檔 | `living-documentation`, `finishing-a-development-branch`, `comet-archive` | 程式碼與活體文檔雙向追溯同步 |
+
+### 專家團隊評審執行契約
+調用專家團隊進行全方位評審時，必須強制啟動 **架構 (Architect)、安全 (Security)、實現 (Developer)、測試 (QA)**（方案期含 **產品 (PM)**）等法定視角，輸出必須攜帶 `檔案:行號 (File:Line)` 證據與明確裁決（PASS/REJECT），嚴禁無行號程式碼的泛泛文字腦補。
+
 ## 子級規則與工程技能調度矩陣（按需查閱與喚醒）
 
 為避免上下文單次載入膨脹，以下細粒度規約與專業技能存放在 `.agents/rules/` 與 `.agents/skills/`，相關場景按需查閱或呼叫；需要外部 CLI / MCP 的技能僅在其已安裝並配置後可執行：

@@ -52,6 +52,33 @@ Charger le contexte selon les besoins de la tâche. Les tâches en plusieurs ét
 - Les services de mémoire multi-outils ne sont activés qu'explicitement par projet ; les règles globales ne configurent ni n'activent la collecte automatique personnelle. Sans service de mémoire, continuer avec les conventions du projet et les fichiers Markdown.
 - La collecte automatique doit être explicitement activée par l'opérateur avec validation du périmètre des données ; l'exclusion de chemins ne filtre pas le texte arbitre des invites. Interdiction d'inclure des identifiants et données privées dans les invites ou mémoires.
 
+## Cycle de vie de l'ingénierie et portes d'étape (Phase Gates)
+
+Les projets de R&D doivent respecter une boucle fermée d'ingénierie rigoureusement enchaînée. Il est formellement interdit de sauter la conception initiale pour coder à l'aveugle ou d'affirmer une livraison sans preuves de test :
+1. **Boucle de collaboration des cinq rôles fondamentaux** :
+   - 🎯 **Product Manager (PM)** : Analyse des besoins, user stories, PRD/SRS et critères d'acceptation ; définit « quoi construire et les limites métier » ;
+   - 🏗️ **Architecte** : Conception technique, diagrammes d'architecture, évaluation et sélection technologique (HLD/LLD) ; définit « le découplage et la trajectoire d'évolution » ;
+   - 💻 **Développeur** : Implémentation selon les spécifications, tests unitaires et optimisation ; respecte strictement TDD et l'échelle minimale Ponytail ;
+   - 🔍 **Réviseur de code (Reviewer)** : Revue de code déterministe, conformité architecturale et audit de sécurité ; garde-fou avant toute intégration ;
+   - 🧪 **QA (Ingénieur Test)** : Conception des cas de test, injection aux limites/pannes, tests automatisés et suivi des anomalies ; fournit les preuves tangibles de qualité.
+2. **Portes d'étape (Phase Gates)** :
+   - **Besoins ➔ Architecture** : Pas de conception majeure sans valeur métier explicite et critères vérifiables ;
+   - **Architecture ➔ Implémentation** : Les fonctionnalités complexes requièrent une conception validée et une matrice de compromis avant d'écrire le code ;
+   - **Implémentation ➔ Revue** : Le code achevé doit subir une revue ancrée à la ligne ; zéro problème bloquant ou risque de sécurité toléré avant merge ;
+   - **Revue ➔ Test & QA** : Après validation en revue, exécuter la suite de tests sous l'angle QA et produire des preuves réelles de passage en terminal ;
+   - **Test ➔ Livraison** : Livraison autorisée uniquement quand tous les tests sont au vert et que la documentation vivante est synchronisée.
+
+### Collège d'experts obligatoire pour les revues (Mandatory Expert Panel)
+
+Lorsqu'une revue par « une équipe d'experts » est demandée, l'agent ne doit jamais se limiter à du jeu de rôle générique. **Les rôles d'experts suivants doivent obligatoirement siéger et statuer indépendamment** :
+- 🏗️ **[Architecte] Expert Architecture** : Découplage, dépendances unidirectionnelles, choix techniques et rétrocompatibilité ;
+- 🛡️ **[Auditeur Sécurité] Expert Sécurité** : Vulnérabilités d'authentification, injections, fuite de secrets/tokens et surface d'attaque ;
+- 💻 **[Lead Développeur] Expert Ingénierie** : Code smells, concurrence, gestion des ressources et robustesse des exceptions ;
+- 🧪 **[Spécialiste QA] Expert Qualité & Testabilité** : Pertinence réelle des tests (rejet des faux tests purement mockés), cas limites et résilience ;
+- 🎯 **[Product Manager] Expert Produit** (obligatoire lors des revues de besoins/solutions) : Alignement sur le besoin, refus de la dérive des objectifs (Scope Creep) et du surdimensionnement.
+
+**Protocole de rapport de revue** : Chaque rôle doit fournir un avis distinct comprenant : ① le périmètre examiné ; ② **des preuves empiriques ancrées à la ligne (`File:Line`)** ; ③ le niveau de sévérité (`Critical` / `Important` / `Minor`) ; ④ une décision explicite (`PASS` / `REJECT` / `CONDITIONAL PASS`). Tout constat `Critical` non corrigé constitue un veto absolu bloquant la livraison.
+
 ## Frontières d'autorisation et règles d'or de sécurité Git
 
 > Spécification Git complète : `.agents/rules/git-workflow.md`.
