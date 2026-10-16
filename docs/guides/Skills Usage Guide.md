@@ -33,7 +33,7 @@ If Claude doesn't pick up a skill when you expect it, just name it explicitly.
 > | `integration` | 2 | External tool integrations (comet, codegraph) |
 > | `utility` | 3 | Single-purpose utilities (caveman, ponytail, rtk) |
 >
-> **Note on counts**: `skills-lock.json` has 46 entries but this catalog lists 44 skills.
+> **Note on counts**: `skills-lock.json` has 42 entries but this catalog lists 40 skills.
 > The 2 extra entries (`openspec`, `superpowers`) are source-repo meta entries —
 > provenance placeholders for the upstream families, not installable skills.
 
@@ -54,10 +54,6 @@ If Claude doesn't pick up a skill when you expect it, just name it explicitly.
 | `openspec-bulk-archive-change` | Auto | — | Archives multiple completed changes. | Batch cleanup. |
 | `openspec-ff-change` | Auto | — | Fast-forwards through artifact creation. | When you want to skip ceremony and get to implementation. |
 | `openspec-onboard` | Hybrid | — | Guided walkthrough of the OpenSpec workflow. | First time using OpenSpec: "onboard me to openspec". |
-| `draft-openspec-docs` | Hybrid | — | Collaborative page-drafting for OpenSpec docs. | When drafting OpenSpec documentation pages. |
-| `write-openspec-docs` | Hybrid | — | OpenSpec docs-writing mode with house style. | When writing OpenSpec user docs. |
-| `verify-openspec-docs` | Hybrid | — | Fact-checks OpenSpec docs with fresh-context subagent. | When validating OpenSpec documentation claims. |
-| `release-openspec` | Hybrid | — | Audits merged work for OpenSpec releases. | When cutting an OpenSpec release. |
 | `living-documentation` | Hybrid | — | Maintains specs/architecture/reference/guides with traceability. | Ongoing. Auto-activates for doc tasks; say "update living docs" to force. |
 
 ### 2. Code Quality & Review
