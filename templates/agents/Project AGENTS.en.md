@@ -70,8 +70,7 @@ This project enforces a tightly-knit engineering closed loop across all phases. 
 | **5. Verification** | 🧪 **QA (Test Engineer)** | Test case design, boundary testing, bug retests, test report | `verification-before-completion`, `systematic-debugging` | Full test suite passing with authentic terminal evidence |
 | **6. Delivery** | 📦 **Release Team** | Living doc & code traceability sync, release tagging, archiving | `living-documentation`, `finishing-a-development-branch`, `comet-archive` | Bidirectional living doc and code traceability verified |
 
-### Mandatory Expert Panel Review Protocol
-When triggering an expert panel for comprehensive review, the agent must mandatorily activate **Architect, Security, Developer, and QA** perspectives (plus **PM** during proposals/designs). Outputs must include concrete `File:Line` evidence and unambiguous verdicts (`PASS` / `REJECT`), strictly avoiding unanchored text roleplay.
+> See Global AGENTS.md "Mandatory Expert Panel" section for the review protocol.
 
 ## Sub-rule and Engineering Skill Dispatch Matrix (On-Demand Activation)
 
