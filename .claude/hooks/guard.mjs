@@ -577,7 +577,7 @@ for (const inv of gitInvocations) {
 for (const inv of gitInvocations) {
   if (inv.subcommand === "push") {
     const deletes = inv.args.some((a) =>
-      a === "--delete" || a === "-d" || a.startsWith("--delete=") || /^\S*:\S*$/.test(a));
+      a === "--delete" || a === "-d" || a.startsWith("--delete=") || /^:[^/]/.test(a));
     if (deletes) {
       // If we haven't already denied (protected branches handled above), just warn
       warn(
