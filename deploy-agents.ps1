@@ -958,6 +958,14 @@ if ($ToolCursor) {
     } else {
         Write-Host "  [INFO] .cursorrules already exists, keeping existing file." -ForegroundColor Gray
     }
+    # P1 fix: modern Cursor (v0.40+) prefers .cursor/rules/*.mdc
+    $cursorRulesDir = Join-Path $ResolvedProjectPath ".cursor/rules"
+    if (-not (Test-Path $cursorRulesDir)) { New-Item -ItemType Directory -Path $cursorRulesDir -Force | Out-Null }
+    $cursorMdc = Join-Path $cursorRulesDir "agent-harness.mdc"
+    if (-not (Test-Path $cursorMdc)) {
+        "---`nalwaysApply: true`n---`n`n@AGENTS.md`n" | Out-File -FilePath $cursorMdc -Encoding utf8
+        Write-Host "  [OK] Deployed Cursor bridge: .cursor/rules/agent-harness.mdc" -ForegroundColor Green
+    }
 }
 
 # Bridge for Gemini CLI (GEMINI.md)
@@ -1031,7 +1039,18 @@ function New-RuleDirBridge {
 if ($ToolWindsurf) { New-RuleDirBridge "Windsurf" ".windsurf/rules" "agent-harness.md" }
 if ($ToolCline) { New-RuleDirBridge "Cline" ".clinerules" "agent-harness.md" }
 if ($ToolRoo) { New-RuleDirBridge "Roo Code" ".roo/rules" "agent-harness.md" }
-if ($ToolKiro) { New-RuleDirBridge "Kiro" ".kiro/steering" "agent-harness.md" }
+# P1 fix: Kiro steering needs frontmatter for auto-load
+if ($ToolKiro) {
+    $kiroDir = Join-Path $ResolvedProjectPath ".kiro/steering"
+    if (-not (Test-Path $kiroDir)) { New-Item -ItemType Directory -Path $kiroDir -Force | Out-Null }
+    $kiroFile = Join-Path $kiroDir "agent-harness.md"
+    if (-not (Test-Path $kiroFile)) {
+        "---`ninclusion: always`n---`n`n@AGENTS.md`n" | Out-File -FilePath $kiroFile -Encoding utf8
+        Write-Host "  [OK] Deployed Kiro bridge: .kiro/steering/agent-harness.md (with frontmatter)" -ForegroundColor Green
+    } else {
+        Write-Host "  [INFO] .kiro/steering/agent-harness.md already exists, keeping existing file." -ForegroundColor Gray
+    }
+}
 if ($ToolContinue) { New-RuleDirBridge "Continue.dev" ".continue/rules" "agent-harness.md" }
 if ($ToolTrae) { New-RuleDirBridge "Trae" ".trae/rules" "agent-harness.md" }
 
