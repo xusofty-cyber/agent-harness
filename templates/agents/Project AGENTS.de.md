@@ -55,7 +55,7 @@
 3. **Konfigurationsisolation**: Sämtliche Konfigurationen müssen über zentrale Umgebungsvariablen oder Konfigurationsmodule eingelesen werden; kein Hardcoding im Code.
 4. **Log-Anonymisierung**: Alle vertraulichen Werte in Konsolenausgaben oder Logs (PII, Tokens, Passwörter) müssen maskiert werden.
 5. **Risikoklassifizierung**: Unterscheidung von Hinweisen, Benachrichtigungen und zwingenden Freigaben gemäß `.agents/rules/security-boundary.md`; Dateianzahl allein rechtfertigt kein Anhalten.
-6. **Isolation geschützter Git-Branches**: Direkte Codeänderungen auf geschützten Branches (develop/master/main/release*/staging) sind verboten. Änderungen erfolgen auf temporären Branches.
+6. **Git-Sicherheit**: Siehe Global AGENTS.md, „Git-Sicherheitsregeln“.
 
 ## Engineering-Lebenszyklus und Phasen-Gates (Lifecycle & Phase Gates)
 
@@ -70,8 +70,7 @@ Dieses Projekt erfordert einen strikt geschlossenen Entwicklungsregelkreis. Feat
 | **5. Verifikation** | 🧪 **QA (Test-Ingenieur)** | Testfalldesign, Grenzprüfungen, Fehlernachtests, Testbericht | `verification-before-completion`, `systematic-debugging` | Komplette Testsuite erfolgreich mit echten Konsolenausgaben |
 | **6. Auslieferung** | 📦 **Release Team** | Living-Doc-/Code-Traceability-Sync, Tagging, Archivierung | `living-documentation`, `finishing-a-development-branch`, `comet-archive` | Bidirektionale Nachvollziehbarkeit zwischen Code und Docs |
 
-### Protokoll für obligatorische Expertengremien
-Bei einem umfassenden Review durch ein Expertenteam müssen die Rollen **Architekt, Sicherheit, Entwickler und QA** (bei Konzepten inkl. **PM**) zwingend einbezogen werden. Die Ausgaben müssen zeilengenaue Nachweise (`Datei:Zeile`) und eindeutige Verdikte (`PASS`/`REJECT`) enthalten; oberflächliches Rollenspiel ist unzulässig.
+> Siehe Global AGENTS.md, Abschnitt „Obligatorisches Expertengremium“.
 
 ## Matrix für Teilregeln und Engineering-Skills (Bedarfsgesteuerte Aktivierung)
 
