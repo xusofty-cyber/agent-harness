@@ -65,14 +65,6 @@
       "domain": "document",
       "pinnedCommit": "fa0fa64bdc967915dc8399e803be67759e1e62b8"
     },
-    "draft-openspec-docs": {
-      "source": "Fission-AI/OpenSpec",
-      "sourceType": "github",
-      "skillPath": ".agents/skills/draft-openspec-docs/SKILL.md",
-      "computedHash": "274209302f5171434c69ab9a658a660419179feec77dbc99b432e7c69606a4cc",
-      "domain": "openspec",
-      "pinnedCommit": "f1b521dffac38ed6638689cd28b0c204b1eef0f1"
-    },
     "engineering-docs": {
       "source": "./agent-harness (authored in-repo)",
       "sourceType": "local",
@@ -257,14 +249,6 @@
       "domain": "superpowers",
       "pinnedCommit": "3fb75974186ea7fada621d8ab77b3b02169baf57"
     },
-    "release-openspec": {
-      "source": "Fission-AI/OpenSpec",
-      "sourceType": "github",
-      "skillPath": ".agents/skills/release-openspec/SKILL.md",
-      "computedHash": "56b391b3b4e8a0250f24d967f2b0d31324d679a84b3ac5f9490b78e001604e18",
-      "domain": "openspec",
-      "pinnedCommit": "3f02c686c5c52ea03e66912354b49c25c5cf0f8b"
-    },
     "requesting-code-review": {
       "source": "obra/superpowers",
       "sourceType": "github",
@@ -336,22 +320,6 @@
       "computedHash": "2befe7fc55bcadaa3d97dd9e8efeb633d2561c0ebe74c5a8b17c4d9e7e4520b3",
       "domain": "superpowers",
       "pinnedCommit": "3be5aad3dd2400ef23b15680969f4bcd3b6d7b8b"
-    },
-    "verify-openspec-docs": {
-      "source": "Fission-AI/OpenSpec",
-      "sourceType": "github",
-      "skillPath": ".agents/skills/verify-openspec-docs/SKILL.md",
-      "computedHash": "a3fa53a4ce377610cf8bafb72b78ce49492dd49bda6f0ff4485d5481925b94fb",
-      "domain": "openspec",
-      "pinnedCommit": "f1b521dffac38ed6638689cd28b0c204b1eef0f1"
-    },
-    "write-openspec-docs": {
-      "source": "Fission-AI/OpenSpec",
-      "sourceType": "github",
-      "skillPath": ".agents/skills/write-openspec-docs/SKILL.md",
-      "computedHash": "581e121b2c98040d5ce0a93ad88d0a8736fe06d9c00f5e1105b937c1499dce85",
-      "domain": "openspec",
-      "pinnedCommit": "f1b521dffac38ed6638689cd28b0c204b1eef0f1"
     },
     "writing-plans": {
       "source": "obra/superpowers",

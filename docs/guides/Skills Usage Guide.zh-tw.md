@@ -2,7 +2,7 @@
 
 > **Language / 语言**: [English](Skills%20Usage%20Guide.md) | [简体中文](Skills%20Usage%20Guide.zh.md) | **繁體中文** | [Français](Skills%20Usage%20Guide.fr.md) | [Deutsch](Skills%20Usage%20Guide.de.md)
 
-44 個內建 skill 在實戰中如何運作：哪些自動觸發、哪些需要顯式調用，以及各自的使用時機。
+40 個內建 skill 在實戰中如何運作：哪些自動觸發、哪些需要顯式調用，以及各自的使用時機。
 
 ## Skill 觸發機制
 
@@ -31,7 +31,7 @@ Claude Code 透過兩種方式決定載入 skill：
 > | `integration` | 2 | 外部工具整合（comet、codegraph） |
 > | `utility` | 3 | 單一用途工具（caveman、ponytail、rtk） |
 >
-> **數量說明**：`skills-lock.json` 有 46 個條目，但本目錄只列 44 個 skill。
+> **數量說明**：`skills-lock.json` 有 42 個條目，但本目錄只列 40 個 skill。
 > 多出的 2 個（`openspec`、`superpowers`）是來源倉庫的 meta 條目——僅作來源標記，非可安裝 skill。
 
 ### 1. 工作流與流程控制
@@ -51,10 +51,6 @@ Claude Code 透過兩種方式決定載入 skill：
 | `openspec-bulk-archive-change` | 自動 | — | 批次歸檔多個已完成變更。 | 批次清理。 |
 | `openspec-ff-change` | 自動 | — | 快進跳過製成品建立。 | 想跳過儀式感、直接開工。 |
 | `openspec-onboard` | 混合 | — | OpenSpec 工作流引導。 | 第一次使用：「onboard me to openspec」。 |
-| `draft-openspec-docs` | 混合 | — | OpenSpec 文件協作起草模式。 | 起草 OpenSpec 文件頁面時。 |
-| `write-openspec-docs` | 混合 | — | OpenSpec 文件寫作模式（含風格指南）。 | 寫 OpenSpec 使用者文件時。 |
-| `verify-openspec-docs` | 混合 | — | 用全新上下文 subagent 核查 OpenSpec 文件。 | 驗證 OpenSpec 文件聲明時。 |
-| `release-openspec` | 混合 | — | 稽核已合併工作以發佈 OpenSpec。 | 發佈 OpenSpec 版本時。 |
 | `living-documentation` | 混合 | — | 維護規格/架構/參考/指南，帶溯源關係。 | 持續。文檔任務自動啟動；說「update living docs」強制觸發。 |
 
 ### 2. 程式碼品質與審查
