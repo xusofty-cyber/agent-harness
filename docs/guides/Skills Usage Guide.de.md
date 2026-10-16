@@ -2,7 +2,7 @@
 
 > **Language / 语言**: [English](Skills%20Usage%20Guide.md) | [简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Français](Skills%20Usage%20Guide.fr.md) | **Deutsch**
 
-Wie die 44 gebündelten Skills in der Praxis funktionieren: welche automatisch auslösen, welche explizit aufgerufen werden und wann man welche einsetzt.
+Wie die 40 gebündelten Skills in der Praxis funktionieren: welche automatisch auslösen, welche explizit aufgerufen werden und wann man welche einsetzt.
 
 ## Funktionsweise der Skill-Trigger
 
@@ -31,7 +31,7 @@ Wenn Claude einen Skill nicht wie erwartet lädt, benennen Sie ihn einfach expli
 > | `integration` | 2 | Externe Tool-Integrationen (comet, codegraph) |
 > | `utility` | 3 | Einzelzweck-Utilities (caveman, ponytail, rtk) |
 >
-> **Hinweis zur Zählung**: `skills-lock.json` hat 46 Einträge, dieser Katalog listet 44 Skills.
+> **Hinweis zur Zählung**: `skills-lock.json` hat 42 Einträge, dieser Katalog listet 40 Skills.
 > Die 2 zusätzlichen Einträge (`openspec`, `superpowers`) sind Meta-Einträge der Quell-Repos —
 > Provenienz-Platzhalter, keine installierbaren Skills. nach Kategorien
 
@@ -52,10 +52,6 @@ Wenn Claude einen Skill nicht wie erwartet lädt, benennen Sie ihn einfach expli
 | `openspec-bulk-archive-change` | Auto | — | Archiviert mehrere abgeschlossene Änderungen gleichzeitig. | Batch-Bereinigung. |
 | `openspec-ff-change` | Auto | — | Schneller Vorlauf unter Umgehung der Artefakterstellung. | Um Zeremonien zu überspringen und direkt zur Implementierung überzugehen. |
 | `openspec-onboard` | Hybrid | — | Geführte Einführung in den OpenSpec-Workflow. | Bei der ersten Nutzung von OpenSpec: "onboard me to openspec". |
-| `draft-openspec-docs` | Hybrid | — | Kollaborativer Entwurfsmodus für OpenSpec-Dokumentation. | Beim Erstellen von OpenSpec-Dokumentseiten. |
-| `write-openspec-docs` | Hybrid | — | OpenSpec-Dokmodus mit Hausstil. | Beim Schreiben von OpenSpec-Benutzerdokumentation. |
-| `verify-openspec-docs` | Hybrid | — | Prüft OpenSpec-Dokumentation mit frischem Kontext. | Beim Validieren von OpenSpec-Dokumentationsaussagen. |
-| `release-openspec` | Hybrid | — | Prüft zusammengeführte Arbeit für OpenSpec-Releases. | Bei einem OpenSpec-Release. |
 | `living-documentation` | Hybrid | — | Pflegt Spezifikationen/Architektur/Referenzen/Leitfäden mit Rückverfolgbarkeit. | Fortlaufend. Aktiviert sich bei Dokumentationsaufgaben; "update living docs" erzwingt den Lauf. |
 
 ### 2. Codequalität und Review
