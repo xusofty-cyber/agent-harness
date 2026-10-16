@@ -126,8 +126,12 @@ function shellSplit(cmd) {
       if (c === "'") inSingle = true;
       else if (c === '"') inDouble = true;
       else if (c === "\\" && i + 1 < cmd.length) {
-        cur += cmd[i + 1];
-        i++;
+        if (process.platform === "win32" && /^[A-Za-z]:/.test(cur)) {
+          cur += c;
+        } else {
+          cur += cmd[i + 1];
+          i++;
+        }
       } else if (/\s/.test(c)) {
         if (cur) { tokens.push(cur); cur = ""; }
       } else if (c === ";" || c === "&" || c === "|" || c === "(" || c === ")") {

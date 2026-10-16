@@ -1091,6 +1091,10 @@ if [ "$TOOL_CURSOR" = true ]; then
     if [ ! -e "${TARGET_CURSOR}" ]; then
         ln -sf "AGENTS.md" "${TARGET_CURSOR}" 2>/dev/null || echo "@AGENTS.md" > "${TARGET_CURSOR}"
         echo -e "  ${GREEN}[√] 已建立 Cursor 规则桥接: .cursorrules -> AGENTS.md${NC}"
+    else
+        echo "  [i] 目标项目已存在 .cursorrules，跳过。"
+    fi
+
     # P1 fix: modern Cursor (v0.40+) prefers .cursor/rules/*.mdc
     CURSOR_RULES_DIR="${TARGET_PROJECT_DIR}/.cursor/rules"
     mkdir -p "${CURSOR_RULES_DIR}"
@@ -1099,7 +1103,7 @@ if [ "$TOOL_CURSOR" = true ]; then
         printf -- '---\nalwaysApply: true\n---\n\n@AGENTS.md\n' > "${CURSOR_MDC}"
         echo -e "  ${GREEN}[√] 已建立 Cursor 规则桥接: .cursor/rules/agent-harness.mdc${NC}"
     else
-        echo "  [i] 目标项目已存在 .cursorrules，跳过。"
+        echo "  [i] 目标项目已存在 .cursor/rules/agent-harness.mdc，跳过。"
     fi
 fi
 
@@ -1165,16 +1169,14 @@ fi
 
 if [ "$TOOL_KIRO" = true ]; then
     # P1 fix: Kiro steering needs frontmatter for auto-load (not a bare symlink)
-    if [ "$TOOL_KIRO" = true ]; then
-        kiro_dir="${TARGET_PROJECT_DIR}/.kiro/steering"
-        mkdir -p "${kiro_dir}"
-        kiro_file="${kiro_dir}/agent-harness.md"
-        if [ ! -e "${kiro_file}" ]; then
-            printf -- '---\ninclusion: always\n---\n\n@AGENTS.md\n' > "${kiro_file}"
-            echo -e "  ${GREEN}[√] 已建立 Kiro 规则桥接: .kiro/steering/agent-harness.md (with frontmatter)${NC}"
-        else
-            echo "  [i] 目标项目已存在 .kiro/steering/agent-harness.md，跳过。"
-        fi
+    kiro_dir="${TARGET_PROJECT_DIR}/.kiro/steering"
+    mkdir -p "${kiro_dir}"
+    kiro_file="${kiro_dir}/agent-harness.md"
+    if [ ! -e "${kiro_file}" ]; then
+        printf -- '---\ninclusion: always\n---\n\n@AGENTS.md\n' > "${kiro_file}"
+        echo -e "  ${GREEN}[√] 已建立 Kiro 规则桥接: .kiro/steering/agent-harness.md (with frontmatter)${NC}"
+    else
+        echo "  [i] 目标项目已存在 .kiro/steering/agent-harness.md，跳过。"
     fi
 fi
 
