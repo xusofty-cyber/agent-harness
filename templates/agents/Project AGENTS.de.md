@@ -105,6 +105,18 @@ Um Kontextaufblähung zu vermeiden, befinden sich spezifische Vorgaben in `.agen
 - **Geteilter Memory-Skill**: `.agents/skills/cross-tool-memory/SKILL.md` bei sitzungsübergreifenden Fortsetzungen oder Grundsatzentscheidungen nutzen.
 - **Lebendige Dokumentation & Quellcode-Rückverfolgbarkeit**: Dokumentation wird unter `docs/` gepflegt. `modules` und `depends_on` im Frontmatter deklarieren. Siehe `.agents/skills/living-documentation/SKILL.md`.
 
+## Definition-of-Done-Checkliste
+
+Nach Abschluss einer Feature-Entwicklung oder Anforderungsumsetzung diese Schritte der Reihe nach ausführen — keiner darf übersprungen werden:
+
+1. [ ] **Testverifikation**: Relevante Tests (Unit/Integration) ausführen, alle müssen bestehen, echte Ausführungsnachweise liefern
+2. [ ] **SESSION_STATE.md aktualisieren**: Erledigte Punkte, tatsächliche Verifikationsnachweise, offene Schritte und weiterhin gültige Risiken dokumentieren
+3. [ ] **PROJECT_CONTEXT.md aktualisieren**: Bei Architektur-, Technikentscheidungs- oder Langfrist-Constraint-Änderungen synchronisieren; bei reinen Breakpoint-Änderungen überspringen
+4. [ ] **Code-Review auslösen**: `open-code-review`-Skill (oder `ocr`-CLI) für Review aufrufen — zeilenverankert, vollständige Abdeckung
+5. [ ] **Defekte auf null**: Nach Review-Feedback beheben; Critical-/High-Defekte müssen vor Merge bei null liegen
+
+> Schritt 4 niemals überspringen, um direkt zu mergen. Ohne Review-Nachweis keine Fertigstellung behaupten.
+
 ## Verzeichnisbezogener Regelindex
 
 In Monorepos oder Projekten mit stark isolierten Submodulen Verzeichnis-`AGENTS.md` nur dort anlegen, wo nötig:
