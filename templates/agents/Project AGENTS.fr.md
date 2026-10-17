@@ -105,6 +105,18 @@ Afin d'éviter la saturation du contexte, les spécifications fines et compéten
 - **Compétence de mémoire partagée** : Utiliser `.agents/skills/cross-tool-memory/SKILL.md` pour poursuivre un travail d'une session à l'autre ou valider des décisions durables.
 - **Documentation vivante & Traçabilité du code** : La documentation long terme réside sous `docs/` (`docs/specs/`, `docs/architecture/`, `docs/reference/`, `docs/guides/`). Déclarer `modules` et `depends_on` dans le Frontmatter. Voir `.agents/skills/living-documentation/SKILL.md`.
 
+## Liste de contrôle de finition (Definition of Done)
+
+Après avoir terminé un développement de fonctionnalité ou une implémentation d'exigence, exécutez ces étapes dans l'ordre — aucune ne peut être ignorée :
+
+1. [ ] **Vérification des tests** : Exécuter les tests pertinents (unitaires/intégration), confirmer que tous passent, fournir de vraies preuves d'exécution
+2. [ ] **Mettre à jour SESSION_STATE.md** : Consigner les éléments terminés, les preuves de vérification réelles, les étapes restantes et les risques encore valides
+3. [ ] **Mettre à jour PROJECT_CONTEXT.md** : Si l'architecture, les décisions techniques ou les contraintes à long terme ont changé, synchroniser ; ignorer si seuls les points d'arrêt ont changé
+4. [ ] **Déclencher la revue de code** : Invoquer la compétence `open-code-review` (ou CLI `ocr`) pour la revue — ancrage ligne, couverture complète
+5. [ ] **Zéro défaut** : Corriger selon les retours de revue ; les défauts Critical / High doivent être à zéro avant fusion
+
+> Ne jamais sauter l'étape 4 pour fusionner directement. Ne pas prétendre que la tâche est terminée sans preuve de revue.
+
 ## Index des règles au niveau répertoire
 
 Dans les monorépôts ou les projets comportant des sous-modules hautement isolés, créer des fichiers `AGENTS.md` de répertoire uniquement lorsque nécessaire :

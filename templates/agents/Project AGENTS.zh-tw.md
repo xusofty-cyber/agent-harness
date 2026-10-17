@@ -105,6 +105,18 @@
 - **共享記憶技能**：涉及跨會話延續、長期專案決策、研究或文件/設計方案時，按需使用 `.agents/skills/cross-tool-memory/SKILL.md`；不儲存完整對話、憑證或未經核實的結論。
 - **活體文件與程式碼追溯**：專案長期技術文件統一維護於 `docs/` 下（需求 `docs/specs/`、架構 `docs/architecture/`、介面與配置參考 `docs/reference/`、使用者操作指南 `docs/guides/`）。各文件頭部 Frontmatter 聲明 `modules`（關聯程式碼路徑）與 `depends_on`。詳見 `.agents/skills/living-documentation/SKILL.md`。
 
+## 功能完成檢查清單（Definition of Done）
+
+完成功能開發或需求實作後，必須按順序執行以下步驟，缺一不可：
+
+1. [ ] **測試驗證**：執行相關測試（單元/整合），確認全部通過，提供真實執行證據
+2. [ ] **更新 SESSION_STATE.md**：記錄已完成事項、實際驗證證據、未完成步驟和仍有效的風險
+3. [ ] **更新 PROJECT_CONTEXT.md**：如有架構變更、技術決策或長期約束變化，同步更新；僅斷點變化時跳過
+4. [ ] **觸發程式碼審查**：呼叫 `open-code-review` 技能進行審查（或 `ocr` CLI），行號錨定、全量覆蓋
+5. [ ] **清零缺陷**：根據審查意見修復，Critical / High 缺陷清零後方可合併
+
+> 嚴禁跳過第 4 步直接合併。未出示審查證據前，不得聲稱任務完成。
+
 ## 目錄級規則索引
 
 當專案為 Monorepo 或存在高隔離獨立子模組時，僅在必要子目錄下按需建立 `AGENTS.md`：
