@@ -105,6 +105,18 @@ To avoid context explosion, fine-grained rules and skills reside in `.agents/rul
 - **Shared Memory Skill**: Use `.agents/skills/cross-tool-memory/SKILL.md` when continuing across sessions or making durable decisions; never persist full conversations or unverified conclusions.
 - **Living Documentation & Code Traceability**: Long-term documentation lives under `docs/` (`docs/specs/`, `docs/architecture/`, `docs/reference/`, `docs/guides/`). Declare `modules` and `depends_on` in Frontmatter. Keep code and docs synchronized; see `.agents/skills/living-documentation/SKILL.md`.
 
+## Definition of Done Checklist
+
+After completing feature development or requirement implementation, execute these steps in order — none may be skipped:
+
+1. [ ] **Test verification**: Run relevant tests (unit/integration), confirm all pass, provide real execution evidence
+2. [ ] **Update SESSION_STATE.md**: Record completed items, actual verification evidence, remaining steps, and still-valid risks
+3. [ ] **Update PROJECT_CONTEXT.md**: If architecture, technical decisions, or long-term constraints changed, sync updates; skip if only breakpoints changed
+4. [ ] **Trigger code review**: Invoke the `open-code-review` skill (or `ocr` CLI) for review — line-anchored, full coverage
+5. [ ] **Zero defects**: Fix per review feedback; Critical / High defects must be zero before merge
+
+> Never skip step 4 to merge directly. Do not claim task completion without review evidence.
+
 ## Directory-Level Rule Index
 
 In monorepos or projects with highly isolated submodules, create directory-level `AGENTS.md` only where necessary:
