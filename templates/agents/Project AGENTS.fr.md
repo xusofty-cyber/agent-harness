@@ -112,7 +112,7 @@ Après avoir terminé un développement de fonctionnalité ou une implémentatio
 1. [ ] **Vérification des tests** : Exécuter les tests pertinents (unitaires/intégration), confirmer que tous passent, fournir de vraies preuves d'exécution
 2. [ ] **Mettre à jour SESSION_STATE.md** : Consigner les éléments terminés, les preuves de vérification réelles, les étapes restantes et les risques encore valides
 3. [ ] **Mettre à jour PROJECT_CONTEXT.md** : Si l'architecture, les décisions techniques ou les contraintes à long terme ont changé, synchroniser ; ignorer si seuls les points d'arrêt ont changé
-4. [ ] **Déclencher la revue de code** : Invoquer la compétence `open-code-review` (ou CLI `ocr`) pour la revue — ancrage ligne, couverture complète
+4. [ ] **Exécuter la revue de code** : Vous DEVEZ invoquer vous-même la compétence `open-code-review` (ou CLI `ocr`) — ancrage ligne, couverture complète. Ne demandez JAMAIS à l'utilisateur s'il faut faire une revue ; faites-la directement
 5. [ ] **Zéro défaut** : Corriger selon les retours de revue ; les défauts Critical / High doivent être à zéro avant fusion
 
 > Ne jamais sauter l'étape 4 pour fusionner directement. Ne pas prétendre que la tâche est terminée sans preuve de revue.
