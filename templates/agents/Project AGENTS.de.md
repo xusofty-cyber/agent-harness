@@ -112,7 +112,7 @@ Nach Abschluss einer Feature-Entwicklung oder Anforderungsumsetzung diese Schrit
 1. [ ] **Testverifikation**: Relevante Tests (Unit/Integration) ausführen, alle müssen bestehen, echte Ausführungsnachweise liefern
 2. [ ] **SESSION_STATE.md aktualisieren**: Erledigte Punkte, tatsächliche Verifikationsnachweise, offene Schritte und weiterhin gültige Risiken dokumentieren
 3. [ ] **PROJECT_CONTEXT.md aktualisieren**: Bei Architektur-, Technikentscheidungs- oder Langfrist-Constraint-Änderungen synchronisieren; bei reinen Breakpoint-Änderungen überspringen
-4. [ ] **Code-Review auslösen**: `open-code-review`-Skill (oder `ocr`-CLI) für Review aufrufen — zeilenverankert, vollständige Abdeckung
+4. [ ] **Code-Review durchführen**: Du MUSST den `open-code-review`-Skill (oder `ocr`-CLI) selbst aufrufen — zeilenverankert, vollständige Abdeckung. Frage NIEMALS den Nutzer, ob ein Review stattfinden soll; führe es einfach durch
 5. [ ] **Defekte auf null**: Nach Review-Feedback beheben; Critical-/High-Defekte müssen vor Merge bei null liegen
 
 > Schritt 4 niemals überspringen, um direkt zu mergen. Ohne Review-Nachweis keine Fertigstellung behaupten.
