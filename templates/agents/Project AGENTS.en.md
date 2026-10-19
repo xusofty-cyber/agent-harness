@@ -112,7 +112,7 @@ After completing feature development or requirement implementation, execute thes
 1. [ ] **Test verification**: Run relevant tests (unit/integration), confirm all pass, provide real execution evidence
 2. [ ] **Update SESSION_STATE.md**: Record completed items, actual verification evidence, remaining steps, and still-valid risks
 3. [ ] **Update PROJECT_CONTEXT.md**: If architecture, technical decisions, or long-term constraints changed, sync updates; skip if only breakpoints changed
-4. [ ] **Trigger code review**: Invoke the `open-code-review` skill (or `ocr` CLI) for review — line-anchored, full coverage
+4. [ ] **Execute code review**: You MUST invoke the `open-code-review` skill (or `ocr` CLI) yourself — line-anchored, full coverage. NEVER ask the user whether to review; just do it
 5. [ ] **Zero defects**: Fix per review feedback; Critical / High defects must be zero before merge
 
 > Never skip step 4 to merge directly. Do not claim task completion without review evidence.
