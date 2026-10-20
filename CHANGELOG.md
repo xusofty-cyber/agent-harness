@@ -146,6 +146,7 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 - **冗余流水线包装脚本收敛**：移除 `pipeline.sh` 和 `pipeline.ps1` 包装入口，统一保留功能完备、参数全面的标准执行器 `run-pipeline.sh` 与 `run-pipeline.ps1`；同步清理 5 语言 README、多工具部署与全景实战指南中的历史引用。
 
 ### Fixed
+- **CI 红灯修复（markdownlint + ShellCheck）**：合并 `[Unreleased]` 下重复的 `### Added` / `### Fixed` 章节（MD024）；将各语言 README 与指南的目录链接改为指向译文标题锚点（MD051，共 16 处）；清理连续空行（MD012）与 `README.md` 标题层级跳级（MD001，并为四个译本 README 补齐缺失的前置要求章节以保持 `##` 章节对齐）；`run-pipeline.sh` 的 `-I/--interactive` 标志此前只赋值从未生效，现已接入向导触发条件（强制启动 6 步向导、与执行前确认互斥，`-y` 优先），消除 ShellCheck SC2034 警告。
 - **流水线模板路径与作用域修复**：修复 `run-pipeline.sh` / `run-pipeline.ps1` 在模板迁移至 `templates/agents/` 后的全局模板解析告警与 `.ai-memory.toml.example` 查找失败；修复 `run-pipeline.sh` 附加探针中顶层非函数作用域使用 `local` 变量的问题；完善 `deploy-agents.sh` / `deploy-agents.ps1` 模板路径回退兼容；`repo_checks.py` 增加 15 个模板完整性校验与流水线全局模板解析对齐校验。
 
 - **Markdownlint CI blocker (P0)**: Unified heading in all 15 engineering document templates from dual H1s to single bilingual `# {title_cn} / {title_en}` (MD025) and added language identifier to `SKILL.md` decision tree fenced code block (MD040), eliminating 31 markdownlint errors in CI.

@@ -6,6 +6,12 @@
 
 Ce dépôt fournit des modèles de règles aux niveaux global, projet et répertoire, des crochets PreToolUse pour Claude Code, des bibliothèques de compétences (skills) et des scripts de déploiement pour Windows/Linux/macOS. Le comportement de chargement et les fonctionnalités varient selon l'outil hôte. Les crochets sont des mécanismes côté client et ne constituent pas des barrières de sécurité côté système d'exploitation ou serveur.
 
+## Prérequis
+
+- **Linux/macOS** : `bash`, `git`, `python3` (préinstallés sur la plupart des systèmes)
+- **Windows** : PowerShell 5.1+, `git`
+- **Optionnel** : `node` (pour les crochets Claude Code), `cargo` (pour ai-memory)
+
 ---
 
 ## Architecture du système

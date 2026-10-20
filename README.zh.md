@@ -9,6 +9,12 @@
 
 本项目提供全局、项目和目录级规范模板、Claude Code PreToolUse 钩子、技能文件，以及 Windows/Linux/macOS 部署脚本。各工具的规则加载方式和钩子能力不同；请以支持矩阵和部署脚本实际行为为准。钩子属于客户端机制，不是操作系统或服务端安全边界。
 
+## 前置要求
+
+- **Linux/macOS**：`bash`、`git`、`python3`（大多数系统已预装）
+- **Windows**：PowerShell 5.1+、`git`
+- **可选**：`node`（用于 Claude Code 钩子）、`cargo`（用于 ai-memory）
+
 ---
 
 ## 架构

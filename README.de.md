@@ -9,6 +9,12 @@
 
 Dieses Repository bietet globale, projekt- und verzeichnisbezogene Regelsätze, Claude Code PreToolUse Sicherheits-Hooks, Skill-Sammlungen sowie Bereitstellungsskripte für Windows/Linux/macOS. Ladeverhalten und Hook-Funktionalitäten variieren je nach Wirtswerkzeug. Hooks sind clientseitige Schutzmechanismen und stellen keine Betriebssystem- oder serverseitigen Sicherheitsgrenzen dar.
 
+## Voraussetzungen
+
+- **Linux/macOS**: `bash`, `git`, `python3` (auf den meisten Systemen vorinstalliert)
+- **Windows**: PowerShell 5.1+, `git`
+- **Optional**: `node` (für Claude Code Hooks), `cargo` (für ai-memory)
+
 ---
 
 ## Architektur

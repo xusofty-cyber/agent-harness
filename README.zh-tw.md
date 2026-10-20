@@ -6,6 +6,12 @@
 
 本專案提供全域、專案和目錄級規範範本、Claude Code PreToolUse 鉤子、技能檔案，以及 Windows/Linux/macOS 部署指令碼。各工具的規則載入方式和鉤子能力不同；請以支援矩陣和部署指令碼實際行為為準。鉤子屬於客戶端機制，不是作業系統或伺服器端安全邊界。
 
+## 前置要求
+
+- **Linux/macOS**：`bash`、`git`、`python3`（大多數系統已預裝）
+- **Windows**：PowerShell 5.1+、`git`
+- **可選**：`node`（用於 Claude Code 鉤子）、`cargo`（用於 ai-memory）
+
 ---
 
 ## 架構

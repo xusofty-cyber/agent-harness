@@ -510,8 +510,11 @@ if [ "$APPLY_SKILLS" = true ] || [ "$RUN_UPDATE" = true ]; then
     RUN_APPLY_SKILLS=true
 fi
 
-# Interactive 6-step wizard when executed without explicit stage/config flags
-if [ "$EXPLICIT_CONFIG" = false ] && [ "$NON_INTERACTIVE" = false ]; then
+# Interactive 6-step wizard when executed without explicit stage/config flags;
+# -I/--interactive forces the wizard even when explicit flags were passed
+# (mirrors run-pipeline.ps1, where the wizard and the pre-flight review are
+# mutually exclusive). -y/--yes still wins over -I.
+if [ "$NON_INTERACTIVE" = false ] && { [ "$EXPLICIT_CONFIG" = false ] || [ "$FORCE_INTERACTIVE" = true ]; }; then
     echo -e "\n${CYAN}================================================================${NC}"
     echo -e "${CYAN}  🚀 Agent Harness 统一工程流水线向导 (Unified Pipeline Runner)  ${NC}"
     echo -e "${CYAN}================================================================${NC}"
@@ -630,8 +633,9 @@ if [ "$EXPLICIT_CONFIG" = false ] && [ "$NON_INTERACTIVE" = false ]; then
     RUN_DETAIL_MODE="$SELECTED_VALUE"
 fi
 
-# Pre-flight review: when user passed explicit CLI parameters but NOT -y
-if [ "$EXPLICIT_CONFIG" = true ] && [ "$NON_INTERACTIVE" = false ]; then
+# Pre-flight review: when user passed explicit CLI parameters but NOT -y;
+# skipped when -I already ran the full wizard above
+if [ "$EXPLICIT_CONFIG" = true ] && [ "$NON_INTERACTIVE" = false ] && [ "$FORCE_INTERACTIVE" = false ]; then
     echo -e "\n${CYAN}================================================================${NC}"
     echo -e "${CYAN}  🚀 Agent Harness 流水线执行前配置确认 (Pre-flight Review)   ${NC}"
     echo -e "${CYAN}================================================================${NC}"
