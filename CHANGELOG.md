@@ -10,62 +10,6 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 - **专家团队评审法定席位（Mandatory Expert Panel）**：在模板中确立多专家评审执行契约，强制要求架构师、安全审计员、技术实现专家、QA 测试专家（需求阶段含产品经理）必须出席并出具 `File:Line` 行级证据与明确裁决，杜绝大模型无依据的泛泛角色扮演。
 - **Agent 正确触发与常见问题排查指南 (FAQ)**：新增 `docs/guides/Agent Triggering and FAQ Guide.zh.md`（及软链 `docs/FAQ.zh.md`），系统梳理代码审查工具错配、AI 记忆占位符跳过、Comet 状态机唤醒、TDD/科学调试与证据门实践等核心高频问题，并提供开箱即用的精准 Prompt 模板速查库。
 
-### Removed
-- **冗余流水线包装脚本收敛**：移除 `pipeline.sh` 和 `pipeline.ps1` 包装入口，统一保留功能完备、参数全面的标准执行器 `run-pipeline.sh` 与 `run-pipeline.ps1`；同步清理 5 语言 README、多工具部署与全景实战指南中的历史引用。
-
-### Fixed
-- **流水线模板路径与作用域修复**：修复 `run-pipeline.sh` / `run-pipeline.ps1` 在模板迁移至 `templates/agents/` 后的全局模板解析告警与 `.ai-memory.toml.example` 查找失败；修复 `run-pipeline.sh` 附加探针中顶层非函数作用域使用 `local` 变量的问题；完善 `deploy-agents.sh` / `deploy-agents.ps1` 模板路径回退兼容；`repo_checks.py` 增加 15 个模板完整性校验与流水线全局模板解析对齐校验。
-
-### Changed
-- **法语 Guide 翻译**：`Multi-Tool Deployment and Configuration Guide.fr.md` 与
-  `Tools Practical Usage and Skills Panorama Guide.fr.md` 全文翻译为法语（此前为英文原文）。
-- **Hook 安全加固**：修复 3 个 P0 旁路——git 缩写选项（`--forc`）、环境变量前缀
- （`FOO=bar git push`）、内联 alias（`git -c alias.p=push`）；加 4 个回归测试（42/42）。
-- **skills-lock 真版本锁定**：37 个外部 skill 新增 `pinnedCommit` 字段（commit SHA），
-  `sync-skills.py` 优先从 pin 的 commit 拉取，不再静默跟随上游 tip；lock 版本升至 v2。
-- **de/fr README 补全**：ai-memory 4 步详细配置完整翻译（此前压缩为 19 行代码块）。
-- **Hook 安全回归修复**（P0）：`--force-with-lease=<ref>` 带等号值形式绕过 force 检测，
-  改为 `startsWith` 匹配；加回归测试（38/38）。
-- **Hook 性能优化**：`getCurrentBranch()` 单次调用内缓存；`getRepoRoot()` 优先
-  `__dirname` 推导（各省 ~11ms）；无 ReDoS 风险。
-- **模板目录整理**：15 个 AGENTS 模板（Global/Project/Directory × 5 语言）
-  移入 `templates/agents/`；deploy 双脚本路径同步；根目录 38→23 文件。
-- **可访问性提升**：Hook 报错双语化（EN+ZH）；新增 `docs/glossary.md` 术语表；
-  README 5 语言加 30 秒上手 TL;DR + mermaid 架构图。
-- **专家遗留项收尾**：Guide 5 语言加触发语过宽警告（ponytail/using-superpowers，
-  外部 skill 不直接改以保同步）；repo_checks.py 新增 markdown 内链检查
-  （修复 Guide 移动导致的 131 个断链）；CI 移除已合并分支触发。
-- **仓库结构整理**：15 个 Guide 移入 `docs/guides/`（根目录 53→38 文件）；
-  `README_zh.md` 重命名为 `README.zh.md`（统一命名规范）；中文 Guide 标注"扩展版"。
-- **项目级评审优化**：Panorama Guide 5 语言 skill 计数 43→44；Hook 测试 25→37
-  （非首命令段、删除变体、警告分支、误伤测试）；Global AGENTS 5 语言 Git 章节
-  压缩为指针（消除与 git-workflow.md 的三层重复）。
-- **Hook 安全加固**（红队评审）：命令归一化预处理（防引号/转义/`-c`插队绕过）；
-  补 force 语义（`+refspec`、`-vf` 捆绑）；`update-ref` 覆盖受保护 ref；
-  分支检查跟随 `-C`/`--git-dir`；测试 17→25。
-- **一致性修复**：11 处补 `staging`（rule/README/Panorama/部署指南）；
-  `Skills Usage Guide.zh.md` 补域汇总表。
-- **新人上手**：头部加读者身份说明、人类 PR 快速通道、`<protected>`/`<DEFAULT_BRANCH>` 定义。
-- **git-workflow.md 三专家评审优化**：新增 Hook 覆盖声明（"Hook 硬拦截"仅 Claude Code 生效，
-  修正 exit code 表述）；§8 新增"提交/回退"意图消歧表与决策树；精益删除冗余 20+ 行
-  （钢铁纪律浓缩、删除重复 Gotchas）。
-- **git-workflow.md 架构重组**（三专家评审）：12 节→8 节（268→176 行），安全约束集中前三节
-  （授权矩阵→钢铁纪律→Never List）；§7/§8/§11 的手册内容并入 `git-advanced` skill；
-  `git-forensics` 更名为 `git-advanced`（覆盖冲突/cherry-pick/bisect/速查）。
-- **git-workflow.md 瘦身优化**：§9 Bisect/Reflog 拆分为按需加载的 `git-forensics` 本地 skill
-  （规则文件 283→~240 行，降低每次会话 token 成本）；§8 新增 revert/reset 一句话决策线；
-  修复 3 处内部一致性问题（revert 语义、rebase 上下文、reset --hard 确认提醒）。
-- **Project renamed `agents-living` → `agent-harness`**: 27 references updated
-  across 13 files (READMEs, guides, AGENTS.md, CONTRIBUTING.md, skills-lock.json
-  source fields, tool docstrings/User-Agents, CI config). Dated historical
-  notes in `docs/internal/` intentionally unchanged. GitHub repo rename
-  (`xusofty-cyber/agent-harness`) to be done via Settings; old URLs redirect
-  automatically.
-- **Eliminated redundant skill directory backups on update**: Removed per-skill directory `.bak.<timestamp>` creation in `deploy-agents.sh` and `deploy-agents.ps1`. Managed skills in `.agents/skills/` are now overwritten cleanly upon update (matching `.claude/skills/`), preventing dozens of stale `.bak.*` directories from polluting project trees and causing duplicate skill indexing in AI agent harnesses.
-- **Physical copy for Claude Code skills deployment**: Changed `deploy-agents.ps1` and `deploy-agents.sh` to deploy skills into `.claude/skills/` via physical directory copies (with automatic cleanup of legacy NTFS junctions / symlinks). Eliminates path traversal and junction crossing errors (`crosses a symbolic link or junction`) during `comet init` and `run-pipeline` runs regardless of execution order.
-- **Native YAML Frontmatter in 15 `engineering-docs` templates**: Upgraded headers of all 15 Markdown template files in `.agents/skills/engineering-docs/references/templates/` (and generator `gen_templates.py`) to native YAML Frontmatter blocks with schema metadata (`id`, `title`, `type`, `status`, `modules`, `depends_on`, `version`, `last_verified_commit`). Ensures any AI agent copying templates defaults to complete traceability metadata for downstream `living-documentation` and `doc-impact.py` analysis.
-
-### Added
 - **git-workflow.md 大幅增强**（借鉴 liangxin-lrjcs/skill-git-workflow 的策略，改编为通用模板）：新增 Commit/Push 自查清单、冲突协同解决协议、Cherry-pick 与回退矩阵（含 revert-the-revert 陷阱）、分支命名规范、提交信息正文纪律、禁止操作速查、常用命令速查；Bisect/Reflog 拆分为按需加载的 `git-forensics` skill。
 - **ai-memory Docker deployment guide**: Documented official Docker container deployment patterns and volume mapping guidelines (fixing in-container `/data` mount path, loopback binding for security, and client-server scope decoupling via `.ai-memory.toml`) across deployment guides and READMEs.
 - **Automatic target project `.gitignore` scaffold & protection**:
@@ -198,7 +142,12 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
     14/15→tests); new `depends_on-tier` CI validation.
   - `fetch-word-template.sh` added to exec-bit patrol.
 
+### Removed
+- **冗余流水线包装脚本收敛**：移除 `pipeline.sh` 和 `pipeline.ps1` 包装入口，统一保留功能完备、参数全面的标准执行器 `run-pipeline.sh` 与 `run-pipeline.ps1`；同步清理 5 语言 README、多工具部署与全景实战指南中的历史引用。
+
 ### Fixed
+- **流水线模板路径与作用域修复**：修复 `run-pipeline.sh` / `run-pipeline.ps1` 在模板迁移至 `templates/agents/` 后的全局模板解析告警与 `.ai-memory.toml.example` 查找失败；修复 `run-pipeline.sh` 附加探针中顶层非函数作用域使用 `local` 变量的问题；完善 `deploy-agents.sh` / `deploy-agents.ps1` 模板路径回退兼容；`repo_checks.py` 增加 15 个模板完整性校验与流水线全局模板解析对齐校验。
+
 - **Markdownlint CI blocker (P0)**: Unified heading in all 15 engineering document templates from dual H1s to single bilingual `# {title_cn} / {title_en}` (MD025) and added language identifier to `SKILL.md` decision tree fenced code block (MD040), eliminating 31 markdownlint errors in CI.
 - **Traceability path alignment (P1-1)**: Converged recommended document output paths in `engineering-docs/SKILL.md` and `comet/SKILL.md` to the standard 4-tier living-doc hierarchy (`docs/{specs,architecture,reference,guides}/`), ensuring all generated docs are discovered by `doc-impact.py`.
 - **Canonical document type enforcement (P1-2)**: Restored strict equality checking for `TIER_TYPES` in `tests/repo_checks.py`, enforcing exact canonical document types (`specs`, `architecture`, `reference`, `guide`, `adr`) across all templates and docs.
@@ -239,6 +188,55 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
   defaults to `claude-code codex antigravity-ide` in unattended mode.
 - **`tui_multiselect` non-TTY fallback**: invalid tokens are now skipped individually
   instead of nuking the entire selection.
+
+### Changed
+- **法语 Guide 翻译**：`Multi-Tool Deployment and Configuration Guide.fr.md` 与
+  `Tools Practical Usage and Skills Panorama Guide.fr.md` 全文翻译为法语（此前为英文原文）。
+- **Hook 安全加固**：修复 3 个 P0 旁路——git 缩写选项（`--forc`）、环境变量前缀
+ （`FOO=bar git push`）、内联 alias（`git -c alias.p=push`）；加 4 个回归测试（42/42）。
+- **skills-lock 真版本锁定**：37 个外部 skill 新增 `pinnedCommit` 字段（commit SHA），
+  `sync-skills.py` 优先从 pin 的 commit 拉取，不再静默跟随上游 tip；lock 版本升至 v2。
+- **de/fr README 补全**：ai-memory 4 步详细配置完整翻译（此前压缩为 19 行代码块）。
+- **Hook 安全回归修复**（P0）：`--force-with-lease=<ref>` 带等号值形式绕过 force 检测，
+  改为 `startsWith` 匹配；加回归测试（38/38）。
+- **Hook 性能优化**：`getCurrentBranch()` 单次调用内缓存；`getRepoRoot()` 优先
+  `__dirname` 推导（各省 ~11ms）；无 ReDoS 风险。
+- **模板目录整理**：15 个 AGENTS 模板（Global/Project/Directory × 5 语言）
+  移入 `templates/agents/`；deploy 双脚本路径同步；根目录 38→23 文件。
+- **可访问性提升**：Hook 报错双语化（EN+ZH）；新增 `docs/glossary.md` 术语表；
+  README 5 语言加 30 秒上手 TL;DR + mermaid 架构图。
+- **专家遗留项收尾**：Guide 5 语言加触发语过宽警告（ponytail/using-superpowers，
+  外部 skill 不直接改以保同步）；repo_checks.py 新增 markdown 内链检查
+  （修复 Guide 移动导致的 131 个断链）；CI 移除已合并分支触发。
+- **仓库结构整理**：15 个 Guide 移入 `docs/guides/`（根目录 53→38 文件）；
+  `README_zh.md` 重命名为 `README.zh.md`（统一命名规范）；中文 Guide 标注"扩展版"。
+- **项目级评审优化**：Panorama Guide 5 语言 skill 计数 43→44；Hook 测试 25→37
+  （非首命令段、删除变体、警告分支、误伤测试）；Global AGENTS 5 语言 Git 章节
+  压缩为指针（消除与 git-workflow.md 的三层重复）。
+- **Hook 安全加固**（红队评审）：命令归一化预处理（防引号/转义/`-c`插队绕过）；
+  补 force 语义（`+refspec`、`-vf` 捆绑）；`update-ref` 覆盖受保护 ref；
+  分支检查跟随 `-C`/`--git-dir`；测试 17→25。
+- **一致性修复**：11 处补 `staging`（rule/README/Panorama/部署指南）；
+  `Skills Usage Guide.zh.md` 补域汇总表。
+- **新人上手**：头部加读者身份说明、人类 PR 快速通道、`<protected>`/`<DEFAULT_BRANCH>` 定义。
+- **git-workflow.md 三专家评审优化**：新增 Hook 覆盖声明（"Hook 硬拦截"仅 Claude Code 生效，
+  修正 exit code 表述）；§8 新增"提交/回退"意图消歧表与决策树；精益删除冗余 20+ 行
+  （钢铁纪律浓缩、删除重复 Gotchas）。
+- **git-workflow.md 架构重组**（三专家评审）：12 节→8 节（268→176 行），安全约束集中前三节
+  （授权矩阵→钢铁纪律→Never List）；§7/§8/§11 的手册内容并入 `git-advanced` skill；
+  `git-forensics` 更名为 `git-advanced`（覆盖冲突/cherry-pick/bisect/速查）。
+- **git-workflow.md 瘦身优化**：§9 Bisect/Reflog 拆分为按需加载的 `git-forensics` 本地 skill
+  （规则文件 283→~240 行，降低每次会话 token 成本）；§8 新增 revert/reset 一句话决策线；
+  修复 3 处内部一致性问题（revert 语义、rebase 上下文、reset --hard 确认提醒）。
+- **Project renamed `agents-living` → `agent-harness`**: 27 references updated
+  across 13 files (READMEs, guides, AGENTS.md, CONTRIBUTING.md, skills-lock.json
+  source fields, tool docstrings/User-Agents, CI config). Dated historical
+  notes in `docs/internal/` intentionally unchanged. GitHub repo rename
+  (`xusofty-cyber/agent-harness`) to be done via Settings; old URLs redirect
+  automatically.
+- **Eliminated redundant skill directory backups on update**: Removed per-skill directory `.bak.<timestamp>` creation in `deploy-agents.sh` and `deploy-agents.ps1`. Managed skills in `.agents/skills/` are now overwritten cleanly upon update (matching `.claude/skills/`), preventing dozens of stale `.bak.*` directories from polluting project trees and causing duplicate skill indexing in AI agent harnesses.
+- **Physical copy for Claude Code skills deployment**: Changed `deploy-agents.ps1` and `deploy-agents.sh` to deploy skills into `.claude/skills/` via physical directory copies (with automatic cleanup of legacy NTFS junctions / symlinks). Eliminates path traversal and junction crossing errors (`crosses a symbolic link or junction`) during `comet init` and `run-pipeline` runs regardless of execution order.
+- **Native YAML Frontmatter in 15 `engineering-docs` templates**: Upgraded headers of all 15 Markdown template files in `.agents/skills/engineering-docs/references/templates/` (and generator `gen_templates.py`) to native YAML Frontmatter blocks with schema metadata (`id`, `title`, `type`, `status`, `modules`, `depends_on`, `version`, `last_verified_commit`). Ensures any AI agent copying templates defaults to complete traceability metadata for downstream `living-documentation` and `doc-impact.py` analysis.
 
 ## [0.2.1] - 2026-10-09
 

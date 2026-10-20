@@ -20,7 +20,6 @@ graph TD
     S --> T[tools/<br/>sync, tui, doc-impact]
 ```
 
-
 ## 核心特性
 
 1. **三級 AGENTS.md 漸進式揭露架構**：

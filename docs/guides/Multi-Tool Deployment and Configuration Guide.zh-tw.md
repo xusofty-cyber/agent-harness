@@ -10,7 +10,7 @@
 
 1. [架構與分層定位（Harness + 漸進式揭露）](#1-架構與分層定位harness--漸進式揭露)
 2. [各工具的配置範圍](#2-各工具的配置範圍)
-3. [Claude Code 用戶端 Hooks：PreToolUse（.claude/settings.json）](#3-claude-code-用戶端-hooks-pretooluse-claudesettingsjson)
+3. [Claude Code 用戶端 Hooks：PreToolUse（.claude/settings.json）](#3-claude-code-用戶端-hookspretooluseclaudesettingsjson)
 4. [跨工具部署與範本更新（deploy-agents）](#4-跨工具部署與範本更新deploy-agents)
    - 4.1 腳本核心架構與流水線
    - 4.2 Windows 部署（`deploy-agents.ps1`）

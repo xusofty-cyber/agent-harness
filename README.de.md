@@ -5,7 +5,7 @@
 > **Wiederverwendbare KI-Codierungsrichtlinien, Sicherheits-Hooks für Claude Code und plattformübergreifende Bereitstellungsskripte**
 
 > **⚡ 30-Sekunden-Start**: `git clone https://github.com/xusofty-cyber/agent-harness.git && cd agent-harness && ./run-pipeline.sh`
-> Details siehe [Quick Start](#quick-start). Glossar: [docs/glossary.md](docs/glossary.md).
+> Details siehe [Quick Start](#schnellstart). Glossar: [docs/glossary.md](docs/glossary.md).
 
 Dieses Repository bietet globale, projekt- und verzeichnisbezogene Regelsätze, Claude Code PreToolUse Sicherheits-Hooks, Skill-Sammlungen sowie Bereitstellungsskripte für Windows/Linux/macOS. Ladeverhalten und Hook-Funktionalitäten variieren je nach Wirtswerkzeug. Hooks sind clientseitige Schutzmechanismen und stellen keine Betriebssystem- oder serverseitigen Sicherheitsgrenzen dar.
 
@@ -22,7 +22,6 @@ graph TD
     G --> H[.claude/hooks/<br/>PreToolUse guards]
     S --> T[tools/<br/>sync, tui, doc-impact]
 ```
-
 
 ## Kernmerkmale
 

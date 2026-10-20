@@ -23,7 +23,6 @@ graph TD
     S --> T[tools/<br/>sync, tui, doc-impact]
 ```
 
-
 ## 核心特性
 
 1. **三级 AGENTS.md 渐进式披露架构**：

@@ -8,10 +8,10 @@ Diese Anleitung bietet eine End-to-End-Spezifikation für die Bereitstellung, Ko
 
 ## Inhaltsverzeichnis
 
-1. [Architektur & Schichtenpositionierung (Harness + Progressive Disclosure)](#1-architecture--layered-positioning-harness--progressive-disclosure)
-2. [Konfigurationsumfang pro Tool](#2-configuration-scope-by-tool)
+1. [Architektur & Schichtenpositionierung (Harness + Progressive Disclosure)](#1-architektur--schichtenpositionierung-harness--progressive-disclosure)
+2. [Konfigurationsumfang pro Tool](#2-konfigurationsumfang-pro-tool)
 3. [Claude Code Client-Hooks: PreToolUse (.claude/settings.json)](#3-claude-code-client-hooks-pretooluse-claudesettingsjson)
-4. [Toolübergreifende Bereitstellung & Template-Updates (deploy-agents)](#4-cross-tool-deployment--template-updates-deploy-agents)
+4. [Toolübergreifende Bereitstellung & Template-Updates (deploy-agents)](#4-toolübergreifende-bereitstellung--template-updates-deploy-agents)
    - 4.1 Kernarchitektur & Pipeline des Skripts
    - 4.2 Windows-Bereitstellung (`deploy-agents.ps1`)
    - 4.3 Linux- / macOS-Bereitstellung (`deploy-agents.sh`)

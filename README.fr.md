@@ -20,7 +20,6 @@ graph TD
     S --> T[tools/<br/>sync, tui, doc-impact]
 ```
 
-
 ## Fonctionnalités clés
 
 1. **Architecture progressive à trois niveaux AGENTS.md** :

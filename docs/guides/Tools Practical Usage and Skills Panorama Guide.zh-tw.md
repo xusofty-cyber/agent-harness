@@ -8,14 +8,14 @@
 
 ## 目錄
 
-1. [Core Architecture & Tool Matrix (Who Manages What)](#1-core-architecture--tool-matrix-who-manages-what)
-2. [Skills & Ecosystem Tools Inventory](#2-skills--ecosystem-tools-inventory)
+1. [Core Architecture & Tool Matrix (Who Manages What)](#1-核心架構與工具矩陣誰負責什麼)
+2. [Skills & Ecosystem Tools Inventory](#2-skills-與生態系工具盤點)
    - 2.1 44 Integrated Native Skills Categorized
    - 2.2 Version Locking, Online Updates & Skill Sync (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
    - 2.3 Optional Harness CLI Tools
    - 2.4 Token Economics of Skills (Why 40+ Skills Do NOT Blow Up Context)
    - 2.5 Engineering Skills & Rules Dispatching Matrix
-3. [Deep Dive into Core Harness Tools & Slash Commands](#3-deep-dive-into-core-harness-tools--slash-commands)
+3. [Deep Dive into Core Harness Tools & Slash Commands](#3-核心-harness-工具與斜線命令深度解析)
    - 3.1 Comet: Versioned Workflow Entry Point
    - 3.2 OpenSpec: Spec-Driven Development (`/opsx:propose`, `/opsx:apply`, etc.)
    - 3.3 Superpowers: TDD, Systematic Debugging & Verification Gate
@@ -26,13 +26,13 @@
    - 3.8 Git Authorization Model & Protected Branch Workflow
    - 3.9 3-Step Session Ceremony & Dynamic Memory Loop
    - 3.10 8 High-Risk Operations Protection Matrix
-4. [Platform-Specific Native Commands & Best Practices](#4-platform-specific-native-commands--best-practices)
+4. [Platform-Specific Native Commands & Best Practices](#4-平台特定的原生命令與最佳實踐)
    - 4.1 Google Antigravity IDE
    - 4.2 Claude Code & PreToolUse Hooks
    - 4.3 OpenAI Codex / GitHub Copilot
    - 4.4 Zed IDE
-5. [End-to-End Practical Walkthrough (Real-World Feature Development)](#5-end-to-end-practical-walkthrough-real-world-feature-development)
-6. [Daily Health Checks & Troubleshooting](#6-daily-health-checks--troubleshooting)
+5. [End-to-End Practical Walkthrough (Real-World Feature Development)](#5-端到端實戰演練真實功能開發)
+6. [Daily Health Checks & Troubleshooting](#6-每日健康檢查與故障排除)
 
 ---
 

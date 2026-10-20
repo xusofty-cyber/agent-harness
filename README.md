@@ -9,7 +9,7 @@
 
 This repository provides global, project, and directory rule templates, Claude Code PreToolUse hooks, skill files, and Windows/Linux/macOS deployment scripts. Rule loading and hook behavior vary by tool. Hooks are client-side mechanisms, not operating-system or server-side security boundaries.
 
-### Prerequisites
+## Prerequisites
 
 - **Linux/macOS**: `bash`, `git`, `python3` (pre-installed on most systems)
 - **Windows**: PowerShell 5.1+, `git`

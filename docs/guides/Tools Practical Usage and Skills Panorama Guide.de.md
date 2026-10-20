@@ -8,14 +8,14 @@ Diese Anleitung bietet ein umfassendes Handbuch für Softwareentwicklung und tec
 
 ## Inhaltsverzeichnis
 
-1. [Kernarchitektur & Tool-Matrix (wer verwaltet was)](#1-core-architecture--tool-matrix-who-manages-what)
-2. [Skills- & Ökosystem-Tool-Inventar](#2-skills--ecosystem-tools-inventory)
+1. [Kernarchitektur & Tool-Matrix (wer verwaltet was)](#1-kernarchitektur--tool-matrix-wer-verwaltet-was)
+2. [Skills- & Ökosystem-Tool-Inventar](#2-skills---ökosystem-tool-inventar)
    - 2.1 44 integrierte native Skills kategorisiert
    - 2.2 Versions-Locking, Online-Updates & Skill-Sync (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
    - 2.3 Optionale Harness-CLI-Tools
    - 2.4 Token-Ökonomie der Skills (warum 40+ Skills den Kontext NICHT sprengen)
    - 2.5 Engineering-Skills- & Regel-Dispatching-Matrix
-3. [Vertiefung in zentrale Harness-Tools & Slash Commands](#3-deep-dive-into-core-harness-tools--slash-commands)
+3. [Vertiefung in zentrale Harness-Tools & Slash Commands](#3-vertiefung-in-zentrale-harness-tools--slash-commands)
    - 3.1 Comet: Versionierter Workflow-Einstiegspunkt
    - 3.2 OpenSpec: Spezifikationsgetriebene Entwicklung (`/opsx:propose`, `/opsx:apply`, etc.)
    - 3.3 Superpowers: TDD, systematisches Debugging & Verifikations-Gate
@@ -26,13 +26,13 @@ Diese Anleitung bietet ein umfassendes Handbuch für Softwareentwicklung und tec
    - 3.8 Git-Autorisierungsmodell & Protected-Branch-Workflow
    - 3.9 3-Schritte-Sitzungszeremonie & dynamische Memory-Schleife
    - 3.10 8-Hochrisiko-Operationen-Schutzmatrix
-4. [Plattformspezifische native Befehle & Best Practices](#4-platform-specific-native-commands--best-practices)
+4. [Plattformspezifische native Befehle & Best Practices](#4-plattformspezifische-native-befehle--best-practices)
    - 4.1 Google Antigravity IDE
    - 4.2 Claude Code & PreToolUse-Hooks
    - 4.3 OpenAI Codex / GitHub Copilot
    - 4.4 Zed IDE
-5. [End-to-End-Praxis-Walkthrough (reale Feature-Entwicklung)](#5-end-to-end-practical-walkthrough-real-world-feature-development)
-6. [Tägliche Health Checks & Troubleshooting](#6-daily-health-checks--troubleshooting)
+5. [End-to-End-Praxis-Walkthrough (reale Feature-Entwicklung)](#5-end-to-end-praxis-walkthrough-reale-feature-entwicklung)
+6. [Tägliche Health Checks & Troubleshooting](#6-tägliche-health-checks--troubleshooting)
 
 ---
 
