@@ -1,0 +1,19 @@
+{
+  "ablation": "",
+  "arm": "pack",
+  "duration_s": 3,
+  "ended_epoch": 1793183682,
+  "false_completion": 0,
+  "host": "htch-runtime",
+  "interventions": 0,
+  "model": "Muse Spark",
+  "notes": "first-try pass; fix subtract to a-b",
+  "outcome": "pass",
+  "rep": 2,
+  "rounds": 3,
+  "run_dir": "/tmp/bench/t1-bugfix/pack/rep2",
+  "start_commit": "2e583970fb952158ad83617fe436534abd38295d",
+  "started_epoch": 1793183679,
+  "task": "t1-bugfix",
+  "verify_attempts": 1
+}
