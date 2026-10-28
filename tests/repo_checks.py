@@ -630,6 +630,73 @@ check("cost-ledger:own-budget",
       (ROOT / "gate" / "cost-budget.json").is_file(),
       "this repo's own gate/cost-budget.json missing (dogfood init-budget)")
 
+# --- 3q. Benchmarks & evaluation (Phase 3, v3 §4.5) ---
+# Framework first, then measured runs: 4 tasks (fixed start commit,
+# acceptance, budget), rubric (six dimensions), calibration (3+ rounds),
+# results that recompute to the baseline report. Unmeasured cells must be
+# marked unmeasured, never filled with invented numbers.
+_EVAL_START = "2e583970fb952158ad83617fe436534abd38295d"
+_eval_tasks = sorted((ROOT / "eval" / "tasks").glob("*/task.md"))
+check("eval:four-tasks", len(_eval_tasks) == 4, f"expected 4 task specs, found {len(_eval_tasks)}")
+for _spec in _eval_tasks:
+    _text = _spec.read_text(encoding="utf-8")
+    _tid = _spec.parent.name
+    check(f"eval:{_tid}-fields",
+          all(f in _text for f in ("start_commit", "acceptance", "budget_time", "budget_rounds")),
+          f"{_tid}/task.md lacks a required field")
+    check(f"eval:{_tid}-start-commit", _EVAL_START in _text,
+          f"{_tid}/task.md start_commit != {_EVAL_START}")
+    check(f"eval:{_tid}-solution", (_spec.parent / "solution.patch").is_file(),
+          f"{_tid}/solution.patch missing")
+_rubric = (ROOT / "eval" / "rubric.md").read_text(encoding="utf-8")
+check("eval:rubric-six-dimensions",
+      all(d in _rubric for d in ("Correctness", "Verification", "Scope discipline",
+                                 "Reliability", "Maintainability", "Handover readiness")),
+      "eval/rubric.md lacks one of the six dimensions")
+check("eval:rubric-rerun-rule", "re-running" in _rubric,
+      "eval/rubric.md does not require re-running acceptance")
+_calib = (ROOT / "eval" / "calibration.md").read_text(encoding="utf-8")
+check("eval:calibration-rounds", _calib.count("## Round ") >= 3,
+      "eval/calibration.md has fewer than 3 recorded rounds")
+check("eval:calibration-not-stable",
+      "NOT yet `stable`" in _calib or "not `stable`" in _calib,
+      "calibration claims stable without a live second-judge round")
+check("eval:workflow-exists",
+      (ROOT / ".github" / "workflows" / "eval-regression.yml").is_file(),
+      ".github/workflows/eval-regression.yml missing")
+_wf = (ROOT / ".github" / "workflows" / "eval-regression.yml").read_text(encoding="utf-8")
+check("eval:workflow-triggers",
+      "workflow_dispatch" in _wf and "schedule" in _wf,
+      "eval-regression.yml lacks manual + monthly triggers")
+check("eval:quality-score-exists",
+      (ROOT / "QUALITY_SCORE.md").is_file(), "QUALITY_SCORE.md missing")
+_qs = (ROOT / "QUALITY_SCORE.md").read_text(encoding="utf-8")
+check("eval:quality-marks-unmeasured", "unmeasured" in _qs.lower(),
+      "QUALITY_SCORE.md does not mark unmeasured cells")
+check("eval:quality-no-upstream-number", "76.8" not in _qs,
+      "QUALITY_SCORE.md quotes the upstream -76.8% token number")
+_eval_result_files = sorted((ROOT / "eval" / "results").glob("*.json"))
+_required_result_fields = {"task", "arm", "rep", "start_commit", "host", "model",
+                           "started_epoch", "ended_epoch", "duration_s", "rounds",
+                           "verify_attempts", "interventions", "outcome", "false_completion"}
+for _rf in _eval_result_files:
+    try:
+        _rec = json.loads(_rf.read_text(encoding="utf-8"))
+        _missing = _required_result_fields - set(_rec)
+    except Exception as e:  # noqa: BLE001
+        _missing = {f"parse error: {e}"}
+    check(f"eval:result-{_rf.name}", not _missing, f"missing fields: {sorted(_missing)}")
+_check_results = subprocess.run(
+    [sys.executable, str(ROOT / "eval" / "check-results.py")],
+    capture_output=True, text=True, cwd=ROOT)
+check("eval:check-results-passes", _check_results.returncode == 0,
+      _check_results.stdout.strip().splitlines()[-1] if _check_results.stdout else "check-results.py failed")
+_bench_smoke = subprocess.run(
+    ["bash", str(ROOT / "eval" / "run-bench.sh"), "smoke"],
+    capture_output=True, text=True, cwd=ROOT)
+check("eval:bench-smoke-passes", _bench_smoke.returncode == 0,
+      "eval/run-bench.sh smoke failed")
+
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
 # its counterpart marker must exist in the other. Markers that exist in
