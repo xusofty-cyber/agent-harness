@@ -1,0 +1,5 @@
+{"seq": 0, "ts": "2026-10-28T12:00:52Z", "type": "init", "detail": {"kind": "goal", "goal_id": "goal-status-plural", "max_rounds": 5, "consecutive_passes_required": 2, "timeout_s": 60, "max_seconds": 600, "require_approval": false}}
+{"seq": 1, "ts": "2026-10-28T12:00:52Z", "type": "round", "detail": {"round": 1, "outcome": "fail", "consecutive_passes": 0}}
+{"seq": 2, "ts": "2026-10-28T12:00:53Z", "type": "round", "detail": {"round": 2, "outcome": "pass", "consecutive_passes": 1}}
+{"seq": 3, "ts": "2026-10-28T12:00:54Z", "type": "round", "detail": {"round": 3, "outcome": "pass", "consecutive_passes": 2}}
+{"seq": 4, "ts": "2026-10-28T12:00:54Z", "type": "complete", "detail": {"round": 3}}

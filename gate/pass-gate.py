@@ -519,8 +519,9 @@ def cmd_status(args):
                           "items": data.get("items", [])},
                          indent=2, ensure_ascii=False))
         return 1 if errors else 0
+    n_items = len(data.get('items', []))
     print(f"project: {data.get('project')}  "
-          f"({len(data.get('items', []))} items)")
+          f"({n_items} item{'s' if n_items != 1 else ''})")
     for item in data.get("items", []):
         ev = item.get("evidence") or {}
         mark = "override" if ev.get("override") else (
