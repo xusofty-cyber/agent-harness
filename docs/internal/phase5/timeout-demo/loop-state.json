@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "kind": "goal",
+  "goal_id": "timeout-demo",
+  "goal_file": "/home/hatch/workspace/agent-harness-phase0/docs/internal/phase5/goal-timeout.md",
+  "status": "failed",
+  "round": 1,
+  "consecutive_passes": 0,
+  "max_rounds": 1,
+  "consecutive_passes_required": 1,
+  "timeout_s": 2,
+  "max_seconds": 0,
+  "require_approval": false,
+  "started_epoch": 1793188937,
+  "ended_epoch": 1793188939,
+  "rounds": [
+    {
+      "round": 1,
+      "phase": "maker",
+      "command": "true",
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.002
+    },
+    {
+      "round": 1,
+      "phase": "verify",
+      "command": "sleep 30",
+      "returncode": 124,
+      "timed_out": true,
+      "duration_s": 2.005,
+      "outcome": "timeout"
+    }
+  ]
+}

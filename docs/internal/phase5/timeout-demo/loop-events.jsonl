@@ -1,0 +1,3 @@
+{"seq": 0, "ts": "2026-10-28T12:02:17Z", "type": "init", "detail": {"kind": "goal", "goal_id": "timeout-demo", "max_rounds": 1, "consecutive_passes_required": 1, "timeout_s": 2, "max_seconds": 0, "require_approval": false}}
+{"seq": 1, "ts": "2026-10-28T12:02:19Z", "type": "round", "detail": {"round": 1, "outcome": "timeout", "consecutive_passes": 0}}
+{"seq": 2, "ts": "2026-10-28T12:02:19Z", "type": "max_rounds", "detail": {"round": 1}}

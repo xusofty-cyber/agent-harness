@@ -410,3 +410,51 @@ Phase 0 decision meeting.
 - **Rejected:** removing on bench data alone; ablating single OpenSpec
   loop steps (the family is decided as a whole).
 - **Date:** 2026-10-28.
+
+## D21 — Loop is built and dogfooded; its need is still unproven (Phase 5)
+
+- **Decision:** the Loop layer ships as `tools/loop.py` (stdlib-only
+  runner: Goal Loop + Maker-Checker, enforced stop conditions,
+  per-command timeout, wall-clock budget, human approval) with
+  `templates/loop/` (goal / loop-state / graph, EN+ZH) and a worked
+  example graph (`docs/internal/phase5-graph.md`). Loop templates are
+  NOT wired into `deploy-agents.sh` / `.ps1` yet — they ship with the
+  repo; deploy integration is deferred to Phase 6 (release), with the
+  rationale that the runner is repo tooling and the templates are
+  opt-in project files, not part of the default distribution.
+- **L14 five criteria, item by item (honest, not padded):**
+  - 可独立拆分 — met: Goal Loop and Maker-Checker ran as separate
+    loops in separate worktrees.
+  - 有分支或回退 — partially met: reopen/block exist in the gate and
+    the loop returns to the maker on failure; no real rollback was ever
+    exercised in the bench.
+  - 中间状态值得保存 — partially met: loop-state.json + loop-events.jsonl
+    exist and were the audit trail for both demo runs; but the demo
+    tasks' intermediate state was trivial.
+  - 结果可验收 — met: every round's verdict came from a re-run verify /
+    checker command, never from the maker's word.
+  - 协作收益大于协调成本 — NOT met: no multi-agent parallelism need
+    was ever measured; the two worktrees ran sequentially in practice.
+  - Total: 2 met, 2 partial, 1 not met — the "at least 3" bar is met
+    only if partials count, and two of the met items are properties of
+    the gate layer, not evidence that Loop is needed.
+- **Four questions:**
+  - Who owns the goal: the repo owner (user).
+  - Who can veto / roll back: the user, via `loop.py approve` (veto by
+    refusing approval) and git revert (rollback).
+  - Which metrics may move: round counts, verify attempts, durations —
+    all recorded per round; thresholds stay provisional.
+  - Which must freeze: the stop conditions in the goal file (max rounds,
+    timeout, budget) — the runner enforces them; changing them mid-loop
+    requires a new loop, not an edit.
+- **Measured verdict:** Goal Loop took ~1.5× the manual baseline
+  (2052 ms vs 1364 ms) on a 1-line fix; Maker-Checker needed 5 rounds
+  with a genuinely shrinking failure list. Demonstrated benefits are
+  process assurance (enforced verification, consecutive-pass rule,
+  audit trail) — not speed and not false-completion reduction. The
+  entry assessment's warning stands: no measured loop need exists yet.
+  Harder benchmark tasks remain the missing evidence.
+- **Rejected:** claiming Loop is needed because it exists; wiring loop
+  templates into deploy before Phase 6; auto-approving loops (approval
+  is always human, recorded).
+- **Date:** 2026-10-28.

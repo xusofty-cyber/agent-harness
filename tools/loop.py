@@ -122,7 +122,23 @@ def _finish_round(state, root, verify_rc, verify_timed_out):
 
 
 def _check_stop(state, root):
-    """Return (stopped, exit_code). Handles pass, max-rounds, budget."""
+    """Return (stopped, exit_code). Handles budget, pass, max-rounds.
+
+    Order matters: the wall-clock budget is a hard stop — exceeding it
+    fails the loop even if the round just passed (a budget is not
+    advisory). The pass condition is checked before max rounds, so a
+    loop that meets the pass condition exactly on its last round still
+    completes.
+    """
+    if state.get("max_seconds") and time.time() - state["started_epoch"] > state["max_seconds"]:
+        state["status"] = "budget-exceeded"
+        state["ended_epoch"] = int(time.time())
+        _append_event(root, "budget_exceeded",
+                      {"round": state["round"],
+                       "elapsed_s": round(time.time() - state["started_epoch"], 1)})
+        _save_state(root, state)
+        print("loop: failed — wall-clock budget exceeded")
+        return True, 1
     if state["consecutive_passes"] >= state["consecutive_passes_required"]:
         if state.get("require_approval") and state["status"] != "awaiting-approval":
             state["status"] = "awaiting-approval"
@@ -146,15 +162,6 @@ def _check_stop(state, root):
         _save_state(root, state)
         print(f"loop: failed — max rounds ({state['max_rounds']}) reached "
               "without the pass condition")
-        return True, 1
-    if state.get("max_seconds") and time.time() - state["started_epoch"] > state["max_seconds"]:
-        state["status"] = "budget-exceeded"
-        state["ended_epoch"] = int(time.time())
-        _append_event(root, "budget_exceeded",
-                      {"round": state["round"],
-                       "elapsed_s": round(time.time() - state["started_epoch"], 1)})
-        _save_state(root, state)
-        print("loop: failed — wall-clock budget exceeded")
         return True, 1
     _save_state(root, state)
     return False, 0

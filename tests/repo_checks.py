@@ -10,12 +10,14 @@ Checks:
   4. deploy-agents.ps1 / deploy-agents.sh feature-parity markers
 """
 
+import ast
 import hashlib
 import json
 import os
 import re
 import subprocess
 import sys
+import tempfile
 import tomllib
 from pathlib import Path
 
@@ -762,6 +764,95 @@ for _guide in ("docs/guides/Skills Usage Guide.md", "docs/guides/Skills Usage Gu
               f"{_guide} standard subsection lists {_std_listed}, want {sorted(set(_std) - set(_min))}")
         check(f"profiles:guide-full-{_guide}", "40" in _sec,
               f"{_guide} tier section does not state the full profile has 40 skills")
+
+# --- 3s. Loop layer (Phase 5, v3 §4.6) ---
+# tools/loop.py (stdlib only) + templates/loop/ (goal / loop-state / graph,
+# EN+ZH) + worked example graph + run records. The graph template carries
+# defaults (60 s timeout), so graph-validate must pass on it as well as on
+# the worked example. The smoke runs a real goal loop and a real timeout.
+_LOOP_TEMPLATES = {
+    "goal.template.md": ("## Goal", "## Verification", "## Stop conditions"),
+    "goal.template.zh.md": ("## 目标", "## 验证方式", "## 停止条件"),
+    "loop-state.template.md": ("## Rounds", "## Approval"),
+    "loop-state.template.zh.md": ("## 各轮", "## 批准"),
+    "graph.template.md": ("## Nodes", "## Edges", "## Approval", "## Timeout",
+                          "## Fan-out"),
+    "graph.template.zh.md": ("## 节点", "## 边", "## 批准", "## 超时",
+                             "## 并行展开"),
+}
+for _lt, _sections in _LOOP_TEMPLATES.items():
+    _lp = ROOT / "templates" / "loop" / _lt
+    check(f"loop:template-{_lt}-exists", _lp.is_file(), f"templates/loop/{_lt} missing")
+    if _lp.is_file():
+        _ltext = _lp.read_text(encoding="utf-8")
+        check(f"loop:template-{_lt}-sections",
+              all(s in _ltext for s in _sections),
+              f"templates/loop/{_lt} lacks a required section")
+_LOOP_ALLOWED_IMPORTS = {"argparse", "json", "os", "re", "shutil",
+                         "subprocess", "sys", "time", "datetime"}
+_loop_tree = ast.parse((ROOT / "tools" / "loop.py").read_text(encoding="utf-8"))
+_loop_imports = set()
+for _node in ast.walk(_loop_tree):
+    if isinstance(_node, ast.Import):
+        _loop_imports.update(a.name.split(".")[0] for a in _node.names)
+    elif isinstance(_node, ast.ImportFrom):
+        _loop_imports.add((_node.module or "").split(".")[0])
+check("loop:stdlib-only", _loop_imports <= _LOOP_ALLOWED_IMPORTS,
+      f"tools/loop.py imports non-stdlib: {sorted(_loop_imports - _LOOP_ALLOWED_IMPORTS)}")
+_loop_help = subprocess.run([sys.executable, str(ROOT / "tools" / "loop.py"), "--help"],
+                            capture_output=True, text=True)
+check("loop:help-exits-0", _loop_help.returncode == 0, "loop.py --help failed")
+for _g in ("templates/loop/graph.template.md", "docs/internal/phase5-graph.md"):
+    _gv = subprocess.run([sys.executable, str(ROOT / "tools" / "loop.py"),
+                          "graph-validate", "--graph", str(ROOT / _g)],
+                         capture_output=True, text=True)
+    check(f"loop:graph-validate-{Path(_g).name}", _gv.returncode == 0,
+          f"graph-validate failed on {_g}")
+_loop_tmp = tempfile.mkdtemp(prefix="loop-smoke-")
+_loop_goal = os.path.join(_loop_tmp, "goal.md")
+Path(_loop_goal).write_text("# Goal\n", encoding="utf-8")
+_loop_init = subprocess.run(
+    [sys.executable, str(ROOT / "tools" / "loop.py"), "init",
+     "--root", os.path.join(_loop_tmp, "run"), "--goal-file", _loop_goal,
+     "--kind", "goal", "--max-rounds", "3", "--consecutive-passes", "2",
+     "--timeout", "5"],
+    capture_output=True, text=True)
+_loop_run = subprocess.run(
+    [sys.executable, str(ROOT / "tools" / "loop.py"), "goal-loop",
+     "--root", os.path.join(_loop_tmp, "run"), "--maker", "true", "--verify", "true"],
+    capture_output=True, text=True)
+check("loop:smoke-goal-loop",
+      _loop_init.returncode == 0 and _loop_run.returncode == 0,
+      "loop.py goal-loop smoke (true/true) failed")
+_loop_to_init = subprocess.run(
+    [sys.executable, str(ROOT / "tools" / "loop.py"), "init",
+     "--root", os.path.join(_loop_tmp, "run3"), "--goal-file", _loop_goal,
+     "--kind", "goal", "--max-rounds", "1", "--consecutive-passes", "1",
+     "--timeout", "1"],
+    capture_output=True, text=True)
+_loop_to_run = subprocess.run(
+    [sys.executable, str(ROOT / "tools" / "loop.py"), "goal-loop",
+     "--root", os.path.join(_loop_tmp, "run3"), "--maker", "true", "--verify", "sleep 30"],
+    capture_output=True, text=True, timeout=30)
+_to_events = Path(_loop_tmp, "run3", "loop-events.jsonl").read_text(encoding="utf-8") \
+    if Path(_loop_tmp, "run3", "loop-events.jsonl").is_file() else ""
+check("loop:smoke-timeout-enforced",
+      _loop_to_init.returncode == 0 and _loop_to_run.returncode != 0
+      and '"timeout"' in _to_events,
+      "loop.py did not record a timeout for a verify past its timeout")
+_decisions = (ROOT / "DECISIONS.md").read_text(encoding="utf-8")
+check("loop:d21-present", "## D21" in _decisions,
+      "DECISIONS.md lacks D21 (Phase 5 L14 + four questions)")
+_record = (ROOT / "docs" / "internal" / "phase5-loops.md").read_text(encoding="utf-8")
+check("loop:record-sections",
+      all(s in _record for s in ("## Goal Loop", "## Maker-Checker Loop",
+                                 "## Timeout rule", "## Verdict")),
+      "docs/internal/phase5-loops.md lacks a required section")
+_pass_gate_test = subprocess.run(
+    [sys.executable, str(ROOT / "tests" / "pass_gate_test.py")],
+    capture_output=True, text=True)
+check("loop:pass-gate-test-passes", _pass_gate_test.returncode == 0,
+      "tests/pass_gate_test.py failed")
 
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
