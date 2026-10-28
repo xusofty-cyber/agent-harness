@@ -1,7 +1,7 @@
 # Rubric calibration log — Phase 3
 
-Status: **calibrated (4 rounds, 0 verdict divergences)**. NOT yet `stable`:
-the "human" side in all four rounds below is the recorded outcome from
+Status: **calibrated (5 rounds, 0 verdict divergences)**. NOT yet `stable`:
+the "human" side in all five rounds below is the recorded outcome from
 phase reports and acceptance commands, not a live second judge. A live
 second-person calibration round is still owed before the rubric is marked
 `stable`.
@@ -83,6 +83,27 @@ harness" + v3 consensus K1.
 **Agreement: yes.** No rubric change. (The rubric correctly Blocks the
 pre-Phase-0 state — the negative control works.)
 
+## Round 5 — Full-matrix run T3 gate rep1 (cross-file rename, gate arm)
+
+Source: `eval/results/t3-cross-file_gate_rep1.json` (real run, 2026-10-28,
+fresh executor session). Scores the gate-arm run of the same task as
+round 3, to check the scope dimension now that the executor rewrote the
+fixture docstrings sensibly instead of mechanically.
+
+| Dimension | Score | Reasoning |
+|---|---|---|
+| Correctness | 2 | Rename complete; `cli.py times 2 3` prints `Result: 6.0`; acceptance passes |
+| Verification | 2 | Acceptance re-run by `pass-gate.py verify`; `status` confirms `passing` with evidence |
+| Scope discipline | 2 | Exactly the 5 task files changed (14 insertions / 14 deletions, pure rename); both docstrings rewritten sensibly ("renames the old operation to times") — no "times to times" nonsense, unlike the bare rep1 scope-1 case |
+| Reliability | 2 | Deterministic; same acceptance passes on re-run (and in rep2/rep3) |
+| Maintainability | 2 | Follows existing code style |
+| Handover readiness | 2 | Task spec + run record are sufficient to continue |
+
+Total 12 → **Accept**. Known outcome: acceptance pass.
+**Agreement: yes.** No rubric change. (The scope-2 anchor "only files
+the task touches are changed" holds here; the contrast with round 3's
+scope 1 shows the dimension discriminates the docstring handling.)
+
 ## Summary
 
 | Round | Item | Rubric verdict | Known outcome | Agreement |
@@ -91,6 +112,7 @@ pre-Phase-0 state — the negative control works.)
 | 2 | Phase 2 comet recovery | Accept (11) | Go-gate passed | yes |
 | 3 | T3 bare rep1 | Accept (11) | acceptance pass | yes |
 | 4 | Pre-Phase-0 pack (retrospective) | Block (5) | "not a harness" | yes |
+| 5 | T3 gate rep1 | Accept (12) | acceptance pass | yes |
 
-4 rounds, 0 divergences, 1 wording change (re-run rule). Next step for
+5 rounds, 0 divergences, 1 wording change (re-run rule). Next step for
 `stable`: one live second-person calibration round.
