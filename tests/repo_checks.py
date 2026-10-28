@@ -791,8 +791,12 @@ check("eval:check-results-passes", _check_results.returncode == 0,
 _bench_smoke = subprocess.run(
     ["bash", str(ROOT / "eval" / "run-bench.sh"), "smoke"],
     capture_output=True, text=True, cwd=ROOT)
+_smoke_lines = [l for l in
+                (_bench_smoke.stdout + _bench_smoke.stderr).strip().splitlines()
+                if l.strip()]
 check("eval:bench-smoke-passes", _bench_smoke.returncode == 0,
-      "eval/run-bench.sh smoke failed")
+      "eval/run-bench.sh smoke failed: "
+      + (" | ".join(_smoke_lines[-2:]) if _smoke_lines else "(no output)"))
 
 # --- 3r. Deploy profiles (Phase 4, 4-1) ---
 # skills-profiles.json is the single source of truth for profile

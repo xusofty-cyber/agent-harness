@@ -188,6 +188,16 @@ PYEOF
 }
 
 do_smoke() {
+    # Preflight (review 2026-10-29): the t1 acceptance command needs
+    # pytest. Without it the smoke used to fail late with the misleading
+    # "acceptance fails after solution" line (and repo_checks reported
+    # only a generic bench-smoke FAIL); fail fast with a diagnosis.
+    if ! python3 -m pytest --version >/dev/null 2>&1; then
+        echo "smoke: PREFLIGHT FAILED — python3 -m pytest is not available" >&2
+        echo "smoke: the t1 acceptance command runs pytest; install it first:" >&2
+        echo "smoke:   python3 -m pip install pytest" >&2
+        exit 1
+    fi
     local tmp
     tmp="$(mktemp -d)"
     trap "rm -rf '$tmp'" EXIT
