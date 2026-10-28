@@ -17,6 +17,12 @@ before Phase 4) is gone. What this script enforces instead:
    release. Nothing here fails the build for a translation being behind —
    that is the point of the change (v2 4-2): a stale translation is a
    tracked debt, not a CI failure.
+5. Template-variant line drift is a WARNING only, never a failure
+   (D61, review 2026-10-29): a SESSION_STATE/PROJECT_CONTEXT template
+   variant that differs from its base by more than 5 lines prints a
+   [drift] reminder. The skeleton 31-line SESSION_STATE format is final;
+   the ZH-TW variant still carries the old 46-line format and is flagged
+   here until regenerated.
 
 Usage:
     i18n-check.py [--spot-check [N]] [--seed N]
@@ -152,6 +158,25 @@ def main(argv):
                     f"(last synced {sha}) — regenerate before release")
             else:
                 failures.append(f"{tgt}: unknown status {status!r}")
+
+    # 5. Template-variant line drift (warning only, D61).
+    for base in ("templates/SESSION_STATE.template.md",
+                 "templates/PROJECT_CONTEXT.template.md"):
+        base_path = ROOT / base
+        if not base_path.is_file():
+            continue
+        base_lines = len(base_path.read_text(encoding="utf-8").splitlines())
+        stem = base[:-len(".md")]
+        for suffix in (".zh.md", ".zh-tw.md"):
+            var = ROOT / (stem + suffix)
+            if not var.is_file():
+                continue
+            var_lines = len(var.read_text(encoding="utf-8").splitlines())
+            if abs(var_lines - base_lines) > 5:
+                reminders.append(
+                    f"[drift] {stem + suffix} is {var_lines} lines vs "
+                    f"base {base} {base_lines} lines — regenerate from "
+                    f"the base format (D61)")
 
     for r in reminders:
         print(r)

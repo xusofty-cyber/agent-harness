@@ -877,3 +877,15 @@ D57); the remaining items below are still pending.
   scaffold itself (patterns present), never the presence of an ignored
   artifact. To be confirmed by the fresh-clone run in the review
   verification round (docs/internal/merge-review-optimization-2026-10-29.md).
+
+## D61 — SESSION_STATE template format: skeleton 31-line format is final (review ruling, 2026-10-29)
+
+- **Decision:** the skeleton's 31-line EN SESSION_STATE template is the
+  final format (consistent with D29 skeleton schema). Yunyi's 11-line
+  breakpoint format is NOT adopted — switching formats would churn
+  every downstream SESSION_STATE without a measured benefit.
+- **Drift:** ZH is 27 lines (within the >5-line tolerance, no warning);
+  ZH-TW is 46 lines (old format, flagged by the i18n-check [drift]
+  warning until regenerated). FR/DE variants were deleted per D27.
+- **Guard:** `tools/i18n-check.py` template-drift check (warning only,
+  never fails the build; same >5-line tolerance as yunyi's lint LINT-006).
