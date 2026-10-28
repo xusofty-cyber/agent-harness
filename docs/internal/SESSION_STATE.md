@@ -62,9 +62,9 @@
 
 ## 验证证据与质量闸门
 
-- `python3 tests/repo_checks.py`：**68 项检查全数 PASS**（包含跨脚本 Parity、文档结构对称性、doc-impact 副本逐字节同步校验等）。
-- `node tests/hooks.test.mjs`：**16 项测试全数 PASS**（Claude Code PreToolUse Bash 安全卫士拦截测试）。
-- `python3 tests/sync_skills_test.py`：**7 项测试全数 PASS**（技能自更新与哈希校验）。
+- `python3 tests/repo_checks.py`：**457 项检查全数 PASS**（2026-10-28 Phase 0 实测；含 §3i 技能计数单一事实源、§3j 技能引用/占位符检查、跨脚本 Parity、文档结构对称性、doc-impact 副本逐字节同步校验等；旧文案“68 项”作废）。
+- `node tests/hooks.test.mjs`：**42 项测试全数 PASS**（Claude Code PreToolUse Bash 安全卫士拦截测试；旧文案“16 项”作废；耗时随环境波动，只记录不作优化目标）。
+- `python3 tests/sync_skills_test.py`：**12 项测试全数 PASS**（技能自更新与哈希校验；旧文案“7 项”作废）。
 - `python tools/doc-impact.py`：**正常识别并输出变更文件，无任何 UnicodeDecodeError 异常**。
 - 本地实测通过：`npm.cmd` 与 `deploy-agents.ps1` 可顺利调起包安装。
 
