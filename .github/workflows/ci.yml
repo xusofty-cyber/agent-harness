@@ -70,6 +70,13 @@ jobs:
       - name: Repository static checks
         run: python3 tests/repo_checks.py
 
+      - name: True-lock check (skills vs pinned commits)
+        # Verifies every vendored skill's local content against the content
+        # at its pinnedCommit in skills-lock.json (Phase 6, 6-1). Drift or
+        # tampering fails the build; a fetch failure also fails (exit 2) so
+        # a broken pin can never slip through silently. ~30 s, network.
+        run: python3 tools/sync-skills.py --check --strict
+
       - name: Deploy smoke test (deploy-agents.sh)
         run: |
           mkdir -p /tmp/smoke-proj

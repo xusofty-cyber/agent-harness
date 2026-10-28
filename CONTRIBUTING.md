@@ -59,6 +59,27 @@ python3 tests/repo_checks.py     # JSON/TOML, SKILL frontmatter, script parity
 CI runs markdownlint, shellcheck, the above, plus a `deploy-agents.sh` smoke test.
 Keep `main` green: fix lint violations in your branch, don't merge red.
 
+## Updating vendored skills (true lock，Phase 6, 6-1)
+
+`skills-lock.json` is a real lock, not metadata. Every github-source entry
+pins an upstream commit (`pinnedCommit`) and the SHA256 of the vendored
+content (`computedHash`); CI verifies both (offline in
+`tests/repo_checks.py` §5/§5b/§5c, online via
+`tools/sync-skills.py --check --strict`).
+
+- **To update a vendored skill**: on a branch, run
+  `python3 tools/sync-skills.py --apply [--skill NAME]`, review the diff
+  (skill file + `computedHash`), and open a PR — upstream updates always
+  go through review, never silently. Never hand-edit `computedHash`.
+- **To re-pin** (move a skill to a newer upstream commit): update
+  `pinnedCommit` + `pinnedAt` (and `pinnedFrom`, noting how the commit was
+  chosen), then run `--apply` to refresh the hash. A pin that no longer
+  resolves upstream fails CI.
+- **Never run `--apply` on `main`** and never edit the lock to cover a file
+  state that was never reviewed (§5b ties hash changes to file changes).
+- **Meta entries** (`openspec`, `superpowers`, `"meta": true`) pin suite
+  repos, not deployable skills. They are annotated, never deleted (D10).
+
 ## Versioning（版本）
 
 Changes are recorded in `CHANGELOG.md` under `Unreleased`. The maintainer tags releases
