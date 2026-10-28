@@ -60,10 +60,12 @@ class EvalTests(unittest.TestCase):
         c["scores"]["correctness"]["evidence"] = ""
         self.assertTrue(any("evidence" in p for p in evaluate.validate(c)))
 
-    def test_status_is_provisional_and_gate_refuses(self):
+    def test_status_is_advisory_only_and_gate_refuses(self):
+        # D28, user final ruling 2026-10-29: standing advisory-only
+        # (was provisional). Gate behavior is unchanged: still refuses.
         status = json.loads(
             (ROOT / "eval" / "rubric-status.json").read_text(encoding="utf-8"))
-        self.assertEqual(status["status"], "provisional")
+        self.assertEqual(status["status"], "advisory-only")
         self.assertFalse(status["auto_approve_allowed"])
         self.assertGreaterEqual(status["rounds_completed"], 5)
         with tempfile.TemporaryDirectory() as d:
