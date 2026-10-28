@@ -48,6 +48,32 @@ def find_evidence(comet_dir: Path) -> list[Path]:
     return hits
 
 
+def _next_seq(events_path: Path) -> int:
+    """Next event seq for the gate log: max integer seq + 1.
+
+    Events must carry the gate format (seq/ts/actor/event/item_id/
+    detail) or pass-gate.py's §3k check flags them and its append
+    logic cannot order them. A corrupt log line fails here, BEFORE
+    the feature list is touched, so an import never half-applies.
+    """
+    seq = 1
+    if not events_path.exists():
+        return seq
+    for lineno, line in enumerate(
+            events_path.read_text(encoding="utf-8").splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
+            rec = json.loads(line)
+        except json.JSONDecodeError:
+            raise ValueError(
+                f"gate/events.jsonl line {lineno} is not valid JSON; "
+                f"repair or remove that line first — no state was changed")
+        if isinstance(rec, dict) and isinstance(rec.get("seq"), int):
+            seq = max(seq, rec["seq"] + 1)
+    return seq
+
+
 def cmd_import(args) -> int:
     list_path = Path(args.file)
     comet_dir = Path(args.comet_dir)
@@ -63,6 +89,11 @@ def cmd_import(args) -> int:
     if item is None:
         print(f"error: no feature '{args.feature}' in {list_path}", file=sys.stderr)
         return 2
+    try:
+        seq = _next_seq(list_path.parent / "events.jsonl")
+    except ValueError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 2
     imported = []
     for p in evidence_files:
         digest = hashlib.sha256(p.read_bytes()).hexdigest()[:16]
@@ -72,9 +103,14 @@ def cmd_import(args) -> int:
     tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     tmp.replace(list_path)
     with (list_path.parent / "events.jsonl").open("a", encoding="utf-8") as f:
-        f.write(json.dumps({"ts": now(), "event": "external_evidence_imported",
-                            "item": args.feature, "via": "comet_adapter",
-                            "files": [i["path"] for i in imported]}, ensure_ascii=False) + "\n")
+        f.write(json.dumps({"seq": seq, "ts": now(),
+                            "actor": "comet_adapter",
+                            "event": "external_evidence_imported",
+                            "item_id": args.feature,
+                            "detail": f"imported {len(imported)} comet "
+                                      f"artifact(s) as external evidence: "
+                                      f"{[i['path'] for i in imported]}"},
+                           ensure_ascii=False) + "\n")
     print(f"imported {len(imported)} comet artifact(s) into feature '{args.feature}' as external evidence.")
     print("note: status unchanged — passing still requires `pass-gate.py verify`.")
     return 0

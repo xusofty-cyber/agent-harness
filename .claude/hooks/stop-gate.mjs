@@ -71,13 +71,23 @@ if (inProgress.length === 0) {
 if (data.stop_hook_active === true) {
   try {
     const eventsPath = join(cwd, "gate", "events.jsonl");
+    // Max integer seq across the whole log + 1 (not the last line's):
+    // a foreign writer may append a seq-less event, and reusing the
+    // last line's seq would duplicate an earlier seq (§3k flags that).
+    // Unparseable lines are skipped here — the hook must never block
+    // the stop; §3k flags the bad line separately.
     let seq = 1;
     if (existsSync(eventsPath)) {
       const lines = readFileSync(eventsPath, "utf-8")
         .split("\n")
         .filter(Boolean);
-      if (lines.length > 0) {
-        seq = (JSON.parse(lines[lines.length - 1]).seq || 0) + 1;
+      for (const line of lines) {
+        try {
+          const s = JSON.parse(line).seq;
+          if (Number.isInteger(s) && s >= seq) seq = s + 1;
+        } catch {
+          // skip; flagged by §3k, not by this hook
+        }
       }
     }
     appendFileSync(
@@ -108,13 +118,23 @@ const reason = (process.env.GATE_STOP_REASON || "").trim();
 if (override && reason) {
   try {
     const eventsPath = join(cwd, "gate", "events.jsonl");
+    // Max integer seq across the whole log + 1 (not the last line's):
+    // a foreign writer may append a seq-less event, and reusing the
+    // last line's seq would duplicate an earlier seq (§3k flags that).
+    // Unparseable lines are skipped here — the hook must never block
+    // the stop; §3k flags the bad line separately.
     let seq = 1;
     if (existsSync(eventsPath)) {
       const lines = readFileSync(eventsPath, "utf-8")
         .split("\n")
         .filter(Boolean);
-      if (lines.length > 0) {
-        seq = (JSON.parse(lines[lines.length - 1]).seq || 0) + 1;
+      for (const line of lines) {
+        try {
+          const s = JSON.parse(line).seq;
+          if (Number.isInteger(s) && s >= seq) seq = s + 1;
+        } catch {
+          // skip; flagged by §3k, not by this hook
+        }
       }
     }
     appendFileSync(

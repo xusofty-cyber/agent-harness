@@ -178,15 +178,31 @@ def validate(data):
     return errors
 
 
+class EventsLogError(ValueError):
+    """The append-only event log is unreadable.
+
+    Raised instead of letting a raw JSONDecodeError/KeyError traceback
+    escape: callers fail with a clear message BEFORE mutating any state,
+    so a corrupt log line can never silently drop a state change.
+    """
+
+
 def _read_events(root):
     path = _events_path(root)
     events = []
     if os.path.exists(path):
         with open(path, encoding="utf-8", errors="replace") as f:
-            for line in f:
+            for lineno, line in enumerate(f, 1):
                 line = line.strip()
-                if line:
+                if not line:
+                    continue
+                try:
                     events.append(json.loads(line))
+                except json.JSONDecodeError:
+                    raise EventsLogError(
+                        f"gate/events.jsonl line {lineno} is not valid "
+                        f"JSON (starts: {line[:80]!r}); repair or remove "
+                        f"that line first — no state was changed")
     return events
 
 
@@ -196,11 +212,18 @@ def _append_event(root, event, item_id, detail):
     The log is committed to git, so rewriting history is visible in the
     diff; the file itself cannot stop a determined rewrite — it leaves a
     trace. Sequence numbers are monotonic; a gap or duplicate is a
-    smell CI (§3k) flags.
+    smell CI (§3k) flags. The sequence number is the maximum integer
+    seq already in the log plus one, so an event written by another
+    tool without a seq (or with a non-integer seq) can never crash
+    the append with KeyError — the next append simply continues from
+    the highest known seq.
     """
     path = _events_path(root)
     events = _read_events(root)
-    seq = (events[-1]["seq"] + 1) if events else 1
+    seq = 1
+    for rec in events:
+        if isinstance(rec, dict) and isinstance(rec.get("seq"), int):
+            seq = max(seq, rec["seq"] + 1)
     record = {
         "seq": seq,
         "ts": _utcnow(),
@@ -1098,10 +1121,29 @@ def main(argv=None):
     p.set_defaults(func=cmd_run)
 
     args = parser.parse_args(argv)
+    # Fail fast on a corrupt event log BEFORE any mutation: every
+    # mutating command appends an event, so a bad log line would
+    # otherwise surface mid-command — after some commands already
+    # saved their state change (partial application) or as a raw
+    # traceback. Read-only commands (status/events/check-clean/run/
+    # handoff) keep working so the operator can still inspect state
+    # while repairing the log.
+    if args.cmd in ("init", "add", "start", "verify", "block",
+                    "unblock", "reopen", "override", "terminate"):
+        try:
+            _read_events(args.root)
+        except EventsLogError as e:
+            print(f"error: {e}", file=sys.stderr)
+            return 2
     try:
         return args.func(args)
     except BrokenPipeError:
         return 0
+    except EventsLogError as e:
+        # Explicit failure, not a traceback: the command did not run and
+        # no state was changed. The operator repairs the log line first.
+        print(f"error: {e}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":

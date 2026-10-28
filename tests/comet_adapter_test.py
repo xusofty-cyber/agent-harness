@@ -59,7 +59,14 @@ class TestCometAdapter(unittest.TestCase):
             events = (tmp / "gate" / "events.jsonl").read_text(encoding="utf-8")
             ev = json.loads(events.strip().splitlines()[-1])
             self.assertEqual(ev["event"], "external_evidence_imported")
-            self.assertEqual(ev["item"], "demo")
+            # P0-1: the import event must carry the full gate format
+            # (seq/ts/actor/event/item_id/detail) or pass-gate's append
+            # logic and §3k cannot order or validate it.
+            self.assertEqual(ev["item_id"], "demo")
+            self.assertIsInstance(ev["seq"], int)
+            self.assertIn("ts", ev)
+            self.assertEqual(ev["actor"], "comet_adapter")
+            self.assertIn("detail", ev)
             # Still a valid feature list after the import (validate() is
             # a module-level function; there is no `validate` subcommand).
             import importlib.util
@@ -93,6 +100,24 @@ class TestCometAdapter(unittest.TestCase):
             r = self.run_adapter("import", "--comet-dir", str(comet),
                                  "--feature", "ghost", "--file", str(fl))
             self.assertEqual(r.returncode, 2)
+
+    def test_import_with_corrupt_log_fails_before_mutation(self):
+        # P0-1: a bad events.jsonl line must fail the import cleanly
+        # (exit 2) WITHOUT touching the feature list.
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td)
+            fl = make_list(tmp)
+            before = fl.read_text(encoding="utf-8")
+            (tmp / "gate" / "events.jsonl").write_text(
+                "NOT-JSON\n", encoding="utf-8")
+            comet = tmp / "docs" / "comet" / "change-1"
+            comet.mkdir(parents=True)
+            (comet / "verify-result.json").write_text("{}", encoding="utf-8")
+            r = self.run_adapter("import", "--comet-dir", str(comet),
+                                 "--feature", "demo", "--file", str(fl))
+            self.assertEqual(r.returncode, 2)
+            self.assertIn("not valid JSON", r.stderr)
+            self.assertEqual(fl.read_text(encoding="utf-8"), before)
 
     def test_map_no_candidates_exits_0(self):
         with tempfile.TemporaryDirectory() as td:

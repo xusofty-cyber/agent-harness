@@ -37,6 +37,85 @@ def _status_with(n_items):
     return out.stdout
 
 
+def _load_pass_gate():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "pass_gate_mod", str(PASS_GATE))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+class EventsLogToleranceTest(unittest.TestCase):
+    """P0-1: the event log must never crash the gate with a traceback.
+
+    A legacy seq-less event (as comet_adapter used to write) must not
+    break the next append, and a corrupt line must fail a mutating
+    command cleanly (exit 2) without changing any state.
+    """
+
+    def test_append_tolerates_seq_less_last_event(self):
+        mod = _load_pass_gate()
+        with tempfile.TemporaryDirectory() as td:
+            gate = Path(td) / "gate"
+            gate.mkdir()
+            (gate / "events.jsonl").write_text(
+                '{"ts": "2026-10-29T00:00:00Z", "event": "legacy", '
+                '"item": "x", "via": "old-writer", "files": []}\n',
+                encoding="utf-8")
+            rec = mod._append_event(td, "test_event", "x", "d")
+            self.assertEqual(rec["seq"], 1)
+            (gate / "events.jsonl").write_text(
+                '{"seq": 3, "ts": "t", "actor": "a", "event": "e", '
+                '"item_id": null, "detail": ""}\n'
+                '{"ts": "t", "event": "legacy2"}\n',
+                encoding="utf-8")
+            rec = mod._append_event(td, "test_event2", "x", "d")
+            self.assertEqual(rec["seq"], 4)
+
+    def test_read_events_raises_clear_error_on_bad_line(self):
+        mod = _load_pass_gate()
+        with tempfile.TemporaryDirectory() as td:
+            gate = Path(td) / "gate"
+            gate.mkdir()
+            (gate / "events.jsonl").write_text(
+                '{"seq": 1, "ts": "t", "actor": "a", "event": "e", '
+                '"item_id": null, "detail": ""}\nNOT-JSON\n',
+                encoding="utf-8")
+            with self.assertRaises(ValueError) as ctx:
+                mod._read_events(td)
+            self.assertIn("line 2", str(ctx.exception))
+            self.assertIn("no state was changed", str(ctx.exception))
+
+    def test_mutating_command_fails_clean_without_state_change(self):
+        with tempfile.TemporaryDirectory() as td:
+            tmpdir = Path(td)
+            gate = tmpdir / "gate"
+            gate.mkdir()
+            items = [{"id": "item-0", "title": "item 0", "priority": "p1",
+                      "area": "gate", "user_visible_behavior": "x",
+                      "status": "in_progress",
+                      "verification": {"command": "true",
+                                       "timeout_seconds": 60},
+                      "evidence": None}]
+            fl = gate / "feature_list.json"
+            fl.write_text(json.dumps(
+                {"version": 1, "project": "p", "items": items}))
+            (gate / "events.jsonl").write_text(
+                '{"seq": 1, "ts": "t", "actor": "a", "event": "e", '
+                '"item_id": null, "detail": ""}\nNOT-JSON\n',
+                encoding="utf-8")
+            r = subprocess.run(
+                [sys.executable, str(PASS_GATE), "--root", str(tmpdir),
+                 "block", "--id", "item-0", "--reason", "r"],
+                capture_output=True, text=True)
+            self.assertEqual(r.returncode, 2)
+            self.assertNotIn("Traceback", r.stderr)
+            self.assertIn("not valid JSON", r.stderr)
+            data = json.loads(fl.read_text())
+            self.assertEqual(data["items"][0]["status"], "in_progress")
+
+
 class StatusPluralTest(unittest.TestCase):
     def test_zero_items(self):
         self.assertIn("(0 items)", _status_with(0))
