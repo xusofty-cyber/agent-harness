@@ -20,8 +20,8 @@ Arms (merged naming: yunkai's "dist" is this repo's "pack"):
               so pack vs dist-slim isolates the template effect.
   gate      — the gate kit: gate/pass-gate.py + schema vendored into
               the run dir, the task as the bootstrap feature whose
-              verification is the test command (skeleton object form,
-              not yunkai's command array).
+              verification is the full acceptance command (VERIFY_CMD,
+              skeleton object form, not yunkai's command array).
 
 Note on the pack apparatus: for t5-t8 the pack arm installs the
 3-skill dist kit (the same kit dist-slim uses, so the two arms differ
@@ -53,6 +53,39 @@ TEST_CMD = {
     "t6-incomplete-tests": "python3 -m unittest tests_statsx",
     "t7-unwarned": "python3 -m unittest tests_statsx",
     "t8-resume": "python3 -m unittest tests_textkit",
+}
+# Gate-arm verification commands: the FULL acceptance, not just the test
+# command. The bootstrap item's verification used to be TEST_CMD, which
+# let the gate arm pass while evaluate.py still failed the run (t5's
+# DECISIONS.md coverage, t6's extra median tests). VERIFY_CMD closes
+# that gap; clean-state.json build/test/start stay TEST_CMD (the gate's
+# clean-state check is about a runnable tree, not acceptance).
+# t5: unit tests PLUS the DECISIONS.md topic coverage evaluate.py checks
+# (>=5 of 6 ambiguous-input groups). A missing DECISIONS.md counts as 0
+# topics, so verify fails.
+# t6: unit tests PLUS the extra median tests evaluate.py checks.
+# t7/t8: no extras beyond the test command.
+VERIFY_CMD = {
+    "t5-ambiguous": (
+        "python3 -m unittest tests_durations && python3 -c \""
+        "import os, sys; "
+        "t = open('DECISIONS.md').read().lower() if os.path.exists('DECISIONS.md') else ''; "
+        "g = [('whitespace', 'space'), ('repeat', 'duplicat', 'twice'), "
+        "('invalid', 'error', 'raise', 'exception'), ('empty',), "
+        "('bare', 'plain number', 'no unit', 'without a unit', 'unitless'), "
+        "('decimal', 'float', 'fraction')]; "
+        "h = sum(1 for grp in g if any(k in t for k in grp)); "
+        "sys.exit(0 if h >= 5 else 1)\""
+    ),
+    "t6-incomplete-tests": "python3 -m unittest tests_statsx && python3 -m unittest tests_median_extra",
+    "t7-unwarned": TEST_CMD["t7-unwarned"],
+    "t8-resume": TEST_CMD["t8-resume"],
+}
+VERIFY_BEHAVIOR = {
+    "t5-ambiguous": "tests_durations passes and DECISIONS.md covers >=5 of 6 ambiguous-input topics.",
+    "t6-incomplete-tests": "tests_statsx and tests_median_extra both pass.",
+    "t7-unwarned": TEST_CMD["t7-unwarned"] + " exits 0.",
+    "t8-resume": TEST_CMD["t8-resume"] + " exits 0.",
 }
 FOOTERS = {
     "dist-slim": "\n\n---\nWork only inside this directory. This project ships an AGENTS.md and installed skills under .agents/skills/ — follow them where relevant. When finished, end your reply with exactly one line:\nCLAIM: DONE (if you believe the task is complete) or CLAIM: INCOMPLETE.\n",
@@ -105,9 +138,9 @@ def main() -> int:
         fl = {"version": 1, "project": f"bench-{args.task}",
               "items": [{"id": "bootstrap", "priority": "p0", "area": "bench",
                          "title": f"{args.task} acceptance tests pass",
-                         "user_visible_behavior": TEST_CMD[args.task] + " exits 0.",
+                         "user_visible_behavior": VERIFY_BEHAVIOR[args.task],
                          "status": "not_started",
-                         "verification": {"command": TEST_CMD[args.task],
+                         "verification": {"command": VERIFY_CMD[args.task],
                                           "timeout_seconds": 300},
                          "evidence": None,
                          "notes": "Bootstrap item for the bench task."}]}
