@@ -27,7 +27,7 @@
 
 | 提交 | 修复 | 来源 | 验证 |
 |---|---|---|---|
-| `7f23a9f` | QUALITY_SCORE 数字漂移 6/6 → 3/3（合并分支 feature_list 实为 3 条，全 passing）；三工具 pin 落点措辞修正（pin 面是部署脚本/指南，不是 skills-lock.json）；ci.yml 加 `workflow_dispatch`（不改现有触发、不自动跑） | 云开 §5#1、云逸 P0#3、云逸 P1#9 | 数字实测 3/3；lock 42 条目实测无 codegraph/comet/rtk；触发条件实测仅新增 dispatch |
+| `7f23a9f` | QUALITY_SCORE 数字漂移 6/6 → 3/3（合并分支 feature_list 实为 3 条，全 passing）；pin 精度说明补记（见补注）；ci.yml 加 `workflow_dispatch`（不改现有触发、不自动跑） | 云开 §5#1、云逸 P0#3、云逸 P1#9 | 数字实测 3/3；触发条件实测仅新增 dispatch |
 | `f785acb` | Gate bootstrap 验收补全：t5 纳入 DECISIONS.md（≥5/6 主题组，与 evaluate.py 同组）、t6 纳入 `tests_median_extra`；Gate PASS ≠ 任务全过的缺口补上 | 云逸 P0#4（取优先方案：纳入验收，而非仅文档说明） | 新增 `tests/bench_bootstrap_verify_test.py` 4/4（缺 extra 则 FAIL、有则 PASS） |
 | `0c03da7` | D47/D48 落定不再挂候选：D47 采纳——check-clean 新增 3c 维（占位 FAIL）；D48 实质采纳、无代码改动（实测无检查依赖 gitignored 文件） | 云逸 P1#8 | `tests/check_clean_test.py` 4/4；新鲜克隆验证 D48 |
 | `0834664` | SESSION_STATE 格式定稿：骨干 31 行 EN 格式为最终版（与 D29 骨干 schema 一致），云逸 11 行格式不采纳；i18n-check 增加行数漂移提醒（>5 行告警、不阻塞） | 云逸 P0#5（取 (b) 方案） | ZH-TW 46 vs 31 打印 [drift] 提醒、exit 仍 0；ZH 27 vs 31 在容差内 |
@@ -42,7 +42,7 @@
 
 - 云逸“方案推荐 v3-yunyi 做骨架”**不属实**：对比方案 §6.1 明言以云澈 `feat/phase0-v3` 为骨架，合并选 `ab8ec04` 是遵方案。
 - D27 归属：方案文档自身不一致——§6.3 把 D27 Guard + 13 测试归于云开，但云开 DECISIONS 只有 D-001–D-011、并无 D27；云逸 D27 经远端分支核实确实存在。双方各对一半，已在本记录与分支记录中纠正，D27 归属云逸无争议。
-- 云逸 P0#3 属实：三工具确实不在 skills-lock.json（42 条目无此三名），pin 面在部署脚本/指南；rtk SHA 在 merge-v3 与云逸分支不同一事已记录，发布前以 rtk 上游尖端复核一次（见第 4 节）。
+- 云逸 P0#3 **不属实（本记录初版写错，2026-10-29 晚间已更正）**：云澈直接查 `skills-lock.json` 实测，三工具**都在** 42 条目内且有 pin——codegraph：pinnedCommit `01e0ac3a…` + installerSha256（sh 与 ps1 双通道）；comet：npmVersion 0.5.1 + pinnedCommit `35c9860b…`；rtk：pinnedCommit `e05c7bdf…` + installerSha256。DECISIONS 原句“都 pin 在 lock 里”为真，`7f23a9f` 只补了精度说明（rtk 的 ps1 winget 通道仍无 pin，属 D13 已知缺口；上游 tip 与 pin 不一致是按设计，不算过期）。云逸原文称“42 条目无此三名”与实测不符，初版记录采信该说法是云澈的核查失误，特此更正。rtk SHA 在 merge-v3（`e05c7bdf…`）与云逸分支（`753a3b0e…`）不同一事仍成立，发布前以 rtk 上游尖端复核一次（见第 4 节）。
 - 云开 §4 四项“用户既定裁定”经核对原文成立（D-004、D-006、D-007、D-011 均见于云开分支记录），本轮第 1、2、3、5 项终裁与之对齐；硬停一项三方记录曾互相矛盾（云逸 D23 称用户选 ON、骨干 D12 与云开 D-007 称只警告），现以用户 2026-10-29 终裁 ON 为准。
 - 两份分析的复测数字（repo_checks 662、hooks 108、pytest 69、bench smoke 4/4、deploy smoke）抽查复跑属实。
 
@@ -62,7 +62,7 @@
 
 ## 4. 仍未决事项与发版前剩余清单
 
-**政策项：除发版时机本身外，已无剩余争议项。** 上表 6 项之外无待裁决政策。
+**政策项：用户明确提出异议的 6 项已全部终裁；D29–D34 仍为合并时暂定（未再起争议，随发布批准一并确认）。** D29–D34 即合并时 C1–C10 映射中除 D26–D28 外的部分（骨干 schema 为标准、standard 档 18 技能、默认 minimal、状态文件放 `gate/`、DECISIONS 在根目录、Loop/Graph 进 v0.3.0），用户未再提出异议，但也未经用户终裁确认，发布批准时一并确认；D35（VERSION/tag）见上表第 6 项。
 
 发版前剩余清单（按顺序，均未执行）：
 
