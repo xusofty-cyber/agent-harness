@@ -129,7 +129,9 @@
       "skillPath": ".agents/skills/write-openspec-docs/SKILL.md",
       "repository": "https://github.com/Fission-AI/OpenSpec",
       "domain": "openspec",
-      "pinnedCommit": "f1b521dffac38ed6638689cd28b0c204b1eef0f1"
+      "pinnedCommit": "f1b521dffac38ed6638689cd28b0c204b1eef0f1",
+      "meta": true,
+      "note": "Meta entry (Phase 2, 2-2c): pins the Fission-AI/OpenSpec suite repo (pinnedCommit) — not a deployable skill, no skill directory. sync-skills.py skips it; count-skills.py counts it as a meta entry."
     },
     "openspec-apply-change": {
       "source": "Fission-AI/OpenSpec",
@@ -293,7 +295,9 @@
       "skillPath": "skills/test-driven-development/SKILL.md",
       "repository": "https://github.com/obra/superpowers",
       "domain": "superpowers",
-      "pinnedCommit": "5bf4e78011075bcfc0dc295f0724994cd123ee71"
+      "pinnedCommit": "5bf4e78011075bcfc0dc295f0724994cd123ee71",
+      "meta": true,
+      "note": "Meta entry (Phase 2, 2-2c): pins the obra/superpowers suite repo (pinnedCommit) — not a deployable skill, no skill directory. sync-skills.py skips it; count-skills.py counts it as a meta entry."
     },
     "systematic-debugging": {
       "source": "obra/superpowers",

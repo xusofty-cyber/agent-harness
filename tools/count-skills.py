@@ -46,7 +46,10 @@ EXPECTED_DIRS = {
 }
 EXPECTED_TOTAL_DIRS = 40
 EXPECTED_LOCK_ENTRIES = 42
-META_ENTRIES = {"openspec", "superpowers"}
+# Suite-level pins, not deployable skills. The lock marks them with
+# "meta": true (Phase 2, 2-2c); the marker — not this name list — is the
+# rule. This set is only the expected value for --check.
+EXPECTED_META_ENTRIES = {"openspec", "superpowers"}
 
 # Live docs whose skill-count claims must agree with disk. History files
 # (CHANGELOG.md, docs/internal/SESSION_RESUME*.md) are excluded on purpose.
@@ -72,6 +75,8 @@ def compute_counts():
     lock_data = json.loads((ROOT / "skills-lock.json").read_text(encoding="utf-8-sig"))
     lock_skills = lock_data["skills"]
     dir_skills = {p.name for p in (ROOT / ".agents" / "skills").iterdir() if p.is_dir()}
+    meta_entries = sorted(n for n, m in lock_skills.items()
+                          if m.get("meta") is True)
     by_source = Counter()
     for name in dir_skills:
         src = lock_skills.get(name, {}).get("source", "<no-lock-entry>")
@@ -83,9 +88,9 @@ def compute_counts():
         "total_dirs": len(dir_skills),
         "by_source": {k: by_source.get(k, 0) for k in EXPECTED_DIRS},
         "lock_entries": len(lock_skills),
-        "lock_meta_entries": sorted(set(lock_skills) & META_ENTRIES),
+        "lock_meta_entries": meta_entries,
         "dirs_without_lock": sorted(dir_skills - set(lock_skills)),
-        "lock_without_dir": sorted(set(lock_skills) - dir_skills - META_ENTRIES),
+        "lock_without_dir": sorted(set(lock_skills) - dir_skills - set(meta_entries)),
     }
 
 
@@ -120,6 +125,9 @@ def check():
         problems.append(f"total dirs: expected {EXPECTED_TOTAL_DIRS}, got {counts['total_dirs']}")
     if counts["lock_entries"] != EXPECTED_LOCK_ENTRIES:
         problems.append(f"lock entries: expected {EXPECTED_LOCK_ENTRIES}, got {counts['lock_entries']}")
+    if set(counts["lock_meta_entries"]) != EXPECTED_META_ENTRIES:
+        problems.append(f"meta entries: expected {sorted(EXPECTED_META_ENTRIES)}, "
+                        f"got {counts['lock_meta_entries']}")
     if counts["dirs_without_lock"]:
         problems.append(f"dirs without lock entry: {counts['dirs_without_lock']}")
     if counts["lock_without_dir"]:

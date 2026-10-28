@@ -68,6 +68,18 @@ class TestExternalSkillsFilter(unittest.TestCase):
             result = mod.external_skills(self._lock(), only="local")
         self.assertEqual(result, [])
 
+    def test_meta_entries_skipped_even_with_skill_path(self):
+        # Phase 2, 2-2c: a "meta": true entry is a suite pin, never a
+        # syncable skill — even if it looks like one (skills/ path + dir).
+        lock = self._lock()
+        lock["skills"]["suite-pin"] = {
+            "sourceType": "github", "source": "o/suite",
+            "skillPath": "skills/suite/SKILL.md", "meta": True}
+        with patch.object(Path, "is_file", lambda self: True):
+            result = mod.external_skills(lock)
+        names = [n for n, _ in result]
+        self.assertEqual(names, ["ext-ok"])
+
 
 class TestCheckSkill(unittest.TestCase):
     def test_in_sync(self):

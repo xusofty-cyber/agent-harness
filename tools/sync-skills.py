@@ -130,6 +130,8 @@ def external_skills(lock: dict, only: str | None = None) -> list[tuple[str, dict
     for name, meta in lock.get("skills", {}).items():
         if only and name != only:
             continue
+        if meta.get("meta"):
+            continue  # suite-level pin, not a deployable skill (Phase 2, 2-2c)
         if meta.get("sourceType") != "github":
             continue
         if "package" in meta:

@@ -92,7 +92,7 @@ for name in sorted(local_skills):
 # serves as the content identifier. No skill may exist without provenance.
 # (META_ENTRIES are source-repo placeholders, not real skills.)
 for name, meta in sorted(lock_data.get("skills", {}).items()):
-    if name in ("openspec", "superpowers"):  # source-repo meta entries, not real skills
+    if meta.get("meta") is True:  # source-repo meta entry (Phase 2, 2-2c), not a real skill
         continue
     has_provenance = bool(meta.get("version")) or bool(meta.get("computedHash"))
     check(f"provenance:{name}", has_provenance,
@@ -670,10 +670,14 @@ for ps1_marker, sh_marker, feature in PIPELINE_PARITY:
 
 # --- 5. skills-lock.json consistency ---
 # Every skill directory must have a lock entry (provenance metadata).
-# Lock entries without a directory are allowed only for known meta-entries
-# (suites, not single skills).
-META_ENTRIES = {"openspec", "superpowers"}
+# Lock entries without a directory are allowed only for meta-entries
+# (suites, not single skills), marked explicitly with "meta": true in the
+# lock (Phase 2, 2-2c) — the marker, not a hardcoded name list, is the rule.
 lock_data = json.loads((ROOT / "skills-lock.json").read_text(encoding="utf-8-sig"))
+META_ENTRIES = {n for n, m in lock_data.get("skills", {}).items()
+                if m.get("meta") is True}
+check("lock:meta-entries-exact", META_ENTRIES == {"openspec", "superpowers"},
+      f"meta entries must be exactly openspec + superpowers, got: {sorted(META_ENTRIES)}")
 lock_skills = set(lock_data["skills"])
 dir_skills = {p.name for p in (ROOT / ".agents" / "skills").iterdir() if p.is_dir()}
 missing_lock = sorted(dir_skills - lock_skills)
