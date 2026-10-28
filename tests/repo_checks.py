@@ -920,6 +920,8 @@ check("loop:pass-gate-test-passes", _pass_gate_test.returncode == 0,
 # in templates/loop/ and the stdlib-only runner in tools/loop.py, and that
 # the deployed runner executes (--help exits 0). The gate deploy smoke
 # lives in CI; this one pins the Loop half of the same contract.
+# Merge addition: the same deploy must also land gate/graph.py (the graph
+# executor, merged from v3-yunyi) and it must execute (--help exits 0).
 _loop_deploy_tmp = tempfile.mkdtemp(prefix="loop-deploy-")
 try:
     _loop_deploy = subprocess.run(
@@ -944,6 +946,15 @@ try:
             capture_output=True, text=True, timeout=30)
         check("loop-deploy:runner-runs", _deployed_help.returncode == 0,
               "deployed tools/loop.py --help failed")
+    _deployed_graph = Path(_loop_deploy_tmp, "gate", "graph.py")
+    check("graph-deploy:present", _deployed_graph.is_file(),
+          "gate/graph.py missing after deploy")
+    if _deployed_graph.is_file():
+        _deployed_graph_help = subprocess.run(
+            [sys.executable, str(_deployed_graph), "--help"],
+            capture_output=True, text=True, timeout=30)
+        check("graph-deploy:runs", _deployed_graph_help.returncode == 0,
+              "deployed gate/graph.py --help failed")
 finally:
     shutil.rmtree(_loop_deploy_tmp, ignore_errors=True)
 
@@ -990,6 +1001,7 @@ PARITY = [
     ("target-auto-create", "target-auto-create", "auto-create missing target directory"),
     ("IncludeHeavySkills", "include-heavy-skills", "opt-in heavy skills (docx, brainstorming)"),
     ("GateDeploy", "gate-deploy", "gate layer deployment (pass-gate.py + schema + init template)"),
+    ("GraphDeploy", "graph-deploy", "graph executor deployment (gate/graph.py)"),
     ("SkillProfile", "--profile", "deployment profiles minimal/standard/full"),
     ("LoopDeploy", "loop-deploy", "loop layer deployment (loop.py + templates)"),
 ]

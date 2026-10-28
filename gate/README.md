@@ -164,7 +164,7 @@ reviewer can find them.
 ## Deploy
 
 `deploy-agents.sh` / `.ps1` copy the gate *code* (`pass-gate.py`,
-`feature_list.schema.json`, `init.template.sh`, this README) to the
+`graph.py`, `feature_list.schema.json`, `init.template.sh`, this README) to the
 target's `gate/`. They never copy `feature_list.json`, `events.jsonl`,
 or `clean-state.json` — those are per-project state. A target project
 runs `sh gate/init.template.sh --name <project> --verify "<cmd>" --start

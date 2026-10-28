@@ -1274,6 +1274,8 @@ if ((Test-Path $SourceSkillsLock) -and (-not $isSelfRepo)) {
 
 # Deploy gate layer (Phase 1): pass-gate.py + schema + init template.
 # GateDeploy
+# GraphDeploy (merged from v3-yunyi): gate/graph.py ships with the gate
+# layer — the graph executor, not per-project state.
 # Only the code ships. feature_list.json / events.jsonl are per-project
 # state, created by `gate/init.template.sh` or `pass-gate.py init` — never
 # copied from this repo. Skipped on self-deploy (same directory).
@@ -1283,7 +1285,7 @@ if ((Test-Path $SourceGateDir) -and (-not $isSelfRepo)) {
     if (-not (Test-Path $TargetGateDir)) {
         New-Item -ItemType Directory -Path $TargetGateDir -Force | Out-Null
     }
-    foreach ($gateFile in @("pass-gate.py", "feature_list.schema.json", "init.template.sh", "README.md")) {
+    foreach ($gateFile in @("pass-gate.py", "graph.py", "feature_list.schema.json", "init.template.sh", "README.md")) {
         $sourceFile = Join-Path $SourceGateDir $gateFile
         if (Test-Path $sourceFile) {
             $targetFile = Join-Path $TargetGateDir $gateFile
@@ -1293,7 +1295,7 @@ if ((Test-Path $SourceGateDir) -and (-not $isSelfRepo)) {
             }
         }
     }
-    Write-Host "  [OK] Deployed gate layer: gate/ (pass-gate.py + schema + init.template.sh)" -ForegroundColor Green
+    Write-Host "  [OK] Deployed gate layer: gate/ (pass-gate.py + graph.py + schema + init.template.sh)" -ForegroundColor Green
 }
 
 # Deploy Loop layer (Phase 6, 6-5; D21 leftover): loop.py + templates.
