@@ -1527,6 +1527,20 @@ for doc_subdir in specs architecture reference guides management tests adr; do
 done
 echo -e "  ${GREEN}[√] 已就绪文档骨架目录: docs/{specs,architecture,reference,guides,management,tests,adr}${NC}"
 
+# Merged from v3-yunkai: snapshot an existing .comet/ state dir before
+# comet init rewrites it. Backups live under .comet/backups/ (covered by
+# the scaffolded gitignore).
+backup_comet_state() {
+    local target_dir="$1" ts dest
+    [ -d "${target_dir}/.comet" ] || return 0
+    ts="$(date +%Y%m%d-%H%M%S)"
+    dest="${target_dir}/.comet/backups/${ts}"
+    mkdir -p "$dest"
+    cp -R "${target_dir}/.comet/." "$dest/" 2>/dev/null || true
+    rm -rf "$dest/backups"
+    echo -e "  ${GREEN}[√] Comet 状态已备份 (state backup): .comet/backups/${ts}${NC}"
+}
+
 # ==============================================================================
 # 9. Optional Comet CLI Init (--comet-init) & Configuration Scaffold
 # ==============================================================================
@@ -1542,6 +1556,7 @@ fi
 
 if [ "$DO_COMET_INIT" = true ]; then
     if command -v comet >/dev/null 2>&1; then
+        backup_comet_state "${TARGET_PROJECT_DIR}"
         echo -e "\n${YELLOW}>>> 正在目标项目中运行 'comet init'...${NC}"
         (cd "${TARGET_PROJECT_DIR}" && comet init) || echo -e "  ${YELLOW}[!] comet init 执行存在告警。${NC}"
     else

@@ -1403,6 +1403,21 @@ foreach ($sub in $docSubdirs) {
 }
 Write-Host "  [OK] Initialized living documentation scaffold: docs/{specs,architecture,reference,guides,management,tests,adr}" -ForegroundColor Green
 
+# Merged from v3-yunkai: snapshot an existing .comet/ state dir before
+# comet init rewrites it. Backups live under .comet/backups/ (covered by
+# the scaffolded gitignore).
+function Backup-CometState {
+    param([string]$TargetDir)
+    $cometDir = Join-Path $TargetDir ".comet"
+    if (-not (Test-Path $cometDir)) { return }
+    $ts = Get-Date -Format "yyyyMMdd-HHmmss"
+    $dest = Join-Path $cometDir "backups\$ts"
+    New-Item -ItemType Directory -Path $dest -Force | Out-Null
+    Get-ChildItem -LiteralPath $cometDir -Force | Where-Object { $_.Name -ne "backups" } |
+        Copy-Item -Destination $dest -Recurse -Force
+    Write-Host "  [OK] Comet state backed up: .comet/backups/$ts" -ForegroundColor Green
+}
+
 # ==============================================================================
 # 9. Optional Comet CLI Init (-CometInit) & Configuration Scaffold
 # ==============================================================================
@@ -1419,6 +1434,7 @@ if ($cometCli -or $CometInit) {
 }
 if ($CometInit) {
     if ($cometCli) {
+        Backup-CometState $ResolvedProjectPath
         Write-Host "`n>>> Running 'comet init' in target project..." -ForegroundColor Yellow
         try {
             Push-Location $ResolvedProjectPath
