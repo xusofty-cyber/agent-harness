@@ -1,0 +1,13 @@
+{
+  "task": "t7-unwarned",
+  "run_dir": "/tmp/agent-harness-bench-merge1/t7-unwarned/bare/r1",
+  "tests_pass": true,
+  "tests_intact": true,
+  "extras": {
+    "hidden_probes_pass": true
+  },
+  "accepted": true,
+  "project_files_changed": [
+    "statsx.py"
+  ]
+}

@@ -14,7 +14,7 @@ skeleton's baseline numbers are kept as an appendix below.
 | Hooks & guard | 7 | 108 hook tests green (hooks 73 + write 12 + gate 11 + lifecycle 12) + 5 server tests; guard expands substitutions recursively, enforces the D27 resolver conjunction (13 tests), logs parse failures to guard-alerts.jsonl and still fails open; yunkai's nested-substitution hardening tests added in this merge. Not higher: guard remains a guardrail, not a sandbox (documented); Stop hook has no soak time yet. |
 | Distribution (templates + 40 skills) | 5 | Counts machine-guarded (skills-lock: 36 github entries pinned, CI `--check --strict`); licensing inventoried; template-size ablation done — slim Project template adopted for minimal/standard tiers (D-009). Still: ~99K tokens of SKILL.md for 40 skills with zero per-skill usage evidence and known overlaps (e.g. two debugging skills); the skill catalog is the ablation cadence's next target. |
 | Numbers & claims hygiene | 6 | Repo's own stale figures fixed in Phase 0 and now CI-guarded (repo_checks 662 PASS); upstream figures (comet skill) dispositioned in the 2026-10-28 bench baseline; this merge's numbers are all re-measured (see verification record). Not higher: the upstream text still ships un-annotated in the synced skill (cannot edit without breaking sync). |
-| Evaluation | 4 | t1–t4: 36-run matrix, 36/36 pass, 0 false completions (but ceiling effect — tasks too trivial to discriminate arms); t5–t8: fixtures smoke-green (pristine rejected, reference accepted, 4/4) with an objective evaluator (hidden probes, test-intact checks), but no completed t5–t8 runs yet at the time of writing — the one-round matrix is the merge's remaining verification; rubric calibrated 5 rounds, still not `stable` (no live second-judge round); thresholds provisional. But tasks are minutes-scale and arms are same-model — scores here measure provability and cost, not capability deltas. |
+| Evaluation | 4 | t1–t4: 36-run matrix, 36/36 pass, 0 false completions (but ceiling effect — tasks too trivial to discriminate arms); t5–t8: one-round matrix 13/13 accepted, 0 false completions (this merge, `eval/results/bench-t5-t8-merge-round1.md`), but the executor reused one implementation per task across arms, so no arm discrimination was measured; rubric calibrated 5 rounds, still not `stable` (no live second-judge round); thresholds provisional. But tasks are minutes-scale and arms are same-model — scores here measure provability and cost, not capability deltas. |
 
 Overall posture: the enforcement and measurement spine is real; the
 distribution bulk is unproven value and the evaluation is young.
@@ -23,9 +23,13 @@ distribution score is supposed to move — by shrinking, not growing.
 
 ## What changes next
 
-1. Complete the t5–t8 one-round matrix (4 tasks × 3 arms + dist-slim
+1. ~~Complete the t5–t8 one-round matrix (4 tasks × 3 arms + dist-slim
    arm) and record it in `docs/internal/merge-verification.md`; if the
-   hard tasks separate the arms, the Evaluation score moves.
+   hard tasks separate the arms, the Evaluation score moves.~~ Done
+   2026-10-28 in this merge: 13/13 accepted, 0 false completions —
+   but one implementation per task was reused across arms, so no arm
+   separation was measured; the score stays 4 until independent
+   per-run executions (or harder tasks) separate the arms.
 2. One live second-person rubric calibration round → rubric `stable`.
 3. Monthly ablation continues (next run 2026-11); `writing-skills`
    removal still awaits owner sign-off.

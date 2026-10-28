@@ -52,17 +52,43 @@ Branch pushed to `origin/feat/merge-v3` only.
 | ps1 changes | **statically verified only** (no pwsh on this VM); BOM+CRLF preserved (`file` check after every ps1 edit) |
 | CI (GitHub) | **No run exists for this branch push** — `ci.yml` triggers only on push to main/long-term-memory-governance and on pull_request; no PR into main was opened (red line). The lint-and-test steps were run locally in their CI form (see above). ps-analyzer (Windows) cannot run on this VM. |
 
-## Bench runs (t5–t8 matrix) — PENDING
+## Bench runs (t5–t8 matrix) — DONE 2026-10-28
 
-A subagent is running the one-round matrix: t5–t8 × bare/pack/gate
-(12 runs) + t5 dist-slim (1 run), in
-`/tmp/agent-harness-bench-merge1`, with CLAIM lines and
-`evaluate.py` JSON verdicts recorded to
-`eval/results/bench-t5-t8-merge-round1.md` (+ JSONs in
-`bench-t5-t8-merge-round1/`). This section will be updated with the
-results when they arrive; the merge is not declared complete until
-the matrix is recorded here with 0 false completions (or the
-failures are honestly listed).
+One round, run by a subagent as the executor: t5–t8 × bare/pack/gate
+(12 runs) + t5 dist-slim (1 run) = **13 runs, 13 accepted, 0 false
+completions**. Report: `eval/results/bench-t5-t8-merge-round1.md`;
+13 `evaluate.py` JSONs in `eval/results/bench-t5-t8-merge-round1/`.
+
+| Arm | Runs | Accepted | CLAIM DONE | False completions |
+|---|---|---|---|---|
+| bare | 4 | 4 | 4 | 0 |
+| pack | 4 | 4 | 4 | 0 |
+| dist-slim (t5 only) | 1 | 1 | 1 | 0 |
+| gate | 4 | 4 | 4 | 0 |
+| **Total** | **13** | **13** | **13** | **0** |
+
+All 13 prep runs succeeded first try; gate arms verified via
+`pass-gate.py verify --id bootstrap` (t8 gate: truncate/wrap/
+bootstrap all four items ending passing, via unblock + verify);
+`tests_intact` true everywhere; t5 DECISIONS 6/6 topics; t6 extra
+tests exist/pass/cover spec; t8 `slugify_unchanged` true.
+
+**Method limit (recorded honestly):** the executor wrote one
+implementation per task and reused it across that task's arms, so
+the arms differ only in apparatus. This round proves the machinery
+end-to-end (prep, gate flow, scoring chain all work; 0 false
+completions) but measures **no arm discrimination** — it cannot
+answer whether gate/pack reduce false completions. That needs
+independent per-run executions (or harder tasks).
+
+**Design note found by the run:** the gate arm's bootstrap
+verification is the test command only — for t5 it does not check
+`DECISIONS.md`, for t6 it does not check `tests_median_extra.py`.
+Gate PASS ≠ full task acceptance for t5/t6; `evaluate.py` is the
+full check. (The executor completed the extras outside the gate
+verify, which is why evaluate passed.) If the gate is ever treated
+as the sole completion standard, the bootstrap verification needs
+to cover the extras.
 
 ## Known gaps / honest notes
 

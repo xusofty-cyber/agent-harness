@@ -1,0 +1,16 @@
+{
+  "task": "t6-incomplete-tests",
+  "run_dir": "/tmp/agent-harness-bench-merge1/t6-incomplete-tests/gate/r1",
+  "tests_pass": true,
+  "tests_intact": true,
+  "extras": {
+    "hidden_probes_pass": true,
+    "extra_tests_exist": true,
+    "extra_tests_pass": true,
+    "extra_tests_cover_spec": true
+  },
+  "accepted": true,
+  "project_files_changed": [
+    "statsx.py"
+  ]
+}

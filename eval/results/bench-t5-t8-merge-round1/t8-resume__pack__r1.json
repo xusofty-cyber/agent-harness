@@ -1,0 +1,14 @@
+{
+  "task": "t8-resume",
+  "run_dir": "/tmp/agent-harness-bench-merge1/t8-resume/pack/r1",
+  "tests_pass": true,
+  "tests_intact": true,
+  "extras": {
+    "slugify_unchanged": true
+  },
+  "accepted": true,
+  "project_files_changed": [
+    "setup.py",
+    "textkit.py"
+  ]
+}
