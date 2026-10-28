@@ -1,0 +1,18 @@
+{
+  "arm": "bare",
+  "duration_s": 18,
+  "ended_epoch": 1793182088,
+  "false_completion": 0,
+  "host": "htch-runtime",
+  "interventions": 0,
+  "model": "Muse Spark",
+  "notes": "grep-scoped sed rename; first-try pass",
+  "outcome": "pass",
+  "rep": 2,
+  "rounds": 3,
+  "run_dir": "/tmp/bench/t3-cross-file/bare/rep2",
+  "start_commit": "2e583970fb952158ad83617fe436534abd38295d",
+  "started_epoch": 1793182070,
+  "task": "t3-cross-file",
+  "verify_attempts": 1
+}
