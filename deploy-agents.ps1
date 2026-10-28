@@ -1285,7 +1285,7 @@ if ((Test-Path $SourceGateDir) -and (-not $isSelfRepo)) {
     if (-not (Test-Path $TargetGateDir)) {
         New-Item -ItemType Directory -Path $TargetGateDir -Force | Out-Null
     }
-    foreach ($gateFile in @("pass-gate.py", "graph.py", "feature_list.schema.json", "init.template.sh", "README.md")) {
+    foreach ($gateFile in @("pass-gate.py", "graph.py", "comet_adapter.py", "feature_list.schema.json", "init.template.sh", "README.md")) {
         $sourceFile = Join-Path $SourceGateDir $gateFile
         if (Test-Path $sourceFile) {
             $targetFile = Join-Path $TargetGateDir $gateFile
@@ -1295,7 +1295,7 @@ if ((Test-Path $SourceGateDir) -and (-not $isSelfRepo)) {
             }
         }
     }
-    Write-Host "  [OK] Deployed gate layer: gate/ (pass-gate.py + graph.py + schema + init.template.sh)" -ForegroundColor Green
+    Write-Host "  [OK] Deployed gate layer: gate/ (pass-gate.py + graph.py + comet_adapter.py + schema + init.template.sh)" -ForegroundColor Green
 }
 
 # Deploy Loop layer (Phase 6, 6-5; D21 leftover): loop.py + templates.

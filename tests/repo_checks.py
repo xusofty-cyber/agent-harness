@@ -374,7 +374,7 @@ check("docs:no-unfilled-placeholders", not _placeholder_bad,
 # Recursion guard: a verification command may itself be repo_checks.py;
 # re-runs set GATE_CI_RECURSION=1 and a nested run skips this section.
 _GATE_REQUIRED = ["pass-gate.py", "feature_list.schema.json",
-                  "init.template.sh"]
+                  "init.template.sh", "comet_adapter.py"]
 _gate_missing = [f for f in _GATE_REQUIRED if not (ROOT / "gate" / f).exists()]
 check("gate:files-present", not _gate_missing,
       f"missing gate files: {', '.join(_gate_missing)}")
@@ -955,6 +955,21 @@ try:
             capture_output=True, text=True, timeout=30)
         check("graph-deploy:runs", _deployed_graph_help.returncode == 0,
               "deployed gate/graph.py --help failed")
+    # Merge addition (yunkai): the same deploy must land
+    # gate/comet_adapter.py and it must execute (map on an empty dir
+    # exits 0 with the "no comet change directories" line).
+    _deployed_adapter = Path(_loop_deploy_tmp, "gate", "comet_adapter.py")
+    check("comet-adapter-deploy:present", _deployed_adapter.is_file(),
+          "gate/comet_adapter.py missing after deploy")
+    if _deployed_adapter.is_file():
+        _deployed_adapter_map = subprocess.run(
+            [sys.executable, str(_deployed_adapter), "map",
+             "--root", _loop_deploy_tmp],
+            capture_output=True, text=True, timeout=30)
+        check("comet-adapter-deploy:runs",
+              _deployed_adapter_map.returncode == 0
+              and "no comet change directories" in _deployed_adapter_map.stdout,
+              "deployed gate/comet_adapter.py map failed")
 finally:
     shutil.rmtree(_loop_deploy_tmp, ignore_errors=True)
 

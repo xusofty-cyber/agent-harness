@@ -1428,7 +1428,7 @@ fi
 if [ -d "${SCRIPT_DIR}/gate" ] && [ "${SCRIPT_DIR}" != "${TARGET_PROJECT_DIR}" ]; then
     TARGET_GATE_DIR="${TARGET_PROJECT_DIR}/gate"
     mkdir -p "${TARGET_GATE_DIR}"
-    for gate_file in pass-gate.py graph.py feature_list.schema.json init.template.sh README.md; do
+    for gate_file in pass-gate.py graph.py comet_adapter.py feature_list.schema.json init.template.sh README.md; do
         if [ -f "${SCRIPT_DIR}/gate/${gate_file}" ]; then
             if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_GATE_DIR}/${gate_file}" ]; then
                 if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_GATE_DIR}/${gate_file}"; fi
@@ -1436,7 +1436,7 @@ if [ -d "${SCRIPT_DIR}/gate" ] && [ "${SCRIPT_DIR}" != "${TARGET_PROJECT_DIR}" ]
             fi
         fi
     done
-    echo -e "  ${GREEN}[√] 已部署门禁层: gate/ (pass-gate.py + graph.py + schema + init.template.sh)${NC}"
+    echo -e "  ${GREEN}[√] 已部署门禁层: gate/ (pass-gate.py + graph.py + comet_adapter.py + schema + init.template.sh)${NC}"
 fi
 
 # Deploy Loop layer (Phase 6, 6-5; D21 leftover): loop.py + templates.
