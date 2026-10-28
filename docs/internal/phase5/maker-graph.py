@@ -83,7 +83,7 @@ ROUND2 = ("## Timeout\n\nTBD",
           "  `budget_exceeded` event and fails the loop.")
 
 ROUND3 = ("## Approval\n\nTBD",
-          "## Approval\n\n- What happened: the loop reached its pass condition at round 4\n"
+          "## Approval\n\n- What happened: the loop reached its pass condition at round 5\n"
           "- What changed: templates/loop/graph.template.md (this file)\n"
           "- Why human: adopting a new template into the repo needs a person —\n"
           "  the runner can verify shape, not whether the graph is the right contract\n"
