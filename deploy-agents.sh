@@ -22,6 +22,13 @@ NC='\033[0m' # No Color
 # Never write a different version in docs; the lock is the record.
 COMET_NPM_VERSION="0.5.1"
 
+# Phase 6 (6-2): pinned Open Code Review CLI version, measured 2026-10-28
+# with `npm view @alibaba-group/open-code-review version` (1.13.3). Must
+# match skills-lock.json open-code-review.npmVersion — tests/repo_checks.py
+# guards it. The open-code-review *skill* is authored in-repo (local); the
+# pin here is for the optional *CLI* it can delegate to, not the skill.
+OCR_NPM_VERSION="1.13.3"
+
 # Print usage
 usage() {
     echo -e "${CYAN}用法 (Usage):${NC}"
@@ -743,13 +750,13 @@ guide_optional_cli_tools() {
     else
         echo "  Open Code Review CLI (ocr) 未安装。open-code-review 技能仍可用（Tier B 方法论模式），安装后可启用零 Token 开销的委托评审。"
         if prompt_yes_no "现在安装 Open Code Review CLI？"; then
-            if npm install -g @alibaba-group/open-code-review; then
+            if npm install -g "@alibaba-group/open-code-review@${OCR_NPM_VERSION}"; then
                 echo -e "  ${GREEN}[√] ocr 已安装。委托模式无需配置 LLM Key，由当前 Agent 直接推理。${NC}"
             else
-                echo "  [!] ocr 安装失败。可手动执行：npm install -g @alibaba-group/open-code-review"
+                echo "  [!] ocr 安装失败。可手动执行：npm install -g @alibaba-group/open-code-review@${OCR_NPM_VERSION}"
             fi
         else
-            echo "  安装命令：npm install -g @alibaba-group/open-code-review"
+            echo "  安装命令：npm install -g @alibaba-group/open-code-review@${OCR_NPM_VERSION}"
         fi
     fi
 

@@ -530,6 +530,30 @@ except Exception as _cc_exc:  # noqa: BLE001
 check("comet-pin:check-tool-passes", _cc_ok,
       "tools/check-comet.py does not pass on this repo")
 
+# --- 3m1. OCR CLI pin (Phase 6, 6-2) ---
+# Mirrors comet-pin: the open-code-review *skill* is authored in-repo
+# (local), but the optional OCR *CLI* it can delegate to is pinned by
+# version in the lock entry (npmVersion + pinnedAt) and in both deploy
+# scripts (OCR_NPM_VERSION / $script:OcrNpmVersion). No bare (unversioned)
+# `npm install -g @alibaba-group/open-code-review` may remain.
+_ocr_meta = _comet_lock.get("skills", {}).get("open-code-review", {})
+_ocr_pin = _ocr_meta.get("npmVersion", "")
+check("ocr-pin:lock",
+      bool(_ocr_pin) and bool(_ocr_meta.get("pinnedAt"))
+      and bool(_ocr_meta.get("pinnedFrom")),
+      f"open-code-review lock entry lacks npmVersion/pinnedAt/pinnedFrom: {_ocr_meta}")
+_sh_ocr = _re3.search(r'OCR_NPM_VERSION="([^"]+)"', _deploy_sh_txt)
+_ps1_ocr = _re3.search(r'\$script:OcrNpmVersion = "([^"]+)"', _deploy_ps1_txt)
+check("ocr-pin:scripts-agree-with-lock",
+      bool(_sh_ocr) and bool(_ps1_ocr)
+      and _sh_ocr.group(1) == _ocr_pin and _ps1_ocr.group(1) == _ocr_pin,
+      f"deploy pin mismatch: sh={_sh_ocr.group(1) if _sh_ocr else None} "
+      f"ps1={_ps1_ocr.group(1) if _ps1_ocr else None} lock={_ocr_pin}")
+check("ocr-pin:no-bare-install",
+      _re3.search(r"install -g @alibaba-group/open-code-review(?!@)", _deploy_sh_txt) is None
+      and _re3.search(r"install -g @alibaba-group/open-code-review(?!@)", _deploy_ps1_txt) is None,
+      "bare `npm install -g @alibaba-group/open-code-review` (unversioned) still present")
+
 # --- 3m2. Pinned installer scripts (Phase 2, 2-2) ---
 # codegraph/rtk installers are pinned by upstream commit + SHA256 of the
 # installer at that commit (measured 2026-10-28). The lock is the record;

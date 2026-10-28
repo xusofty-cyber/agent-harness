@@ -121,7 +121,10 @@
       "version": "0.1.0",
       "skillPath": ".agents/skills/open-code-review/SKILL.md",
       "computedHash": "d53c2617dacf50ffbab13b41d7ce6f3b55b8a76940da783b81870dca01946bf8",
-      "domain": "local"
+      "domain": "local",
+      "npmVersion": "1.13.3",
+      "pinnedAt": "2026-10-28",
+      "pinnedFrom": "npm view @alibaba-group/open-code-review version"
     },
     "openspec": {
       "source": "Fission-AI/OpenSpec",

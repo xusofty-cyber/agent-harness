@@ -53,6 +53,13 @@ param (
 # skills-lock.json comet.npmVersion — tests/repo_checks.py guards it.
 $script:CometNpmVersion = "0.5.1"
 
+# Phase 6 (6-2): pinned Open Code Review CLI version, measured 2026-10-28
+# with `npm view @alibaba-group/open-code-review version` (1.13.3). Must
+# match skills-lock.json open-code-review.npmVersion — tests/repo_checks.py
+# guards it. The open-code-review *skill* is authored in-repo (local); the
+# pin here is for the optional *CLI* it can delegate to, not the skill.
+$script:OcrNpmVersion = "1.13.3"
+
 $ToolClaude = $true
 $ToolCopilot = $true
 $ToolCursor = $true
@@ -516,11 +523,11 @@ function Guide-OptionalCliTools([string]$TargetPath) {
     } else {
         Write-Host "  Open Code Review CLI (ocr) is optional. The open-code-review skill works without it (Tier B methodology mode); installing enables zero-LLM-cost delegation review."
         if (Confirm-OptionalStep "Install Open Code Review CLI now?") {
-            & $npmCmd install -g @alibaba-group/open-code-review
-            if ($LASTEXITCODE -ne 0) { Write-Warning "ocr installation failed. Manual command: npm install -g @alibaba-group/open-code-review" }
+            & $npmCmd install -g "@alibaba-group/open-code-review@$script:OcrNpmVersion"
+            if ($LASTEXITCODE -ne 0) { Write-Warning "ocr installation failed. Manual command: npm install -g @alibaba-group/open-code-review@$script:OcrNpmVersion" }
             else { Write-Host "  [INFO] ocr installed. Delegation mode needs no LLM key; the host agent performs the review." -ForegroundColor Yellow }
         } else {
-            Write-Host "  Install command: npm install -g @alibaba-group/open-code-review"
+            Write-Host "  Install command: npm install -g @alibaba-group/open-code-review@$script:OcrNpmVersion"
         }
     }
 
