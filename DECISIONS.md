@@ -268,3 +268,58 @@ Phase 0 decision meeting.
 - **Rationale:** record the platform asymmetry honestly rather than
   claiming full parity where the platform offers none.
 - **Date:** 2026-10-28.
+
+## D14 — Benchmarks measure our own runs only; thresholds come from variance (Phase 3)
+
+- **Decision:** the benchmark (`eval/`) runs 4 fixed tasks (T1 bugfix, T2
+  single feature, T3 cross-file rename, T4 docs+code sync) on the tinycalc
+  fixture at fixed start commit
+  `2e583970fb952158ad83617fe436534abd38295d`, in three arms (bare / pack /
+  gate) with P01 English independent-directory isolation, ≥3 reps per task,
+  reporting median + distribution. Thresholds are derived from the measured
+  baseline variance with a stated formula (duration red-line = median +
+  2×(max − median); rounds red-line = max + 2; completion floor 11/12 per
+  12-run window; any false completion is a red-line breach). Unmeasured
+  cells are marked **unmeasured**; upstream token claims are not quoted in
+  our reports at all (not even as disclaimers — `eval/check-results.py`
+  enforces this).
+- **Rationale:** D2's correction stands — a threshold without a measured
+  baseline is invented. With n=3 the thresholds are provisional lower
+  bounds and must be re-derived after the full 36-run matrix.
+- **Rejected:** inventing a "completion −10%" red line; quoting upstream
+  numbers as our results; single-run conclusions.
+- **Date:** 2026-10-28.
+
+## D15 — Rubric is six-dimensional and calibrated, not yet stable (Phase 3)
+
+- **Decision:** one evaluator rubric (`eval/rubric.md`), six dimensions
+  (correctness, verification, scope discipline, reliability,
+  maintainability, handover readiness), each 0–2, verdict Accept / Revise /
+  Block (any 0 → Block; total < 9 → Revise; else Accept). Verification
+  requires re-running the acceptance command, never trusting the agent's
+  claim. Calibrated in 4 rounds against recorded outcomes (0 verdict
+  divergences, 1 wording change: the re-run rule) — see
+  `eval/calibration.md`. The rubric stays **provisional, not `stable`**:
+  all four rounds used recorded outcomes as the "human" side; a live
+  second-person calibration round is still owed.
+- **Rationale:** a rubric nobody calibrated is an opinion with a table.
+  The negative control (retrospective Block of the pre-Phase-0 pack)
+  shows the rubric can say no.
+- **Rejected:** the four-dimension variant (kept only as a simplified view
+  with an explicit mapping, if ever used); marking the rubric stable
+  without a live second judge.
+- **Date:** 2026-10-28.
+
+## D16 — Eval tooling is shell-only; eval regression is manual + monthly (Phase 3)
+
+- **Decision:** `eval/run-bench.sh` is Bash-only by design (CI runs on
+  ubuntu; the runner is repo tooling, not a deployed feature, so the
+  sh/ps1 PARITY rule does not apply). `.github/workflows/eval-regression.yml`
+  runs on manual trigger + monthly cron: benchmark smoke, results
+  recomputation (`eval/check-results.py`), pack/gate setup paths. It does
+  NOT red-line on a single run's duration — thresholds apply to 12-run
+  windows only.
+- **Rationale:** a monthly eval that cries wolf on one slow run would be
+  ignored within two months; the guard must match the statistics it
+  enforces.
+- **Date:** 2026-10-28.
