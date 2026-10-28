@@ -1296,6 +1296,43 @@ if ((Test-Path $SourceGateDir) -and (-not $isSelfRepo)) {
     Write-Host "  [OK] Deployed gate layer: gate/ (pass-gate.py + schema + init.template.sh)" -ForegroundColor Green
 }
 
+# Deploy Loop layer (Phase 6, 6-5; D21 leftover): loop.py + templates.
+# LoopDeploy
+# Only the code + templates ship. loop-state.json / loop-events.jsonl are
+# per-project state, created by `tools/loop.py` runs — never copied from
+# this repo. Skipped on self-deploy (same directory).
+$SourceLoopDir = Join-Path $ScriptDir "templates\loop"
+if ((Test-Path $SourceLoopDir) -and (-not $isSelfRepo)) {
+    $TargetLoopDir = Join-Path $ResolvedProjectPath "templates\loop"
+    if (-not (Test-Path $TargetLoopDir)) {
+        New-Item -ItemType Directory -Path $TargetLoopDir -Force | Out-Null
+    }
+    foreach ($loopFile in @("goal.template.md", "goal.template.zh.md", "loop-state.template.md", "loop-state.template.zh.md", "graph.template.md", "graph.template.zh.md")) {
+        $sourceFile = Join-Path $SourceLoopDir $loopFile
+        if (Test-Path $sourceFile) {
+            $targetFile = Join-Path $TargetLoopDir $loopFile
+            if ($Update -or (-not (Test-Path $targetFile))) {
+                if ($Update) { Backup-ManagedPath $targetFile }
+                Copy-Item -Path $sourceFile -Destination $targetFile -Force
+            }
+        }
+    }
+    Write-Host "  [OK] Deployed loop templates: templates/loop/ (goal / loop-state / graph, EN+ZH)" -ForegroundColor Green
+}
+$SourceLoopRunner = Join-Path $ScriptDir "tools\loop.py"
+if ((Test-Path $SourceLoopRunner) -and (-not $isSelfRepo)) {
+    $TargetToolsDir = Join-Path $ResolvedProjectPath "tools"
+    if (-not (Test-Path $TargetToolsDir)) {
+        New-Item -ItemType Directory -Path $TargetToolsDir -Force | Out-Null
+    }
+    $targetLoopRunner = Join-Path $TargetToolsDir "loop.py"
+    if ($Update -or (-not (Test-Path $targetLoopRunner))) {
+        if ($Update) { Backup-ManagedPath $targetLoopRunner }
+        Copy-Item -Path $SourceLoopRunner -Destination $targetLoopRunner -Force
+    }
+    Write-Host "  [OK] Deployed loop runner: tools/loop.py" -ForegroundColor Green
+}
+
 # Sync .ai-memory.toml.example
 if ((Test-Path $SourceAiMemoryExample) -and (-not $isSelfRepo)) {
     $targetAiMemoryExample = Join-Path $ResolvedProjectPath ".ai-memory.toml.example"

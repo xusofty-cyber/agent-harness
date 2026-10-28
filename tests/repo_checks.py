@@ -15,6 +15,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -913,6 +914,39 @@ _pass_gate_test = subprocess.run(
 check("loop:pass-gate-test-passes", _pass_gate_test.returncode == 0,
       "tests/pass_gate_test.py failed")
 
+# --- 3t. Loop deploy smoke (Phase 6, 6-5; D21 leftover) ---
+# Deploy to an empty temp dir (non-interactive, stdin closed — same shape
+# as the CI smoke test) and verify the Loop layer lands: all six templates
+# in templates/loop/ and the stdlib-only runner in tools/loop.py, and that
+# the deployed runner executes (--help exits 0). The gate deploy smoke
+# lives in CI; this one pins the Loop half of the same contract.
+_loop_deploy_tmp = tempfile.mkdtemp(prefix="loop-deploy-")
+try:
+    _loop_deploy = subprocess.run(
+        ["bash", str(ROOT / "deploy-agents.sh"), _loop_deploy_tmp],
+        stdin=subprocess.DEVNULL, capture_output=True, text=True,
+        cwd=str(ROOT), timeout=180)
+    check("loop-deploy:exit-0", _loop_deploy.returncode == 0,
+          f"deploy-agents.sh to empty dir exited {_loop_deploy.returncode}: "
+          f"{_loop_deploy.stderr.strip()[-200:]}")
+    for _lf in ("goal.template.md", "goal.template.zh.md",
+                "loop-state.template.md", "loop-state.template.zh.md",
+                "graph.template.md", "graph.template.zh.md"):
+        check(f"loop-deploy:template-{_lf}",
+              Path(_loop_deploy_tmp, "templates", "loop", _lf).is_file(),
+              f"templates/loop/{_lf} missing after deploy")
+    _deployed_loop = Path(_loop_deploy_tmp, "tools", "loop.py")
+    check("loop-deploy:runner-present", _deployed_loop.is_file(),
+          "tools/loop.py missing after deploy")
+    if _deployed_loop.is_file():
+        _deployed_help = subprocess.run(
+            [sys.executable, str(_deployed_loop), "--help"],
+            capture_output=True, text=True, timeout=30)
+        check("loop-deploy:runner-runs", _deployed_help.returncode == 0,
+              "deployed tools/loop.py --help failed")
+finally:
+    shutil.rmtree(_loop_deploy_tmp, ignore_errors=True)
+
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
 # its counterpart marker must exist in the other. Markers that exist in
@@ -957,6 +991,7 @@ PARITY = [
     ("IncludeHeavySkills", "include-heavy-skills", "opt-in heavy skills (docx, brainstorming)"),
     ("GateDeploy", "gate-deploy", "gate layer deployment (pass-gate.py + schema + init template)"),
     ("SkillProfile", "--profile", "deployment profiles minimal/standard/full"),
+    ("LoopDeploy", "loop-deploy", "loop layer deployment (loop.py + templates)"),
 ]
 ps1 = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
 sh = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")

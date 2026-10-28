@@ -1437,6 +1437,34 @@ if [ -d "${SCRIPT_DIR}/gate" ] && [ "${SCRIPT_DIR}" != "${TARGET_PROJECT_DIR}" ]
     echo -e "  ${GREEN}[√] 已部署门禁层: gate/ (pass-gate.py + schema + init.template.sh)${NC}"
 fi
 
+# Deploy Loop layer (Phase 6, 6-5; D21 leftover): loop.py + templates.
+# loop-deploy
+# Only the code + templates ship. loop-state.json / loop-events.jsonl are
+# per-project state, created by `tools/loop.py` runs — never copied from
+# this repo. Skipped on self-deploy (same directory).
+if [ -d "${SCRIPT_DIR}/templates/loop" ] && [ "${SCRIPT_DIR}" != "${TARGET_PROJECT_DIR}" ]; then
+    TARGET_LOOP_DIR="${TARGET_PROJECT_DIR}/templates/loop"
+    mkdir -p "${TARGET_LOOP_DIR}"
+    for loop_file in goal.template.md goal.template.zh.md loop-state.template.md loop-state.template.zh.md graph.template.md graph.template.zh.md; do
+        if [ -f "${SCRIPT_DIR}/templates/loop/${loop_file}" ]; then
+            if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_LOOP_DIR}/${loop_file}" ]; then
+                if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_LOOP_DIR}/${loop_file}"; fi
+                cp -f "${SCRIPT_DIR}/templates/loop/${loop_file}" "${TARGET_LOOP_DIR}/${loop_file}"
+            fi
+        fi
+    done
+    echo -e "  ${GREEN}[√] 已部署循环层模板: templates/loop/ (goal / loop-state / graph，中英)${NC}"
+fi
+if [ -f "${SCRIPT_DIR}/tools/loop.py" ] && [ "${SCRIPT_DIR}" != "${TARGET_PROJECT_DIR}" ]; then
+    TARGET_TOOLS_DIR="${TARGET_PROJECT_DIR}/tools"
+    mkdir -p "${TARGET_TOOLS_DIR}"
+    if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_TOOLS_DIR}/loop.py" ]; then
+        if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_TOOLS_DIR}/loop.py"; fi
+        cp -f "${SCRIPT_DIR}/tools/loop.py" "${TARGET_TOOLS_DIR}/loop.py"
+    fi
+    echo -e "  ${GREEN}[√] 已部署循环层运行器: tools/loop.py${NC}"
+fi
+
 # Sync .ai-memory.toml.example
 if [ -f "${SOURCE_AI_MEMORY_EXAMPLE}" ]; then
     TARGET_AI_MEMORY_EXAMPLE="${TARGET_PROJECT_DIR}/.ai-memory.toml.example"
