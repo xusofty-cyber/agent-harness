@@ -475,6 +475,31 @@ test("allows single-quoted '$(which git)' literal", () => {
   assert.equal(r.exitCode, 0);
 });
 
+// --- Guard hardening (merged from v3-yunkai, tests/guard_hardening.test.mjs) ---
+// Yunkai's 5th test (unparseable stdin is logged to guard.log) is NOT
+// ported: this branch logs parse failures to guard-alerts.jsonl instead
+// (yunyi's mechanism), and that is already covered by the "malformed
+// stdin is fail-open but logs the parse failure" test below.
+test("denies force push hidden in $() inside echo (yunkai)", () => {
+  const r = runHook("echo $(git push --force origin main)");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies force push hidden in backticks inside echo (yunkai)", () => {
+  const r = runHook("echo `git push -f`");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies nested substitution at depth 2 (yunkai)", () => {
+  const r = runHook("echo $(echo $(git push --force))");
+  assert.equal(r.exitCode, 2);
+});
+
+test("allows benign substitution $(git --version) (yunkai)", () => {
+  const r = runHook("echo $(git --version)");
+  assert.equal(r.exitCode, 0);
+});
+
 test("malformed stdin is fail-open but logs the parse failure", () => {
   const res = spawnSync("node", [GUARD], {
     input: "this is not json",
