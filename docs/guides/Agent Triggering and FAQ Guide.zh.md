@@ -164,7 +164,7 @@ sed -i 's/replace-with-workspace-name/my_workspace/; s/replace-with-project-name
 4. **自动化验收与验证（Verify 阶段）**：
    > ✔ *“/comet-verify 运行全量测试并出具真实通过证据。”*
 5. **交付与归档（Archive 阶段）**：
-   > ✔ *“/comet-archive 整理本次变更，同步活体文档并归档当前 change。”*
+   > ✔ *“/comet 执行归档：整理本次变更，同步活体文档并归档当前 change。”*
 
 ---
 

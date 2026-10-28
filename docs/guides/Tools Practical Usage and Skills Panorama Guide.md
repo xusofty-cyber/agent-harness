@@ -10,7 +10,7 @@ This guide provides a comprehensive handbook for software engineering and techni
 
 1. [Core Architecture & Tool Matrix (Who Manages What)](#1-core-architecture--tool-matrix-who-manages-what)
 2. [Skills & Ecosystem Tools Inventory](#2-skills--ecosystem-tools-inventory)
-   - 2.1 44 Integrated Native Skills Categorized
+   - 2.1 40 Integrated Native Skills Categorized
    - 2.2 Version Locking, Online Updates & Skill Sync (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
    - 2.3 Optional Harness CLI Tools
    - 2.4 Token Economics of Skills (Why 40+ Skills Do NOT Blow Up Context)
@@ -93,14 +93,14 @@ The deployment scripts write paths; check each host's current documentation and 
 
 ## 2. Skills & Ecosystem Tools Inventory
 
-### 2.1 44 Integrated Native Skills Categorized
+### 2.1 40 Integrated Native Skills Categorized
 
 The installer copies the repository's skill directories into `.agents/skills/`; actual discovery depends on the host tool and its configuration.
 
 #### 1. Versioned Workflow Entry Point
 - **`comet`**: The Comet CLI provides versioned Native and Classic workflows. This repository ships an entry-point guide only; it does not implement Comet phase guards.
 
-#### 2. OpenSpec Specification-Driven Suite (16 skills)
+#### 2. OpenSpec Specification-Driven Suite (12 skills)
 - **`openspec`**: Core architecture.
 - **`openspec-propose`**: Proposes changes with design, specs, and tasks in one step.
 - **`openspec-new-change`**: Step-by-step artifact creation.

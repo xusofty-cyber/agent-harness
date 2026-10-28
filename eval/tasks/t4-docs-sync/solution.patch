@@ -1,0 +1,25 @@
+diff --git a/README.md b/README.md
+index 386366b..6c33b43 100644
+--- a/README.md
++++ b/README.md
+@@ -7,7 +7,7 @@ A tiny calculator used as the agent-harness benchmark fixture.
+ - `add(a, b)` — returns `a + b`.
+ - `subtract(a, b)` — returns `a - b`.
+ - `multiply(a, b)` — returns `a * b`.
+-- `divide(a, b)` — returns the exact quotient of `a / b`.
++- `divide(a, b)` — returns the quotient of `a / b`, rounded to 2 decimal places.
+ 
+ ## CLI
+ 
+diff --git a/calc.py b/calc.py
+index f28474b..949376c 100644
+--- a/calc.py
++++ b/calc.py
+@@ -19,5 +19,5 @@ def multiply(a, b):
+ 
+ 
+ def divide(a, b):
+-    """Return the exact quotient (task T4 changes this to 2-decimal rounding)."""
+-    return a / b
++    """Return the quotient rounded to 2 decimal places."""
++    return round(a / b, 2)

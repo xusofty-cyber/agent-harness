@@ -15,6 +15,13 @@ YELLOW='\033[0;33m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
+# Phase 2 (2-2): pinned Comet CLI version, measured 2026-10-28 with
+# `npm view @rpamis/comet version` (0.5.1; git tag 0.5.1 =
+# 35c9860b77b42bafa0c2d80d8d695889f888a924). Must match
+# skills-lock.json comet.npmVersion — tests/repo_checks.py guards it.
+# Never write a different version in docs; the lock is the record.
+COMET_NPM_VERSION="0.5.1"
+
 # Print usage
 usage() {
     echo -e "${CYAN}用法 (Usage):${NC}"
@@ -31,6 +38,8 @@ usage() {
     echo "  --directory       与 --initialize 配合，为现有子目录生成目录级 AGENTS.md。"
     echo "  --check, -k       检查项目级规则中的初始化占位项；可搭配 --directory 检查模块规则。"
     echo "  --comet-init       若系统中已安装 comet CLI，自动在目标项目中运行 comet init。"
+    echo "  --include-heavy-skills 部署可选重型技能 docx 与 brainstorming（默认跳过；docx 约 1.3 MB，brainstorming 含本地服务 server.cjs）。只影响本次新复制，不删除目标项目已有文件。"
+    echo "  --profile <minimal|standard|full> 部署技能分层（默认 minimal：10 个核心技能；standard：18 个；full：全部 40 个。成员见 skills-profiles.json）。"
     echo "  --ai-memory-init, -m 初始化项目 .ai-memory.toml 并接入跨工具记忆 (ai-memory)。
   --pipeline         启动统一流水线 (Pipeline: 规则部署 + AI记忆 + 技能同步 + 文档质检)。"
     echo ""
@@ -52,6 +61,10 @@ DO_COMET_INIT=false
 DO_AI_MEMORY_INIT=false
 DO_INITIALIZE=false
 DO_CHECK=false
+INCLUDE_HEAVY_SKILLS=false
+# Phase 4 (4-1): deployment profile. Default minimal (10 core skills);
+# membership lives in skills-profiles.json, never in this script.
+PROFILE="minimal"
 DIRECTORY_PATH=""
 LANG_OPTION="en"
 FORCE_INTERACTIVE=false
@@ -85,6 +98,17 @@ while [ "$arg_index" -lt "$#" ]; do
             ;;
         --comet-init)
             DO_COMET_INIT=true
+            ;;
+        --include-heavy-skills)
+            INCLUDE_HEAVY_SKILLS=true
+            ;;
+        --profile)
+            arg_index=$((arg_index + 1))
+            if [ "$arg_index" -ge "$#" ]; then echo "[!] --profile requires minimal, standard or full" >&2; exit 2; fi
+            PROFILE="${args[$arg_index]}"
+            ;;
+        --profile=*)
+            PROFILE="${arg#--profile=}"
             ;;
         --ai-memory-init|-m)
             DO_AI_MEMORY_INIT=true
@@ -451,6 +475,24 @@ esac
 # Script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Phase 4 (4-1): resolve the profile's skill list now, so a bad profile
+# fails before anything is copied. skills-profiles.json is the single
+# source of truth; tools/profile-skills.py reads it. "full" needs no
+# filtering (every directory on disk), so it works without python3.
+case "$PROFILE" in
+    minimal|standard|full) ;;
+    *) echo "[!] --profile must be minimal, standard or full (got: $PROFILE)" >&2; exit 2 ;;
+esac
+PROFILE_SKILLS=""
+if [ "$PROFILE" != "full" ]; then
+    if ! command -v python3 >/dev/null 2>&1; then
+        echo "[!] --profile $PROFILE requires python3 to read skills-profiles.json" >&2
+        echo "    Install python3, or deploy with --profile full." >&2
+        exit 2
+    fi
+    PROFILE_SKILLS=$(python3 "${SCRIPT_DIR}/tools/profile-skills.py" "$PROFILE") || exit 2
+fi
+
 resolve_template() {
     local base_name="$1"
     local suffix="$2"
@@ -593,10 +635,56 @@ prompt_yes_no() {
     [[ "$answer" =~ ^[Yy]$ ]]
 }
 
+# Phase 2 (2-2): install a pinned installer script only after SHA256 check.
+# Downloads $1 to a temp file, verifies it against $2, then runs it with sh.
+# Refuses (exit 1) on download failure, missing hash tool, or hash mismatch —
+# never executes an unverified network stream. $3 is the display label.
+install_pinned_script() {
+    local url="$1" expected_sha="$2" label="$3"
+    local tmp actual_sha
+    tmp="$(mktemp)" || { echo "  [!] 无法创建临时文件，跳过 ${label} 安装。"; return 1; }
+    if ! command -v curl >/dev/null 2>&1; then
+        echo "  [!] 缺少 curl，无法安装 ${label}。"
+        rm -f "$tmp"
+        return 1
+    fi
+    if ! curl -fsSL "$url" -o "$tmp"; then
+        echo "  [!] ${label} 安装器下载失败：${url}"
+        rm -f "$tmp"
+        return 1
+    fi
+    if command -v sha256sum >/dev/null 2>&1; then
+        actual_sha="$(sha256sum "$tmp" | awk '{print $1}')"
+    elif command -v shasum >/dev/null 2>&1; then
+        actual_sha="$(shasum -a 256 "$tmp" | awk '{print $1}')"
+    else
+        echo "  [!] 缺少 sha256sum/shasum，无法校验 ${label} 安装器，拒绝安装。"
+        rm -f "$tmp"
+        return 1
+    fi
+    if [ "$actual_sha" != "$expected_sha" ]; then
+        echo "  [!] ${label} 安装器 SHA256 不匹配（期望 ${expected_sha}，实际 ${actual_sha}），拒绝安装。"
+        rm -f "$tmp"
+        return 1
+    fi
+    sh "$tmp"
+    local _rc=$?
+    rm -f "$tmp"
+    return "$_rc"
+}
+
 guide_optional_cli_tools() {
     local target="$1"
-    local install_codegraph='curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.sh | sh'
-    local install_rtk='curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh'
+    # Phase 2 (2-2): pinned installers. The URL pins the upstream commit and
+    # the SHA256 is the hash of the installer at that commit, both measured
+    # 2026-10-28. They must match skills-lock.json (codegraph/rtk entries) —
+    # tests/repo_checks.py guards the agreement. Never pipe a live network
+    # stream into a shell: install_pinned_script downloads to a temp file,
+    # verifies the hash, and only then runs it.
+    local install_codegraph_url='https://raw.githubusercontent.com/colbymchenry/codegraph/01e0ac3aa7419a7ab75583963e8a95359f3af1d3/install.sh'
+    local install_codegraph_sha='e8bbcc694584d5c88fa7c25103fc0f9c238d63a86c1494ca03448b680dbcc86e'
+    local install_rtk_url='https://raw.githubusercontent.com/rtk-ai/rtk/e05c7bdfacfcfe1f845d11f47339e4eae63eb3f5/install.sh'
+    local install_rtk_sha='7ca3997314f631b8ad267e5add9af4b7a2f0351bdab0b1c5a9b7ed4008d0434a'
 
     echo -e "\n${CYAN}>>> 可选 CLI 工具（Ponytail / Caveman 已作为 Skill 随项目部署）${NC}"
 
@@ -605,16 +693,13 @@ guide_optional_cli_tools() {
     else
         echo "  CodeGraph CLI 未安装。它会连接 Agent，并在项目中生成本地索引。"
         if prompt_yes_no "现在安装 CodeGraph CLI？安装后还会单独询问是否配置 Agent 与项目索引。"; then
-            if ! command -v curl >/dev/null 2>&1; then
-                echo "  [!] 缺少 curl。请按官方说明安装：${install_codegraph}"
-                echo "  安装后：codegraph install；进入目标项目运行 codegraph init。"
-            elif sh -c "$install_codegraph"; then
-                echo -e "  ${GREEN}[√] CodeGraph CLI 安装器已执行。请重开终端，确认 codegraph 在 PATH 中。${NC}"
+            if install_pinned_script "$install_codegraph_url" "$install_codegraph_sha" "CodeGraph"; then
+                echo -e "  ${GREEN}[√] CodeGraph CLI 安装器已执行（SHA256 已校验）。请重开终端，确认 codegraph 在 PATH 中。${NC}"
             else
-                echo "  [!] CodeGraph 安装失败。官方命令：${install_codegraph}"
+                echo "  [!] CodeGraph 安装失败。可手动执行：curl -fsSL ${install_codegraph_url} -o install.sh && sha256sum install.sh（应为 ${install_codegraph_sha}），确认后 sh install.sh"
             fi
         else
-            echo "  安装命令：${install_codegraph}"
+            echo "  安装命令：curl -fsSL ${install_codegraph_url} -o install.sh && sha256sum install.sh（应为 ${install_codegraph_sha}），确认后 sh install.sh"
             echo "  安装后：codegraph install；进入目标项目运行 codegraph init。"
         fi
     fi
@@ -633,16 +718,13 @@ guide_optional_cli_tools() {
     else
         echo "  RTK CLI 未安装或检测到的 rtk 不是 Rust Token Killer。"
         if prompt_yes_no "现在安装 Rust Token Killer (RTK) CLI？"; then
-            if ! command -v curl >/dev/null 2>&1; then
-                echo "  [!] 缺少 curl。请按官方说明安装：${install_rtk}"
-                echo "  安装后：运行 rtk gain 验证，再进入目标项目运行 rtk init。"
-            elif sh -c "$install_rtk"; then
-                echo -e "  ${GREEN}[√] RTK 安装器已执行。请重开终端并运行 rtk gain 验证。${NC}"
+            if install_pinned_script "$install_rtk_url" "$install_rtk_sha" "RTK"; then
+                echo -e "  ${GREEN}[√] RTK 安装器已执行（SHA256 已校验）。请重开终端并运行 rtk gain 验证。${NC}"
             else
-                echo "  [!] RTK 安装失败。官方命令：${install_rtk}"
+                echo "  [!] RTK 安装失败。可手动执行：curl -fsSL ${install_rtk_url} -o install.sh && sha256sum install.sh（应为 ${install_rtk_sha}），确认后 sh install.sh"
             fi
         else
-            echo "  安装命令：${install_rtk}（安装后用 rtk gain 验证，避免同名工具混淆）"
+            echo "  安装命令：curl -fsSL ${install_rtk_url} -o install.sh && sha256sum install.sh（应为 ${install_rtk_sha}），确认后 sh install.sh（安装后用 rtk gain 验证，避免同名工具混淆）"
             echo "  验证后：进入目标项目运行 rtk init 配置支持的 Agent Hook。"
         fi
     fi
@@ -677,13 +759,23 @@ guide_optional_cli_tools() {
     else
         echo "  Comet CLI 未安装。Comet 工作流 skill 仅提供入口指引，不实现状态机；安装后可用 --comet-init 初始化项目。"
         if prompt_yes_no "现在安装 Comet CLI？"; then
-            if npm install -g @rpamis/comet; then
+            if npm install -g "@rpamis/comet@${COMET_NPM_VERSION}"; then
                 echo -e "  ${GREEN}[√] comet 已安装。${NC}"
             else
-                echo "  [!] comet 安装失败。可手动执行：npm install -g @rpamis/comet"
+                echo "  [!] comet 安装失败。可手动执行：npm install -g @rpamis/comet@${COMET_NPM_VERSION}"
             fi
         else
-            echo "  安装命令：npm install -g @rpamis/comet"
+            echo "  安装命令：npm install -g @rpamis/comet@${COMET_NPM_VERSION}"
+        fi
+    fi
+    # Phase 2 (2-2): verify the installed comet matches the pinned version.
+    # A mismatch is a loud warning here (install already succeeded or the user
+    # already had a different version); tools/check-comet.py is the hard gate.
+    if command -v comet >/dev/null 2>&1 && command -v python3 >/dev/null 2>&1; then
+        _comet_check_rc=0
+        python3 "${SCRIPT_DIR}/tools/check-comet.py" || _comet_check_rc=$?
+        if [ "$_comet_check_rc" -ne 0 ]; then
+            echo -e "  ${YELLOW}[!] 已安装的 comet 与锁定版本不一致（锁定 @rpamis/comet@${COMET_NPM_VERSION}，2026-10-28 实测）。请运行 npm install -g @rpamis/comet@${COMET_NPM_VERSION} 更新。${NC}"
         fi
     fi
 }
@@ -927,10 +1019,14 @@ if [ -z "$TARGET_PROJECT_ARG" ]; then
     exit 0
 fi
 
-# Validate target project directory
-if [ ! -d "${TARGET_PROJECT_ARG}" ]; then
-    echo -e "${RED}[Error] Target project path does not exist or is not a directory: / 目标项目路径不存在或不是目录: ${TARGET_PROJECT_ARG}${NC}"
+# Validate target project directory (target-auto-create: create it if missing)
+if [ -e "${TARGET_PROJECT_ARG}" ] && [ ! -d "${TARGET_PROJECT_ARG}" ]; then
+    echo -e "${RED}[Error] Target project path exists but is not a directory: / 目标项目路径已存在但不是目录: ${TARGET_PROJECT_ARG}${NC}"
     exit 1
+fi
+if [ ! -d "${TARGET_PROJECT_ARG}" ]; then
+    echo -e "  ${YELLOW}[i] Target project directory does not exist; creating it: / 目标项目目录不存在，自动创建: ${TARGET_PROJECT_ARG}${NC}"
+    mkdir -p "${TARGET_PROJECT_ARG}" || { echo -e "${RED}[Error] Failed to create target directory: ${TARGET_PROJECT_ARG}${NC}"; exit 1; }
 fi
 
 TARGET_PROJECT_DIR="$(cd "${TARGET_PROJECT_ARG}" && pwd)"
@@ -1198,10 +1294,6 @@ if [ "$TOOL_CLAUDE" = true ] && [ -f "${SOURCE_CLAUDE_SETTINGS}" ]; then
     if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_CLAUDE_SETTINGS}" ]; then
         if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_CLAUDE_SETTINGS}"; fi
         cp -f "${SOURCE_CLAUDE_SETTINGS}" "${TARGET_CLAUDE_SETTINGS}"
-        # P0 fix: codegraph.cmd is Windows-only; use codegraph on Unix
-        if [ "$(uname)" != "Windows_NT" ] && [ "$(uname -o 2>/dev/null)" != "Msys" ]; then
-            sed -i 's/codegraph\.cmd/codegraph/g' "${TARGET_CLAUDE_SETTINGS}"
-        fi
         echo -e "  ${GREEN}[√] 已部署 Claude Code 安全拦截钩子: .claude/settings.json${NC}"
     else
         echo "  [i] 目标项目已存在 .claude/settings.json，跳过。"
@@ -1254,7 +1346,7 @@ fi
 # ==============================================================================
 # 4. Deploy Skills (.agents/skills/ & .claude/skills/)
 # ==============================================================================
-echo -e "\n${YELLOW}>>> [3/3] 正在部署技能库与工具链集成...${NC}"
+echo -e "\n${YELLOW}>>> [3/3] 正在部署技能库与工具链集成 (profile: ${PROFILE})...${NC}"
 
 TARGET_SKILLS_DIR="${TARGET_PROJECT_DIR}/.agents/skills"
 TARGET_CLAUDE_SKILLS_DIR="${TARGET_PROJECT_DIR}/.claude/skills"
@@ -1266,6 +1358,24 @@ if [ -d "${SOURCE_SKILLS_DIR}" ]; then
     for skill_path in "${SOURCE_SKILLS_DIR}"/*; do
         if [ -d "$skill_path" ]; then
             skill_name=$(basename "$skill_path")
+            # Phase 4 (4-1): profile filter. "full" deploys everything;
+            # minimal/standard only deploy their listed skills.
+            # profile
+            if [ "$PROFILE" != "full" ]; then
+                case " $PROFILE_SKILLS " in
+                    *" $skill_name "*) ;;
+                    *) echo "  [i] 跳过非 ${PROFILE} 技能 .agents/skills/${skill_name}（用 --profile full 部署全部技能）。"; continue ;;
+                esac
+            fi
+            # include-heavy-skills: docx + brainstorming are opt-in (heavy / local service)
+            case "$skill_name" in
+                docx|brainstorming)
+                    if [ "$INCLUDE_HEAVY_SKILLS" != true ]; then
+                        echo "  [i] 跳过可选重型技能 .agents/skills/${skill_name}（使用 --include-heavy-skills 部署）。"
+                        continue
+                    fi
+                    ;;
+            esac
             dest_skill="${TARGET_SKILLS_DIR}/${skill_name}"
 
             if [ "$DO_UPDATE" = true ] || [ ! -d "${dest_skill}" ]; then
@@ -1299,6 +1409,25 @@ if [ -f "${SOURCE_SKILLS_LOCK}" ]; then
         cp -f "${SOURCE_SKILLS_LOCK}" "${TARGET_PROJECT_DIR}/skills-lock.json"
         echo -e "  ${GREEN}[√] 已同步 skills-lock.json${NC}"
     fi
+fi
+
+# Deploy gate layer (Phase 1): pass-gate.py + schema + init template.
+# gate-deploy
+# Only the code ships. feature_list.json / events.jsonl are per-project
+# state, created by `gate/init.template.sh` or `pass-gate.py init` — never
+# copied from this repo. Skipped on self-deploy (same directory).
+if [ -d "${SCRIPT_DIR}/gate" ] && [ "${SCRIPT_DIR}" != "${TARGET_PROJECT_DIR}" ]; then
+    TARGET_GATE_DIR="${TARGET_PROJECT_DIR}/gate"
+    mkdir -p "${TARGET_GATE_DIR}"
+    for gate_file in pass-gate.py feature_list.schema.json init.template.sh README.md; do
+        if [ -f "${SCRIPT_DIR}/gate/${gate_file}" ]; then
+            if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_GATE_DIR}/${gate_file}" ]; then
+                if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_GATE_DIR}/${gate_file}"; fi
+                cp -f "${SCRIPT_DIR}/gate/${gate_file}" "${TARGET_GATE_DIR}/${gate_file}"
+            fi
+        fi
+    done
+    echo -e "  ${GREEN}[√] 已部署门禁层: gate/ (pass-gate.py + schema + init.template.sh)${NC}"
 fi
 
 # Sync .ai-memory.toml.example
@@ -1380,7 +1509,7 @@ if [ "$DO_COMET_INIT" = true ]; then
         (cd "${TARGET_PROJECT_DIR}" && comet init) || echo -e "  ${YELLOW}[!] comet init 执行存在告警。${NC}"
     else
         echo -e "  ${YELLOW}[!] 指定了 --comet-init，但在系统 PATH 中未找到 comet CLI。${NC}"
-        echo -e "      可通过以下命令安装: npm install -g @rpamis/comet"
+        echo -e "      可通过以下命令安装: npm install -g @rpamis/comet@${COMET_NPM_VERSION}"
     fi
 fi
 
@@ -1452,6 +1581,7 @@ if [ ! -f "${TARGET_GITIGNORE}" ]; then
 *.bak-*
 /.ai-memory.toml
 scratch/
+gate/cost-ledger.jsonl
 EOF
     fi
     echo -e "  ${GREEN}[√] 已初始化目标项目 .gitignore (写入 Agent Harness 忽略规则)${NC}"
@@ -1477,6 +1607,7 @@ else
 *.bak-*
 /.ai-memory.toml
 scratch/
+gate/cost-ledger.jsonl
 EOF
         fi
         echo -e "  ${GREEN}[√] 已向目标项目 .gitignore 追加 Agent Harness 忽略规则${NC}"

@@ -10,7 +10,7 @@ Diese Anleitung bietet ein umfassendes Handbuch für Softwareentwicklung und tec
 
 1. [Kernarchitektur & Tool-Matrix (wer verwaltet was)](#1-kernarchitektur--tool-matrix-wer-verwaltet-was)
 2. [Skills- & Ökosystem-Tool-Inventar](#2-skills---ökosystem-tool-inventar)
-   - 2.1 44 integrierte native Skills kategorisiert
+   - 2.1 40 integrierte native Skills kategorisiert
    - 2.2 Versions-Locking, Online-Updates & Skill-Sync (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
    - 2.3 Optionale Harness-CLI-Tools
    - 2.4 Token-Ökonomie der Skills (warum 40+ Skills den Kontext NICHT sprengen)
@@ -93,14 +93,14 @@ Die Deployment-Skripte schreiben Pfade; vor der Annahme, dass eine Datei konsumi
 
 ## 2. Skills- & Ökosystem-Tool-Inventar
 
-### 2.1 44 integrierte native Skills kategorisiert
+### 2.1 40 integrierte native Skills kategorisiert
 
 Der Installer kopiert die Skill-Verzeichnisse des Repositorys nach `.agents/skills/`; die tatsächliche Erkennung hängt vom Host-Tool und seiner Konfiguration ab.
 
 #### 1. Versionierter Workflow-Einstiegspunkt
 - **`comet`**: Die Comet CLI bietet versionierte Native- und Classic-Workflows. Dieses Repository liefert nur eine Einstiegspunkt-Anleitung; es implementiert keine Comet-Phase-Guards.
 
-#### 2. OpenSpec-Spezifikationsgetriebene Suite (16 Skills)
+#### 2. OpenSpec-Spezifikationsgetriebene Suite (12 Skills)
 - **`openspec`**: Kernarchitektur.
 - **`openspec-propose`**: Schlägt Änderungen mit Design, Specs und Tasks in einem Schritt vor.
 - **`openspec-new-change`**: Schrittweise Artefakterstellung.

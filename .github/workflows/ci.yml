@@ -39,7 +39,10 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq shellcheck
           npm install -g markdownlint-cli
-          pip install pyyaml
+          # pytest: the bench smoke inside repo_checks runs the fixture
+          # acceptance command (python3 -m pytest ...); setup-python
+          # does not ship it.
+          pip install pyyaml pytest
 
       - name: Markdown lint
         run: markdownlint '**/*.md'
@@ -48,13 +51,20 @@ jobs:
         run: shellcheck -S warning ./*.sh
 
       - name: Node syntax check (hooks)
-        run: node --check .claude/hooks/guard.mjs && node --check .claude/hooks/guard-write.mjs
+        run: node --check .claude/hooks/guard.mjs && node --check .claude/hooks/guard-write.mjs && node --check .claude/hooks/guard-feature-list.mjs && node --check .claude/hooks/stop-gate.mjs && node --check .claude/hooks/session-start.mjs && node --check .claude/hooks/post-tool-use.mjs
 
       - name: Hook behavior tests
-        run: node tests/hooks.test.mjs
+        run: |
+          node tests/hooks.test.mjs
+          node tests/hooks-gate.test.mjs
+          node tests/hooks-write.test.mjs
+          node tests/hooks-lifecycle.test.mjs
 
       - name: Skill sync unit tests
-        run: python3 tests/sync_skills_test.py
+        run: |
+          python3 tests/sync_skills_test.py
+          python3 tests/doc_impact_test.py
+          python3 tests/cost_ledger_test.py
 
       - name: Repository static checks
         run: python3 tests/repo_checks.py
@@ -68,6 +78,8 @@ jobs:
           test -f /tmp/smoke-proj/.agents/rules/security-boundary.md
           test -f /tmp/smoke-proj/.claude/settings.json
           test -f /tmp/smoke-proj/.claude/hooks/guard.mjs
+          test -f /tmp/smoke-proj/.claude/hooks/session-start.mjs
+          test -f /tmp/smoke-proj/.claude/hooks/post-tool-use.mjs
           test -f /tmp/smoke-proj/skills-lock.json
           test -d /tmp/smoke-proj/.agents/skills
           test -d /tmp/smoke-proj/docs/specs
