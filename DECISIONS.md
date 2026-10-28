@@ -110,9 +110,8 @@ Phase 0 decision meeting.
   ≤10 skill list cannot be set from data yet. Re-check after Phase 3
   bench data.
 - **U2 — Comet state contents unmeasured.** See N1 caveat.
-- **U3 — sh/ps1 dual-implementation endgame.** No timetable exists for
-  ending the dual-script maintenance; v3 requires a decision + review
-  date in Phase 4-3, no indefinite deferral.
+- **U3 — sh/ps1 dual-implementation endgame.** Settled by D17 (Phase 4):
+  keep dual, sh-first, review 2027-04-28.
 
 ## D5 — Gate code lives in `gate/`, not `kernel/` (Phase 1; settles N3)
 
@@ -322,4 +321,39 @@ Phase 0 decision meeting.
 - **Rationale:** a monthly eval that cries wolf on one slow run would be
   ignored within two months; the guard must match the statistics it
   enforces.
+- **Date:** 2026-10-28.
+
+## D17 — sh/ps1 dual implementation: keep both, sh-first, review 2027-04-28 (Phase 4, 4-3; settles U3)
+
+- **Decision:** keep the dual implementation. `deploy-agents.sh` is the
+  reference implementation; `deploy-agents.ps1` is a maintained port.
+  Every new deploy/pipeline feature lands in sh first and is ported to ps1
+  in the same PR — the PARITY test (`tests/repo_checks.py` §4/§4b) fails
+  CI otherwise. No ps1-only features; no new shell entry points. This is a
+  decision to keep the status quo deliberately, not a deferral: the
+  alternatives were costed and rejected below.
+- **Cost data (measured 2026-10-28):** deploy scripts 1,592 (sh) + 1,483
+  (ps1) lines; pipeline scripts 1,136 (sh) + 1,058 (ps1) lines; 5,269
+  lines total across the four files; 54 PARITY markers (37 deploy + 17
+  pipeline) binding them. Phase 0-10 measured the same multiplier class
+  for languages: one rule change touches ~20 files. The shell split is the
+  same kind of cost, in the same order of magnitude.
+- **Rationale:** there is no usage data on which shell users deploy with
+  (U1 — no telemetry), so converging to one shell now would strand an
+  unknown share of users on no evidence. The PARITY test is the mechanism
+  that makes dual maintenance bounded: drift fails CI instead of
+  accumulating silently.
+- **Rejected:** (a) freezing ps1 to bug-fixes only — strands Windows users
+  on no evidence; (b) a generator from a single source — unproven, and the
+  generator itself would need parity tests against its output; (c) a
+  Python `harness` CLI as the sole implementation — a 5,269-line rewrite
+  with full regression risk and no forcing need.
+- **Review date: 2027-04-28.** Revisit on any one trigger: (1) usage data
+  shows one shell's deploy share below 10% over a quarter; (2) a third
+  parity-drift incident (a feature landing in one script without the
+  other — count starts at Phase 4; prior drift: `codegraph.cmd`, fixed in
+  Phase 0); (3) a Python CLI lands for another reason, at which point
+  convergence is re-decided rather than assumed. If none triggers by the
+  review date, the review records a new date in writing — the decision
+  does not silently lapse.
 - **Date:** 2026-10-28.
