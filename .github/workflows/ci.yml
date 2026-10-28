@@ -17,6 +17,12 @@ on:
   push:
     branches: [main, long-term-memory-governance]
   pull_request:
+  # Manual trigger only (added 2026-10-29, review round): lets a branch
+  # like feat/merge-v3 get a real CI record without opening a PR into
+  # main. Existing push/PR triggers are unchanged; this adds no automatic
+  # runs. Before release, trigger a full manual run including the Windows
+  # ps-analyzer job (see docs/internal/release-checklist.md).
+  workflow_dispatch:
 
 jobs:
   lint-and-test:

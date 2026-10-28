@@ -786,6 +786,19 @@ D57); the remaining items below are still pending.
   Conflicts with skeleton D22 (true lock, no exemptions). Merge kept
   the true lock — all three are pinned in `skills-lock.json` — and
   did not take the exemption.
+  - **Pin-surface precision (review 2026-10-29):** the sentence above is
+    literally true — codegraph, comet, and rtk each carry a pin in the
+    42-entry lock (codegraph `pinnedCommit` + `installerSha256`, comet
+    `npmVersion` 0.5.1 + `pinnedCommit`, rtk `pinnedCommit` +
+    `installerSha256`) — but the lock entry is not the only pin surface.
+    The deploy scripts enforce the same pins at install time (installer
+    SHA checks agree with the lock), and the guides document the pinned
+    installs. What the lock does NOT cover: rtk's PowerShell winget
+    channel remains unpinned (skeleton D13, known gap). A lock pin that
+    differs from the upstream tip is by design (pins are dated
+    2026-10-28), not drift; re-pinning is a supply-chain decision, not a
+    bug fix. Do not rewrite this bullet to claim the pins live only in
+    scripts/guides — that would be false.
 - **yunyi D29 — skill tiers standard = 22.** Conflicts with D30/C5
   (standard = 18). Merge kept 18.
 - **yunyi D16/D21 — rubric `stable` claimed after confirmation round
