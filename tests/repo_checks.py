@@ -554,6 +554,29 @@ check("ocr-pin:no-bare-install",
       and _re3.search(r"install -g @alibaba-group/open-code-review(?!@)", _deploy_ps1_txt) is None,
       "bare `npm install -g @alibaba-group/open-code-review` (unversioned) still present")
 
+# --- 3m1b. Docs pin guard (Phase 6, 6-2) ---
+# The EN+ZH Panorama Guides are repo-authored install instructions: they
+# must show only pinned installs — versioned npm packages and
+# download-then-verify installer flows. No bare `npm install -g <pkg>`
+# (unversioned) and no piped `curl | sh` / `irm | iex` install may appear.
+# FR/DE/ZH-TW are translations: tracked stale in docs/internal/i18n-status.md,
+# not hard-failed here (Phase 4, 4-2). The vendored comet skill
+# (.agents/skills/comet/SKILL.md) still shows an unversioned comet install
+# in upstream text — editing it would break the lock (§5); recorded as a
+# known gap in D22, not scanned here.
+_GUIDE_EN = (ROOT / "docs" / "guides" / "Tools Practical Usage and Skills Panorama Guide.md").read_text(encoding="utf-8")
+_GUIDE_ZH = (ROOT / "docs" / "guides" / "Tools Practical Usage and Skills Panorama Guide.zh.md").read_text(encoding="utf-8")
+for _gname, _gtxt in (("EN", _GUIDE_EN), ("ZH", _GUIDE_ZH)):
+    check(f"docs-pin:{_gname}-no-bare-npm",
+          _re3.search(r"install -g @rpamis/comet(?!@)", _gtxt) is None
+          and _re3.search(r"install -g @alibaba-group/open-code-review(?!@)", _gtxt) is None
+          and _re3.search(r"i -g @colbymchenry/codegraph(?!@)", _gtxt) is None
+          and _re3.search(r"install -g @colbymchenry/codegraph(?!@)", _gtxt) is None,
+          f"{_gname} Panorama Guide still shows a bare (unversioned) npm install")
+    check(f"docs-pin:{_gname}-no-piped-install",
+          "install.sh | sh" not in _gtxt and "install.ps1 | iex" not in _gtxt,
+          f"{_gname} Panorama Guide still shows a piped curl|sh / irm|iex install")
+
 # --- 3m2. Pinned installer scripts (Phase 2, 2-2) ---
 # codegraph/rtk installers are pinned by upstream commit + SHA256 of the
 # installer at that commit (measured 2026-10-28). The lock is the record;

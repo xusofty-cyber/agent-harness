@@ -193,10 +193,22 @@ The installer copies the repository's skill directories into `.agents/skills/`; 
 ### 2.3 Optional Harness CLI Tools
 
 Skill availability depends on the host tool and its configuration. Terminal-level CLI tools are optional:
-- **Comet CLI**: install via `npm install -g @rpamis/comet`; provides native/classic workflow execution and `--comet-init` initialization.
-- **CodeGraph CLI**: macOS/Linux: `curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.sh | sh`; Windows PowerShell: `irm https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.ps1 | iex`. Run `codegraph install` to wire agents and `codegraph init` in the project.
-- **RTK (Rust Token Killer) CLI**: macOS/Linux: `curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh`; Windows: `winget install rtk-ai.rtk`. Verify with `rtk gain`. Run `rtk init` in the project to configure agent hooks.
-- **Open Code Review (OCR) CLI**: install via `npm install -g @alibaba-group/open-code-review`; enables Tier A zero-LLM-cost delegation review via the `open-code-review` skill.
+- **Comet CLI**: install the pinned version via `npm install -g @rpamis/comet@0.5.1` (pinned 2026-10-28; must match `skills-lock.json` `comet.npmVersion`); provides native/classic workflow execution and `--comet-init` initialization.
+- **CodeGraph CLI**: never pipe an installer to a shell. macOS/Linux — download the installer pinned in `skills-lock.json` (`codegraph.installerUrl`), verify its SHA256, then run it:
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/01e0ac3aa7419a7ab75583963e8a95359f3af1d3/install.sh -o /tmp/codegraph-install.sh
+  echo "e8bbcc694584d5c88fa7c25103fc0f9c238d63a86c1494ca03448b680dbcc86e  /tmp/codegraph-install.sh" | sha256sum -c -
+  sh /tmp/codegraph-install.sh
+  ```
+  Or `npm install -g @colbymchenry/codegraph@1.6.2`. Windows PowerShell — download the pinned `install.ps1` (`codegraph.installerUrlPs1`), verify its SHA256 (`024091f428cac6eaa217bae8f840a9572a91daab974a8354085ba72f86f6aee1`), then run it, or use the same versioned npm install. Run `codegraph install` to wire agents and `codegraph init` in the project.
+- **RTK (Rust Token Killer) CLI**: never pipe an installer to a shell. macOS/Linux — download the installer pinned in `skills-lock.json` (`rtk.installerUrl`), verify its SHA256, then run it:
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/e05c7bdfacfcfe1f845d11f47339e4eae63eb3f5/install.sh -o /tmp/rtk-install.sh
+  echo "7ca3997314f631b8ad267e5add9af4b7a2f0351bdab0b1c5a9b7ed4008d0434a  /tmp/rtk-install.sh" | sha256sum -c -
+  sh /tmp/rtk-install.sh
+  ```
+  Windows: `winget install rtk-ai.rtk` (winget has no version pin — known gap, D13). Verify with `rtk gain`. Run `rtk init` in the project to configure agent hooks.
+- **Open Code Review (OCR) CLI**: install the pinned version via `npm install -g @alibaba-group/open-code-review@1.13.3` (pinned 2026-10-28; must match `skills-lock.json` `open-code-review.npmVersion`); enables Tier A zero-LLM-cost delegation review via the `open-code-review` skill.
 
 The deployment scripts automatically detect these optional CLIs during initial setup and guide installation where appropriate.
 
