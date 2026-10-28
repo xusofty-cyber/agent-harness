@@ -16,6 +16,20 @@
           {
             "type": "command",
             "command": "node .claude/hooks/guard-write.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/guard-feature-list.mjs"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/stop-gate.mjs"
           }
         ]
       }
