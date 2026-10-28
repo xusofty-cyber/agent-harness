@@ -11,6 +11,12 @@
 // and the hook appends a stop_override event to gate/events.jsonl and
 // lets the session stop. An override without a reason is not an override.
 //
+// Deadlock guard (merge, from v3-yunyi/v3-yunkai): Claude Code sets
+// stop_hook_active when this hook already blocked the same stop once.
+// Blocking again would loop forever, so a second attempt is allowed —
+// but the allowance is logged to gate/events.jsonl
+// (stop_allowed_hook_active) so the unfinished items stay visible.
+//
 // Limits: Claude Code only (other hosts have no Stop hook). If there is
 // no gate/feature_list.json in the working directory the gate is not in
 // use and the hook exits 0. stdin parse failure is fail-open (exit 0),
@@ -55,6 +61,45 @@ const inProgress = (list.items || []).filter(
   (i) => i.status === "in_progress"
 );
 if (inProgress.length === 0) {
+  process.exit(0);
+}
+
+// Deadlock guard: this hook already blocked this stop once
+// (stop_hook_active). The agent saw the guidance above and is choosing
+// to stop anyway; blocking again would loop forever. Allow, and log the
+// allowance so the unfinished items stay visible.
+if (data.stop_hook_active === true) {
+  try {
+    const eventsPath = join(cwd, "gate", "events.jsonl");
+    let seq = 1;
+    if (existsSync(eventsPath)) {
+      const lines = readFileSync(eventsPath, "utf-8")
+        .split("\n")
+        .filter(Boolean);
+      if (lines.length > 0) {
+        seq = (JSON.parse(lines[lines.length - 1]).seq || 0) + 1;
+      }
+    }
+    appendFileSync(
+      eventsPath,
+      JSON.stringify({
+        seq,
+        ts: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+        actor: "stop-gate",
+        event: "stop_allowed_hook_active",
+        item_id: inProgress.map((i) => i.id).join(","),
+        detail:
+          "stop allowed on second attempt (stop_hook_active); items still in_progress",
+      }) + "\n"
+    );
+  } catch {
+    // Logging must never block the stop itself.
+  }
+  process.stderr.write(
+    `[GATE-HOOK] Stop allowed: hook already blocked this stop once (stop_hook_active); ` +
+      `${inProgress.length} item(s) still in_progress (${inProgress.map((i) => i.id).join(", ")}). ` +
+      "Allowance logged to gate/events.jsonl (stop_allowed_hook_active).\n"
+  );
   process.exit(0);
 }
 
