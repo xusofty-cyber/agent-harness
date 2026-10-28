@@ -22,7 +22,7 @@ The schema lives in `gate/`; the human template lives in
 
 ## The loop
 
-```
+```console
 pass-gate.py add --id <id> --title "..." --behavior "..." --command "<verify>"
 pass-gate.py start --id <id>        # WIP=1: one item in_progress at a time
 ... do the work ...

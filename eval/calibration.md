@@ -72,7 +72,7 @@ Source: v1 diagnosis + v3 K1 (repo at `97b01a2`, before Phase 0).
 | Dimension | Score | Reasoning |
 |---|---|---|
 | Correctness | 1 | Distributes rules/skills and deploys; but what it claims to be (a harness) it is not |
-| Verification | 0 | Fake-green: `|| true` + unconditional PASS; doc-impact/sync-skills exit 0 always — checks passed while verification was hollow |
+| Verification | 0 | Fake-green: stages recorded PASS despite failures; doc-impact/sync-skills exit 0 always — checks passed while verification was hollow |
 | Scope discipline | 1 | 40 skills, no tiering; undisciplined but not the failing dimension |
 | Reliability | 1 | Works in the author's environment; hooks fail on non-Claude hosts |
 | Maintainability | 1 | 156-line AGENTS.md; duplicated `.comet/config.yaml` |

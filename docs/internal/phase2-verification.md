@@ -9,7 +9,7 @@ repo root when in doubt.
 Stale-doc fixture `/tmp/docimpact-fixture` (a doc whose
 `last_verified_commit` is behind `src/foo.py`):
 
-```
+```console
 $ python3 tools/doc-impact.py --root /tmp/docimpact-fixture --strict
 exit=1
 🔴 docs/specs/foo.md [SPEC-FOO] (direct, 2 commits behind)
@@ -24,7 +24,7 @@ exit=0   # all vendored skills in sync with their upstreams today
 
 Pipeline on the same fixture, stage 4 only:
 
-```
+```console
 $ bash run-pipeline.sh /tmp/docimpact-fixture --stages docs --strict --non-interactive
 ✖ 阶段 4 出现错误（退出码 1，--strict）
 [✖ FAIL]  活体文档影响分析与质检 (doc-impact) : doc-impact.py 返回非零退出码 1（有文档 must-update）（--strict）
@@ -44,7 +44,7 @@ alone — they restore terminal state, they record no PASS. Clean target
 
 Pin measured at implementation time (never hardcoded in a plan doc):
 
-```
+```console
 $ npm view @rpamis/comet version
 0.5.1
 $ comet --version
@@ -64,7 +64,7 @@ Interrupt-recovery test (native workflow, scratch project
 needs a platform selection, so the state-machine path was driven
 directly with the CLI):
 
-```
+```console
 $ comet native new demo-change --json
 exitCode 0 — active change, phase shape, stateVersion 1
 $ comet native next demo-change --summary ... --expected-state-version 1 \
@@ -76,7 +76,7 @@ $ comet native next demo-change --summary ... --expected-state-version 1 \
 
 Simulated interruption — fresh shell, no state touched:
 
-```
+```console
 $ comet native status demo-change --project-root /tmp/comet-recovery --json
 phase shape | stateVersion 2 | status await-user   # identical, not reset
 $ comet resume-probe --utterance "continue demo-change" --json /tmp/comet-recovery
@@ -129,7 +129,7 @@ Remaining known gap: `xargs` / `find -exec` indirection is not expanded.
 
 Pipeline → ledger end-to-end (`/tmp/ledger-demo`, target with `gate/`):
 
-```
+```console
 $ bash run-pipeline.sh /tmp/ledger-demo --stages deploy --non-interactive
 pipeline exit=0
 $ cat /tmp/ledger-demo/gate/cost-ledger.jsonl
@@ -145,7 +145,7 @@ exit=0
 Over-budget demo (budget tightened to `max_tool_calls_per_day: 1`, three
 hook-style tool-call lines appended):
 
-```
+```console
 $ python3 tools/cost-ledger.py check-budget --gate-dir /tmp/ledger-demo/gate
 COST BUDGET EXCEEDED (2026-10-28): max_tool_calls_per_day: 3 > 1
 Alert only — the run is NOT auto-stopped (budget semantics for auto-stop are not defined yet).
@@ -158,7 +158,7 @@ exit=1
 
 ## 5. Full verification (end of Phase 2)
 
-```
+```console
 $ python3 tests/repo_checks.py
 All repo checks passed. — 508 PASS
 $ node tests/hooks.test.mjs            — pass 56, fail 0
