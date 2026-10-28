@@ -26,6 +26,13 @@ for Claude Code, Codex, Antigravity, Copilot and Zed. MIT licensed.
 - **This repo's own notes** live in `docs/internal/` (not the distribution root).
 - Changelog entries go under `[Unreleased]` in `CHANGELOG.md`.
 
+## Source of truth
+
+Repository files are the source of truth; ai-memory is a recall adapter
+only. On conflict between a retrieved memory and a repo file, the repo
+file wins. Decisions live in `DECISIONS.md`; session breakpoints live in
+`docs/internal/SESSION_STATE.md`.
+
 ## Key paths
 
 - `.agents/rules/` — modular sub-rules (engineering, git, security, tokens)
