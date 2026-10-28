@@ -17,6 +17,12 @@
       deprecation policy).
 - [ ] Deploy smoke: `deploy-agents.sh` to an empty directory exits 0;
       `deploy-agents.ps1` smoke in CI.
+- [ ] Real CI record for the release branch: trigger `workflow_dispatch`
+      on the branch from GitHub Actions (ci.yml `on:` gained a manual
+      trigger 2026-10-29 precisely so a branch can get a CI record
+      without opening a PR into main). The run must include the Windows
+      `ps-analyzer` job — ps1 changes are otherwise only statically
+      verified. A local run mirroring CI steps is not a substitute.
 - [ ] `docs/internal/release-v0.3.0.md` draft updated with the final
       measured numbers (re-verify, do not copy old numbers).
 - [ ] CHANGELOG `[Unreleased]` entries are complete and honest (what was
