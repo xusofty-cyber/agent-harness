@@ -964,48 +964,19 @@ if _lock_base:
 else:
     print("  [warn] lock-history: no base ref found, check skipped")
 
-# --- 6. Multilingual doc pairs: structural parity ---
-# Each translated guide must keep the same ## section count as its source,
-# so the translated structure cannot silently drift from the source.
-MULTILINGUAL_DOC_PAIRS = [
-    ("README.md", "README.zh.md"),
-    ("README.md", "README.zh-tw.md"),
-    ("README.md", "README.fr.md"),
-    ("README.md", "README.de.md"),
-    ("docs/guides/Multi-Tool Deployment and Configuration Guide.md",
-     "docs/guides/Multi-Tool Deployment and Configuration Guide.zh.md"),
-    ("docs/guides/Multi-Tool Deployment and Configuration Guide.md",
-     "docs/guides/Multi-Tool Deployment and Configuration Guide.zh-tw.md"),
-    ("docs/guides/Multi-Tool Deployment and Configuration Guide.md",
-     "docs/guides/Multi-Tool Deployment and Configuration Guide.fr.md"),
-    ("docs/guides/Multi-Tool Deployment and Configuration Guide.md",
-     "docs/guides/Multi-Tool Deployment and Configuration Guide.de.md"),
-    ("docs/guides/Tools Practical Usage and Skills Panorama Guide.md",
-     "docs/guides/Tools Practical Usage and Skills Panorama Guide.zh.md"),
-    ("docs/guides/Tools Practical Usage and Skills Panorama Guide.md",
-     "docs/guides/Tools Practical Usage and Skills Panorama Guide.zh-tw.md"),
-    ("docs/guides/Tools Practical Usage and Skills Panorama Guide.md",
-     "docs/guides/Tools Practical Usage and Skills Panorama Guide.fr.md"),
-    ("docs/guides/Tools Practical Usage and Skills Panorama Guide.md",
-     "docs/guides/Tools Practical Usage and Skills Panorama Guide.de.md"),
-    ("docs/guides/Skills Usage Guide.md",
-     "docs/guides/Skills Usage Guide.zh.md"),
-    ("docs/guides/Skills Usage Guide.md",
-     "docs/guides/Skills Usage Guide.zh-tw.md"),
-    ("docs/guides/Skills Usage Guide.md",
-     "docs/guides/Skills Usage Guide.fr.md"),
-    ("docs/guides/Skills Usage Guide.md",
-     "docs/guides/Skills Usage Guide.de.md"),
-]
-
-def h2_count(path):
-    return sum(1 for line in (ROOT / path).read_text(encoding="utf-8").splitlines()
-               if line.startswith("## "))
-
-for src, target in MULTILINGUAL_DOC_PAIRS:
-    src_n, target_n = h2_count(src), h2_count(target)
-    check(f"doc-parity:{src}=={target}", src_n == target_n,
-          f"## count drift: {src} has {src_n}, {target} has {target_n} — sync ## sections in {target}")
+# --- 6. Multilingual docs: EN/ZH parity + i18n status (Phase 4, 4-2) ---
+# EN/ZH are the sources of truth: their ## counts must match (hard check).
+# FR/DE/ZH-TW are generated products: tools/i18n-check.py enforces the
+# status file (docs/internal/i18n-status.md) — an "in-sync" row must match
+# its source sha, a "stale"/"frozen" row passes with a printed reminder.
+# The old 16-pair symmetric H2 hard check was removed here: a translation
+# being behind is tracked debt, not a CI failure (v2 4-2).
+_i18n = subprocess.run(
+    [sys.executable, str(ROOT / "tools" / "i18n-check.py")],
+    capture_output=True, text=True, cwd=str(ROOT), timeout=60)
+_i18n_tail = (_i18n.stdout.strip().splitlines() or [""])[-1]
+check("i18n:status-check", _i18n.returncode == 0, _i18n_tail)
+print(_i18n.stdout, end="")
 
 # --- 7. Executable bit on entry-point scripts ---
 # The GitHub contents API resets the exec bit to 100644 on every content push,
