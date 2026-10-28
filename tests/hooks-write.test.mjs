@@ -9,6 +9,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { mkdtempSync, existsSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -93,6 +95,24 @@ test("allows on malformed stdin (fail-open)", () => {
     encoding: "utf-8",
   });
   assert.equal(res.status, 0);
+});
+
+// --- Graded parse failure (merged from v3-yunyi, Phase 2.5): log + alert ---
+test("logs and alerts on malformed stdin (graded policy)", () => {
+  const dir = mkdtempSync(join(tmpdir(), "hook-write-parse-"));
+  const res = spawnSync("node", [GUARD_WRITE], {
+    input: "not json {{{",
+    cwd: dir,
+    encoding: "utf-8",
+  });
+  assert.equal(res.status, 0);
+  assert.match(res.stderr, /guard-alerts\.jsonl/);
+  const logPath = join(dir, ".claude", "hooks", "guard-alerts.jsonl");
+  assert.equal(existsSync(logPath), true);
+  const line = readFileSync(logPath, "utf-8");
+  assert.match(line, /stdin_parse_failed/);
+  assert.match(line, /guard-write\.mjs/);
+  assert.doesNotMatch(line, /not json/); // raw stdin must never be logged
 });
 
 test("handles Edit tool with path field", () => {

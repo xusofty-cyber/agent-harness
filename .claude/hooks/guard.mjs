@@ -17,10 +17,25 @@ let data;
 try {
   data = JSON.parse(input);
 } catch {
-  // Phase 2 (2-4): parse failure stays fail-open (exit 0 — a hook must never
-  // wedge the session on malformed input), but it is no longer silent: the
-  // failure is logged to stderr so a broken pipe is visible, not invisible.
-  process.stderr.write("[SECURITY-HOOK] stdin JSON parse failed; allowing (fail-open by design)\n");
+  // Graded policy (merged from v3-yunyi, Phase 2.5): a parse failure is
+  // NOT silent and NOT fail-closed. It is logged (append-only, no raw
+  // input — raw stdin could contain secrets) and alerted on stderr, and
+  // the call is allowed. A silent allow would hide a hook that is not
+  // actually inspecting anything; a fail-closed deny would block
+  // legitimate work on a malformed hook payload.
+  try {
+    const { appendFileSync, mkdirSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const dir = join(process.cwd(), ".claude", "hooks");
+    mkdirSync(dir, { recursive: true });
+    appendFileSync(join(dir, "guard-alerts.jsonl"),
+      JSON.stringify({ ts: new Date().toISOString(), event: "stdin_parse_failed",
+        source: "guard.mjs",
+        detail: "stdin JSON parse failed; allowed per graded policy (log+alert, not fail-closed)" }) + "\n");
+  } catch {
+    // Logging failure must not change the allow decision.
+  }
+  process.stderr.write("[SECURITY-HOOK] ⚠️ Guard stdin parse failed — logged to .claude/hooks/guard-alerts.jsonl; call allowed per graded policy.\n");
   process.exit(0);
 }
 
@@ -583,6 +598,135 @@ for (const inv of gitInvocations) {
 
 // 3. Delete protected remote branches
 const PROTECTED_REF_RE = new RegExp(`^(?:refs/heads/)?${PROTECTED_BRANCH_PATTERN}$`);
+
+// 2b. Indirect git via resolver substitution (merged from v3-yunyi, D27).
+// Conjunctive and per-segment: deny iff one segment contains BOTH (a) a
+// git-resolver substitution and (b) a git subcommand plus an argument
+// pattern that is already a hard block today (force push, clean -d/-f,
+// protected-ref delete / update-ref). Resolver alone never denies;
+// dangerous args alone never deny under this rule. Single-quoted spans
+// never expand and are stripped first; double-quoted resolvers DO expand
+// and count.
+// Why this exists on top of the sentinel rewrite above: the rewrite turns
+// a resolver into GIT_TOKEN and re-parses, but a fully double-quoted word
+// such as "$(which git)" push --force collapses into ONE token (spaces
+// inside quotes do not split), so the normalized path never sees a git
+// argv[0]. This raw-text conjunction catches that case. It is a second
+// check, not a replacement: the sentinel path still handles the plain
+// (unquoted) forms. Residual limits (documented, not fixed by static
+// scan): cross-call variables ($GIT in a later call), PATH shims, shell
+// functions/aliases, eval of constructed strings. Server-side branch
+// protection remains the real boundary for those.
+const RESOLVER_RE = /^(which\s+git|command\s+-v\s+git|type\s+-[pP]\s+git)\b/;
+function stripSingleQuoted(s) {
+  let out = "", inS = false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (inS) { if (c === "'") inS = false; continue; }
+    if (c === "'") { inS = true; continue; }
+    out += c;
+  }
+  return out;
+}
+function rawSegments(cmd) {
+  const segs = [];
+  let cur = "", inS = false, inD = false, depth = 0, inBt = false;
+  for (let i = 0; i < cmd.length; i++) {
+    const c = cmd[i];
+    if (inS) { cur += c; if (c === "'") inS = false; continue; }
+    if (inBt) { cur += c; if (c === "`") inBt = false; continue; }
+    if (inD) {
+      cur += c;
+      if (c === "\\" && i + 1 < cmd.length) { cur += cmd[++i]; continue; }
+      if (c === '"') inD = false;
+      continue;
+    }
+    if (c === "'") { inS = true; cur += c; continue; }
+    if (c === '"') { inD = true; cur += c; continue; }
+    if (c === "`") { inBt = true; cur += c; continue; }
+    if (c === "$" && cmd[i + 1] === "(") { depth++; cur += c; continue; }
+    if (c === "(") { depth++; cur += c; continue; }
+    if (c === ")") { if (depth > 0) depth--; cur += c; continue; }
+    if (depth === 0 && (c === ";" || c === "&" || c === "|")) {
+      if (cur.trim()) segs.push(cur);
+      cur = "";
+      continue;
+    }
+    cur += c;
+  }
+  if (cur.trim()) segs.push(cur);
+  return segs;
+}
+function resolverSpans(seg) {
+  // Returns [start, end) spans of resolver substitutions in seg.
+  const spans = [];
+  for (let i = 0; i < seg.length; i++) {
+    if (seg[i] === "`") {
+      const end = seg.indexOf("`", i + 1);
+      if (end > i && RESOLVER_RE.test(seg.slice(i + 1, end).trim())) spans.push([i, end + 1]);
+      if (end > i) i = end;
+      continue;
+    }
+    if (seg[i] === "$" && seg[i + 1] === "(") {
+      let depth = 1, j = i + 2;
+      while (j < seg.length && depth > 0) {
+        if (seg[j] === "(") depth++;
+        else if (seg[j] === ")") depth--;
+        j++;
+      }
+      if (depth === 0 && RESOLVER_RE.test(seg.slice(i + 2, j - 1).trim())) spans.push([i, j]);
+    }
+  }
+  return spans;
+}
+function hasIndirectDangerousGit(cmd) {
+  for (const seg of rawSegments(cmd)) {
+    const stripped = stripSingleQuoted(seg);
+    const spans = resolverSpans(stripped);
+    if (!spans.length) continue;
+    // Merge refinement vs. the yunyi original: the resolver must be the
+    // segment's first word (argv[0], optionally double-quoted). A resolver
+    // that is an argument (echo $(which git) ...) or an assignment value
+    // (x=$(which git) ...) is not an invocation, and the skeleton's own
+    // tests require those to stay allowed. The fully double-quoted word
+    // "$(which git)" push --force still qualifies: the quote wraps the
+    // resolver, which is argv[0] of the executed word.
+    const lead = stripped.length - stripped.trimStart().length;
+    const head = stripped.slice(lead);
+    const first = spans[0];
+    const atArgv0 = first[0] === lead ||
+      (first[0] === lead + 1 && head.startsWith('"'));
+    if (!atArgv0) continue;
+    let rest = "";
+    let prev = 0;
+    for (const [a, b] of spans) { rest += stripped.slice(prev, a) + " "; prev = b; }
+    rest += stripped.slice(prev);
+    const tokens = rest.replace(/[()]/g, " ").split(/\s+/).filter(Boolean)
+      .map((t) => t.replace(/^["`]+|["`]+$/g, ""));
+    for (let i = 0; i < tokens.length; i++) {
+      const sub = tokens[i];
+      const args = tokens.slice(i + 1);
+      if (sub === "push") {
+        if (isForcePush({ subcommand: "push", args })) return true;
+        for (let j = 0; j < args.length; j++) {
+          const a = args[j];
+          if ((a === "--delete" || a === "-d") && args[j + 1] && PROTECTED_REF_RE.test(args[j + 1])) return true;
+          if (a.startsWith("--delete=") && PROTECTED_REF_RE.test(a.slice("--delete=".length))) return true;
+          if (/^:(?!\/)/.test(a) && PROTECTED_REF_RE.test(a.slice(1))) return true;
+        }
+      } else if (sub === "clean") {
+        if (args.some((a) => (/^-[a-zA-Z]+$/.test(a) && !a.startsWith("--") && /[dfDF]/.test(a)) || a === "--force")) return true;
+      } else if (sub === "update-ref") {
+        if (args.some((a) => PROTECTED_REF_RE.test(a))) return true;
+      }
+    }
+  }
+  return false;
+}
+if (hasIndirectDangerousGit(command)) {
+  deny(`[SECURITY-HOOK] ❌ Indirect git via resolver (e.g. $(which git)) with a destructive argument permanently prohibited! / 通过解析器间接调用 git 并带破坏性参数，永久禁止！`);
+}
+
 for (const inv of gitInvocations) {
   if (inv.subcommand !== "push") continue;
   const args = inv.args;

@@ -9,7 +9,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { mkdtempSync, writeFileSync, existsSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -146,6 +146,73 @@ test("denies rebase on protected branches", () => {
 test("allows on malformed stdin (fail-open)", () => {
   const res = spawnSync("node", [GUARD], { input: "not json", encoding: "utf-8" });
   assert.equal(res.status, 0);
+});
+
+// --- Graded parse failure (merged from v3-yunyi, Phase 2.5): log + alert, not silent, not fail-closed ---
+test("logs and alerts on malformed stdin (graded policy)", () => {
+  const dir = mkdtempSync(join(tmpdir(), "hook-parse-"));
+  const res = spawnSync("node", [GUARD], { input: "not json", cwd: dir, encoding: "utf-8" });
+  assert.equal(res.status, 0);
+  assert.match(res.stderr, /guard-alerts\.jsonl/);
+  const logPath = join(dir, ".claude", "hooks", "guard-alerts.jsonl");
+  assert.equal(existsSync(logPath), true);
+  const line = readFileSync(logPath, "utf-8");
+  assert.match(line, /stdin_parse_failed/);
+  assert.doesNotMatch(line, /not json/); // raw stdin must never be logged
+});
+
+// --- Indirect git via resolver substitution (merged from v3-yunyi, D27) ---
+// Conjunctive rule: resolver + dangerous arg in the SAME segment denies.
+// The double-quoted cases are the regression the merge closes: the
+// sentinel rewrite collapses "$(which git)" into one token, so the
+// normalized path never sees a git argv[0] — only this raw-text check
+// catches them.
+test("denies resolver indirection + force push", () => {
+  assert.equal(runHook("$(which git) push --force origin main").exitCode, 2);
+});
+
+test("denies resolver indirection in backticks + force push", () => {
+  assert.equal(runHook("`which git` push --force origin main").exitCode, 2);
+});
+
+test("denies resolver indirection + clean -df", () => {
+  assert.equal(runHook("$(which git) clean -df").exitCode, 2);
+});
+
+test("denies alternate resolver (command -v) + force-with-lease", () => {
+  assert.equal(runHook("$(command -v git) push --force-with-lease").exitCode, 2);
+});
+
+test("allows benign resolver indirection (rev-parse)", () => {
+  assert.equal(runHook("$(which git) rev-parse HEAD").exitCode, 0);
+});
+
+test("allows resolver alone", () => {
+  assert.equal(runHook("echo $(which git)").exitCode, 0);
+});
+
+test("allows resolver indirection without a dangerous arg", () => {
+  assert.equal(runHook("$(which git) push origin main").exitCode, 0);
+});
+
+test("allows dangerous token in a different segment than the resolver", () => {
+  assert.equal(runHook("echo --force; $(which git) status").exitCode, 0);
+});
+
+test("allows single-quoted resolver text (literal, not executed)", () => {
+  assert.equal(runHook("echo 'use $(which git) push --force'").exitCode, 0);
+});
+
+test("denies double-quoted resolver indirection + force push", () => {
+  assert.equal(runHook('"$(which git)" push --force origin main').exitCode, 2);
+});
+
+test("denies resolver indirection + protected-ref delete", () => {
+  assert.equal(runHook("$(which git) push --delete main").exitCode, 2);
+});
+
+test("allows benign subcommand via resolver indirection", () => {
+  assert.equal(runHook("$(which git) stash list").exitCode, 0);
 });
 
 test("ignores non-Bash tools", () => {
