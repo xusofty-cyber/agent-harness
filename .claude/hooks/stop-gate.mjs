@@ -29,6 +29,9 @@ let data = {};
 try {
   data = JSON.parse(input);
 } catch {
+  // Phase 2 (2-4): parse failure stays fail-open (exit 0), but it is logged
+  // to stderr instead of silently allowed.
+  process.stderr.write("[STOP-GATE] stdin JSON parse failed; allowing (fail-open by design)\n");
   process.exit(0);
 }
 

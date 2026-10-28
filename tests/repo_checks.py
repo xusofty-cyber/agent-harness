@@ -582,6 +582,24 @@ check("hooks-lifecycle:post-tool-use-wired",
       "post-tool-use.mjs" in _settings_text,
       "settings.json does not register post-tool-use.mjs")
 
+# --- 3o. Guard graded hardening (Phase 2, 2-4) ---
+# guard.mjs must expand command substitutions and eval/sh -c indirection
+# (not a blanket fail-closed: parse failures stay fail-open but logged).
+_guard = (ROOT / ".claude" / "hooks" / "guard.mjs").read_text(encoding="utf-8")
+check("guard:expands-substitutions",
+      "rewriteSubstitutions" in _guard and "GIT_TOKEN" in _guard,
+      "guard.mjs lacks command-substitution expansion")
+check("guard:expands-indirection",
+      '"eval"' in _guard and '"-c"' in _guard and "MAX_EXPAND_DEPTH" in _guard,
+      "guard.mjs lacks eval/sh -c indirection expansion")
+check("guard:parse-failure-logged",
+      "parse failed" in _guard,
+      "guard.mjs parse failure is silent (must log to stderr)")
+_hooks_test = (ROOT / "tests" / "hooks.test.mjs").read_text(encoding="utf-8")
+check("guard:which-git-test",
+      "$(which git)" in _hooks_test and "sh -c" in _hooks_test,
+      "hooks.test.mjs lacks substitution/indirection bypass tests")
+
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
 # its counterpart marker must exist in the other. Markers that exist in
