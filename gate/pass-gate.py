@@ -23,6 +23,13 @@ Usage (run from the project root, or pass --root):
   pass-gate.py status [--json]
   pass-gate.py check-clean [--root DIR]
   pass-gate.py events [--last N]
+  pass-gate.py terminate --id <id> --stage static|runtime|system
+      (merged from v3-yunyi: three-layer termination, no skipping)
+  pass-gate.py handoff [--out PATH]
+      (merged from v3-yunyi: handoff draft from git + events + breakpoint)
+  pass-gate.py run --worktree <name> [--branch <branch>] -- <command...>
+      (merged from v3-yunyi: run a host command in an isolated git
+      worktree, then check-clean there; never auto-merges)
 
 Exit codes: 0 = the requested check passed / the command succeeded;
 1 = verification failed, state unchanged, or a rule was violated
@@ -468,6 +475,9 @@ def cmd_reopen(args):
     item["status"] = "in_progress"
     item["evidence"] = None
     _save(args.root, data)
+    # A rolled-back item must not reuse stale termination stages:
+    # clear its record so terminate starts from static again.
+    _clear_termination(args.root, args.id)
     _append_event(args.root, "reopened", args.id,
                   f"reason: {args.reason}")
     print(f"reopened: {args.id} (evidence cleared; verify again to pass)")
@@ -543,6 +553,302 @@ def cmd_events(args):
               f"{ev['event']} {ev.get('item_id') or '-'} :: "
               f"{ev.get('detail', '')}")
     return 0
+
+
+# --- three-layer termination, handoff, worktree run (merged from v3-yunyi) ---
+# These three commands are ports of gate/harness.py (yunyi) onto the
+# skeleton's own state shape: items (not features), verification objects
+# {command, timeout_seconds}, evidence with output_sha256, events with a
+# monotonic seq, and atomic writes everywhere. Differences vs. the
+# original are called out where they matter; see gate/README.md.
+
+TERMINATION_STAGES = ("static", "runtime", "system")
+
+
+def _termination_path(root):
+    return os.path.join(root, "gate", "termination.json")
+
+
+def _load_termination(root):
+    """Return (state, error). A corrupt termination.json is fatal, never
+    silently discarded (yunyi's version returned {} on corrupt JSON)."""
+    path = _termination_path(root)
+    if not os.path.exists(path):
+        return {}, None
+    try:
+        with open(path, encoding="utf-8") as f:
+            state = json.load(f)
+    except json.JSONDecodeError as e:
+        return {}, f"termination state is not valid JSON: {path}: {e}"
+    if not isinstance(state, dict):
+        return {}, f"termination state must be a JSON object: {path}"
+    return state, None
+
+
+def _save_termination(root, state):
+    """Atomic write (tmp + replace), unlike yunyi's direct write_text."""
+    path = _termination_path(root)
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(state, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+    os.replace(tmp, path)
+
+
+def _clear_termination(root, item_id):
+    """Drop one item's termination record (reopen path). Best effort:
+    a corrupt file is left alone and warned about — the next terminate
+    will fail loudly on it instead of silently losing state."""
+    state, err = _load_termination(root)
+    if err:
+        print(f"warning: {err} (leaving it for a human to inspect)",
+              file=sys.stderr)
+        return
+    if item_id in state:
+        del state[item_id]
+        _save_termination(root, state)
+
+
+def cmd_terminate(args):
+    """Three-layer termination: static -> runtime -> system, no skipping.
+
+    - static: the feature list validates and gate/init.template.sh (if
+      present) parses. No verification runs yet.
+    - runtime: the item's verification command runs and exits 0;
+      evidence is written in the skeleton's format, but the status does
+      NOT become passing yet.
+    - system: check-clean passes; only then does the item become
+      passing, with the runtime evidence attached.
+    Stages are recorded in gate/termination.json ({id: {stage: true}});
+    a stage is idempotent and re-runnable. Terminate only works from
+    in_progress (same rule as verify). Reopening an item clears its
+    termination record, so a rolled-back item cannot skip layers by
+    reusing stale stage marks (a gap in the yunyi original, where
+    rollback left termination.json untouched).
+    """
+    data, err = _load(args.root)
+    if err:
+        print(err)
+        return 1
+    item = _find(data, args.id)
+    if item is None:
+        print(f"no such item: {args.id}")
+        return 1
+    if item["status"] != "in_progress":
+        print(f"cannot terminate {args.id}: status is {item['status']} "
+              "(terminate only from in_progress — run `start` first)")
+        return 1
+    state, err = _load_termination(args.root)
+    if err:
+        print(err)
+        return 1
+    done = state.get(args.id, {})
+    stage = args.stage
+    prerequisites = {"static": [], "runtime": ["static"],
+                     "system": ["static", "runtime"]}
+    missing = [p for p in prerequisites[stage] if not done.get(p)]
+    if missing:
+        _append_event(args.root, "termination_skip_refused", args.id,
+                      f"requested {stage} without {missing}")
+        print(f"REFUSED: cannot run {stage} before {missing} for "
+              f"{args.id} (three-layer order is static -> runtime -> "
+              "system)", file=sys.stderr)
+        return 2
+    if stage == "static":
+        errors = validate(data)
+        init_sh = os.path.join(args.root, "gate", "init.template.sh")
+        if os.path.exists(init_sh):
+            proc = subprocess.run(["bash", "-n", init_sh],
+                                  capture_output=True, text=True)
+            if proc.returncode != 0:
+                errors.append(f"init.template.sh syntax failed: "
+                              f"{proc.stderr[:200]}")
+        if errors:
+            _append_event(args.root, "termination_failed", args.id,
+                          f"static failed: {errors[:3]}")
+            print(f"FAIL static: {errors}", file=sys.stderr)
+            return 1
+        done["static"] = True
+    elif stage == "runtime":
+        cmd = item["verification"]["command"]
+        timeout = args.timeout or item["verification"].get(
+            "timeout_seconds", 300)
+        exit_code, tail = _run(cmd, args.root, timeout)
+        if exit_code != 0:
+            _append_event(args.root, "verification_failed", args.id,
+                          f"termination runtime failed (exit {exit_code})")
+            print(f"FAIL runtime: {args.id} verification exit {exit_code}",
+                  file=sys.stderr)
+            return 1
+        item["evidence"] = {
+            "command": cmd,
+            "exit_code": 0,
+            "ran_at": _utcnow(),
+            "output_tail": tail,
+            "output_sha256": hashlib.sha256(
+                tail.encode("utf-8")).hexdigest(),
+        }
+        _save(args.root, data)
+        done["runtime"] = True
+    else:  # system
+        clean = cmd_check_clean(argparse.Namespace(root=args.root))
+        if clean != 0:
+            _append_event(args.root, "termination_failed", args.id,
+                          "system failed: check-clean did not pass")
+            print(f"FAIL system: check-clean did not pass for {args.id}",
+                  file=sys.stderr)
+            return 1
+        item["status"] = "passing"
+        _save(args.root, data)
+        done["system"] = True
+        _append_event(args.root, "status_transition", args.id,
+                      "passing via three-layer termination "
+                      "(static+runtime+system)")
+    state[args.id] = done
+    _save_termination(args.root, state)
+    print(f"TERMINATE {stage}: {args.id} OK (stages done: "
+          f"{[s for s in TERMINATION_STAGES if done.get(s)]})")
+    return 0
+
+
+def cmd_handoff(args):
+    """Generate a handoff draft from git log, the event log and the
+    session breakpoint. Always exits 0: a handoff is a draft for a human
+    to review, never a verdict.
+
+    Unlike the yunyi original, this also reads SESSION_STATE.md (the
+    breakpoint file the original's docstring promised but its code never
+    read) and writes --out atomically.
+    """
+    data, err = _load(args.root)
+    if err:
+        print(err)
+        return 1
+    items = data.get("items", [])
+    in_progress = [i for i in items if i["status"] == "in_progress"]
+    blocked = [i for i in items if i["status"] == "blocked"]
+    passing = [i for i in items if i["status"] == "passing"]
+    next_item = in_progress[0] if in_progress else next(
+        (i for i in items if i["status"] == "not_started"), None)
+    try:
+        proc = subprocess.run(["git", "log", "--oneline", "-10"],
+                              cwd=args.root, capture_output=True, text=True,
+                              timeout=60)
+        git_log = proc.stdout.strip() if proc.returncode == 0 else ""
+    except Exception:  # noqa: BLE001 - git absent is not a failure
+        git_log = ""
+    events = _read_events(args.root)[-10:]
+    events_text = "\n".join(
+        f"#{ev['seq']} {ev['ts']} {ev['actor']} {ev['event']} "
+        f"{ev.get('item_id') or '-'} :: {ev.get('detail', '')}"
+        for ev in events)
+    state_path = _session_state_path(args.root)
+    if state_path is None:
+        breakpoint_text = "(no SESSION_STATE.md found)"
+    else:
+        with open(state_path, encoding="utf-8") as f:
+            lines = [l.rstrip() for l in f if l.strip()][:20]
+        breakpoint_text = "\n".join(lines) or "(SESSION_STATE.md is empty)"
+    lines = [
+        "# Handoff draft (generated by pass-gate handoff — review before use)",
+        "",
+        f"- Verified: {len(passing)} passing; in progress: "
+        f"{len(in_progress)}; blocked: {len(blocked)}",
+        f"- In progress: {', '.join(i['id'] for i in in_progress) or 'none'}",
+        f"- Blocked: {', '.join(i['id'] for i in blocked) or 'none'}",
+        f"- Next: {next_item['id'] + ' — ' + next_item['title'] if next_item else 'none'}",
+        "- Do not touch (until verified): gate/feature_list.json status / "
+        "evidence fields — only pass-gate may write them.",
+        "",
+        "## Session breakpoint",
+        breakpoint_text,
+        "",
+        "## Recent commits",
+        git_log or "(not a git repository or no commits)",
+        "",
+        "## Recent gate events",
+        events_text or "(no events yet)",
+    ]
+    text = "\n".join(lines) + "\n"
+    if args.out:
+        tmp = args.out + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            f.write(text)
+        os.replace(tmp, args.out)
+        print(f"handoff written to {args.out}")
+    else:
+        print(text)
+    return 0
+
+
+def cmd_run(args):
+    """Run a host command in an isolated git worktree, then check-clean
+    there. Never auto-merges (Phase 1 safety rule).
+
+    Differences vs. the yunyi original: an optional --branch creates a
+    real branch for the worktree (the original used a detached HEAD and
+    printed a merge hint for a branch that did not exist); without
+    --branch the worktree is detached and the message says so plainly.
+    The check-clean target is gate/feature_list.json (the skeleton's
+    layout, not the original's root-level feature_list.json); a
+    worktree without a gate is reported, not merged blindly.
+    """
+    root = args.root
+    host_command = list(args.host_command or [])
+    if host_command and host_command[0] == "--":
+        host_command = host_command[1:]
+    if not host_command:
+        print("REFUSED: pass-gate run requires a host command after --",
+              file=sys.stderr)
+        return 2
+    worktree_dir = os.path.join(root, ".worktrees", args.worktree)
+    if os.path.exists(worktree_dir):
+        print(f"REFUSED: worktree already exists: {worktree_dir} "
+              "(remove it or pick another name)", file=sys.stderr)
+        return 2
+    cmd = ["git", "worktree", "add", worktree_dir]
+    if args.branch:
+        cmd += ["-b", args.branch]
+    proc = subprocess.run(cmd, cwd=root, capture_output=True, text=True)
+    if proc.returncode != 0:
+        print(f"worktree creation failed: {proc.stdout} {proc.stderr}",
+              file=sys.stderr)
+        return 1
+    print(f"worktree created: {worktree_dir}")
+    try:
+        run = subprocess.run(host_command, cwd=worktree_dir)
+        if run.returncode != 0:
+            print(f"host command failed (exit {run.returncode}); "
+                  "worktree left in place for inspection; NOT merged.",
+                  file=sys.stderr)
+            return run.returncode
+        # Check-clean inside the worktree (only if it is a gate project).
+        if os.path.exists(os.path.join(
+                worktree_dir, "gate", "feature_list.json")):
+            clean = subprocess.run(
+                [sys.executable, os.path.abspath(__file__),
+                 "--root", worktree_dir, "check-clean"])
+            if clean.returncode != 0:
+                print("check-clean failed in worktree; NOT merged. Fix, "
+                      "re-verify, then merge manually.", file=sys.stderr)
+                return 1
+        else:
+            print("(worktree has no gate/feature_list.json; "
+                  "skipping check-clean)")
+        print(f"OK in worktree {worktree_dir}. pass-gate does NOT "
+              "auto-merge.")
+        if args.branch:
+            print(f"To merge manually after review: git merge --no-ff "
+                  f"{args.branch}")
+        else:
+            print("No branch was created (detached HEAD). To merge: "
+                  "create a branch in the worktree first "
+                  f"(git -C {worktree_dir} switch -c <branch>), then "
+                  "merge it.")
+        return 0
+    except Exception as exc:  # noqa: BLE001
+        print(f"pass-gate run failed: {exc}", file=sys.stderr)
+        return 1
 
 
 def _load_clean_config(root):
@@ -732,6 +1038,32 @@ def main(argv=None):
     p = sub.add_parser("events", help="show the append-only event log")
     p.add_argument("--last", type=int, default=20)
     p.set_defaults(func=cmd_events)
+
+    p = sub.add_parser("terminate",
+                       help="three-layer termination: static -> runtime "
+                            "-> system, no skipping")
+    p.add_argument("--id", required=True)
+    p.add_argument("--stage", required=True, choices=TERMINATION_STAGES)
+    p.add_argument("--timeout", type=int, default=None,
+                   help="verification timeout in seconds for the runtime "
+                        "stage (default: the item's timeout_seconds)")
+    p.set_defaults(func=cmd_terminate)
+
+    p = sub.add_parser("handoff", help="generate a handoff draft")
+    p.add_argument("--out", default=None,
+                   help="write handoff to file instead of stdout")
+    p.set_defaults(func=cmd_handoff)
+
+    p = sub.add_parser("run", help="run a host command in an isolated "
+                       "git worktree (never auto-merges)")
+    p.add_argument("--worktree", required=True,
+                   help="worktree name under .worktrees/")
+    p.add_argument("--branch", default=None,
+                   help="create this branch for the worktree "
+                        "(default: detached HEAD, no branch)")
+    p.add_argument("host_command", nargs=argparse.REMAINDER,
+                   help="host command after --")
+    p.set_defaults(func=cmd_run)
 
     args = parser.parse_args(argv)
     try:
