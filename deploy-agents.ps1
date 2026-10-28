@@ -35,7 +35,9 @@ param (
 
     [switch]$Interactive,
 
-    [switch]$Pipeline
+    [switch]$Pipeline,
+
+    [switch]$IncludeHeavySkills
 )
 
 $ToolClaude = $true
@@ -572,6 +574,7 @@ if (-not $ProjectPath -and -not $Global) {
     Write-Host "  -ProjectPath   目标项目根目录路径。"
     Write-Host "  -Global (-g)   初始化 Claude、Antigravity 2.0/CLI/IDE、Codex 用户全局规则。"
     Write-Host "  -Update (-u)   更新模板仓库；与 -Global 一起使用时，先备份再覆盖全局规则。"
+    Write-Host "  -IncludeHeavySkills   部署可选重型技能 docx 与 brainstorming（默认跳过；docx 约 1.3 MB，brainstorming 含本地服务 server.cjs）。只影响本次新复制，不删除目标项目已有文件。"
     exit 0
 }
 if ($DirectoryPath -and -not ($Initialize -or $Check)) { throw "-DirectoryPath requires -Initialize or -Check." }
@@ -1152,6 +1155,11 @@ if (-not (Test-Path $TargetClaudeSkillsDir)) {
 if (Test-Path $SourceSkillsDir) {
     Get-ChildItem -Path $SourceSkillsDir -Directory | ForEach-Object {
         $skillName = $_.Name
+        # include-heavy-skills: docx + brainstorming are opt-in (heavy / local service)
+        if (($skillName -eq "docx" -or $skillName -eq "brainstorming") -and -not $IncludeHeavySkills) {
+            Write-Host "  [INFO] Skipping optional heavy skill .agents/skills/$skillName (use -IncludeHeavySkills to deploy)." -ForegroundColor Gray
+            return
+        }
         $targetSkillPath = Join-Path $TargetSkillsDir $skillName
         
         # Copy / Update skill files
