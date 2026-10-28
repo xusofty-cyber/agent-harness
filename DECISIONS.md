@@ -548,3 +548,232 @@ Phase 0 decision meeting.
   partial + 1 not met on the L14 criteria); shipping it in deploy does
   not claim otherwise. Approval stays human, always.
 - **Date:** 2026-10-28.
+
+---
+
+# Merge decisions (2026-10-28, branch `feat/merge-v3`)
+
+Three branches were merged per
+`agent-harness-三分支对比与合并优化方案-2026-10-28.md`: the skeleton
+`feat/phase0-v3` (this file's D1–D25) plus `v3-yunyi` and `v3-yunkai`.
+The user was asleep during the merge and could not rule on the ten
+open items (C1–C10); each ruling below is marked **合并执行时暂定，
+用户复核时可改** (provisional at merge time, user may change on
+review).
+
+## Numbering note (deviation from the plan's §6.5 suggestion)
+
+The plan suggested donor-branch decisions continue from D26. They do
+not: D26–D35 are reserved for the ten C1–C10 rulings below, and donor
+decisions continue from **D36**. The numbering is explicit here so no
+one has to guess which D-number came from where.
+
+## Correction: D27 belongs to yunyi, not yunkai
+
+The merge plan's §6.3 attributed "D27 Guard conjunction + 13 tests"
+to `v3-yunkai`. That attribution is wrong, verified against the
+branches: D27 (Guard `$(which git)` indirection) lives at
+`origin/v3-yunyi:DECISIONS.md:53` and its 13 tests at
+`origin/v3-yunyi:tests/hooks.test.mjs:185-235`. Yunkai's actual Guard
+work is recursive substitution parsing plus 5 hardening tests (see
+D36–D56 table). The merge took D27 from yunyi (correct source); the
+plan's attribution is corrected here, not silently repeated.
+
+## D26 — C1: `archive_confirmation` defaults to `required` (merge ruling, provisional)
+
+- **Decision:** the template default stays `required` (skeleton D4,
+  v3 D4). Yunkai's D-004 (keep `automatic`) is recorded under
+  "Pending ruling" below, not adopted.
+- **Reason:** the v3 consensus (D4) already settled this; the merge
+  does not re-open a settled v3 decision on a donor branch's say-so.
+  Changing the default to `automatic` would silently weaken every new
+  deployment's archive safety.
+- **Provisional:** 合并执行时暂定，用户复核时可改。
+
+## D27 — C2: FR/DE templates stay frozen, not deleted (merge ruling, provisional)
+
+- **Decision:** FR/DE templates are frozen for new content (skeleton
+  D3/D19), not deleted. Yunkai's D-006 (delete 18 FR/DE files) is
+  recorded under "Pending ruling" below, not adopted.
+- **Reason:** v3 froze non-EN/ZH templates pending a usage decision;
+  deletion is irreversible for downstream users who may still read
+  those templates, and no usage evidence was presented for the merge.
+  Freezing is the reversible option.
+- **Provisional:** 合并执行时暂定，用户复核时可改。
+
+## D28 — C3: rubric stays provisional, no auto-approve (merge ruling, provisional)
+
+- **Decision:** the rubric (yunyi's `eval/evaluate.py` + gate) is
+  merged with `eval/rubric-status.json` provisional and
+  `auto_approve_allowed: false`; `--gate` always refuses (exit 2)
+  until a real second-reviewer calibration round marks it stable.
+  Yunyi's all-2 (12/12) Accept rule is NOT adopted — the verdict rule
+  follows the skeleton's `eval/rubric.md` (Accept = total ≥ 9 and no
+  0; Block = any 0). Yunkai's D-011 (rubric advisory-only, never
+  calibrate) is recorded under "Pending ruling" below.
+- **Reason:** yunyi's own D16 refused a stable claim until a
+  confirmation round ran with fixed wording; the skeleton's D15
+  likewise keeps the rubric un-stable for lack of a live second-judge
+  round. Auto-approval on an un-stable rubric would let a gate pass
+  work no human reviewed.
+- **Provisional:** 合并执行时暂定，用户复核时可改。
+
+## D29 — C4: the skeleton's schema is the standard (merge ruling, provisional)
+
+- **Decision:** `gate/feature_list.schema.json` keeps the skeleton's
+  shape (top-level `items`, verification as an object
+  `{command, timeout_seconds}`, `additionalProperties: false`). The
+  yunkai shape (`features`, verification as a command array) is NOT
+  adopted; yunkai's bench/comet_adapter/hooks were rewritten to the
+  skeleton shape on port. A cross-branch migration/conversion script
+  is a post-merge todo, not done in this merge.
+- **Reason:** the skeleton's schema is the one `pass-gate.py`
+  `validate()` and repo_checks §3k enforce, and it is the stricter of
+  the two (closed object, required evidence rules). Adopting the
+  looser yunkai schema would have weakened the gate for every existing
+  deployment.
+- **Provisional:** 合并执行时暂定，用户复核时可改。
+
+## D30 — C5: standard profile is 18 skills (merge ruling, provisional)
+
+- **Decision:** the standard profile stays 18 skills (skeleton D18,
+  `skills-profiles.json`). Yunyi's D29 (standard = 22) is NOT
+  adopted.
+- **Reason:** the skeleton's profile membership is the single source
+  of truth already guarded by CI; yunyi's 22 counts a different
+  membership (openspec added wholesale) that was never bench-attributed
+  to any outcome. Changing the count would move the default
+  distribution without evidence.
+- **Provisional:** 合并执行时暂定，用户复核时可改。
+
+## D31 — C6: default profile is minimal (merge ruling, provisional)
+
+- **Decision:** the default deploy profile stays `minimal` (10
+  skills, skeleton D18). Yunkai's `--tier` default (`full`) is NOT
+  adopted.
+- **Reason:** v3 Phase 4 settled minimal as the default on the
+  subtraction principle (ship the smallest proven set); yunkai's
+  full-by-default would ship 40 skills — including the unproven bulk
+  the quality scorecard scores 5/10 — to every new project.
+- **Provisional:** 合并执行时暂定，用户复核时可改。
+
+## D32 — C7: gate state files live inside `gate/` (merge ruling, provisional)
+
+- **Decision:** `feature_list.json` / `events.jsonl` live in `gate/`
+  (skeleton layout). Yunkai's root-level state files are NOT adopted;
+  every ported yunkai path (bench gate arm, comet_adapter, t8 setup)
+  was rewritten to `gate/`.
+- **Reason:** the skeleton's layout keeps per-project state next to
+  the engine that owns it, and the deploy scripts ship `gate/` as one
+  unit. Root-level state files would collide with the repo's own
+  root-level files in deployed projects and split state from engine.
+- **Provisional:** 合并执行时暂定，用户复核时可改。
+
+## D33 — C8: DECISIONS.md lives at the root, skeleton numbering is the base (merge ruling, provisional)
+
+- **Decision:** this file stays at the repo root with the skeleton's
+  numbering (D1–D25) as the base. Yunkai's `docs/internal/
+  DECISIONS.md` (D-001–D-011) is folded in from D36 below, not kept
+  as a second file.
+- **Reason:** one decision log, one numbering, one place to look.
+  Two files with overlapping numbers (D1 vs D-001) would make every
+  future "per D7" reference ambiguous.
+- **Provisional:** 合并执行时暂定，用户复核时可改。
+
+## D34 — C9: Loop/Graph enter v0.3.0; release notes state the L14 gap honestly (merge ruling, provisional)
+
+- **Decision:** Loop (skeleton Phase 5) and Graph (yunyi) ship in
+  v0.3.0. The release notes must state honestly that the L14 criteria
+  are not fully met (2 met + 2 partial + 1 not met, D21) — no claim
+  that Loop/Graph are proven efficiency wins. Yunkai's D-008 (defer
+  Loop/Graph) is recorded below, not adopted.
+- **Reason:** the user explicitly chose to continue Loop (2026-10-28
+  19:48) and the Graph executor is built and tested; withholding both
+  from the release would discard finished work. But the entry gates
+  were never fully met, so the release must not over-claim.
+- **Provisional:** 合并执行时暂定，用户复核时可改。
+
+## D35 — C10: version is v0.3.0, but VERSION stays 0.2.1 in this branch (merge ruling, provisional)
+
+- **Decision:** the release version is v0.3.0, but `VERSION` stays
+  `0.2.1` in the merge branch — no bump, no tag here. The bump + tag
+  happen in the release flow after merging to main (which needs
+  separate user approval; main is frozen).
+- **Reason:** the merge branch is not a release; tagging from it
+  would publish a version whose contents were never approved for
+  main. `tools/check-release.py` enforces VERSION/CHANGELOG/lock
+  consistency, and a premature bump would break that gate.
+- **Provisional:** 合并执行时暂定，用户复核时可改。
+
+## Donor decisions (from D36)
+
+Each donor decision is recorded once, with its source number and
+what the merge did with it. "Adopted" means the substance landed in
+this branch; "record" means it is preserved here for the history but
+changed nothing in the merge; "not adopted" means the merge
+deliberately did not take it (reason given).
+
+| # | Source | Decision (one line) | Merge status |
+|---|---|---|---|
+| D36 | yunyi D27 | Guard `$(which git)` indirection: deny iff one segment has both a git-resolver substitution and an already-hard-blocked pattern; 13 tests | Adopted (merged, with the resolver-must-be-argv[0] refinement) |
+| D37 | yunyi D32 | Brainstorming server loopback probe: HTTP+WS gap closed by live probe; server stays opt-in | Adopted (safety doc + 5 server tests) |
+| D38 | yunyi D18 | brainstorming/server.cjs kept as opt-in skill asset, tests + safety note; not deleted, not promoted | Adopted (D37 is its evidence) |
+| D39 | yunyi D8/D19 | Guard parse failure graded: log to guard-alerts.jsonl + stderr alert, allow (exit 0); raw stdin never logged | Adopted |
+| D40 | yunyi D12 | Harness run never auto-merges; reports check-clean, leaves the worktree for manual merge | Adopted (`pass-gate run --branch`, no merge) |
+| D41 | yunyi D26 | Phase 5 Graph entry met: parallel need concrete (T1–T4 ran 3 parallel subagents); merge rule ALL, fallback by layer, approval node | Adopted (gate/graph.py) |
+| D42 | yunyi D2 | Second pilot SET: muse-ai-Desktop (draft releases, pilot branch cannot reach users); webhookBox NOT chosen (live relay) | Record (pilot not run in this merge) |
+| D43 | yunkai D-009 | Slim Project template for minimal/standard tiers (ablation #2: outcome-neutral, −31% apparatus context) | Adopted |
+| D44 | yunkai D-005 | Second pilot executed on webhookBox: gate ran on a real project, 2 features passed with evidence; kit not adopted there by owner decision | Record (experience only, no code; pilot branch discarded) |
+| D45 | yunkai D-010 | v3-yunkai is not merged to main; main stays as the owner directs | Record (honoured: this merge touches no main) |
+| D46 | yunyi D11 | Gate logic in `gate/harness.py`, `gate/pass-gate.py` a thin shim | Not adopted — skeleton has no harness.py; pass-gate.py is the implementation |
+| D47 | yunyi D15 | check-clean FAILs when SESSION_STATE still has template placeholders | Not adopted in this merge (candidate follow-up) |
+| D48 | yunyi D24 | repo_checks no longer fails fresh clones for gitignored local-only files | Not adopted in this merge (candidate follow-up) |
+| D49 | yunkai D-008 | Loop/Graph engineering deferred, with triggers (manual re-mention ≥5×, workflow inexpressible in feature list, host missing a primitive) | Not adopted — merge ships Loop + Graph per C9/D34; triggers kept as the revisit signal |
+| D50 | yunyi D14 | SESSION_STATE history archived to `docs/internal/SESSION_STATE.archive-2026-10-28.md` | Record (yunyi-internal housekeeping) |
+| D51 | yunyi D25 | Phase 4 proceeds despite unmet gates 4–5, by explicit user instruction, deviation recorded | Record (yunyi-internal process) |
+| D52 | yunyi D33 | Phase 6 leftovers closeout (SESSION_STATE de/fr/zh-tw rewritten, core review keeps minimal 10) | Record (yunyi-internal) |
+| D53 | yunyi D20 | Support-matrix tiers: 真强制 / 仅配置 / 仅文件; tier upgrades need a repo test | Record (framing only) |
+| D54 | yunyi D30 | Multilingual + lint: EN↔ZH pairs hard, others warn-only; harness lint-rules in CI | Partially adopted — EN/ZH hard covered by D19; harness lint-rules not ported |
+| D55 | yunyi D13 | Comet template archive `required`; repo's own `.comet/config.yaml` stays `automatic` | Covered by D4 in substance; record |
+| D56 | yunyi D6 | `docx` and `brainstorming/server.cjs` default OPTIONAL, not deleted; confirm usage first | Covered in substance by the skeleton's heavy-skill gating; record |
+
+Covered by skeleton decisions and not listed above: yunyi D1 (≈D1),
+D3 (≈D3), D4 (≈D4), D5/D17/D22 (hard stop OFF — see pending ruling),
+D7 (skill counts, disk is truth), D9 (≈D8), D10 (branch isolation);
+yunkai D-001 (≈D1), D-002 (≈D3/D19), D-003 (repo files are the source
+of truth), D-007 (≈D12 + D15).
+
+## Pending ruling (conflicts the merge did not settle)
+
+These donor decisions conflict with the skeleton or with the merge
+rulings above. They are recorded here, not silently absorbed, and
+need a user ruling. Until then, the merge ruling (or skeleton
+decision) stands.
+
+- **yunkai D-004 — `archive_confirmation` stays `automatic`.**
+  Conflicts with D4/D26 (`required`). Merge kept `required`.
+- **yunkai D-006 — delete the FR/DE rule templates (18 files).**
+  Conflicts with D3/D19/D27 (frozen, not deleted). Merge kept them
+  frozen.
+- **yunkai D-011 — human rubric calibration not run; rubric stays
+  advisory-only.** Conflicts in direction with D28/C3: the merge
+  ships a gated evaluator (provisional, `--gate` refuses) rather than
+  an advisory-only rubric, but agrees calibration has not run. The
+  open question is whether to ever run the calibration or keep the
+  rubric advisory forever.
+- **yunyi D23 — cost hard stop ENABLED (user chose the ceilings).**
+  Conflicts with skeleton D12 (budgets warn, never auto-stop) and the
+  merge's do-not-take list. Merge kept the hard stop OFF (no
+  `eval/cost.py` hard-stop gate). The ceilings and the zero-stop-event
+  status are recorded in yunyi's branch if the user wants to revisit.
+- **yunyi D31 — lock pins with PIN_EXEMPT = {codegraph, comet, rtk}.**
+  Conflicts with skeleton D22 (true lock, no exemptions). Merge kept
+  the true lock — all three are pinned in `skills-lock.json` — and
+  did not take the exemption.
+- **yunyi D29 — skill tiers standard = 22.** Conflicts with D30/C5
+  (standard = 18). Merge kept 18.
+- **yunyi D16/D21 — rubric `stable` claimed after confirmation round
+  4.** Conflicts with skeleton D15 and D28/C3 (not stable, no live
+  second-judge round). Merge did NOT carry the stable claim over;
+  `eval/rubric-status.json` is provisional with auto-approve off.
+  A live second-person calibration round is the way to settle this.
