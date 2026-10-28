@@ -88,7 +88,13 @@ do_setup() {
         exit 1
     fi
     if [ "$arm" = "pack" ] || [ "$arm" = "gate" ]; then
-        bash "$ROOT/deploy-agents.sh" "$dest" >/tmp/bench-deploy.log 2>&1 || {
+        # Phase 4 (4-1): pack/gate arms deploy --profile full — the
+        # distribution pack as shipped before Phase 4 (38 skills). The
+        # default profile is minimal (10); using it here would make the
+        # pack arm a different comparison than Phase 3 designed. The
+        # pack arm was never measured before this change (0/12), so no
+        # measured data is redefined by pinning it now.
+        bash "$ROOT/deploy-agents.sh" "$dest" --profile full >/tmp/bench-deploy.log 2>&1 || {
             echo "setup: deploy-agents.sh failed (see /tmp/bench-deploy.log)" >&2; exit 1; }
     fi
     if [ "$arm" = "gate" ]; then
@@ -193,24 +199,37 @@ do_smoke() {
 }
 
 do_measure_load() {
+    # Phase 4 (4-1): report all three profiles. "deployed_total_bytes"
+    # counts the whole deployed directory (rules, templates, hooks);
+    # "skills_bytes" counts .agents/skills only. Do not compare the two
+    # as if they measured the same thing.
     local tmp
     tmp="$(mktemp -d)"
     trap "rm -rf '$tmp'" EXIT
-    bash "$ROOT/deploy-agents.sh" "$tmp/pack" >/tmp/bench-deploy.log 2>&1 || {
-        echo "measure-load: deploy failed (see /tmp/bench-deploy.log)" >&2; exit 1; }
-    python3 - "$tmp/pack" <<'PYEOF'
+    for profile in minimal standard full; do
+        bash "$ROOT/deploy-agents.sh" "$tmp/pack-$profile" --profile "$profile" >/tmp/bench-deploy.log 2>&1 || {
+            echo "measure-load: deploy --profile $profile failed (see /tmp/bench-deploy.log)" >&2; exit 1; }
+    done
+    python3 - "$tmp" <<'PYEOF'
 import json, sys
 from pathlib import Path
-root = Path(sys.argv[1])
-skills = sorted(p for p in (root / ".agents" / "skills").glob("*/SKILL.md")) if (root / ".agents" / "skills").is_dir() else []
-total = sum(p.stat().st_size for p in root.rglob("*") if p.is_file())
-print(json.dumps({
-    "deployed_skill_dirs": len(skills),
-    "deployed_total_bytes": total,
-    "largest_skills": sorted(
-        ((p.parent.name, p.stat().st_size) for p in skills),
-        key=lambda x: -x[1])[:5],
-}, indent=2))
+tmp = Path(sys.argv[1])
+out = {}
+for profile in ("minimal", "standard", "full"):
+    root = tmp / f"pack-{profile}"
+    sdir = root / ".agents" / "skills"
+    skills = sorted(p for p in sdir.glob("*/SKILL.md")) if sdir.is_dir() else []
+    skills_bytes = sum(p.stat().st_size for p in sdir.rglob("*") if p.is_file()) if sdir.is_dir() else 0
+    total = sum(p.stat().st_size for p in root.rglob("*") if p.is_file())
+    out[profile] = {
+        "deployed_skill_dirs": len(skills),
+        "skills_bytes": skills_bytes,
+        "deployed_total_bytes": total,
+        "largest_skills": sorted(
+            ((p.parent.name, p.stat().st_size) for p in skills),
+            key=lambda x: -x[1])[:5],
+    }
+print(json.dumps(out, indent=2))
 PYEOF
 }
 

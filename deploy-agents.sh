@@ -39,6 +39,7 @@ usage() {
     echo "  --check, -k       检查项目级规则中的初始化占位项；可搭配 --directory 检查模块规则。"
     echo "  --comet-init       若系统中已安装 comet CLI，自动在目标项目中运行 comet init。"
     echo "  --include-heavy-skills 部署可选重型技能 docx 与 brainstorming（默认跳过；docx 约 1.3 MB，brainstorming 含本地服务 server.cjs）。只影响本次新复制，不删除目标项目已有文件。"
+    echo "  --profile <minimal|standard|full> 部署技能分层（默认 minimal：10 个核心技能；standard：18 个；full：全部 40 个。成员见 skills-profiles.json）。"
     echo "  --ai-memory-init, -m 初始化项目 .ai-memory.toml 并接入跨工具记忆 (ai-memory)。
   --pipeline         启动统一流水线 (Pipeline: 规则部署 + AI记忆 + 技能同步 + 文档质检)。"
     echo ""
@@ -61,6 +62,9 @@ DO_AI_MEMORY_INIT=false
 DO_INITIALIZE=false
 DO_CHECK=false
 INCLUDE_HEAVY_SKILLS=false
+# Phase 4 (4-1): deployment profile. Default minimal (10 core skills);
+# membership lives in skills-profiles.json, never in this script.
+PROFILE="minimal"
 DIRECTORY_PATH=""
 LANG_OPTION="en"
 FORCE_INTERACTIVE=false
@@ -97,6 +101,14 @@ while [ "$arg_index" -lt "$#" ]; do
             ;;
         --include-heavy-skills)
             INCLUDE_HEAVY_SKILLS=true
+            ;;
+        --profile)
+            arg_index=$((arg_index + 1))
+            if [ "$arg_index" -ge "$#" ]; then echo "[!] --profile requires minimal, standard or full" >&2; exit 2; fi
+            PROFILE="${args[$arg_index]}"
+            ;;
+        --profile=*)
+            PROFILE="${arg#--profile=}"
             ;;
         --ai-memory-init|-m)
             DO_AI_MEMORY_INIT=true
@@ -462,6 +474,24 @@ esac
 
 # Script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Phase 4 (4-1): resolve the profile's skill list now, so a bad profile
+# fails before anything is copied. skills-profiles.json is the single
+# source of truth; tools/profile-skills.py reads it. "full" needs no
+# filtering (every directory on disk), so it works without python3.
+case "$PROFILE" in
+    minimal|standard|full) ;;
+    *) echo "[!] --profile must be minimal, standard or full (got: $PROFILE)" >&2; exit 2 ;;
+esac
+PROFILE_SKILLS=""
+if [ "$PROFILE" != "full" ]; then
+    if ! command -v python3 >/dev/null 2>&1; then
+        echo "[!] --profile $PROFILE requires python3 to read skills-profiles.json" >&2
+        echo "    Install python3, or deploy with --profile full." >&2
+        exit 2
+    fi
+    PROFILE_SKILLS=$(python3 "${SCRIPT_DIR}/tools/profile-skills.py" "$PROFILE") || exit 2
+fi
 
 resolve_template() {
     local base_name="$1"
@@ -1316,7 +1346,7 @@ fi
 # ==============================================================================
 # 4. Deploy Skills (.agents/skills/ & .claude/skills/)
 # ==============================================================================
-echo -e "\n${YELLOW}>>> [3/3] 正在部署技能库与工具链集成...${NC}"
+echo -e "\n${YELLOW}>>> [3/3] 正在部署技能库与工具链集成 (profile: ${PROFILE})...${NC}"
 
 TARGET_SKILLS_DIR="${TARGET_PROJECT_DIR}/.agents/skills"
 TARGET_CLAUDE_SKILLS_DIR="${TARGET_PROJECT_DIR}/.claude/skills"
@@ -1328,6 +1358,15 @@ if [ -d "${SOURCE_SKILLS_DIR}" ]; then
     for skill_path in "${SOURCE_SKILLS_DIR}"/*; do
         if [ -d "$skill_path" ]; then
             skill_name=$(basename "$skill_path")
+            # Phase 4 (4-1): profile filter. "full" deploys everything;
+            # minimal/standard only deploy their listed skills.
+            # profile
+            if [ "$PROFILE" != "full" ]; then
+                case " $PROFILE_SKILLS " in
+                    *" $skill_name "*) ;;
+                    *) echo "  [i] 跳过非 ${PROFILE} 技能 .agents/skills/${skill_name}（用 --profile full 部署全部技能）。"; continue ;;
+                esac
+            fi
             # include-heavy-skills: docx + brainstorming are opt-in (heavy / local service)
             case "$skill_name" in
                 docx|brainstorming)
