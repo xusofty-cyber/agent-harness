@@ -528,6 +528,36 @@ except Exception as _cc_exc:  # noqa: BLE001
 check("comet-pin:check-tool-passes", _cc_ok,
       "tools/check-comet.py does not pass on this repo")
 
+# --- 3m2. Pinned installer scripts (Phase 2, 2-2) ---
+# codegraph/rtk installers are pinned by upstream commit + SHA256 of the
+# installer at that commit (measured 2026-10-28). The lock is the record;
+# both deploy scripts must carry the same URL + hash, and no piped
+# `curl | sh` / `irm | iex` install may remain in either script.
+_HEX40 = re.compile(r"^[0-9a-f]{40}$")
+_HEX64 = re.compile(r"^[0-9a-f]{64}$")
+for _name in ("codegraph", "rtk"):
+    _m = _comet_lock.get("skills", {}).get(_name, {})
+    check(f"installer-pin:{_name}-lock",
+          bool(_HEX40.match(_m.get("pinnedCommit", "")))
+          and bool(_HEX64.match(_m.get("installerSha256", "")))
+          and _m.get("pinnedCommit", "") in _m.get("installerUrl", "")
+          and bool(_m.get("pinnedAt")),
+          f"{_name} lock entry lacks pinnedCommit/installerSha256/installerUrl/pinnedAt")
+    check(f"installer-pin:{_name}-sh-agrees",
+          _m.get("installerUrl", "") in _deploy_sh_txt
+          and _m.get("installerSha256", "") in _deploy_sh_txt,
+          f"deploy-agents.sh installer URL/SHA disagrees with lock for {_name}")
+check("installer-pin:codegraph-ps1-agrees",
+      _comet_lock["skills"]["codegraph"].get("installerUrlPs1", "") in _deploy_ps1_txt
+      and _comet_lock["skills"]["codegraph"].get("installerSha256Ps1", "") in _deploy_ps1_txt,
+      "deploy-agents.ps1 codegraph installer URL/SHA disagrees with lock")
+check("installer-pin:no-piped-install",
+      "codegraph/main/install.sh | sh" not in _deploy_sh_txt
+      and "rtk/master/install.sh | sh" not in _deploy_sh_txt
+      and "install.ps1 | iex" not in _deploy_ps1_txt
+      and "Invoke-Expression (Invoke-RestMethod" not in _deploy_ps1_txt,
+      "piped curl|sh / irm|iex install still present in a deploy script")
+
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
 # its counterpart marker must exist in the other. Markers that exist in

@@ -411,7 +411,14 @@ function Confirm-OptionalStep([string]$Prompt) {
 }
 
 function Guide-OptionalCliTools([string]$TargetPath) {
-    $codegraphInstall = 'irm https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.ps1 | iex'
+    # Phase 2 (2-2): pinned installer — the URL pins the upstream commit and
+    # the SHA256 is the hash of install.ps1 at that commit (measured
+    # 2026-10-28). Must match skills-lock.json codegraph.installerSha256Ps1 —
+    # tests/repo_checks.py guards the agreement. Never pipe a live download
+    # into Invoke-Expression: download, verify, then run.
+    $codegraphInstallUrl = 'https://raw.githubusercontent.com/colbymchenry/codegraph/01e0ac3aa7419a7ab75583963e8a95359f3af1d3/install.ps1'
+    $codegraphInstallSha256 = '024091f428cac6eaa217bae8f840a9572a91daab974a8354085ba72f86f6aee1'
+    $codegraphInstall = "Download $codegraphInstallUrl, verify SHA256 $codegraphInstallSha256, then run the downloaded install.ps1"
     $rtkInstall = 'winget install rtk-ai.rtk'
 
     Write-Host "`n>>> Optional CLI tools (Ponytail and Caveman Skills are already copied with the project)" -ForegroundColor Cyan
@@ -422,8 +429,16 @@ function Guide-OptionalCliTools([string]$TargetPath) {
         Write-Host "  CodeGraph CLI is optional. It connects agents and builds a local project index."
         if (Confirm-OptionalStep "Install CodeGraph CLI now? Agent wiring and project indexing will be asked separately") {
             try {
-                Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.ps1')
-                Write-Host "  [INFO] Reopen PowerShell if codegraph is not yet on PATH. Then run codegraph install and codegraph init from the project directory." -ForegroundColor Yellow
+                $tmpInstaller = Join-Path $env:TEMP "codegraph-install.ps1"
+                Invoke-RestMethod $codegraphInstallUrl -OutFile $tmpInstaller
+                $actualHash = (Get-FileHash -Algorithm SHA256 $tmpInstaller).Hash.ToLower()
+                if ($actualHash -ne $codegraphInstallSha256.ToLower()) {
+                    Write-Warning "CodeGraph installer SHA256 mismatch (expected $codegraphInstallSha256, got $actualHash). Refusing to run."
+                } else {
+                    & $tmpInstaller
+                    Write-Host "  [INFO] Reopen PowerShell if codegraph is not yet on PATH. Then run codegraph install and codegraph init from the project directory." -ForegroundColor Yellow
+                }
+                Remove-Item $tmpInstaller -ErrorAction SilentlyContinue
             } catch {
                 Write-Warning "CodeGraph installation failed. Official command: $codegraphInstall"
             }
@@ -455,6 +470,10 @@ function Guide-OptionalCliTools([string]$TargetPath) {
         Write-Host "  RTK CLI is optional. The 'rtk' name is shared by unrelated tools; verify with 'rtk gain'."
         if (Confirm-OptionalStep "Install Rust Token Killer (RTK) CLI now?") {
             if (Get-Command winget -ErrorAction SilentlyContinue) {
+                # Phase 2 (2-2) note: winget resolves the latest manifest release;
+                # there is no git-commit pin on this channel. The lock's rtk
+                # pinnedCommit/installerSha256 cover the sh installer path.
+                # See DECISIONS.md D13.
                 & winget install rtk-ai.rtk
                 if ($LASTEXITCODE -ne 0) { Write-Warning "RTK installation failed. Official command: $rtkInstall" }
                 Write-Host "  [INFO] Reopen PowerShell, run rtk gain to verify, then run rtk init in the project if you want the hook." -ForegroundColor Yellow

@@ -605,10 +605,56 @@ prompt_yes_no() {
     [[ "$answer" =~ ^[Yy]$ ]]
 }
 
+# Phase 2 (2-2): install a pinned installer script only after SHA256 check.
+# Downloads $1 to a temp file, verifies it against $2, then runs it with sh.
+# Refuses (exit 1) on download failure, missing hash tool, or hash mismatch —
+# never executes an unverified network stream. $3 is the display label.
+install_pinned_script() {
+    local url="$1" expected_sha="$2" label="$3"
+    local tmp actual_sha
+    tmp="$(mktemp)" || { echo "  [!] 无法创建临时文件，跳过 ${label} 安装。"; return 1; }
+    if ! command -v curl >/dev/null 2>&1; then
+        echo "  [!] 缺少 curl，无法安装 ${label}。"
+        rm -f "$tmp"
+        return 1
+    fi
+    if ! curl -fsSL "$url" -o "$tmp"; then
+        echo "  [!] ${label} 安装器下载失败：${url}"
+        rm -f "$tmp"
+        return 1
+    fi
+    if command -v sha256sum >/dev/null 2>&1; then
+        actual_sha="$(sha256sum "$tmp" | awk '{print $1}')"
+    elif command -v shasum >/dev/null 2>&1; then
+        actual_sha="$(shasum -a 256 "$tmp" | awk '{print $1}')"
+    else
+        echo "  [!] 缺少 sha256sum/shasum，无法校验 ${label} 安装器，拒绝安装。"
+        rm -f "$tmp"
+        return 1
+    fi
+    if [ "$actual_sha" != "$expected_sha" ]; then
+        echo "  [!] ${label} 安装器 SHA256 不匹配（期望 ${expected_sha}，实际 ${actual_sha}），拒绝安装。"
+        rm -f "$tmp"
+        return 1
+    fi
+    sh "$tmp"
+    local _rc=$?
+    rm -f "$tmp"
+    return "$_rc"
+}
+
 guide_optional_cli_tools() {
     local target="$1"
-    local install_codegraph='curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.sh | sh'
-    local install_rtk='curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh'
+    # Phase 2 (2-2): pinned installers. The URL pins the upstream commit and
+    # the SHA256 is the hash of the installer at that commit, both measured
+    # 2026-10-28. They must match skills-lock.json (codegraph/rtk entries) —
+    # tests/repo_checks.py guards the agreement. Never pipe a live network
+    # stream into a shell: install_pinned_script downloads to a temp file,
+    # verifies the hash, and only then runs it.
+    local install_codegraph_url='https://raw.githubusercontent.com/colbymchenry/codegraph/01e0ac3aa7419a7ab75583963e8a95359f3af1d3/install.sh'
+    local install_codegraph_sha='e8bbcc694584d5c88fa7c25103fc0f9c238d63a86c1494ca03448b680dbcc86e'
+    local install_rtk_url='https://raw.githubusercontent.com/rtk-ai/rtk/e05c7bdfacfcfe1f845d11f47339e4eae63eb3f5/install.sh'
+    local install_rtk_sha='7ca3997314f631b8ad267e5add9af4b7a2f0351bdab0b1c5a9b7ed4008d0434a'
 
     echo -e "\n${CYAN}>>> 可选 CLI 工具（Ponytail / Caveman 已作为 Skill 随项目部署）${NC}"
 
@@ -617,16 +663,13 @@ guide_optional_cli_tools() {
     else
         echo "  CodeGraph CLI 未安装。它会连接 Agent，并在项目中生成本地索引。"
         if prompt_yes_no "现在安装 CodeGraph CLI？安装后还会单独询问是否配置 Agent 与项目索引。"; then
-            if ! command -v curl >/dev/null 2>&1; then
-                echo "  [!] 缺少 curl。请按官方说明安装：${install_codegraph}"
-                echo "  安装后：codegraph install；进入目标项目运行 codegraph init。"
-            elif sh -c "$install_codegraph"; then
-                echo -e "  ${GREEN}[√] CodeGraph CLI 安装器已执行。请重开终端，确认 codegraph 在 PATH 中。${NC}"
+            if install_pinned_script "$install_codegraph_url" "$install_codegraph_sha" "CodeGraph"; then
+                echo -e "  ${GREEN}[√] CodeGraph CLI 安装器已执行（SHA256 已校验）。请重开终端，确认 codegraph 在 PATH 中。${NC}"
             else
-                echo "  [!] CodeGraph 安装失败。官方命令：${install_codegraph}"
+                echo "  [!] CodeGraph 安装失败。可手动执行：curl -fsSL ${install_codegraph_url} -o install.sh && sha256sum install.sh（应为 ${install_codegraph_sha}），确认后 sh install.sh"
             fi
         else
-            echo "  安装命令：${install_codegraph}"
+            echo "  安装命令：curl -fsSL ${install_codegraph_url} -o install.sh && sha256sum install.sh（应为 ${install_codegraph_sha}），确认后 sh install.sh"
             echo "  安装后：codegraph install；进入目标项目运行 codegraph init。"
         fi
     fi
@@ -645,16 +688,13 @@ guide_optional_cli_tools() {
     else
         echo "  RTK CLI 未安装或检测到的 rtk 不是 Rust Token Killer。"
         if prompt_yes_no "现在安装 Rust Token Killer (RTK) CLI？"; then
-            if ! command -v curl >/dev/null 2>&1; then
-                echo "  [!] 缺少 curl。请按官方说明安装：${install_rtk}"
-                echo "  安装后：运行 rtk gain 验证，再进入目标项目运行 rtk init。"
-            elif sh -c "$install_rtk"; then
-                echo -e "  ${GREEN}[√] RTK 安装器已执行。请重开终端并运行 rtk gain 验证。${NC}"
+            if install_pinned_script "$install_rtk_url" "$install_rtk_sha" "RTK"; then
+                echo -e "  ${GREEN}[√] RTK 安装器已执行（SHA256 已校验）。请重开终端并运行 rtk gain 验证。${NC}"
             else
-                echo "  [!] RTK 安装失败。官方命令：${install_rtk}"
+                echo "  [!] RTK 安装失败。可手动执行：curl -fsSL ${install_rtk_url} -o install.sh && sha256sum install.sh（应为 ${install_rtk_sha}），确认后 sh install.sh"
             fi
         else
-            echo "  安装命令：${install_rtk}（安装后用 rtk gain 验证，避免同名工具混淆）"
+            echo "  安装命令：curl -fsSL ${install_rtk_url} -o install.sh && sha256sum install.sh（应为 ${install_rtk_sha}），确认后 sh install.sh（安装后用 rtk gain 验证，避免同名工具混淆）"
             echo "  验证后：进入目标项目运行 rtk init 配置支持的 Agent Hook。"
         fi
     fi
