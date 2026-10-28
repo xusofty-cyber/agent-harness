@@ -94,7 +94,7 @@ checker drove real revisions, not planted failures.
 The committed `templates/loop/graph.template.md` is the loop's round-4
 output plus template framing only. Diffed 2026-10-28: the only
 differences are the header (`<LOOP_NAME>` / `<goal.md path>` placeholders
-+ contract note), owner names generalized to `<maker>`/`<approver>`,
+and a contract note), owner names generalized to `<maker>`/`<approver>`,
 approval text generalized to placeholders, wall-clock budget `<N>`
 instead of 600, and added guidance prose (node-kind definitions).
 Both files pass `graph-validate`. One prose inaccuracy in the loop

@@ -551,7 +551,7 @@ Phase 0 decision meeting.
 
 ---
 
-# Merge decisions (2026-10-28, branch `feat/merge-v3`)
+## Merge decisions (2026-10-28, branch `feat/merge-v3`)
 
 Three branches were merged per
 `agent-harness-三分支对比与合并优化方案-2026-10-28.md`: the skeleton

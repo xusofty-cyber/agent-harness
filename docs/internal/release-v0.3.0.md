@@ -31,7 +31,7 @@ verified with measured numbers, not claims.
   pinned 0.5.1; codegraph/rtk installers hash-verified (curl|sh / irm|iex
   zeroed); ghost meta entries annotated `meta: true`, never deleted (D10);
   all five hook events wired; Guard expands indirect execution; cost ledger
-  + budget alerts (never auto-stop).
+  - budget alerts (never auto-stop).
 - **Phase 3 — self-built benchmark**: 4 tasks (fixed start commit),
   `eval/run-bench.sh`, six-dimension rubric (5 calibration rounds), eval
   regression CI, first `QUALITY_SCORE.md`.
