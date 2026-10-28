@@ -17,6 +17,36 @@ Claude Code 通过两种方式决定加载 skill：
 **关键：** 自动触发依赖每个 skill 的 `SKILL.md` 中的 `description` 字段。
 如果 Claude 没按预期加载某个 skill，直接点名即可。
 
+<!-- profiles:begin -->
+## 部署分层
+
+`deploy-agents.sh` / `deploy-agents.ps1` 按分层部署技能（Phase 4）。默认分层
+为 `minimal`（10 个技能）。用 `--profile minimal | standard | full` 选择分层
+（PowerShell：`-Profile`）。成员定义在 `skills-profiles.json` 中，下表必须与之
+一致（CI §3r 检查）。入选依据与每个技能的证据见
+`docs/internal/skill-tiers.md`。
+
+### minimal (default — 10 skills)
+
+`verification-before-completion`, `systematic-debugging`,
+`test-driven-development`, `living-documentation`, `writing-plans`,
+`executing-plans`, `using-git-worktrees`, `subagent-driven-development`,
+`requesting-code-review`, `codegraph`
+
+### standard (18 skills)
+
+Minimal plus: `comet`, `openspec-new-change`, `openspec-propose`,
+`openspec-apply-change`, `openspec-verify-change`, `openspec-archive-change`,
+`finishing-a-development-branch`, `dispatching-parallel-agents`
+
+### full (40 skills)
+
+`.agents/skills/` 下的全部 40 个技能目录（见下方分类速查）。
+`docx` 与 `brainstorming` 为重型技能，仅在同时传入
+`--include-heavy-skills` / `-IncludeHeavySkills` 时才复制；不传该参数时
+full 实际部署 38 个。
+<!-- profiles:end -->
+
 ## Skill 分类速查
 
 > | 领域 | Skills | 用途 |
