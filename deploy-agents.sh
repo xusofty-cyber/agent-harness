@@ -1198,10 +1198,6 @@ if [ "$TOOL_CLAUDE" = true ] && [ -f "${SOURCE_CLAUDE_SETTINGS}" ]; then
     if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_CLAUDE_SETTINGS}" ]; then
         if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_CLAUDE_SETTINGS}"; fi
         cp -f "${SOURCE_CLAUDE_SETTINGS}" "${TARGET_CLAUDE_SETTINGS}"
-        # P0 fix: codegraph.cmd is Windows-only; use codegraph on Unix
-        if [ "$(uname)" != "Windows_NT" ] && [ "$(uname -o 2>/dev/null)" != "Msys" ]; then
-            sed -i 's/codegraph\.cmd/codegraph/g' "${TARGET_CLAUDE_SETTINGS}"
-        fi
         echo -e "  ${GREEN}[√] 已部署 Claude Code 安全拦截钩子: .claude/settings.json${NC}"
     else
         echo "  [i] 目标项目已存在 .claude/settings.json，跳过。"
