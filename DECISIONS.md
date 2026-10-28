@@ -113,3 +113,59 @@ Phase 0 decision meeting.
 - **U3 — sh/ps1 dual-implementation endgame.** No timetable exists for
   ending the dual-script maintenance; v3 requires a decision + review
   date in Phase 4-3, no indefinite deferral.
+
+## D5 — Gate code lives in `gate/`, not `kernel/` (Phase 1; settles N3)
+
+- **Decision:** the Phase 1 gate code lives in `gate/`:
+  `gate/feature_list.schema.json`, `gate/pass-gate.py`,
+  `gate/events.jsonl`, `gate/init.template.sh`.
+- **Rationale:** `pass-gate.py` is a verification script, not a runtime
+  kernel; the name must match the substance (v3 §3, N3).
+- **Rejected:** `kernel/` — kept the "name is wrong, judgement follows
+  the name" mistake the v3 consensus explicitly called out.
+- **Date:** 2026-10-28.
+
+## D6 — Human override is logged and visible, never silent (Phase 1)
+
+- **Decision:** a human may mark an item passing without a passing run,
+  but only through `pass-gate.py override --reason` (recorded in
+  `evidence.override` with exit_code −1 and in `gate/events.jsonl`), or
+  stop a session with in_progress items only through the Stop hook's
+  `GATE_ALLOW_STOP=1` + non-empty `GATE_STOP_REASON` (recorded as a
+  `stop_override` event). An override without a reason is not an
+  override.
+- **Rationale:** the gate must never deadlock a session, but an
+  unlogged escape hatch is the same as no gate — a reviewer must be
+  able to tell an override from a passing run at a glance.
+- **Rejected:** silent override flags, and no override at all (the Stop
+  hook would lock a session mid-item with no way out).
+- **Date:** 2026-10-28.
+
+## D7 — Clean-state is five dimensions; progress counts twice (Phase 1)
+
+- **Decision:** `pass-gate.py check-clean` checks five dimensions:
+  build, tests, progress, temp artefacts, standard start path. The
+  progress dimension has two checks: (3a) narrative progress in
+  `SESSION_STATE.md` names the in_progress item, and (3b) the feature
+  list is truthful — every `passing` item's verification still exits 0
+  on re-run. A dimension with no command configured reports SKIP, never
+  PASS.
+- **Rationale:** narrative alone can lie and the list alone can go
+  stale; the pair catches both (v3 §4.1 clean-state ruling).
+- **Rejected:** six separate dimensions (double-counts progress) and
+  treating unconfigured dimensions as passing (fake green).
+- **Date:** 2026-10-28.
+
+## D8 — Gate state is committed to git; Comet local state is not (Phase 1; settles N1)
+
+- **Decision:** the self-owned gate's state (`gate/feature_list.json`,
+  `gate/events.jsonl`, `gate/clean-state.json`) is committed to git.
+  Comet's local runtime state stays out of git (already the case via
+  `.gitignore`).
+- **Rationale:** gate evidence must be reviewable in a PR; the event
+  log's tamper visibility depends on git history. Comet state contains
+  machine paths and per-machine noise.
+- **Caveat:** whether Comet state files actually contain machine paths
+  was never measured (U2) — the Phase 1 dogfood did not run Comet, so
+  this stays open for Phase 1 dogfooding on a Comet-using project.
+- **Date:** 2026-10-28.

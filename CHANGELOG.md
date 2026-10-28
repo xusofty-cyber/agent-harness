@@ -6,6 +6,10 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 ### Added
+- **Phase 1（共识方案 v3）：`gate/` 门禁层**：`gate/feature_list.schema.json`（功能清单状态机：not_started / in_progress / blocked / passing，WIP=1，passing 须带证据、不可逆除非带理由 reopen）；`gate/pass-gate.py`（只用 Python 标准库：init / add / start / verify / block / unblock / reopen / override / status / check-clean / events）；`gate/init.template.sh`（新项目脚手架 + 一次 smoke 验证，占位符未填则 init 失败）；`gate/events.jsonl`（只追加事件日志）；`gate/README.md`（用法、防篡改三件套与诚实列出的缺口、人工兜底通道）。
+- **Phase 1 防篡改三件套（纵深防御，不承诺防住）**：`.claude/hooks/guard-feature-list.mjs`（PreToolUse 拦截对 `feature_list.json` 的直接写，仅 Claude Code 生效）；`tests/repo_checks.py` §3k（CI 二次核对：重跑 passing 项的验收命令 + 事件日志单调性与覆盖）；`gate/events.jsonl` 留痕。Dogfood 实测两次拦截虚假通过（见 `docs/internal/phase1-dogfood.md`）。
+- **Phase 1 Stop 钩子兜底通道**：`.claude/hooks/stop-gate.mjs`（有 in_progress 项时阻止停止；`GATE_ALLOW_STOP=1` + 非空 `GATE_STOP_REASON` 可放行并记 `stop_override` 事件）；`pass-gate.py override`（人工放行须带理由，证据里可见 `override`）。
+- **Phase 1 会话模板（仅 EN + ZH，非中英冻结）**：`templates/SESSION_STATE.template.md` / `.zh.md` 改为 ≤1 页断点格式；新增 `templates/DECISIONS.template.md` / `.zh.md`；本仓 `docs/internal/SESSION_STATE.md` 已按新格式迁移（dogfood 1）。
 - **Phase 0（共识方案 v3）**：技能计数单一事实源（`tools/count-skills.py` + `tests/repo_checks.py` §3i，磁盘实测 40 个 skill）；技能引用/占位符 CI 检查（§3j）；`DECISIONS.md`（D1–D4、N1/N3/N4、N5、U1–U3 书面记录）；`THIRD-PARTY-LICENSES.md`（42 行，与 `skills-lock.json` 1:1）；`docs/internal/users-and-change-cost.md`（暂定用户画像 + 一次规则改动的实测触及面）；`docs/internal/ai-memory-routing.md`（ai-memory 路由块自根 `AGENTS.md` 移出，根文件 156 行 → 61 行）。
 - **部署脚本 opt-in 重型技能**：`--include-heavy-skills` / `-IncludeHeavySkills`（`docx` 约 1.3 MB、`brainstorming` 含本地服务 `server.cjs` 默认不再部署；`skills-lock.json` 仍保留两者）。
 - **部署目标目录不存在时自动创建**（`mkdir -p` / `New-Item -Force`；已存在但不是目录时仍报错退出）。
