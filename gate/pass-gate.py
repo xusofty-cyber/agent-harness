@@ -640,8 +640,15 @@ def cmd_terminate(args):
     - runtime: the item's verification command runs and exits 0;
       evidence is written in the skeleton's format, but the status does
       NOT become passing yet.
-    - system: check-clean passes; only then does the item become
-      passing, with the runtime evidence attached.
+    - system: check-clean passes AND the runtime evidence is present,
+      passing (exit_code 0), and for the item's CURRENT verification
+      command; only then does the item become passing. The evidence
+      check is what stops a hand-written termination.json from
+      skipping straight to passing: stage marks alone never suffice.
+    Each successful stage appends its own event (static/runtime), so
+    a forged termination record is distinguishable from a real run in
+    the event log — previously only the final status_transition was
+    logged.
     Stages are recorded in gate/termination.json ({id: {stage: true}});
     a stage is idempotent and re-runnable. Terminate only works from
     in_progress (same rule as verify). Reopening an item clears its
@@ -692,6 +699,8 @@ def cmd_terminate(args):
             print(f"FAIL static: {errors}", file=sys.stderr)
             return 1
         done["static"] = True
+        _append_event(args.root, "termination_stage", args.id,
+                      "static passed")
     elif stage == "runtime":
         cmd = item["verification"]["command"]
         timeout = args.timeout or item["verification"].get(
@@ -713,7 +722,28 @@ def cmd_terminate(args):
         }
         _save(args.root, data)
         done["runtime"] = True
+        _append_event(args.root, "termination_stage", args.id,
+                      "runtime passed (verification exit 0)")
     else:  # system
+        # P1-1: stage marks alone must never suffice. The runtime
+        # evidence must exist, must have passed, and must be for the
+        # item's CURRENT verification command — otherwise a
+        # hand-written termination.json (or evidence from before the
+        # command changed) would skip straight to passing.
+        ev = item.get("evidence")
+        current_cmd = item["verification"]["command"]
+        if not isinstance(ev, dict) or ev.get("exit_code") != 0 \
+                or ev.get("command") != current_cmd:
+            _append_event(args.root, "termination_failed", args.id,
+                          "system refused: no runtime evidence matching "
+                          "the current verification command")
+            print(f"FAIL system: {args.id} has no runtime evidence for "
+                  f"the current verification command "
+                  f"(evidence command: "
+                  f"{None if not isinstance(ev, dict) else ev.get('command')!r} "
+                  f"vs verification: {current_cmd!r}); run the runtime "
+                  f"stage first", file=sys.stderr)
+            return 1
         clean = cmd_check_clean(argparse.Namespace(root=args.root))
         if clean != 0:
             _append_event(args.root, "termination_failed", args.id,

@@ -75,6 +75,53 @@ class TerminateTest(unittest.TestCase):
             self.assertTrue(done["static"] and done["runtime"] and done["system"])
             self.assertIn("passing via three-layer termination", _events(tmpdir))
 
+    def test_forged_termination_cannot_skip_to_passing(self):
+        # P1-1: a hand-written termination.json claiming static+runtime,
+        # with no runtime evidence and a failing verification command,
+        # must NOT reach passing via the system stage.
+        with tempfile.TemporaryDirectory() as d:
+            tmpdir = _project(Path(d), verification="false")
+            (tmpdir / "gate" / "termination.json").write_text(
+                json.dumps({"demo-item": {"static": True,
+                                          "runtime": True}}))
+            proc = _gate("terminate", "--id", "demo-item",
+                         "--stage", "system", cwd=tmpdir)
+            self.assertEqual(proc.returncode, 1)
+            self.assertEqual(_item(tmpdir)["status"], "in_progress")
+            self.assertIn("termination_failed", _events(tmpdir))
+
+    def test_stale_evidence_refused_when_command_changed(self):
+        # P1-1: runtime evidence for an older verification command
+        # does not satisfy the system stage after the command changes.
+        with tempfile.TemporaryDirectory() as d:
+            tmpdir = _project(Path(d))
+            _gate("terminate", "--id", "demo-item", "--stage", "static",
+                  cwd=tmpdir)
+            _gate("terminate", "--id", "demo-item", "--stage", "runtime",
+                  cwd=tmpdir)
+            data = json.loads(
+                (tmpdir / "gate" / "feature_list.json").read_text())
+            data["items"][0]["verification"]["command"] = "true && true"
+            (tmpdir / "gate" / "feature_list.json").write_text(
+                json.dumps(data))
+            proc = _gate("terminate", "--id", "demo-item",
+                         "--stage", "system", cwd=tmpdir)
+            self.assertEqual(proc.returncode, 1)
+            self.assertEqual(_item(tmpdir)["status"], "in_progress")
+
+    def test_stage_successes_each_log_an_event(self):
+        # P1-1: a forged record must be distinguishable from a real
+        # run in the event log, so static/runtime successes log too.
+        with tempfile.TemporaryDirectory() as d:
+            tmpdir = _project(Path(d))
+            for stage in ("static", "runtime", "system"):
+                _gate("terminate", "--id", "demo-item",
+                      "--stage", stage, cwd=tmpdir)
+            events = _events(tmpdir)
+            self.assertIn("termination_stage", events)
+            self.assertIn("static passed", events)
+            self.assertIn("runtime passed", events)
+
     def test_skip_refused_and_logged(self):
         with tempfile.TemporaryDirectory() as d:
             tmpdir = _project(Path(d))
