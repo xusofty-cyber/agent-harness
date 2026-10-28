@@ -32,14 +32,14 @@ OCR_NPM_VERSION="1.13.3"
 # Print usage
 usage() {
     echo -e "${CYAN}用法 (Usage):${NC}"
-    echo "  $0 <项目根目录路径> [--global|-g] [--update|-u] [--initialize|-i] [--directory <相对目录>] [--check|-k] [--lang <en|zh|zh-tw|fr|de>]"
-    echo "  $0 --global|-g [--update|-u] [--lang <en|zh|zh-tw|fr|de>]   # 初始化全局配置；--update 先备份再覆盖已有规则"
+    echo "  $0 <项目根目录路径> [--global|-g] [--update|-u] [--initialize|-i] [--directory <相对目录>] [--check|-k] [--lang <en|zh|zh-tw>]"
+    echo "  $0 --global|-g [--update|-u] [--lang <en|zh|zh-tw>]   # 初始化全局配置；--update 先备份再覆盖已有规则"
     echo ""
     echo -e "${CYAN}参数说明 (Parameters):${NC}"
     echo "  <项目根目录路径>   目标项目所在的相对路径或绝对路径。"
     echo "  --global, -g       初始化 Claude、Antigravity 2.0/CLI/IDE、Codex 用户全局规则。"
     echo "  --update, -u       更新模板仓库；与 --global 一起使用时，先备份再覆盖全局规则。"
-    echo "  --lang, -l         指定模板语言 (en, zh, zh-tw, fr, de；默认 en)。"
+    echo "  --lang, -l         指定模板语言 (en, zh, zh-tw；默认 en)。"
     echo "  --interactive, -I  启动逐步交互式选择向导（单选语言/范围、多选 Agent 工具与选项）。"
     echo "  --initialize, -i 识别项目事实，生成 AGENTS.md 并列出待确认项。"
     echo "  --directory       与 --initialize 配合，为现有子目录生成目录级 AGENTS.md。"
@@ -53,11 +53,13 @@ usage() {
     echo -e "${CYAN}示例 (Examples):${NC}"
     echo "  $0 /path/to/my-project --lang en"
     echo "  $0 /path/to/my-project --lang zh-tw"
-    echo "  $0 /path/to/my-project --global --update --lang fr"
+    echo "  $0 /path/to/my-project --global --update --lang zh-tw"
     echo "  $0 /path/to/my-project --comet-init"
     echo "  $0 /path/to/my-project --ai-memory-init"
     echo "  $0 --global --update"
-    exit 1
+    # Exit code is the caller's choice: --help passes 0, error paths
+    # (missing target) call usage with no argument and keep the old 1.
+    exit "${1:-1}"
 }
 
 # Parse arguments
@@ -135,7 +137,7 @@ while [ "$arg_index" -lt "$#" ]; do
             ;;
         --lang|-l)
             arg_index=$((arg_index + 1))
-            if [ "$arg_index" -ge "$#" ]; then echo "[!] --lang requires a language code (e.g. en, zh, zh-tw, fr, de)" >&2; exit 2; fi
+            if [ "$arg_index" -ge "$#" ]; then echo "[!] --lang requires a language code (e.g. en, zh, zh-tw)" >&2; exit 2; fi
             LANG_OPTION="${args[$arg_index]}"
             ;;
         --directory)
@@ -144,7 +146,7 @@ while [ "$arg_index" -lt "$#" ]; do
             DIRECTORY_PATH="${args[$arg_index]}"
             ;;
         --help|-h)
-            usage
+            usage 0
             ;;
         *)
             if [ -z "$TARGET_PROJECT_ARG" ]; then

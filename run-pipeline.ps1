@@ -94,7 +94,7 @@ if ($Help) {
     Write-Host "  -Docs                  执行阶段 4: 活体文档影响分析与质检 (doc-impact)`n"
     Write-Host "配置选项 (Configuration):" -ForegroundColor Cyan
     Write-Host "  -Project, -p <路径>    目标项目根目录 (默认: 当前目录 .)"
-    Write-Host "  -Lang, -l <语言>       规则模板语言 (en, zh, zh-tw, fr, de；默认: zh)"
+    Write-Host "  -Lang, -l <语言>       规则模板语言 (en, zh, zh-tw；默认: zh)"
     Write-Host "  -Global, -g            部署/更新本机各工具全局规则 (~/.gemini, ~/.codex, ~/.claude)"
     Write-Host "  -Update, -u            覆盖更新已有全局规则并备份；同时更新外部 skills"
     Write-Host "  -CheckOnly, -k         只读检查模式 (技能仅检查差异、文档仅分析影响)"
