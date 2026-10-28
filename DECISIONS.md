@@ -557,9 +557,10 @@ Three branches were merged per
 `agent-harness-三分支对比与合并优化方案-2026-10-28.md`: the skeleton
 `feat/phase0-v3` (this file's D1–D25) plus `v3-yunyi` and `v3-yunkai`.
 The user was asleep during the merge and could not rule on the ten
-open items (C1–C10); each ruling below is marked **合并执行时暂定，
+open items (C1–C10); each ruling below was marked **合并执行时暂定，
 用户复核时可改** (provisional at merge time, user may change on
-review).
+review). D26, D27, and D28 have since been replaced by user final
+rulings on 2026-10-29 (see those entries); D29–D35 remain provisional.
 
 ## Numbering note (deviation from the plan's §6.5 suggestion)
 
@@ -606,8 +607,6 @@ plan's attribution is corrected here, not silently repeated.
   were stale, unmaintained translations; deleting them removes a standing
   regeneration debt and the false impression of five-language support.
   EN/ZH/ZH-TW remain.
-  Freezing is the reversible option.
-- **Provisional:** 合并执行时暂定，用户复核时可改。
 
 ## D28 — C3: rubric is standing advisory-only, never auto-approves (user final ruling, 2026-10-29)
 
