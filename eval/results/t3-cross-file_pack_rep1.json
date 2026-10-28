@@ -1,0 +1,19 @@
+{
+  "ablation": "",
+  "arm": "pack",
+  "duration_s": 10,
+  "ended_epoch": 1793183823,
+  "false_completion": 0,
+  "host": "htch-runtime",
+  "interventions": 0,
+  "model": "Muse Spark",
+  "notes": "first-try pass; sed rename + docstrings rewritten sensibly (no 'times to times'); cli times 2 3 prints Result: 6.0",
+  "outcome": "pass",
+  "rep": 1,
+  "rounds": 4,
+  "run_dir": "/tmp/bench/t3-cross-file/pack/rep1",
+  "start_commit": "2e583970fb952158ad83617fe436534abd38295d",
+  "started_epoch": 1793183813,
+  "task": "t3-cross-file",
+  "verify_attempts": 1
+}
