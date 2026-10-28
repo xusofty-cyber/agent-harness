@@ -304,6 +304,45 @@ _count = subprocess.run(
 _count_detail = (_count.stdout.strip().splitlines() or [""])[-1]
 check("skills:count-source-of-truth", _count.returncode == 0, _count_detail)
 
+# --- 3j. Skill references in templates/guides must resolve (Phase 0, 0-6) ---
+# Backticked skill-name-looking tokens (`lowercase-hyphenated`) in the
+# distributable agent templates and the FAQ guides must be either a real
+# skill directory under .agents/skills/ or a known non-skill identifier
+# (allowlist below). This catches dead references like `comet-archive`
+# (removed in 0-6; no such skill ever existed). Slash-command utterances
+# in prose (e.g. "/comet ...") are not backticked and stay a manual-review
+# item. Also: docs/internal/*.md must not contain unfilled <PLACEHOLDER>/
+# <TODO>/<TBD>/<XXX> markers.
+_SKILL_TOKEN_RE = re.compile(r"`([a-z][a-z0-9_-]*)`")
+_SKILL_REF_ALLOWLIST = {
+    # product / project names, not skills
+    "agent-harness", "ai-memory",
+    # lock meta entry (source repo), not a skill directory
+    "openspec",
+    # frontmatter keys / git identifiers / CLI tool names
+    "depends_on", "modules", "develop", "main", "master", "staging",
+    "rebase", "ocr", "rg",
+}
+_skill_dirs = {p.name for p in (ROOT / ".agents" / "skills").iterdir() if p.is_dir()}
+_skill_ref_bad: list[str] = []
+for _rel in sorted(str(p.relative_to(ROOT)) for p in (ROOT / "templates" / "agents").glob("*.md")) + \
+        sorted(str(p.relative_to(ROOT)) for p in (ROOT / "docs" / "guides").glob("Agent Triggering and FAQ Guide.*.md")):
+    _text = (ROOT / _rel).read_text(encoding="utf-8-sig")
+    for _lineno, _line in enumerate(_text.splitlines(), 1):
+        for _tok in _SKILL_TOKEN_RE.findall(_line):
+            if _tok not in _skill_dirs and _tok not in _SKILL_REF_ALLOWLIST:
+                _skill_ref_bad.append(f"{_rel}:{_lineno}: `{_tok}`")
+check("skills:references-resolve", not _skill_ref_bad,
+      "; ".join(_skill_ref_bad[:5]))
+_PLACEHOLDER_RE = re.compile(r"<\s*(PLACEHOLDER|TODO|TBD|XXX)\b", re.IGNORECASE)
+_placeholder_bad: list[str] = []
+for _p in sorted((ROOT / "docs" / "internal").rglob("*.md")):
+    for _lineno, _line in enumerate(_p.read_text(encoding="utf-8-sig").splitlines(), 1):
+        if _PLACEHOLDER_RE.search(_line):
+            _placeholder_bad.append(f"{_p.relative_to(ROOT)}:{_lineno}")
+check("docs:no-unfilled-placeholders", not _placeholder_bad,
+      "; ".join(_placeholder_bad[:5]))
+
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
 # its counterpart marker must exist in the other. Markers that exist in

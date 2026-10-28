@@ -68,7 +68,7 @@
 | **3. 編碼實現** | 💻 **Developer (程式設計師)** | 業務程式碼實現、單元測試、局部程式碼優化 | `test-driven-development`, `ponytail`, `writing-plans` | 測試先行（紅綠循環），最小清晰實現 |
 | **4. 程式碼審查** | 🔍 **Reviewer (審查員)** | 確定性審查報告、安全審計、修改清單 | `open-code-review`, `requesting-code-review` | 行號錨定，Critical / High 缺陷零殘留 |
 | **5. 測試驗證** | 🧪 **QA (測試工程師)** | 測試用例設計、邊界驗證、Bug 複測與驗證報告 | `verification-before-completion`, `systematic-debugging` | 跑通測試套件，提供客觀真實執行證據 |
-| **6. 交付歸檔** | 📦 **Release Team** | 活體文檔與追溯同步、版本標記、變更歸檔 | `living-documentation`, `finishing-a-development-branch`, `comet-archive` | 程式碼與活體文檔雙向追溯同步 |
+| **6. 交付歸檔** | 📦 **Release Team** | 活體文檔與追溯同步、版本標記、變更歸檔 | `living-documentation`, `finishing-a-development-branch` | 程式碼與活體文檔雙向追溯同步 |
 
 > 專家團隊評審規範見 Global AGENTS.md「專家團隊評審法定席位」章節。
 
