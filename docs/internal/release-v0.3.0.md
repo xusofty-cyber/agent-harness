@@ -71,8 +71,10 @@ verified with measured numbers, not claims.
 
 ## What was NOT done (known gaps, honest list)
 
-- **Rubric not marked stable**: 5 calibration rounds, 0 disagreements, but
-  still needs one real second human reviewer (Phase 3/4/5 carry-over).
+- **Rubric standing advisory-only (D28)**: 5 calibration rounds, 0
+  disagreements; a live second review is deferred, not owed — only on
+  a real project the user knows well, when conditions mature (Phase
+  3/4/5 carry-over, settled by user final ruling 2026-10-29).
 - **Core-10 list provisional**: no usage data; re-review 2026-11-28.
 - **Bench ceiling effect**: tasks too easy; the matrix does not prove the
   gate reduces false completions (the proof remains Phase 1 dogfood's
@@ -81,8 +83,10 @@ verified with measured numbers, not claims.
   an unversioned comet install in upstream text — editing it would break
   the lock; recorded in D22, not fixed.
 - **RTK winget has no version pin** (D13 known gap).
-- **FR/DE/ZH-TW Panorama Guide rows are `stale`** (EN §2.3 pinned
-  instructions not yet translated); 9 older stale rows remain.
+- **ZH-TW rows are `stale`** (5 rows per `docs/internal/i18n-status.md`:
+  README, three guides, Global AGENTS; Panorama Guide ZH-TW still shows
+  curl|sh and unversioned npm install — EN §2.3 pinned instructions
+  not yet translated). FR/DE rows were deleted per D27.
 - **Ablation candidate `writing-skills`** awaits owner sign-off (not
   removed in this release).
 - **Loop templates were not wired into deploy until Phase 6** (D21

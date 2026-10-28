@@ -768,9 +768,10 @@ of truth), D-007 (≈D12 + D15).
 These donor decisions conflict with the skeleton or with the merge
 rulings above. They are recorded here, not silently absorbed, and
 need a user ruling. Until then, the merge ruling (or skeleton
-decision) stands. Settled since: yunkai D-004, yunkai D-006, and yunyi
-D23 were decided by user final rulings on 2026-10-29 (see D26, D27,
-D57); the remaining items below are still pending.
+decision) stands. Settled since: yunkai D-004, yunkai D-006, yunkai
+D-011, yunyi D23, and yunyi D16/D21 were decided by user final rulings
+on 2026-10-29 (see D26, D27, D28, D57); the remaining items below are
+still pending.
 
 - **yunkai D-004 — `archive_confirmation` stays `automatic`.**
   SETTLED by user final ruling 2026-10-29 (see D26): the template default

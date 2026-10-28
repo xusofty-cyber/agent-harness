@@ -105,7 +105,7 @@ demonstrated in Phase 1 dogfood, not by this matrix. Pack-vs-gate
 | Pipeline (`--strict`) | Accept | Phase 2 verification: strict FAIL exit 1 / advisory WARN exit 0, no PASS on failure |
 | Hooks (5 events) | Accept | 56 + 10 + 11 + 12 hook tests pass; parse failures logged, still fail-open |
 | Benchmarks (`eval/`) | Accept | 36/36 runs pass (12 per arm); thresholds re-derived from the full matrix, still provisional |
-| Docs / i18n | Revise | EN/ZH current; FR/DE/ZH-TW frozen per D3; rubric standing advisory-only (D28) |
+| Docs / i18n | Revise | EN/ZH current; FR/DE deleted per D27; ZH-TW frozen per D3; rubric standing advisory-only (D28) |
 
 Module scores are judgement calls anchored to the evidence cited, not
 measurements. The rubric itself is **calibrated (5 rounds, 0 divergences)**
