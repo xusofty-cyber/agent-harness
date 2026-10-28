@@ -37,7 +37,14 @@ param (
 
     [switch]$Pipeline,
 
-    [switch]$IncludeHeavySkills
+    [switch]$IncludeHeavySkills,
+
+    # Phase 4 (4-1): deployment profile. Default minimal (10 core skills);
+    # membership lives in skills-profiles.json. NOTE: $Profile is a
+    # PowerShell automatic variable and cannot be a parameter name, so the
+    # parameter is $SkillProfile.
+    [ValidateSet("minimal", "standard", "full")]
+    [string]$SkillProfile = "minimal"
 )
 
 # Phase 2 (2-2): pinned Comet CLI version, measured 2026-10-28 with
@@ -1171,7 +1178,19 @@ if ((Test-Path $SourceReviewSensitivePaths) -and (-not $isSelfRepo)) {
 # ==============================================================================
 # 5. Deploy / Update Skills (.agents/skills/ & .claude/skills/)
 # ==============================================================================
-Write-Host "`n>>> [3/3] Deploying integrated skills library..." -ForegroundColor Yellow
+Write-Host "`n>>> [3/3] Deploying integrated skills library (Profile: $SkillProfile)..." -ForegroundColor Yellow
+
+# Phase 4 (4-1): resolve the profile's skill list from skills-profiles.json
+# (single source of truth). "full" needs no filtering.
+# SkillProfile
+$script:ProfileSkills = @()
+if ($SkillProfile -ne "full") {
+    $profilesFile = Join-Path $ScriptDir "skills-profiles.json"
+    if (-not (Test-Path $profilesFile)) {
+        throw "skills-profiles.json not found at $profilesFile"
+    }
+    $script:ProfileSkills = (Get-Content $profilesFile -Raw | ConvertFrom-Json).profiles.$SkillProfile.skills
+}
 
 $TargetSkillsDir = Join-Path $ResolvedProjectPath ".agents\skills"
 $TargetClaudeSkillsDir = Join-Path $ResolvedProjectPath ".claude\skills"
@@ -1186,6 +1205,12 @@ if (-not (Test-Path $TargetClaudeSkillsDir)) {
 if (Test-Path $SourceSkillsDir) {
     Get-ChildItem -Path $SourceSkillsDir -Directory | ForEach-Object {
         $skillName = $_.Name
+        # Phase 4 (4-1): profile filter. "full" deploys everything;
+        # minimal/standard only deploy their listed skills.
+        if ($SkillProfile -ne "full" -and $script:ProfileSkills -notcontains $skillName) {
+            Write-Host "  [INFO] Skipping non-$SkillProfile skill .agents/skills/$skillName (use -Profile full to deploy all skills)." -ForegroundColor Gray
+            return
+        }
         # include-heavy-skills: docx + brainstorming are opt-in (heavy / local service)
         if (($skillName -eq "docx" -or $skillName -eq "brainstorming") -and -not $IncludeHeavySkills) {
             Write-Host "  [INFO] Skipping optional heavy skill .agents/skills/$skillName (use -IncludeHeavySkills to deploy)." -ForegroundColor Gray

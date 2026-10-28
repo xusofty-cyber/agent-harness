@@ -697,6 +697,72 @@ _bench_smoke = subprocess.run(
 check("eval:bench-smoke-passes", _bench_smoke.returncode == 0,
       "eval/run-bench.sh smoke failed")
 
+# --- 3r. Deploy profiles (Phase 4, 4-1) ---
+# skills-profiles.json is the single source of truth for profile
+# membership. Assertions: default is minimal; minimal <= 10; standard is a
+# strict superset of minimal; full is exactly every skill directory on
+# disk; heavy skills (docx, brainstorming) are in full only; every listed
+# skill exists on disk; the EN+ZH Skills Usage Guides' tier sections
+# (between <!-- profiles:begin --> / <!-- profiles:end -->) list exactly
+# the profile members.
+import json as _json3r
+_profiles_path = ROOT / "skills-profiles.json"
+try:
+    _profiles_data = _json3r.loads(_profiles_path.read_text(encoding="utf-8"))
+except Exception as e:  # noqa: BLE001
+    _profiles_data = {}
+    check("profiles:file-valid", False, f"skills-profiles.json unreadable: {e}")
+_profiles = _profiles_data.get("profiles", {}) if isinstance(_profiles_data, dict) else {}
+check("profiles:default-minimal", _profiles_data.get("default") == "minimal",
+      f"default profile is {_profiles_data.get('default')!r}, expected 'minimal'")
+_disk_skills = {p.name for p in (ROOT / ".agents" / "skills").iterdir() if p.is_dir()}
+for _pname in ("minimal", "standard", "full"):
+    _plist = _profiles.get(_pname, {}).get("skills", []) if isinstance(_profiles.get(_pname), dict) else []
+    check(f"profiles:{_pname}-exists", bool(_plist), f"profile {_pname} missing or empty")
+    check(f"profiles:{_pname}-no-duplicates", len(_plist) == len(set(_plist)),
+          f"profile {_pname} has duplicate entries")
+    _missing = [s for s in _plist if s not in _disk_skills]
+    check(f"profiles:{_pname}-on-disk", not _missing,
+          f"profile {_pname} lists skills not on disk: {_missing}")
+_min = _profiles.get("minimal", {}).get("skills", [])
+_std = _profiles.get("standard", {}).get("skills", [])
+_full = _profiles.get("full", {}).get("skills", [])
+check("profiles:minimal-le-10", len(_min) <= 10, f"minimal has {len(_min)} skills, must be <= 10")
+check("profiles:standard-superset-minimal", set(_min) < set(_std),
+      "standard must be a strict superset of minimal")
+check("profiles:full-is-all", set(_full) == _disk_skills,
+      f"full must be exactly the {len(_disk_skills)} skill dirs on disk")
+check("profiles:heavy-in-full-only",
+      set(_profiles.get("full", {}).get("heavy", [])) == {"brainstorming", "docx"}
+      and not (set(_min) | set(_std)) & {"brainstorming", "docx"},
+      "heavy skills (docx, brainstorming) must be listed in full.heavy and in no smaller profile")
+_deploy_sh_txt = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")
+_deploy_ps1_txt = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
+check("profiles:sh-default-minimal", 'PROFILE="minimal"' in _deploy_sh_txt,
+      "deploy-agents.sh default PROFILE is not minimal")
+check("profiles:ps1-default-minimal", '$SkillProfile = "minimal"' in _deploy_ps1_txt,
+      "deploy-agents.ps1 default SkillProfile is not minimal")
+for _guide in ("docs/guides/Skills Usage Guide.md", "docs/guides/Skills Usage Guide.zh.md"):
+    _gtext = (ROOT / _guide).read_text(encoding="utf-8")
+    _m = re.search(r"<!-- profiles:begin -->(.*?)<!-- profiles:end -->", _gtext, re.S)
+    check(f"profiles:guide-section-{_guide}", _m is not None,
+          f"{_guide} lacks the <!-- profiles:begin/end --> tier section")
+    if _m:
+        _sec = _m.group(1)
+        _min_sec = re.search(r"### minimal.*?(?=###|\Z)", _sec, re.S | re.I)
+        _std_sec = re.search(r"### standard.*?(?=###|\Z)", _sec, re.S | re.I)
+        _min_listed = {s for s in re.findall(r"`([a-z][a-z0-9-]+)`", _min_sec.group(0))
+                       if s in _disk_skills} if _min_sec else set()
+        _std_listed = {s for s in re.findall(r"`([a-z][a-z0-9-]+)`", _std_sec.group(0))
+                       if s in _disk_skills} if _std_sec else set()
+        check(f"profiles:guide-minimal-{_guide}", _min_listed == set(_min),
+              f"{_guide} minimal subsection lists {_min_listed}, want {set(_min)}")
+        check(f"profiles:guide-standard-{_guide}",
+              _std_listed == set(_std) - set(_min),
+              f"{_guide} standard subsection lists {_std_listed}, want {sorted(set(_std) - set(_min))}")
+        check(f"profiles:guide-full-{_guide}", "40" in _sec,
+              f"{_guide} tier section does not state the full profile has 40 skills")
+
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
 # its counterpart marker must exist in the other. Markers that exist in
@@ -740,6 +806,7 @@ PARITY = [
     ("target-auto-create", "target-auto-create", "auto-create missing target directory"),
     ("IncludeHeavySkills", "include-heavy-skills", "opt-in heavy skills (docx, brainstorming)"),
     ("GateDeploy", "gate-deploy", "gate layer deployment (pass-gate.py + schema + init template)"),
+    ("SkillProfile", "--profile", "deployment profiles minimal/standard/full"),
 ]
 ps1 = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
 sh = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")
