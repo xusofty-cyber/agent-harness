@@ -451,6 +451,41 @@ else:
         check("gate:template-valid", not _tpl_errors,
               "; ".join(_tpl_errors[:5]))
 
+# --- 3l. Pipeline gates are real (Phase 2, 2-1) ---
+# The old pipeline swallowed stage failures (`cmd || true`) and recorded
+# PASS unconditionally. Guard the fix structurally:
+#   1. both pipeline scripts define a strict mode;
+#   2. no stage tool invocation is followed by `|| true` (stty/trap/read and
+#      the informational comet probe keep theirs — they record no PASS);
+#   3. both tools are invoked with --strict by the pipeline, so findings are
+#      machine-detectable in every mode (strict decides FAIL vs WARN);
+#   4. both summaries can print WARN (advisory failure, never PASS);
+#   5. both tools document real exit codes (no "0 always" left).
+_p_sh = (ROOT / "run-pipeline.sh").read_text(encoding="utf-8")
+_p_ps1 = (ROOT / "run-pipeline.ps1").read_text(encoding="utf-8-sig")
+check("pipeline-strict:sh-flag",
+      "--strict" in _p_sh and "STRICT_MODE" in _p_sh,
+      "run-pipeline.sh lacks --strict / STRICT_MODE")
+check("pipeline-strict:ps1-flag", "[switch]$Strict" in _p_ps1,
+      "run-pipeline.ps1 lacks [switch]$Strict")
+check("pipeline-strict:sh-no-swallow",
+      '"${skills_cmd[@]}" || true' not in _p_sh
+      and '"claude-code" "codex" "antigravity-ide" || true' not in _p_sh,
+      "run-pipeline.sh still swallows a stage failure with || true")
+check("pipeline-strict:tools-strict",
+      '"--strict"' in _p_sh and '"--strict"' in _p_ps1,
+      "pipeline does not invoke sync-skills/doc-impact with --strict")
+check("pipeline-strict:warn-status",
+      'SUMMARY_STATUS+=("WARN")' in _p_sh
+      and 'summaryStatus += "WARN"' in _p_ps1,
+      "pipeline summary cannot print WARN")
+_sync_src = (ROOT / "tools" / "sync-skills.py").read_text(encoding="utf-8")
+_doc_src = (ROOT / "tools" / "doc-impact.py").read_text(encoding="utf-8")
+check("pipeline-strict:tools-exit-codes",
+      "0 always" not in _sync_src and "0 always" not in _doc_src
+      and "strict_exit_code" in _sync_src and "strict_exit_code" in _doc_src,
+      "sync-skills.py / doc-impact.py still claim exit 0 always")
+
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
 # its counterpart marker must exist in the other. Markers that exist in
@@ -541,6 +576,8 @@ PIPELINE_PARITY = [
     ("BriefProbe", "brief-probe", "pipeline brief probe mode"),
     ("CheckOnly", "check-only", "pipeline check-only read-only mode"),
     ("ApplySkills", "apply-skills", "pipeline apply-skills flag"),
+    ("Strict", "strict", "pipeline strict mode (fail vs warn)"),
+    ("WARN", "WARN", "pipeline advisory WARN status"),
     ("gitignore.snippet", "gitignore.snippet", "pipeline gitignore snippet scaffold"),
     ("Resolve-GlobalTemplate", "resolve_global_template", "pipeline global template resolution"),
 ]
