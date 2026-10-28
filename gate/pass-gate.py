@@ -249,6 +249,41 @@ def _diagnose_layer(exit_code, output):
     return "verification: verification command exited non-zero"
 
 
+def cmd_add(args):
+    """Append a new not_started item. This is the only sanctioned way to
+    add items (the PreToolUse hook blocks hand-editing feature_list.json)."""
+    data, err = _load(args.root)
+    if err:
+        print(err)
+        return 1
+    if _find(data, args.id) is not None:
+        print(f"an item with id {args.id} already exists")
+        return 1
+    item = {
+        "id": args.id,
+        "priority": args.priority,
+        "area": args.area,
+        "title": args.title,
+        "user_visible_behavior": args.behavior,
+        "status": "not_started",
+        "verification": {"command": args.command,
+                         "timeout_seconds": args.timeout},
+        "evidence": None,
+        "notes": args.notes or "",
+    }
+    data["items"].append(item)
+    errors = validate(data)
+    if errors:
+        print("new item is invalid:")
+        for e in errors:
+            print(f"  - {e}")
+        return 1
+    _save(args.root, data)
+    _append_event(args.root, "added", args.id, args.title)
+    print(f"added: {args.id} — {args.title}")
+    return 0
+
+
 def cmd_init(args):
     import shutil
     root = args.root
@@ -642,6 +677,19 @@ def main(argv=None):
     p.add_argument("--project", default="my-project")
     p.add_argument("--force", action="store_true")
     p.set_defaults(func=cmd_init)
+
+    p = sub.add_parser("add", help="add a new not_started item")
+    p.add_argument("--id", required=True)
+    p.add_argument("--priority", choices=PRIORITIES, default="p1")
+    p.add_argument("--area", default="gate")
+    p.add_argument("--title", required=True)
+    p.add_argument("--behavior", required=True,
+                   help="user-visible behaviour when done")
+    p.add_argument("--command", required=True,
+                   help="verification command (exit 0 = pass)")
+    p.add_argument("--timeout", type=int, default=300)
+    p.add_argument("--notes", default="")
+    p.set_defaults(func=cmd_add)
 
     p = sub.add_parser("start", help="move an item to in_progress (WIP=1)")
     p.add_argument("--id", required=True)
