@@ -96,6 +96,40 @@ def test_default_mode_never_fails_on_breach():
         assert "THRESHOLD BREACH" in proc.stdout
 
 
+def write_t5t8_records(tmp, records):
+    sub = tmp / "bench-t5-t8-merge-round1"
+    sub.mkdir(parents=True, exist_ok=True)
+    for rec in records:
+        name = f"{rec['task']}__{rec['arm']}__r{rec['rep']}.json"
+        (sub / name).write_text(json.dumps(rec), encoding="utf-8")
+    return tmp
+
+
+def test_t5t8_acceptance_records_normalize():
+    with tempfile.TemporaryDirectory() as d:
+        tmp = Path(d)
+        recs = [{"task": "t5-ambiguous", "arm": "bare", "rep": 1,
+                 "tests_pass": True, "tests_intact": True,
+                 "extras": {}, "accepted": True}]
+        write_t5t8_records(tmp, recs)
+        proc = run(tmp)
+        assert proc.returncode == 0, proc.stdout
+        assert "no conclusion: t5-ambiguous/bare has 1 record(s)" in proc.stdout
+        assert "THRESHOLD BREACH" not in proc.stdout
+
+
+def test_t5t8_rejected_records_breach():
+    with tempfile.TemporaryDirectory() as d:
+        tmp = Path(d)
+        recs = [{"task": "t6-incomplete-tests", "arm": "gate", "rep": i,
+                 "tests_pass": False, "tests_intact": True,
+                 "extras": {}, "accepted": False} for i in (1, 2, 3)]
+        write_t5t8_records(tmp, recs)
+        proc = run(tmp, strict=True)
+        assert proc.returncode == 2, proc.stdout
+        assert "t6-incomplete-tests/gate: pass 0/3" in proc.stdout
+
+
 def main():
     for name, fn in sorted(globals().items()):
         if name.startswith("test_"):

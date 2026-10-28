@@ -11,6 +11,16 @@ the format eval/run-bench.sh writes) and checks, per (task, arm) group:
 A group with fewer than 3 records is "no conclusion" (never a breach and
 never a pass) — thresholds are not judged on insufficient samples.
 
+The t5-t8 matrix records (eval/results/bench-t5-t8-merge-round1/,
+{task}__{arm}__r{n}.json, written by evaluate.py) are acceptance-only:
+they carry accepted / tests_pass / tests_intact / extras but no
+outcome / verify_attempts / duration_s / false_completion. They are
+normalized here (accepted -> outcome, task/arm from the filename), so
+they join the pass-rate check; the median and false-completion checks
+are skipped for those groups (no data), and with 1 record per group
+they currently report "no conclusion". Do not read a t5-t8 "ok" as a
+full threshold pass — it can only ever be a pass-rate signal.
+
 Thresholds are PROVISIONAL: they are generous headroom (2-4x) over the
 2026-10-28 baseline (pooled duration median 6.0s, verify_attempts 1,
 false_completion 0/36) and must be re-derived from the merged baseline
@@ -51,6 +61,28 @@ def _load_records(results_dir: Path) -> list[dict]:
                 records.append(json.loads(path.read_text(encoding="utf-8")))
             except Exception as exc:  # noqa: BLE001 - a bad file is check-results.py's job
                 print(f"WARN: skipping unreadable record {path.name}: {exc}")
+    # t5-t8 matrix records (review 2026-10-29): evaluate.py writes
+    # acceptance-only JSONs (accepted / tests_pass / tests_intact /
+    # extras) under bench-t5-t8-merge-round1/, named
+    # {task}__{arm}__r{n}.json — not the run-bench.sh record shape.
+    # Normalize: accepted -> outcome, task/arm from the filename.
+    # duration_s / verify_attempts / false_completion stay absent, so
+    # the median and false-completion checks skip these groups.
+    t5t8_dir = results_dir / "bench-t5-t8-merge-round1"
+    if t5t8_dir.is_dir():
+        for path in sorted(t5t8_dir.glob("*.json")):
+            try:
+                rec = json.loads(path.read_text(encoding="utf-8"))
+            except Exception as exc:  # noqa: BLE001
+                print(f"WARN: skipping unreadable record {path.name}: {exc}")
+                continue
+            parts = path.stem.split("__")
+            if len(parts) != 3 or not isinstance(rec, dict):
+                print(f"WARN: skipping unparseable t5-t8 record {path.name}")
+                continue
+            rec["task"], rec["arm"] = parts[0], parts[1]
+            rec["outcome"] = "pass" if rec.get("accepted") else "fail"
+            records.append(rec)
     return records
 
 
