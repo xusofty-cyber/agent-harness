@@ -24,7 +24,7 @@ graph TD
     G[Global AGENTS.md<br/>cross-project constitution] --> P[Project AGENTS.md<br/>project template]
     P --> D[Directory AGENTS.md<br/>monorepo micro-boundaries]
     P --> R[.agents/rules/<br/>on-demand sub-rules]
-    R --> S[.agents/skills/<br/>44 on-demand skills]
+    R --> S[.agents/skills/<br/>40 on-demand skills]
     G --> H[.claude/hooks/<br/>PreToolUse guards]
     S --> T[tools/<br/>sync, tui, doc-impact]
 ```
@@ -43,10 +43,10 @@ graph TD
    - 永久硬拦截（`exit 2`）：受保护分支（`develop`/`master`/`main`/`release*`/`staging`）直改提交、`git push --force`、删除受保护远端分支、受保护分支 rebase；
    - 部分命令会硬拒绝，其他情况只是非阻断警告；正则检查不能覆盖所有命令形式，也不能替代 Git 服务端分支保护。
 
-3. **44 个可复用技能目录（[`.agents/skills/`](.agents/skills/)）**：
+3. **40 个可复用技能目录（[`.agents/skills/`](.agents/skills/)）**：
    - **Comet 集成说明**：引导检查已安装版本和项目配置；此技能本身不实现 Comet 状态机或阶段守卫。
    - **活体文档与工程文档规范**：`living-documentation`（六阶文档体系：specs/architecture/reference/guides，Frontmatter 代码双向追溯关联，L0/L1/L2 变更门禁与文档演进）与 `engineering-docs`（31 种研发文档类型，15 个中英双语门禁模板，确保各 Agent 阶段输出格式一致）。
-   - **规范驱动开发（SDD）**：`openspec` 全套 16 个技能（提案、变更应用、验证、主文档同步、归档）。
+   - **规范驱动开发（SDD）**：`openspec` 全套 12 个技能（提案、变更应用、验证、主文档同步、归档）。
    - **测试驱动开发（TDD）**：`superpowers` 全套 15 个技能（TDD 红绿循环、系统性排障、完工验证证据门、工作区隔离）。
    - **实现与检索指导**：`ponytail`（最小实现决策阶梯）与 `codegraph`（CodeGraph 可选集成指引；CLI/MCP 需单独安装配置）。
    - **输出与表达指导**：`rtk`（Rust Token Killer 可选 CLI 指引；需配置命令重写 Hook）与 `caveman`（简明表达 Skill）。
@@ -93,7 +93,7 @@ agent-harness/
 │   │   ├── git-workflow.md          # Git 授权模型、受保护分支强隔离、提交规范
 │   │   ├── security-boundary.md     # 八大高风险操作防呆矩阵、凭证零泄露
 │   │   └── token-discipline.md      # 读拿说三道闸门、上下文防漏与日志截断
-│   └── skills/                      # 44 个原生工程技能库（Comet, OpenSpec, Superpowers...）
+│   └── skills/                      # 40 个原生工程技能库（Comet, OpenSpec, Superpowers...）
 ├── .claude/
 │   ├── settings.json                # Claude Code PreToolUse 安全拦截配置
 │   └── hooks/                       # 安全钩子脚本（Node.js，读取 stdin JSON）

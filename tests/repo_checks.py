@@ -13,6 +13,7 @@ Checks:
 import hashlib
 import json
 import re
+import subprocess
 import sys
 import tomllib
 from pathlib import Path
@@ -291,6 +292,17 @@ for tmpl_prefix in ("Global AGENTS", "Project AGENTS", "Directory AGENTS"):
         expected_tmpl = ROOT / "templates" / "agents" / f"{tmpl_prefix}{lang_suf}.md"
         check(f"template-exists:{tmpl_prefix}{lang_suf}", expected_tmpl.is_file(),
               f"missing canonical template: {expected_tmpl}")
+
+# --- 3i. Skill counts: single source of truth (Phase 0, 0-1) ---
+# tools/count-skills.py owns the expected composition (40 dirs on disk,
+# 42 lock entries incl. 2 meta entries) and scans live docs for stale
+# counts (44/43/42 in a skill context, openspec suite != 12). The script
+# is the single implementation; this check only asserts it passes.
+_count = subprocess.run(
+    [sys.executable, str(ROOT / "tools" / "count-skills.py"), "--check"],
+    capture_output=True, text=True, cwd=str(ROOT), timeout=60)
+_count_detail = (_count.stdout.strip().splitlines() or [""])[-1]
+check("skills:count-source-of-truth", _count.returncode == 0, _count_detail)
 
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,

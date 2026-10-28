@@ -8,7 +8,7 @@
 
 ## What this repo is
 
-Reusable AI coding-rule templates, Claude Code hooks, 44 native skill
+Reusable AI coding-rule templates, Claude Code hooks, 40 native skill
 directories, and one-click deployment scripts (`deploy-agents.ps1` / `.sh`)
 for Claude Code, Codex, Antigravity, Copilot and Zed. MIT licensed.
 
@@ -29,7 +29,7 @@ for Claude Code, Codex, Antigravity, Copilot and Zed. MIT licensed.
 ## Key paths
 
 - `.agents/rules/` — modular sub-rules (engineering, git, security, tokens)
-- `.agents/skills/` — 44 skill directories
+- `.agents/skills/` — 40 skill directories
 - `.claude/hooks/guard.mjs` — Claude Code PreToolUse Bash guard
 - `docs/internal/` — this repo's own dev notes (not deployed)
 
