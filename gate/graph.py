@@ -31,6 +31,12 @@ Flow: plan -> fan-out -> fan-in -> approve -> done.
   stop_reason approval_timeout.
 - Merging always targets --result, never main and never --base.
   The result branch is kept for inspection either way.
+- Fan-in checks every git return code: a failed merge is recorded
+  as blocked (never "merged"/"done") and the run exits non-zero.
+  --result must not be main, --base, or the checked-out branch,
+  and must not already exist unless --force is given: silently
+  deleting and rebuilding a user-named branch used to be possible
+  (and --result main used to merge straight into main).
 
 State: transitions go to the file given by --state (default:
 <repo>/graph-state.jsonl, so state never scatters into the
@@ -121,11 +127,62 @@ def cmd_run(args) -> int:
                            "stop_reason": "not_all_tasks_passed_no_merge"})
         print("graph blocked: not all tasks passed, no merge")
         return 1
-    _sh(["git", "branch", "-D", args.result], repo)
-    _sh(["git", "checkout", "-b", args.result, args.base], repo)
+    # P0-2/P1-6: the result branch is user-named, never implicit.
+    # Refuse to merge onto main, onto --base, onto the checked-out
+    # branch, or onto an existing branch (unless --force explicitly
+    # says the operator wants that branch rebuilt). Every git call
+    # below checks its return code: a failed step is blocked, never
+    # reported as merged/done.
+    current = _sh(["git", "branch", "--show-current"], repo)
+    current_branch = current.stdout.strip() if current.returncode == 0 else ""
+    if args.result in ("main", args.base, current_branch):
+        _emit(state_path, {"node": "fan-in", "outcome": "blocked",
+                           "stop_reason": "result_branch_forbidden"})
+        print(f"graph blocked: --result {args.result!r} must not be main, "
+              f"--base ({args.base}), or the checked-out branch "
+              f"({current_branch})")
+        return 1
+    result_exists = _sh(["git", "show-ref", "--verify",
+                         f"refs/heads/{args.result}"], repo).returncode == 0
+    if result_exists and not args.force:
+        _emit(state_path, {"node": "fan-in", "outcome": "blocked",
+                           "stop_reason": "result_branch_exists"})
+        print(f"graph blocked: result branch {args.result!r} already "
+              f"exists; re-run with --force to rebuild it")
+        return 1
+    if result_exists:
+        proc = _sh(["git", "branch", "-D", args.result], repo)
+        if proc.returncode != 0:
+            _emit(state_path, {"node": "fan-in", "outcome": "blocked",
+                               "stop_reason": "result_branch_delete_failed"})
+            print(f"graph blocked: could not delete existing result "
+                  f"branch {args.result!r}: {proc.stderr.strip()[:200]}")
+            return 1
+    proc = _sh(["git", "checkout", "-b", args.result, args.base], repo)
+    if proc.returncode != 0:
+        _emit(state_path, {"node": "fan-in", "outcome": "blocked",
+                           "stop_reason": "result_checkout_failed"})
+        print(f"graph blocked: could not check out result branch "
+              f"{args.result!r} from {args.base}: "
+              f"{proc.stderr.strip()[:200]} (if a previous run left a "
+              f"merge in progress, resolve it or run "
+              f"`git merge --abort` first)")
+        return 1
     for task in spec["tasks"]:
-        _sh(["git", "merge", "--no-ff", "-qm", f"merge graph-{task['id']}",
-             f"graph-{task['id']}"], repo)
+        proc = _sh(["git", "merge", "--no-ff", "-qm",
+                    f"merge graph-{task['id']}",
+                    f"graph-{task['id']}"], repo)
+        if proc.returncode != 0:
+            conflicted = _sh(["git", "diff", "--name-only",
+                              "--diff-filter=U"], repo).stdout.strip()
+            _emit(state_path, {"node": "fan-in", "outcome": "blocked",
+                               "task_id": task["id"],
+                               "stop_reason": "merge_conflict"})
+            print(f"graph blocked: merge of graph-{task['id']} failed "
+                  f"(conflicted: {conflicted or 'unknown'}); the repo "
+                  f"is left mid-merge for inspection — resolve it or "
+                  f"run `git merge --abort`. No merged/done is reported")
+            return 1
     _emit(state_path, {"node": "fan-in", "outcome": "merged",
                        "merge_branch": args.result})
     approval_path = Path(args.approval)
@@ -168,6 +225,8 @@ def main() -> int:
                    help="state file (default: <repo>/graph-state.jsonl)")
     p.add_argument("--timeout", type=int, default=300,
                    help="per-command timeout in seconds for task command/verification (default 300)")
+    p.add_argument("--force", action="store_true",
+                   help="allow rebuilding an already-existing --result branch (otherwise refused)")
     p.set_defaults(func=cmd_run)
     args = parser.parse_args()
     return args.func(args)
