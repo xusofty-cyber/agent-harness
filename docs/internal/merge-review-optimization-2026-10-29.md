@@ -153,6 +153,10 @@ Fixed by a preflight + tail detail (commit `cb1f6d2`, see §2).
 | `cb1f6d2` | review: bench smoke preflight diagnoses missing pytest |
 | `9eec6c2` | review: port yunkai pass-gate behavior suite (7 tests, skeleton-adapted) |
 | `aafc6a6` | review: wire t5-t8 matrix results into check-thresholds |
+| `10bfcac` | docs: merge review + optimization record, changelog, release checklist |
+| `e486268` | sweep: drop fr/de from deploy/pipeline help + --help exits 0 |
+| `d381774` | sweep: sync stale doc wording to settled rulings (D27/D28) |
+| `5a79181` | sweep: remove orphan D27 provisional lines, qualify C1-C10 intro |
 
 Detail per optimization item:
 
@@ -349,7 +353,54 @@ Detail per optimization item:
    (repo_checks count, check-release, deploy smoke); do not copy the
    numbers from this document.
 
-## 7. Deliberately NOT changed in this round
+## 7. Module sweep (after the listed items, 2026-10-29)
+
+Every module below was swept end-to-end after the §2 commits. "No
+issue" means checked by the method listed, not skipped. Every fix got a
+small commit plus a verification (test run or negative run); every doc
+wording change was checked against its source text, not written from
+impression.
+
+| Module | Verdict + check method |
+|---|---|
+| gate (pass-gate, graph, comet_adapter, schema, init) | No issue. Tmp end-to-end smoke: init/add/start/verify/status/check-clean all pass (3c SKIP with no state file, no false fail); `init.template.sh` bash -n clean; schema/validate agreement via repo_checks §3k; graph/comet_adapter covered by pytest + §3t (map on empty dir, --help exit 0). |
+| hooks + guard (incl. guard-alerts, Stop anti-deadlock) | No issue. Hook tests 73+12+11+12, server 5/5. Stop-gate deadlock guards read and confirmed by design: GATE_ALLOW_STOP + GATE_STOP_REASON override channel, second-attempt allowance via stop_hook_active with a logged stop_allowed_hook_active event, fail-open on parse failure and on missing/unreadable feature_list. guard-alerts.jsonl is runtime output only (not tracked by git, worktree status clean → ignored). |
+| deploy dual scripts + PARITY (incl. three-tier distribution) | Two fixes (see below), otherwise no issue. PARITY + PIPELINE_PARITY pass in repo_checks; final matrix: minimal exit 0 without graph/loop, standard/full exit 0 with graph.py + loop.py + 6 templates, --comet-init exit 0, --profile bogus exit 2, --lang fr deploy exit 0 with EN content (fallback). ps1 changes are statically verified only (no PowerShell on this VM; CRLF+BOM preserved, markers present) — see §6 item 2. |
+| bench/eval (rubric, check-thresholds, evaluator) | No issue. t5 bare prep + evaluate end-to-end: accepted True, tests_pass True, extras 6/6 topics. check-thresholds on real data: t1–t4 12 groups ok, t5–t8 13 groups no conclusion, no breach. Rubric advisory-only + --gate refuses exit 2 (see §3). |
+| loop | No issue. Real goal-loop run: init + goal-loop with trivial maker/verify → round 1 maker rc=0, verify pass, "complete at round 1". Imports confirmed stdlib-only. Templates + runner land per tier (§5 matrix). |
+| cost ledger (incl. new hard-stop gate) | No issue. `cost.py check` on empty ledger: BUDGET OK. Over-budget demo (tmp ledger, 11 × verifications=1, correct record shape): BUDGET STOP exit 2 with the Chinese remediation text, stop event appended, second check still stops on the same 11 (budget_stop events excluded from recount — no double-counting). `tools/cost-ledger.py` still warn-only (repo_checks cost-ledger:no-auto-stop). Note: the first demo attempt used a wrong record shape (missing verifications/duration fields, counted as 0) — the record format is documented in cost.py, not a tool defect. |
+| skills-lock true lock | No issue. 42 entries; `sync-skills.py --check --strict` online: exit 0, all in-sync (~26 s). §5c guard present in repo_checks. |
+| check-release | No issue. Passes on 0.2.1 (VERSION/CHANGELOG/lock consistent). Negative test via --root on a tampered copy (VERSION 9.9.9): FAIL printed, exit 1. |
+| i18n (incl. post-D27 reference cleanup) | Two help-text fixes (see below), otherwise no issue. Full grep for `.fr.md`/`.de.md`/Français/Deutsch across md/py/sh/ps1/yaml/json: clean except CHANGELOG history, DECISIONS history, and merge-verification records (all intentionally kept). i18n-check passes: 5 stale rows + 1 [drift] reminder, all tracked debt. |
+| docs (DECISIONS, CHANGELOG, QUALITY_SCORE, release notes, tier narrative) | Fixes below; otherwise no issue. CHANGELOG merge entry's "明确不取" list is history (2026-10-28 state) and correctly untouched. Multi-Tool guide has no profile paragraph (grep: zero "profile" hits) — tier narrative lives in README EN/ZH, skill-tiers, and both scripts' help, all updated. Remaining Provisional lines map exactly to D29–D35 plus the core-10 U1 note (legitimately provisional until 2026-11-28). |
+
+Sweep fixes (each with its verification):
+
+- **Deploy/pipeline help still advertised fr/de** (`e486268`):
+  deploy-agents.sh usage lines, `--lang` help + error message, one
+  `--lang fr` example; run-pipeline.sh/ps1 usage lines. All now list
+  en/zh/zh-tw only. Verified: --lang fr deploy exits 0 with EN
+  content (fallback, not a crash).
+- **`deploy-agents.sh --help` exited 1** (`e486268`): `usage()` itself
+  ends in `exit 1`, so the old `--help` branch's `exit 0` was dead
+  code. `usage()` now takes an exit-code argument (`--help` passes 0,
+  missing-target error path keeps 1). Verified: --help exit 0, no-arg
+  exit 1, repo_checks pass.
+- **Stale doc wording vs settled rulings** (`d381774`): DECISIONS
+  pending intro now lists D-011 + D16/D21 as settled; QUALITY_SCORE
+  Docs/i18n row "FR/DE frozen per D3" → "FR/DE deleted per D27"
+  (ZH-TW still frozen); release draft NOT-done rubric bullet "still
+  needs a second reviewer" → deferred-not-owed (D28), and the
+  "FR/DE/ZH-TW stale / 9 older rows" bullet → ZH-TW-only with the
+  current 5-row count from i18n-status.md; ps1 SkillProfile param
+  comment gains the D58 tier sentence (parity with sh help).
+- **Orphan D27 lines** (`5a79181`): the D27 rewrite had left an
+  orphan sentence ("Freezing is the reversible option.") plus the old
+  Provisional line under a user-final ruling; both removed. C1–C10
+  intro qualified: D26/D27/D28 are user-final, D29–D35 remain
+  provisional.
+
+## 8. Deliberately NOT changed in this round
 
 - No push, no merge to main, no PR into main, no tag (per standing
   rule + this task's explicit instruction).
