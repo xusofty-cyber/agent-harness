@@ -873,7 +873,8 @@ def cmd_check_clean(args):
     1. build passes, 2. tests pass, 3. progress recorded — (a) narrative
     progress in SESSION_STATE mentions the in_progress item, (b) the
     feature list is truthful: every passing item's verification still
-    exits 0 when re-run, 4. temp artefacts cleaned, 5. standard start
+    exits 0 when re-run, (c) no unfilled SESSION_STATE placeholders
+    (D47), 4. temp artefacts cleaned, 5. standard start
     path works. Commands come from gate/clean-state.json; a dimension
     with no command configured is SKIP, not PASS.
     """
@@ -939,6 +940,33 @@ def cmd_check_clean(args):
     else:
         results.append(("3b progress/feature-list truthful", "PASS",
                         f"{len(passing)} passing item(s) re-verified"))
+
+    # 3c. no unfilled SESSION_STATE placeholders (D47, adopted from
+    # yunyi D15). A SESSION_STATE that still carries template markers
+    # is not a handoff-ready state, even if every other dimension
+    # passes. Skeleton-adapted markers: the skeleton template's own
+    # unfilled markers (<YYYY-MM-DD>, <PROJECT_NAME>, "What this session
+    # is trying to ship") plus generic <TODO|TBD|XXX|PLACEHOLDER>
+    # markers. No SESSION_STATE file at all is SKIP here (3a already
+    # FAILs when an item is in_progress without one; a project with no
+    # in_progress items and no state file has nothing to hand off).
+    if state_path is None:
+        results.append(("3c progress/no placeholders", "SKIP",
+                        "no SESSION_STATE.md found"))
+    else:
+        state_text = open(state_path, encoding="utf-8").read()
+        hits = [m for m in ("<YYYY-MM-DD>", "<PROJECT_NAME>",
+                            "What this session is trying to ship")
+                if m in state_text]
+        hits += [m.group(0) for m in
+                 re.finditer(r"<(TODO|TBD|XXX|PLACEHOLDER)>", state_text)]
+        if hits:
+            results.append(("3c progress/no placeholders", "FAIL",
+                            f"unfilled placeholder(s): "
+                            f"{', '.join(sorted(set(hits)))}"))
+        else:
+            results.append(("3c progress/no placeholders", "PASS",
+                            "no unfilled placeholders"))
 
     # 4. temp artefacts cleaned
     temp_hits = []

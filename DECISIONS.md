@@ -851,3 +851,29 @@ D57); the remaining items below are still pending.
 - **Guard:** repo_checks §3t asserts the per-tier file sets (minimal
   absent, standard present + runners execute); PARITY row
   `TierGateGraphLoop` keeps the sh/ps1 gating in sync.
+
+## D59 — D47: check-clean FAILs on unfilled SESSION_STATE placeholders (review ruling, 2026-10-29)
+
+- **Decision:** ADOPT yunyi D15. `gate/pass-gate.py` `check-clean` gains
+  dimension 3c "progress/no placeholders": FAIL if SESSION_STATE
+  contains `<YYYY-MM-DD>`, `<PROJECT_NAME>`, the phrase "What this
+  session is trying to ship", or `<TODO|TBD|XXX|PLACEHOLDER>` markers.
+  Any FAIL dimension keeps the overall exit 1; other dimensions SKIP
+  when unconfigured, as before. No SESSION_STATE file at all is SKIP
+  for 3c (3a already FAILs when an item is in_progress without one).
+- **Skeleton adaptation:** yunyi's check lived in `gate/harness.py`
+  (which the skeleton does not have) and detected `<` plus "what this
+  session" / "本会话要完成". The ported markers are the skeleton
+  template's own unfilled markers, not yunyi's strings.
+- **Guard:** `tests/check_clean_test.py` (placeholder → FAIL, generic
+  `<TODO>` → FAIL, clean → PASS, missing file → SKIP).
+
+## D60 — D48: fresh-clone check relaxation ADOPTED IN EFFECT, no code change (review ruling, 2026-10-29)
+
+- **Decision:** yunyi D24 (fresh-clone checks must not require
+  gitignored local-only files) is ADOPTED IN EFFECT. No code change:
+  the merge branch's repo_checks contains no check requiring a
+  gitignored file — the only gitignore-related checks assert the
+  scaffold itself (patterns present), never the presence of an ignored
+  artifact. To be confirmed by the fresh-clone run in the review
+  verification round (docs/internal/merge-review-optimization-2026-10-29.md).
