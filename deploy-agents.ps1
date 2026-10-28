@@ -1430,6 +1430,7 @@ if (-not (Test-Path $targetGitignore)) {
 *.bak-*
 /.ai-memory.toml
 scratch/
+gate/cost-ledger.jsonl
 "@
         Set-Content -Path $targetGitignore -Value $defaultGiContent -Encoding utf8
     }
@@ -1456,6 +1457,7 @@ scratch/
 *.bak-*
 /.ai-memory.toml
 scratch/
+gate/cost-ledger.jsonl
 "@
         }
         $newGiContent = if ($giContent.EndsWith("`n")) { "$giContent`n$snippetText" } else { "$giContent`n`n$snippetText" }

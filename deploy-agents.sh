@@ -1542,6 +1542,7 @@ if [ ! -f "${TARGET_GITIGNORE}" ]; then
 *.bak-*
 /.ai-memory.toml
 scratch/
+gate/cost-ledger.jsonl
 EOF
     fi
     echo -e "  ${GREEN}[√] 已初始化目标项目 .gitignore (写入 Agent Harness 忽略规则)${NC}"
@@ -1567,6 +1568,7 @@ else
 *.bak-*
 /.ai-memory.toml
 scratch/
+gate/cost-ledger.jsonl
 EOF
         fi
         echo -e "  ${GREEN}[√] 已向目标项目 .gitignore 追加 Agent Harness 忽略规则${NC}"

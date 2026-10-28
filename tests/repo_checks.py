@@ -558,6 +558,30 @@ check("installer-pin:no-piped-install",
       and "Invoke-Expression (Invoke-RestMethod" not in _deploy_ps1_txt,
       "piped curl|sh / irm|iex install still present in a deploy script")
 
+# --- 3n. Hook lifecycle coverage (Phase 2, 2-3) ---
+# .claude/settings.json must wire all five Claude Code hook events, and the
+# hook scripts they point at must exist. The Stop hook came in Phase 1;
+# SessionStart and PostToolUse are Phase 2.
+_settings = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))
+_hooks = _settings.get("hooks", {})
+for _event in ("PreToolUse", "Stop", "SessionStart", "PostToolUse",
+               "UserPromptSubmit"):
+    check(f"hooks-lifecycle:{_event}-wired",
+          isinstance(_hooks.get(_event), list) and len(_hooks[_event]) > 0,
+          f".claude/settings.json lacks {_event} hooks")
+_settings_text = json.dumps(_hooks)
+for _script in ("guard.mjs", "guard-write.mjs", "guard-feature-list.mjs",
+                "stop-gate.mjs", "session-start.mjs", "post-tool-use.mjs"):
+    check(f"hooks-lifecycle:script-{_script}",
+          (ROOT / ".claude" / "hooks" / _script).is_file(),
+          f".claude/hooks/{_script} missing")
+check("hooks-lifecycle:session-start-wired",
+      "session-start.mjs" in _settings_text,
+      "settings.json does not register session-start.mjs")
+check("hooks-lifecycle:post-tool-use-wired",
+      "post-tool-use.mjs" in _settings_text,
+      "settings.json does not register post-tool-use.mjs")
+
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
 # its counterpart marker must exist in the other. Markers that exist in

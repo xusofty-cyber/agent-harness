@@ -90,6 +90,29 @@ Known gaps (recorded honestly, not fixed by pretending):
   *last* lines is not detectable from the file alone. Git history is the
   backstop: compare against the last reviewed commit.
 
+## Session lifecycle hooks (Phase 2, 2-3)
+
+Besides the gate hooks above, two lifecycle hooks complete the set
+(all five Claude Code hook events are now wired in `.claude/settings.json`):
+
+- **SessionStart** (`.claude/hooks/session-start.mjs`): when a session
+  starts in a project with a gate, it prints a compact resume — item
+  counts, in_progress/blocked items, and the first lines of
+  `SESSION_STATE.md`. No gate state means silence, never an error.
+- **PostToolUse** (`.claude/hooks/post-tool-use.mjs`): appends one JSON
+  line per tool call to `gate/cost-ledger.jsonl` (tool name + timestamp) —
+  the raw material for the cost ledger's proxy metrics
+  (`tools/cost-ledger.py`). It only records when `gate/` exists, and
+  `COST_LEDGER=0` disables it entirely. The ledger is local telemetry and
+  is gitignored (unlike `feature_list.json`/`events.jsonl`, which are
+  reviewable evidence and committed per D8).
+- **Stop** (`.claude/hooks/stop-gate.mjs`, Phase 1): blocks stopping while
+  any item is `in_progress`, with the logged human override channel.
+
+All three are Claude Code only — other hosts have no hook events, so on
+them these legs do nothing. Every hook is fail-open: a parse failure or
+an unreadable state file logs to stderr and exits 0.
+
 ## Human override (no deadlocks)
 
 Two logged escape hatches, both visible in the evidence and the log:
