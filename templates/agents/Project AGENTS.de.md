@@ -68,7 +68,7 @@ Dieses Projekt erfordert einen strikt geschlossenen Entwicklungsregelkreis. Feat
 | **3. Implementierung**| 💻 **Entwickler** | Produktivcode, Unit-Tests, saubere Codeoptimierung | `test-driven-development`, `ponytail`, `writing-plans` | Test-First (Rot-Grün-Zyklus), minimale saubere Lösung |
 | **4. Code-Review** | 🔍 **Reviewer** | Deterministischer Reviewbericht, Sicherheitsaudit, Mängelliste | `open-code-review`, `requesting-code-review` | Zeilengenaue Verankerung, keine Critical/High-Mängel |
 | **5. Verifikation** | 🧪 **QA (Test-Ingenieur)** | Testfalldesign, Grenzprüfungen, Fehlernachtests, Testbericht | `verification-before-completion`, `systematic-debugging` | Komplette Testsuite erfolgreich mit echten Konsolenausgaben |
-| **6. Auslieferung** | 📦 **Release Team** | Living-Doc-/Code-Traceability-Sync, Tagging, Archivierung | `living-documentation`, `finishing-a-development-branch` | Bidirektionale Nachvollziehbarkeit zwischen Code und Docs |
+| **6. Auslieferung** | 📦 **Release Team** | Living-Doc-/Code-Traceability-Sync, Tagging, Archivierung | `living-documentation`, `finishing-a-development-branch`, `comet-archive` | Bidirektionale Nachvollziehbarkeit zwischen Code und Docs |
 
 > Siehe Global AGENTS.md, Abschnitt „Obligatorisches Expertengremium“.
 

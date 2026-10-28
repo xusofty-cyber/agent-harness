@@ -1,9 +1,0 @@
-{
-  "version": 1,
-  "max_runs_per_day": 20,
-  "max_tool_calls_per_day": 2000,
-  "max_verify_failures_per_day": 10,
-  "max_overrides_per_day": 5,
-  "max_stage_duration_ms": 600000,
-  "note": "Proxy-metric budget (Phase 2, 2-5). Over-budget only alerts and records a budget_exceeded event — it never auto-stops a run. No token limits: no host exposes a programmatic token API yet (see docs/internal/token-adapters.md)."
-}

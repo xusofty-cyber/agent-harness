@@ -9,8 +9,6 @@
 
 本项目提供全局、项目和目录级规范模板、Claude Code PreToolUse 钩子、技能文件，以及 Windows/Linux/macOS 部署脚本。各工具的规则加载方式和钩子能力不同；请以支持矩阵和部署脚本实际行为为准。钩子属于客户端机制，不是操作系统或服务端安全边界。
 
-> **定位**：本仓库是配置 + 技能分发包，外加自 Phase 1 起的最小门禁脚手架；不包含任何 Agent 运行时。核心门禁自有且与宿主无关，Comet 只是可选适配器，不是本仓库本身。
-
 ## 前置要求
 
 - **Linux/macOS**：`bash`、`git`、`python3`（大多数系统已预装）
@@ -26,7 +24,7 @@ graph TD
     G[Global AGENTS.md<br/>cross-project constitution] --> P[Project AGENTS.md<br/>project template]
     P --> D[Directory AGENTS.md<br/>monorepo micro-boundaries]
     P --> R[.agents/rules/<br/>on-demand sub-rules]
-    R --> S[.agents/skills/<br/>40 on-demand skills]
+    R --> S[.agents/skills/<br/>44 on-demand skills]
     G --> H[.claude/hooks/<br/>PreToolUse guards]
     S --> T[tools/<br/>sync, tui, doc-impact]
 ```
@@ -45,16 +43,16 @@ graph TD
    - 永久硬拦截（`exit 2`）：受保护分支（`develop`/`master`/`main`/`release*`/`staging`）直改提交、`git push --force`、删除受保护远端分支、受保护分支 rebase；
    - 部分命令会硬拒绝，其他情况只是非阻断警告；正则检查不能覆盖所有命令形式，也不能替代 Git 服务端分支保护。
 
-3. **40 个可复用技能目录（[`.agents/skills/`](.agents/skills/)）**：
+3. **44 个可复用技能目录（[`.agents/skills/`](.agents/skills/)）**：
    - **Comet 集成说明**：引导检查已安装版本和项目配置；此技能本身不实现 Comet 状态机或阶段守卫。
    - **活体文档与工程文档规范**：`living-documentation`（六阶文档体系：specs/architecture/reference/guides，Frontmatter 代码双向追溯关联，L0/L1/L2 变更门禁与文档演进）与 `engineering-docs`（31 种研发文档类型，15 个中英双语门禁模板，确保各 Agent 阶段输出格式一致）。
-   - **规范驱动开发（SDD）**：`openspec` 全套 12 个技能（提案、变更应用、验证、主文档同步、归档）。
+   - **规范驱动开发（SDD）**：`openspec` 全套 16 个技能（提案、变更应用、验证、主文档同步、归档）。
    - **测试驱动开发（TDD）**：`superpowers` 全套 15 个技能（TDD 红绿循环、系统性排障、完工验证证据门、工作区隔离）。
    - **实现与检索指导**：`ponytail`（最小实现决策阶梯）与 `codegraph`（CodeGraph 可选集成指引；CLI/MCP 需单独安装配置）。
    - **输出与表达指导**：`rtk`（Rust Token Killer 可选 CLI 指引；需配置命令重写 Hook）与 `caveman`（简明表达 Skill）。
    - **事前决策评审与共享记忆**：`option-review`（5 维度多候选方案事前独立评审与决策矩阵）与 `cross-tool-memory`（跨工具项目长期记忆导航与经验检索）。
-   - **专业文档处理**：`docx`（Word 专业排版）、`pdf`（结构化抽取与分析）。注：`docx` 自带完整 OOXML 校验工具链（约 1.3 MB），是仓库内最大的 skill，默认不再部署；需要时加 `--include-heavy-skills` / `-IncludeHeavySkills`（同时包含带本地服务 `scripts/server.cjs` 的 `brainstorming`）；已部署的旧副本不受影响，该选项只影响本次新复制；
-   - **技能使用与触发时机指南**：各 skill 的触发机制（自动/显式/混合）、分类速查与项目记忆使用说明详见 [`Skills Usage Guide.zh.md`](docs/guides/Skills%20Usage%20Guide.zh.md)（[English](docs/guides/Skills%20Usage%20Guide.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md) | [Français](docs/guides/Skills%20Usage%20Guide.fr.md) | [Deutsch](docs/guides/Skills%20Usage%20Guide.de.md)）。部署分层（Phase 4）：默认只部署 10 个核心技能（`--profile minimal`）；`--profile standard` 部署 18 个，`--profile full` 部署全部 40 个（重型技能仍需 `--include-heavy-skills`）。
+   - **专业文档处理**：`docx`（Word 专业排版）、`pdf`（结构化抽取与分析）；
+   - **技能使用与触发时机指南**：各 skill 的触发机制（自动/显式/混合）、分类速查与项目记忆使用说明详见 [`Skills Usage Guide.zh.md`](docs/guides/Skills%20Usage%20Guide.zh.md)（[English](docs/guides/Skills%20Usage%20Guide.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md) | [Français](docs/guides/Skills%20Usage%20Guide.fr.md) | [Deutsch](docs/guides/Skills%20Usage%20Guide.de.md)）。
    - **Agent 正确触发与常见问题排查指南 (FAQ)**：如何精准唤醒特定技能、避免角色扮演式脑补、正确配置 AI 记忆与状态机排障详见 [`Agent Triggering and FAQ Guide.zh.md`](docs/guides/Agent%20Triggering%20and%20FAQ%20Guide.zh.md)。
 
 4. **一键部署、交互向导与统一流水线（`deploy-agents` & `run-pipeline`）**：
@@ -73,15 +71,15 @@ graph TD
 
 ### 支持范围
 
-| 工具 | 本仓库提供的配置/接线 | 执行档 | 状态 |
-|---|---|---|---|
-| Claude Code | `CLAUDE.md` 桥接、`.claude/skills/` 链接、`.claude/settings.json` Hook | 强制（钩子） | 脚本配置；Hook 仅在 Claude Code 客户端运行 |
-| Antigravity 2.0 / CLI / IDE 与扩展 | 项目规则/技能目录；`--global` 写入 `~/.gemini/AGENTS.md` 和 `GEMINI.md` 兼容指针 | 配置 | 当前表面支持两个全局文件名；较早 IDE 可跟随指针读取规范文件；CLI 专属规则另行配置 |
-| Codex | 全局 `$CODEX_HOME/AGENTS.md`（默认 `~/.codex/AGENTS.md`）、项目 `AGENTS.md` 与 `.agents/skills/` | 配置 | `-Global` 初始化 Codex 全局文件；`-Global -Update` 备份后覆盖当前生效的全局规则 |
-| ai-memory | Claude Code、Codex CLI、Antigravity CLI 的可选 MCP/hooks；Antigravity 2.0 与 IDE 提供 MCP-only 设置 | 配置 | 项目显式选择加入；Codex 桌面版按安装版本核实；ChatGPT 网页版人工交接 |
-| GitHub Copilot | `.github/copilot-instructions.md` 桥接 | 配置 | 脚本配置；具体行为依 Copilot 版本/模式 |
-| Zed | `AGENTS.md` 文件 | 仅文件 | 提供可复用文件；脚本不创建 Zed 专属配置 |
-| Pi / OpenCode | 未提供专用入口或脚本验证 | 仅文件 | 未适配；不能据此推断自动加载 |
+| 工具 | 本仓库提供的配置/接线 | 状态 |
+|---|---|---|
+| Claude Code | `CLAUDE.md` 桥接、`.claude/skills/` 链接、`.claude/settings.json` Hook | 脚本配置；Hook 仅在 Claude Code 客户端运行 |
+| Antigravity 2.0 / CLI / IDE 与扩展 | 项目规则/技能目录；`--global` 写入 `~/.gemini/AGENTS.md` 和 `GEMINI.md` 兼容指针 | 当前表面支持两个全局文件名；较早 IDE 可跟随指针读取规范文件；CLI 专属规则另行配置 |
+| Codex | 全局 `$CODEX_HOME/AGENTS.md`（默认 `~/.codex/AGENTS.md`）、项目 `AGENTS.md` 与 `.agents/skills/` | `-Global` 初始化 Codex 全局文件；`-Global -Update` 备份后覆盖当前生效的全局规则 |
+| ai-memory | Claude Code、Codex CLI、Antigravity CLI 的可选 MCP/hooks；Antigravity 2.0 与 IDE 提供 MCP-only 设置 | 项目显式选择加入；Codex 桌面版按安装版本核实；ChatGPT 网页版人工交接 |
+| GitHub Copilot | `.github/copilot-instructions.md` 桥接 | 脚本配置；具体行为依 Copilot 版本/模式 |
+| Zed | `AGENTS.md` 文件 | 提供可复用文件；脚本不创建 Zed 专属配置 |
+| Pi / OpenCode | 未提供专用入口或脚本验证 | 未适配；不能据此推断自动加载 |
 
 ---
 
@@ -95,7 +93,7 @@ agent-harness/
 │   │   ├── git-workflow.md          # Git 授权模型、受保护分支强隔离、提交规范
 │   │   ├── security-boundary.md     # 八大高风险操作防呆矩阵、凭证零泄露
 │   │   └── token-discipline.md      # 读拿说三道闸门、上下文防漏与日志截断
-│   └── skills/                      # 40 个原生工程技能库（Comet, OpenSpec, Superpowers...）
+│   └── skills/                      # 44 个原生工程技能库（Comet, OpenSpec, Superpowers...）
 ├── .claude/
 │   ├── settings.json                # Claude Code PreToolUse 安全拦截配置
 │   └── hooks/                       # 安全钩子脚本（Node.js，读取 stdin JSON）

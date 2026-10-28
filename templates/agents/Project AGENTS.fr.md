@@ -68,7 +68,7 @@ Ce projet impose une boucle fermée d'ingénierie où chaque étape s'enchaîne 
 | **3. Implémentation**| 💻 **Développeur** | Code de production, tests unitaires, refactoring ciblé | `test-driven-development`, `ponytail`, `writing-plans` | Tests d'abord (boucle rouge-vert), implémentation minimale et propre |
 | **4. Revue de code** | 🔍 **Réviseur (Reviewer)** | Rapport déterministe, audit de sécurité, liste des correctifs | `open-code-review`, `requesting-code-review` | Constats ancrés à la ligne, zéro défaut critique/majeur |
 | **5. Vérification** | 🧪 **QA (Ingénieur Test)** | Conception des cas de test, validation des limites, rapport | `verification-before-completion`, `systematic-debugging` | Suite complète au vert avec preuves tangibles en console |
-| **6. Livraison** | 📦 **Release Team** | Synchronisation living doc/code, étiquetage, archivage | `living-documentation`, `finishing-a-development-branch` | Traçabilité bidirectionnelle documentation et code validée |
+| **6. Livraison** | 📦 **Release Team** | Synchronisation living doc/code, étiquetage, archivage | `living-documentation`, `finishing-a-development-branch`, `comet-archive` | Traçabilité bidirectionnelle documentation et code validée |
 
 > Voir la section « Comité d'experts obligatoire » du Global AGENTS.md.
 

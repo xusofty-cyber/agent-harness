@@ -1,1 +1,0 @@
-{"build":"python3 -m py_compile gate/pass-gate.py tests/repo_checks.py","start":"python3 gate/pass-gate.py status","test":"python3 tests/repo_checks.py"}

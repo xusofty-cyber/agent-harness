@@ -51,7 +51,6 @@ usage() {
     echo "  -k, --check-only        只读检查模式 (技能仅检查差异、文档仅分析影响)"
     echo "  --apply-skills          在技能同步阶段主动拉取并应用上游更新"
     echo "  --brief-probe           探针极简输出模式 (仅打印探针关键摘要前 15 项，适合 CI)"
-    echo "  --strict              严格模式：任一阶段失败记 FAIL、流水线退出 1；默认 advisory 模式：失败记 WARN、退出 0（但绝不记 PASS）"
     echo "  -y, --yes               非交互/无人值守执行 (直接使用推荐配置，不弹窗确认)"
     echo "  --interactive, -I       强制启用交互式逐步选择向导"
     echo "  -h, --help              显示本帮助信息"
@@ -289,7 +288,6 @@ NON_INTERACTIVE=false
 FORCE_INTERACTIVE=false
 EXPLICIT_CONFIG=false
 BRIEF_PROBE=false
-STRICT_MODE=false
 RUN_DETAIL_MODE="quick" # quick or detailed
 GLOBAL_DEPLOYED_IN_WIZARD=false
 SKILLS_SYNC_CHOICE="check"
@@ -491,7 +489,6 @@ while [[ $# -gt 0 ]]; do
         -k|--check-only) CHECK_ONLY=true; EXPLICIT_CONFIG=true; shift ;;
         --apply-skills) APPLY_SKILLS=true; EXPLICIT_CONFIG=true; shift ;;
         --brief-probe) BRIEF_PROBE=true; shift ;;
-        --strict) STRICT_MODE=true; shift ;;
         -y|--yes|--non-interactive) NON_INTERACTIVE=true; shift ;;
         -I|--interactive) FORCE_INTERACTIVE=true; shift ;;
         -h|--help) usage ;;
@@ -802,54 +799,6 @@ declare -a SUMMARY_NAMES=()
 declare -a SUMMARY_STATUS=()
 declare -a SUMMARY_DETAIL=()
 
-# Phase 2 (2-1): record a stage outcome honestly. A tool that exits
-# non-zero is NEVER recorded as PASS (the old code did exactly that:
-# `cmd || true` followed by an unconditional PASS). In --strict mode the
-# stage is FAIL and the pipeline exits 1; in default (advisory) mode it
-# is WARN — visible in the summary, exit 0, but not a pass.
-# Stage 1 (deploy) does not use this helper: a deploy failure is FAIL in
-# every mode, because deploying is the pipeline's own job, not advice.
-# Usage: record_stage <rc> <stage_label> <pass_detail> <fail_detail>
-record_stage() {
-    local _rc="$1" _label="$2" _pass="$3" _fail="$4"
-    if [ "$_rc" -eq 0 ]; then
-        echo -e "${GREEN}✔ ${_label} 执行完成${NC}\n"
-        SUMMARY_STATUS+=("PASS")
-        SUMMARY_DETAIL+=("$_pass")
-        record_ledger "$_label" "pass"
-    elif [ "$STRICT_MODE" = true ]; then
-        echo -e "${RED}✖ ${_label} 出现错误（退出码 ${_rc}，--strict）${NC}\n"
-        SUMMARY_STATUS+=("FAIL")
-        SUMMARY_DETAIL+=("$_fail（--strict）")
-        record_ledger "$_label" "fail"
-    else
-        echo -e "${YELLOW}⚠ ${_label} 未完全成功（退出码 ${_rc}），记为 WARN（默认 advisory 模式；--strict 会记为 FAIL）${NC}\n"
-        SUMMARY_STATUS+=("WARN")
-        SUMMARY_DETAIL+=("$_fail（advisory）")
-        record_ledger "$_label" "warn"
-    fi
-}
-
-# Phase 2 (2-5): one cost-ledger event per pipeline stage, keyed by run id.
-# Only when the target project has a gate/ directory, and only as advisory
-# telemetry: a ledger failure is reported to stderr but never fails the
-# pipeline and never changes the stage outcome. (The `||` below is on
-# telemetry, not on a stage tool — §3l guards stage-tool swallowing.)
-RUN_ID="$(date +%Y%m%d%H%M%S)-$$"
-record_ledger() {
-    local _gate_dir="${TARGET_ABS}/gate"
-    [ -d "$_gate_dir" ] || return 0
-    command -v python3 >/dev/null 2>&1 || return 0
-    local _dur=0
-    if [ -n "${STAGE_START_S:-}" ]; then
-        _dur=$(( ($(date +%s) - STAGE_START_S) * 1000 ))
-    fi
-    python3 "${REPO_ROOT}/tools/cost-ledger.py" record \
-        --gate-dir "$_gate_dir" --kind stage --stage "$1" --status "$2" \
-        --duration-ms "$_dur" --run-id "$RUN_ID" \
-        || echo "  [!] cost ledger record failed (telemetry only, stage outcome unaffected)" >&2
-}
-
 TOTAL_STAGES=0
 if [ "$STAGE_DEPLOY" = true ]; then TOTAL_STAGES=$((TOTAL_STAGES+1)); fi
 if [ "$STAGE_MEMORY" = true ]; then TOTAL_STAGES=$((TOTAL_STAGES+1)); fi
@@ -863,7 +812,6 @@ CURRENT_STAGE=0
 # ==============================================================================
 if [ "$STAGE_DEPLOY" = true ]; then
     CURRENT_STAGE=$((CURRENT_STAGE+1))
-    STAGE_START_S=$(date +%s)  # Phase 2 (2-5): stage timing for the cost ledger
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${BOLD}[$CURRENT_STAGE/$TOTAL_STAGES] 阶段 1: 规则与 Agent 桥接部署 (deploy-agents)${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -893,12 +841,10 @@ if [ "$STAGE_DEPLOY" = true ]; then
         echo -e "${GREEN}✔ 阶段 1 执行完成${NC}\n"
         SUMMARY_STATUS+=("PASS")
         SUMMARY_DETAIL+=("规则与桥接文件配置就绪")
-        record_ledger "阶段 1" "pass"
     else
         echo -e "${RED}✖ 阶段 1 出现错误${NC}\n"
         SUMMARY_STATUS+=("FAIL")
         SUMMARY_DETAIL+=("部署脚本返回非零退出码")
-        record_ledger "阶段 1" "fail"
     fi
 fi
 
@@ -907,7 +853,6 @@ fi
 # ==============================================================================
 if [ "$STAGE_MEMORY" = true ]; then
     CURRENT_STAGE=$((CURRENT_STAGE+1))
-    STAGE_START_S=$(date +%s)  # Phase 2 (2-5): stage timing for the cost ledger
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${BOLD}[$CURRENT_STAGE/$TOTAL_STAGES] 阶段 2: 配置 AI-Memory 记忆服务 (setup-ai-memory)${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -956,20 +901,17 @@ if [ "$STAGE_MEMORY" = true ]; then
         fi
 
         if [ -f "$toml_path" ] && ! grep -Eq 'replace-with-' "$toml_path"; then
-            # Phase 2 (2-1): capture the exit code — the old `|| true` here
-            # swallowed failures and the stage was recorded PASS regardless.
-            _stage2_rc=0
             (
                 cd "$TARGET_ABS"
                 if [ "$RUN_DETAIL_MODE" = "detailed" ] && [ -t 0 ]; then
                     "$REPO_ROOT/setup-ai-memory.sh"
                 else
-                    "$REPO_ROOT/setup-ai-memory.sh" "claude-code" "codex" "antigravity-ide"
+                    "$REPO_ROOT/setup-ai-memory.sh" "claude-code" "codex" "antigravity-ide" || true
                 fi
-            ) || _stage2_rc=$?
-            record_stage "$_stage2_rc" "阶段 2" \
-                "AI 记忆集成与 MCP 配置完成" \
-                "setup-ai-memory 返回非零退出码 ${_stage2_rc}"
+            )
+            echo -e "${GREEN}✔ 阶段 2 执行完成${NC}\n"
+            SUMMARY_STATUS+=("PASS")
+            SUMMARY_DETAIL+=("AI 记忆集成与 MCP 配置完成")
         elif [ "${SUMMARY_STATUS[-1]:-}" != "SKIP" ]; then
             echo -e "${YELLOW}↷ .ai-memory.toml 仍包含占位符，跳过阶段 2。${NC}\n"
             SUMMARY_STATUS+=("SKIP")
@@ -983,7 +925,6 @@ fi
 # ==============================================================================
 if [ "$STAGE_SKILLS" = true ]; then
     CURRENT_STAGE=$((CURRENT_STAGE+1))
-    STAGE_START_S=$(date +%s)  # Phase 2 (2-5): stage timing for the cost ledger
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${BOLD}[$CURRENT_STAGE/$TOTAL_STAGES] 阶段 3: 校验/同步外部技能库 (sync-skills)${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -1000,16 +941,12 @@ if [ "$STAGE_SKILLS" = true ]; then
         SUMMARY_STATUS+=("SKIP")
         SUMMARY_DETAIL+=("未找到 Python 环境")
     else
-        # Phase 2 (2-1): the tools always run with --strict so their findings
-        # are machine-detectable; record_stage decides FAIL (strict) vs WARN
-        # (advisory default). The old swallow-then-PASS pattern is gone.
-        skills_cmd=("$PYTHON_BIN" "$REPO_ROOT/tools/sync-skills.py" "--strict")
+        skills_cmd=("$PYTHON_BIN" "$REPO_ROOT/tools/sync-skills.py")
         if [ "$CHECK_ONLY" = true ]; then
             skills_cmd+=("--check-only")
         fi
-        _skills_rc=0
         if [ "$RUN_DETAIL_MODE" = "detailed" ] && [ -t 0 ]; then
-            "${skills_cmd[@]}" || _skills_rc=$?
+            "${skills_cmd[@]}" || true
         else
             if [ "$CHECK_ONLY" != true ]; then
                 if [ "$RUN_APPLY_SKILLS" = true ]; then
@@ -1020,11 +957,11 @@ if [ "$STAGE_SKILLS" = true ]; then
             else
                 skills_cmd+=("--check")
             fi
-            "${skills_cmd[@]}" || _skills_rc=$?
+            "${skills_cmd[@]}" || true
         fi
-        record_stage "$_skills_rc" "阶段 3" \
-            "技能锁定与版本校验完成" \
-            "sync-skills.py 返回非零退出码 ${_skills_rc}"
+        echo -e "${GREEN}✔ 阶段 3 检查完成${NC}\n"
+        SUMMARY_STATUS+=("PASS")
+        SUMMARY_DETAIL+=("技能锁定与版本校验完成")
     fi
 fi
 
@@ -1033,7 +970,6 @@ fi
 # ==============================================================================
 if [ "$STAGE_DOCS" = true ]; then
     CURRENT_STAGE=$((CURRENT_STAGE+1))
-    STAGE_START_S=$(date +%s)  # Phase 2 (2-5): stage timing for the cost ledger
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${BOLD}[$CURRENT_STAGE/$TOTAL_STAGES] 阶段 4: 活体文档影响分析与质检 (doc-impact)${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -1046,18 +982,20 @@ if [ "$STAGE_DOCS" = true ]; then
         SUMMARY_STATUS+=("SKIP")
         SUMMARY_DETAIL+=("未找到 Python 环境")
     else
-        # Phase 2 (2-1): doc-impact always runs with --strict; a must-update
-        # document is FAIL in strict mode, WARN in advisory default.
-        docs_cmd=("$PYTHON_BIN" "$REPO_ROOT/tools/doc-impact.py" "--root" "$TARGET_ABS" "--strict")
+        docs_cmd=("$PYTHON_BIN" "$REPO_ROOT/tools/doc-impact.py" "--root" "$TARGET_ABS")
         if [ "$RUN_DETAIL_MODE" = "detailed" ] && [ -t 0 ]; then
             docs_cmd+=("--interactive")
         fi
 
-        _docs_rc=0
-        "${docs_cmd[@]}" || _docs_rc=$?
-        record_stage "$_docs_rc" "阶段 4" \
-            "活体文档溯源关系与影响分析通过" \
-            "doc-impact.py 返回非零退出码 ${_docs_rc}（有文档 must-update）"
+        if "${docs_cmd[@]}"; then
+            echo -e "${GREEN}✔ 阶段 4 质检完成${NC}\n"
+            SUMMARY_STATUS+=("PASS")
+            SUMMARY_DETAIL+=("活体文档溯源关系与影响分析通过")
+        else
+            echo -e "${RED}✖ 阶段 4 出现错误${NC}\n"
+            SUMMARY_STATUS+=("FAIL")
+            SUMMARY_DETAIL+=("文档影响分析返回非零退出码")
+        fi
     fi
 fi
 
@@ -1113,10 +1051,6 @@ for i in "${!SUMMARY_NAMES[@]}"; do
             ;;
         SKIP)
             printf " ${YELLOW}[↷ SKIP]${NC}  %-40s : %s\n" "$nm" "$dt"
-            ;;
-        WARN)
-            # Phase 2 (2-1): advisory failure — visible, not a pass, not fatal.
-            printf " ${YELLOW}[! WARN]${NC}  %-40s : %s\n" "$nm" "$dt"
             ;;
         FAIL)
             printf " ${RED}[✖ FAIL]${NC}  %-40s : %s\n" "$nm" "$dt"

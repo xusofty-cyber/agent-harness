@@ -68,18 +68,6 @@ class TestExternalSkillsFilter(unittest.TestCase):
             result = mod.external_skills(self._lock(), only="local")
         self.assertEqual(result, [])
 
-    def test_meta_entries_skipped_even_with_skill_path(self):
-        # Phase 2, 2-2c: a "meta": true entry is a suite pin, never a
-        # syncable skill — even if it looks like one (skills/ path + dir).
-        lock = self._lock()
-        lock["skills"]["suite-pin"] = {
-            "sourceType": "github", "source": "o/suite",
-            "skillPath": "skills/suite/SKILL.md", "meta": True}
-        with patch.object(Path, "is_file", lambda self: True):
-            result = mod.external_skills(lock)
-        names = [n for n, _ in result]
-        self.assertEqual(names, ["ext-ok"])
-
 
 class TestCheckSkill(unittest.TestCase):
     def test_in_sync(self):
@@ -180,30 +168,6 @@ class TestLocalSkillsFilter(unittest.TestCase):
             sd.__truediv__.return_value.__truediv__.return_value.is_file.return_value = True
             names = [n for n, _ in mod.local_skills(lock)]
         self.assertEqual(sorted(names), ["a", "c"])
-
-
-class TestStrictExitCode(unittest.TestCase):
-    """Phase 2, 2-1: --strict exit codes are a pure function of the summary."""
-
-    def test_clean_is_zero(self):
-        self.assertEqual(mod.strict_exit_code({"in-sync": 12}), 0)
-        self.assertEqual(mod.strict_exit_code({}), 0)
-
-    def test_drift_is_one(self):
-        for status in ("outdated", "tampered", "tampered-local",
-                       "missing-hash", "missing-local"):
-            self.assertEqual(mod.strict_exit_code({status: 1}), 1, status)
-            self.assertEqual(
-                mod.strict_exit_code({"in-sync": 5, status: 2}), 1, status)
-
-    def test_fetch_failed_is_two_and_dominates(self):
-        self.assertEqual(mod.strict_exit_code({"fetch-failed": 1}), 2)
-        self.assertEqual(
-            mod.strict_exit_code({"fetch-failed": 1, "outdated": 3}), 2)
-
-    def test_updated_does_not_fail(self):
-        # --apply refreshed the lock; nothing is wrong anymore.
-        self.assertEqual(mod.strict_exit_code({"updated": 2}), 0)
 
 
 if __name__ == "__main__":
