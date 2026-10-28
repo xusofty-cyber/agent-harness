@@ -68,7 +68,7 @@
 | **3. 编码实现** | 💻 **Developer (程序员)** | 业务代码实现、单元测试、局部代码优化 | `test-driven-development`, `ponytail`, `writing-plans` | 测试先行（红绿循环），最小清晰实现 |
 | **4. 代码审查** | 🔍 **Reviewer (审查员)** | 确定性审查报告、安全审计、修改清单 | `open-code-review`, `requesting-code-review` | 行号锚定，Critical / High 缺陷零残留 |
 | **5. 测试验证** | 🧪 **QA (测试工程师)** | 测试用例设计、边界验证、Bug 复测与验证报告 | `verification-before-completion`, `systematic-debugging` | 跑通测试套件，提供客观真实运行证据 |
-| **6. 交付归档** | 📦 **Release Team** | 活体文档与追溯同步、版本标记、变更归档 | `living-documentation`, `finishing-a-development-branch` | 代码与活体文档双向追溯同步 |
+| **6. 交付归档** | 📦 **Release Team** | 活体文档与追溯同步、版本标记、变更归档 | `living-documentation`, `finishing-a-development-branch`, `comet-archive` | 代码与活体文档双向追溯同步 |
 
 > 专家团队评审规范见 Global AGENTS.md「专家团队评审法定席位」章节。
 

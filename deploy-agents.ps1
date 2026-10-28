@@ -35,23 +35,8 @@ param (
 
     [switch]$Interactive,
 
-    [switch]$Pipeline,
-
-    [switch]$IncludeHeavySkills,
-
-    # Phase 4 (4-1): deployment profile. Default minimal (10 core skills);
-    # membership lives in skills-profiles.json. NOTE: $Profile is a
-    # PowerShell automatic variable and cannot be a parameter name, so the
-    # parameter is $SkillProfile.
-    [ValidateSet("minimal", "standard", "full")]
-    [string]$SkillProfile = "minimal"
+    [switch]$Pipeline
 )
-
-# Phase 2 (2-2): pinned Comet CLI version, measured 2026-10-28 with
-# `npm view @rpamis/comet version` (0.5.1; git tag 0.5.1 =
-# 35c9860b77b42bafa0c2d80d8d695889f888a924). Must match
-# skills-lock.json comet.npmVersion — tests/repo_checks.py guards it.
-$script:CometNpmVersion = "0.5.1"
 
 $ToolClaude = $true
 $ToolCopilot = $true
@@ -418,14 +403,7 @@ function Confirm-OptionalStep([string]$Prompt) {
 }
 
 function Guide-OptionalCliTools([string]$TargetPath) {
-    # Phase 2 (2-2): pinned installer — the URL pins the upstream commit and
-    # the SHA256 is the hash of install.ps1 at that commit (measured
-    # 2026-10-28). Must match skills-lock.json codegraph.installerSha256Ps1 —
-    # tests/repo_checks.py guards the agreement. Never pipe a live download
-    # into Invoke-Expression: download, verify, then run.
-    $codegraphInstallUrl = 'https://raw.githubusercontent.com/colbymchenry/codegraph/01e0ac3aa7419a7ab75583963e8a95359f3af1d3/install.ps1'
-    $codegraphInstallSha256 = '024091f428cac6eaa217bae8f840a9572a91daab974a8354085ba72f86f6aee1'
-    $codegraphInstall = "Download $codegraphInstallUrl, verify SHA256 $codegraphInstallSha256, then run the downloaded install.ps1"
+    $codegraphInstall = 'irm https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.ps1 | iex'
     $rtkInstall = 'winget install rtk-ai.rtk'
 
     Write-Host "`n>>> Optional CLI tools (Ponytail and Caveman Skills are already copied with the project)" -ForegroundColor Cyan
@@ -436,16 +414,8 @@ function Guide-OptionalCliTools([string]$TargetPath) {
         Write-Host "  CodeGraph CLI is optional. It connects agents and builds a local project index."
         if (Confirm-OptionalStep "Install CodeGraph CLI now? Agent wiring and project indexing will be asked separately") {
             try {
-                $tmpInstaller = Join-Path $env:TEMP "codegraph-install.ps1"
-                Invoke-RestMethod $codegraphInstallUrl -OutFile $tmpInstaller
-                $actualHash = (Get-FileHash -Algorithm SHA256 $tmpInstaller).Hash.ToLower()
-                if ($actualHash -ne $codegraphInstallSha256.ToLower()) {
-                    Write-Warning "CodeGraph installer SHA256 mismatch (expected $codegraphInstallSha256, got $actualHash). Refusing to run."
-                } else {
-                    & $tmpInstaller
-                    Write-Host "  [INFO] Reopen PowerShell if codegraph is not yet on PATH. Then run codegraph install and codegraph init from the project directory." -ForegroundColor Yellow
-                }
-                Remove-Item $tmpInstaller -ErrorAction SilentlyContinue
+                Invoke-Expression (Invoke-RestMethod 'https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.ps1')
+                Write-Host "  [INFO] Reopen PowerShell if codegraph is not yet on PATH. Then run codegraph install and codegraph init from the project directory." -ForegroundColor Yellow
             } catch {
                 Write-Warning "CodeGraph installation failed. Official command: $codegraphInstall"
             }
@@ -477,10 +447,6 @@ function Guide-OptionalCliTools([string]$TargetPath) {
         Write-Host "  RTK CLI is optional. The 'rtk' name is shared by unrelated tools; verify with 'rtk gain'."
         if (Confirm-OptionalStep "Install Rust Token Killer (RTK) CLI now?") {
             if (Get-Command winget -ErrorAction SilentlyContinue) {
-                # Phase 2 (2-2) note: winget resolves the latest manifest release;
-                # there is no git-commit pin on this channel. The lock's rtk
-                # pinnedCommit/installerSha256 cover the sh installer path.
-                # See DECISIONS.md D13.
                 & winget install rtk-ai.rtk
                 if ($LASTEXITCODE -ne 0) { Write-Warning "RTK installation failed. Official command: $rtkInstall" }
                 Write-Host "  [INFO] Reopen PowerShell, run rtk gain to verify, then run rtk init in the project if you want the hook." -ForegroundColor Yellow
@@ -531,18 +497,12 @@ function Guide-OptionalCliTools([string]$TargetPath) {
     } else {
         Write-Host "  Comet CLI is optional. The comet skill only provides entry guidance; install to use --comet-init for project init."
         if (Confirm-OptionalStep "Install Comet CLI now?") {
-            & $npmCmd install -g "@rpamis/comet@$script:CometNpmVersion"
-            if ($LASTEXITCODE -ne 0) { Write-Warning "comet installation failed. Manual command: npm install -g @rpamis/comet@$script:CometNpmVersion" }
+            & $npmCmd install -g @rpamis/comet
+            if ($LASTEXITCODE -ne 0) { Write-Warning "comet installation failed. Manual command: npm install -g @rpamis/comet" }
             else { Write-Host "  [INFO] comet installed." -ForegroundColor Yellow }
         } else {
-            Write-Host "  Install command: npm install -g @rpamis/comet@$script:CometNpmVersion"
+            Write-Host "  Install command: npm install -g @rpamis/comet"
         }
-    }
-    # Phase 2 (2-2): verify the installed comet matches the pinned version.
-    # A mismatch is a loud warning here; tools/check-comet.py is the hard gate.
-    if ((Get-Command comet -ErrorAction SilentlyContinue) -and (Get-Command python -ErrorAction SilentlyContinue)) {
-        & python (Join-Path $PSScriptRoot "tools\check-comet.py")
-        if ($LASTEXITCODE -ne 0) { Write-Warning "Installed comet does not match the pinned version (@rpamis/comet@$script:CometNpmVersion, measured 2026-10-28). Run npm install -g @rpamis/comet@$script:CometNpmVersion to update." }
     }
 }
 
@@ -612,7 +572,6 @@ if (-not $ProjectPath -and -not $Global) {
     Write-Host "  -ProjectPath   目标项目根目录路径。"
     Write-Host "  -Global (-g)   初始化 Claude、Antigravity 2.0/CLI/IDE、Codex 用户全局规则。"
     Write-Host "  -Update (-u)   更新模板仓库；与 -Global 一起使用时，先备份再覆盖全局规则。"
-    Write-Host "  -IncludeHeavySkills   部署可选重型技能 docx 与 brainstorming（默认跳过；docx 约 1.3 MB，brainstorming 含本地服务 server.cjs）。只影响本次新复制，不删除目标项目已有文件。"
     exit 0
 }
 if ($DirectoryPath -and -not ($Initialize -or $Check)) { throw "-DirectoryPath requires -Initialize or -Check." }
@@ -806,14 +765,10 @@ if (-not $ProjectPath) {
     exit 0
 }
 
-# Validate target project directory (target-auto-create: create it if missing)
-if (Test-Path -LiteralPath $ProjectPath -PathType Leaf) {
-    Write-Host "`n[ERROR] Target project path exists but is not a directory: $ProjectPath" -ForegroundColor Red
+# Validate target project directory
+if (-not (Test-Path $ProjectPath)) {
+    Write-Host "`n[ERROR] Target project path does not exist: $ProjectPath" -ForegroundColor Red
     exit 1
-}
-if (-not (Test-Path -LiteralPath $ProjectPath -PathType Container)) {
-    Write-Host "  [INFO] Target project directory does not exist; creating it: $ProjectPath" -ForegroundColor Yellow
-    try { New-Item -ItemType Directory -Force -Path $ProjectPath | Out-Null } catch { Write-Host "`n[ERROR] Failed to create target directory: $ProjectPath" -ForegroundColor Red; exit 1 }
 }
 $ResolvedProjectPath = (Resolve-Path $ProjectPath).Path
 if (($Initialize -or $Check) -and $DirectoryPath) {
@@ -1178,19 +1133,7 @@ if ((Test-Path $SourceReviewSensitivePaths) -and (-not $isSelfRepo)) {
 # ==============================================================================
 # 5. Deploy / Update Skills (.agents/skills/ & .claude/skills/)
 # ==============================================================================
-Write-Host "`n>>> [3/3] Deploying integrated skills library (Profile: $SkillProfile)..." -ForegroundColor Yellow
-
-# Phase 4 (4-1): resolve the profile's skill list from skills-profiles.json
-# (single source of truth). "full" needs no filtering.
-# SkillProfile
-$script:ProfileSkills = @()
-if ($SkillProfile -ne "full") {
-    $profilesFile = Join-Path $ScriptDir "skills-profiles.json"
-    if (-not (Test-Path $profilesFile)) {
-        throw "skills-profiles.json not found at $profilesFile"
-    }
-    $script:ProfileSkills = (Get-Content $profilesFile -Raw | ConvertFrom-Json).profiles.$SkillProfile.skills
-}
+Write-Host "`n>>> [3/3] Deploying integrated skills library..." -ForegroundColor Yellow
 
 $TargetSkillsDir = Join-Path $ResolvedProjectPath ".agents\skills"
 $TargetClaudeSkillsDir = Join-Path $ResolvedProjectPath ".claude\skills"
@@ -1205,17 +1148,6 @@ if (-not (Test-Path $TargetClaudeSkillsDir)) {
 if (Test-Path $SourceSkillsDir) {
     Get-ChildItem -Path $SourceSkillsDir -Directory | ForEach-Object {
         $skillName = $_.Name
-        # Phase 4 (4-1): profile filter. "full" deploys everything;
-        # minimal/standard only deploy their listed skills.
-        if ($SkillProfile -ne "full" -and $script:ProfileSkills -notcontains $skillName) {
-            Write-Host "  [INFO] Skipping non-$SkillProfile skill .agents/skills/$skillName (use -Profile full to deploy all skills)." -ForegroundColor Gray
-            return
-        }
-        # include-heavy-skills: docx + brainstorming are opt-in (heavy / local service)
-        if (($skillName -eq "docx" -or $skillName -eq "brainstorming") -and -not $IncludeHeavySkills) {
-            Write-Host "  [INFO] Skipping optional heavy skill .agents/skills/$skillName (use -IncludeHeavySkills to deploy)." -ForegroundColor Gray
-            return
-        }
         $targetSkillPath = Join-Path $TargetSkillsDir $skillName
         
         # Copy / Update skill files
@@ -1263,30 +1195,6 @@ if ((Test-Path $SourceSkillsLock) -and (-not $isSelfRepo)) {
         Copy-Item -Path $SourceSkillsLock -Destination $targetSkillsLock -Force
         Write-Host "  [OK] Synced skills-lock.json" -ForegroundColor Green
     }
-}
-
-# Deploy gate layer (Phase 1): pass-gate.py + schema + init template.
-# GateDeploy
-# Only the code ships. feature_list.json / events.jsonl are per-project
-# state, created by `gate/init.template.sh` or `pass-gate.py init` — never
-# copied from this repo. Skipped on self-deploy (same directory).
-$SourceGateDir = Join-Path $ScriptDir "gate"
-if ((Test-Path $SourceGateDir) -and (-not $isSelfRepo)) {
-    $TargetGateDir = Join-Path $ResolvedProjectPath "gate"
-    if (-not (Test-Path $TargetGateDir)) {
-        New-Item -ItemType Directory -Path $TargetGateDir -Force | Out-Null
-    }
-    foreach ($gateFile in @("pass-gate.py", "feature_list.schema.json", "init.template.sh", "README.md")) {
-        $sourceFile = Join-Path $SourceGateDir $gateFile
-        if (Test-Path $sourceFile) {
-            $targetFile = Join-Path $TargetGateDir $gateFile
-            if ($Update -or (-not (Test-Path $targetFile))) {
-                if ($Update) { Backup-ManagedPath $targetFile }
-                Copy-Item -Path $sourceFile -Destination $targetFile -Force
-            }
-        }
-    }
-    Write-Host "  [OK] Deployed gate layer: gate/ (pass-gate.py + schema + init.template.sh)" -ForegroundColor Green
 }
 
 # Sync .ai-memory.toml.example
@@ -1384,7 +1292,7 @@ if ($CometInit) {
             Write-Warning "comet init encountered an issue: $_"
         }
     } else {
-        Write-Warning "'-CometInit' was specified, but 'comet' CLI is not found in PATH. Install via: npm install -g @rpamis/comet@$script:CometNpmVersion"
+        Write-Warning "'-CometInit' was specified, but 'comet' CLI is not found in PATH. Install via: npm install -g @rpamis/comet"
     }
 }
 
@@ -1455,7 +1363,6 @@ if (-not (Test-Path $targetGitignore)) {
 *.bak-*
 /.ai-memory.toml
 scratch/
-gate/cost-ledger.jsonl
 "@
         Set-Content -Path $targetGitignore -Value $defaultGiContent -Encoding utf8
     }
@@ -1482,7 +1389,6 @@ gate/cost-ledger.jsonl
 *.bak-*
 /.ai-memory.toml
 scratch/
-gate/cost-ledger.jsonl
 "@
         }
         $newGiContent = if ($giContent.EndsWith("`n")) { "$giContent`n$snippetText" } else { "$giContent`n`n$snippetText" }

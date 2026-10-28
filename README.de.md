@@ -24,7 +24,7 @@ graph TD
     G[Global AGENTS.md<br/>cross-project constitution] --> P[Project AGENTS.md<br/>project template]
     P --> D[Directory AGENTS.md<br/>monorepo micro-boundaries]
     P --> R[.agents/rules/<br/>on-demand sub-rules]
-    R --> S[.agents/skills/<br/>40 on-demand skills]
+    R --> S[.agents/skills/<br/>44 on-demand skills]
     G --> H[.claude/hooks/<br/>PreToolUse guards]
     S --> T[tools/<br/>sync, tui, doc-impact]
 ```
@@ -42,16 +42,16 @@ graph TD
    - Node.js Guard-Skripte verarbeiten JSON über stdin für zuverlässige Blockaden (`exit 2`);
    - Permanente Blockaden: Direkte Commits auf geschützte Branches (`develop`/`master`/`main`/`release*`/`staging`), `git push --force`, Löschen geschützter Remote-Branches, Rebase auf geschützten Branches.
 
-3. **40 wiederverwendbare Skills ([`.agents/skills/`](.agents/skills/))**:
+3. **44 wiederverwendbare Skills ([`.agents/skills/`](.agents/skills/))**:
    - **Comet Integrationsleitfaden**: Einstiegspunkt für Comet-Workflows;
    - **Lebendige Dokumentation & Technische Dokumentationsvorlagen**: `living-documentation` (4-Stufen-Modell, Frontmatter-Traceability, L0/L1/L2 Impact-Prüfungen) und `engineering-docs` (15 zweisprachige Phasen-Gate-Vorlagen für 31 F&E-Dokumenttypen);
-   - **Spezifikationsgetriebene Entwicklung (SDD)**: 12 Skills der `openspec`-Suite;
+   - **Spezifikationsgetriebene Entwicklung (SDD)**: 16 Skills der `openspec`-Suite;
    - **Testgetriebene Entwicklung (TDD)**: 15 Skills der `superpowers`-Suite;
    - **Implementierungs- und Suchunterstützung**: `ponytail` (Entscheidungsleiter für minimale Lösungen) und `codegraph` (Code-Graph MCP);
    - **Ausgabe- und Kommunikationssteuerung**: `rtk` (Token Killer) und `caveman` (komprimierte Ausgabe);
    - **Entscheidungsreview vor Umsetzung**: `option-review` und `cross-tool-memory`;
    - **Professionelle Dokumentenverarbeitung**: `docx`- und `pdf`-Skills;
-   - **Skill-Nutzungs- und Trigger-Leitfaden**: Für Trigger-Modi (auto/explizit/hybrid), Kategorisierung und Projektgedächtnis aller 40 Skills siehe [`Skills Usage Guide.de.md`](docs/guides/Skills%20Usage%20Guide.de.md) ([English](docs/guides/Skills%20Usage%20Guide.md) | [简体中文](docs/guides/Skills%20Usage%20Guide.zh.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md) | [Français](docs/guides/Skills%20Usage%20Guide.fr.md)).
+   - **Skill-Nutzungs- und Trigger-Leitfaden**: Für Trigger-Modi (auto/explizit/hybrid), Kategorisierung und Projektgedächtnis aller 44 Skills siehe [`Skills Usage Guide.de.md`](docs/guides/Skills%20Usage%20Guide.de.md) ([English](docs/guides/Skills%20Usage%20Guide.md) | [简体中文](docs/guides/Skills%20Usage%20Guide.zh.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md) | [Français](docs/guides/Skills%20Usage%20Guide.fr.md)).
 
 4. **Ein-Klick-Bereitstellung, interaktiver Assistent & einheitliche Pipeline (`deploy-agents` & `run-pipeline`)**:
    - **Schrittweiser interaktiver Terminal-Assistent**: Bei Aufruf ohne Argumente (oder mit `--interactive` / `-Interactive`) startet ein geführter TUI-Assistent (Pfeiltasten, Leertaste zur Mehrfachauswahl, Eingabetaste zur Bestätigung) zur Auswahl von Sprache (`en`, `zh`, `zh-tw`, `fr`, `de`), Bereitstellungsumfang (`project`, `global`, `both`), Projektpfad, 12 Agent-Bridge-Dateien (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy) sowie optionalen Workflows;
@@ -85,7 +85,7 @@ graph TD
 agent-harness/
 ├── .agents/
 │   ├── rules/                       # Modulare Sub-Regeln
-│   └── skills/                      # 40 Engineering-Skills
+│   └── skills/                      # 44 Engineering-Skills
 ├── .claude/
 │   ├── settings.json                # PreToolUse Sicherheitskonfiguration
 │   └── hooks/                       # Sicherheits-Hooks

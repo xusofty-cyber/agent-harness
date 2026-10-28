@@ -33,22 +33,6 @@ feature to one, add it to the other in the same PR. CI enforces this via the
 feature-parity markers in `tests/repo_checks.py` — extend the `PARITY` table when you
 add a feature.
 
-## Symlink risk（软链风险）
-
-`.agents/rules/engineering.md` is a symlink to `engineering-spec.md`
-(one file, two names). It works in a normal `git clone`, but it can break
-when the repo is consumed as a zip download or on filesystems / Windows
-setups that do not restore symlinks: the link becomes a dangling pointer
-or a plain text file containing the target path, and any tool that reads
-`engineering.md` then sees nothing (or the literal target name) instead
-of the rule. Current mitigation: none — no check detects a broken link,
-and the deploy scripts copy it as-is. If you touch this file, edit
-`engineering-spec.md` (the real file) and verify the link still resolves
-(`ls -l .agents/rules/engineering.md`) before pushing. Replacing the
-symlink with a real duplicate file would fix the risk but reintroduce
-drift between the two copies; that trade-off is recorded in
-`DECISIONS.md` (N5) and is still open.
-
 ## Checks before pushing（提交前自检）
 
 ```bash

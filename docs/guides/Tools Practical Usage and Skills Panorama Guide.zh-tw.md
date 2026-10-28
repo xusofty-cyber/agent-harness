@@ -10,7 +10,7 @@
 
 1. [Core Architecture & Tool Matrix (Who Manages What)](#1-核心架構與工具矩陣誰負責什麼)
 2. [Skills & Ecosystem Tools Inventory](#2-skills-與生態系工具盤點)
-   - 2.1 40 Integrated Native Skills Categorized
+   - 2.1 44 Integrated Native Skills Categorized
    - 2.2 Version Locking, Online Updates & Skill Sync (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
    - 2.3 Optional Harness CLI Tools
    - 2.4 Token Economics of Skills (Why 40+ Skills Do NOT Blow Up Context)
@@ -93,14 +93,14 @@
 
 ## 2. Skills 與生態系工具盤點
 
-### 2.1 40 個內建原生 Skills 分類
+### 2.1 44 個內建原生 Skills 分類
 
 安裝程式將倉庫的 skill 目錄複製到 `.agents/skills/`；實際的探索行為取決於宿主工具及其配置。
 
 #### 1. 版本化工作流程進入點
 - **`comet`**：Comet CLI 提供版本化的 Native 和 Classic 工作流程。本倉庫僅提供進入點指南；不實作 Comet 階段守衛。
 
-#### 2. OpenSpec 規格驅動套件（12 個 skills）
+#### 2. OpenSpec 規格驅動套件（16 個 skills）
 - **`openspec`**：核心架構。
 - **`openspec-propose`**：一次性提出包含設計、規格和任務的變更。
 - **`openspec-new-change`**：逐步建立產物。

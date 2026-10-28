@@ -12,7 +12,7 @@
 
 1. [核心架构与工具矩阵全景（谁管什么）](#一-核心架构与工具矩阵全景谁管什么)
 2. [技能（Skills）与生态工具安装清单](#二-技能skills与生态工具安装清单)
-   - 2.1 开箱即用 / 40 原生技能分类全景清单
+   - 2.1 开箱即用 / 44 原生技能分类全景清单
    - 2.2 技能来源元数据与在线更新机制 (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
    - 2.3 Harness 核心工程扩展工具（按需选用）
    - 2.4 平台安装与配置文件位置速查表
@@ -84,16 +84,16 @@
 
 ## 二、 技能（Skills）与生态工具安装清单
 
-### 2.1 开箱即用 / 40 原生技能分类全景清单
+### 2.1 开箱即用 / 44 原生技能分类全景清单
 
 通过执行自动化部署脚本 [`deploy-agents.ps1`](../../deploy-agents.ps1)（Windows）或 [`deploy-agents.sh`](../../deploy-agents.sh)（Linux/macOS）后，全套技能库会自动部署至目标项目的 `.agents/skills/`，并无缝接线至 `.claude/skills/`。
 
-整套技能库包含 **40 个专业工程技能**，按功能领域归类如下：
+整套技能库包含 **44 个专业工程技能**，按功能领域归类如下：
 
 #### 1. Comet 工作流
 - **`comet`**：Comet CLI 按版本提供 Native/Classic 工作流。本仓库只提供入口指引，不实现 Comet 的状态机或阶段守卫；使用前检查项目配置和 CLI 版本。
 
-#### 2. OpenSpec 规范驱动开发套件（12 个模块化技能）
+#### 2. OpenSpec 规范驱动开发套件（16 个模块化技能）
 - **`openspec`**：OpenSpec 基础核心架构。
 - **`openspec-propose`**：一键生成完整需求提案（包含 Design、Specs、Tasks）。
 - **`openspec-new-change`**：步进式创建新变更。

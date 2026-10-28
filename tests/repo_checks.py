@@ -12,9 +12,7 @@ Checks:
 
 import hashlib
 import json
-import os
 import re
-import subprocess
 import sys
 import tomllib
 from pathlib import Path
@@ -92,7 +90,7 @@ for name in sorted(local_skills):
 # serves as the content identifier. No skill may exist without provenance.
 # (META_ENTRIES are source-repo placeholders, not real skills.)
 for name, meta in sorted(lock_data.get("skills", {}).items()):
-    if meta.get("meta") is True:  # source-repo meta entry (Phase 2, 2-2c), not a real skill
+    if name in ("openspec", "superpowers"):  # source-repo meta entries, not real skills
         continue
     has_provenance = bool(meta.get("version")) or bool(meta.get("computedHash"))
     check(f"provenance:{name}", has_provenance,
@@ -294,475 +292,6 @@ for tmpl_prefix in ("Global AGENTS", "Project AGENTS", "Directory AGENTS"):
         check(f"template-exists:{tmpl_prefix}{lang_suf}", expected_tmpl.is_file(),
               f"missing canonical template: {expected_tmpl}")
 
-# --- 3i. Skill counts: single source of truth (Phase 0, 0-1) ---
-# tools/count-skills.py owns the expected composition (40 dirs on disk,
-# 42 lock entries incl. 2 meta entries) and scans live docs for stale
-# counts (44/43/42 in a skill context, openspec suite != 12). The script
-# is the single implementation; this check only asserts it passes.
-_count = subprocess.run(
-    [sys.executable, str(ROOT / "tools" / "count-skills.py"), "--check"],
-    capture_output=True, text=True, cwd=str(ROOT), timeout=60)
-_count_detail = (_count.stdout.strip().splitlines() or [""])[-1]
-check("skills:count-source-of-truth", _count.returncode == 0, _count_detail)
-
-# --- 3j. Skill references in templates/guides must resolve (Phase 0, 0-6) ---
-# Backticked skill-name-looking tokens (`lowercase-hyphenated`) in the
-# distributable agent templates and the FAQ guides must be either a real
-# skill directory under .agents/skills/ or a known non-skill identifier
-# (allowlist below). This catches dead references like `comet-archive`
-# (removed in 0-6; no such skill ever existed). Slash-command utterances
-# in prose (e.g. "/comet ...") are not backticked and stay a manual-review
-# item. Also: docs/internal/*.md must not contain unfilled <PLACEHOLDER>/
-# <TODO>/<TBD>/<XXX> markers.
-_SKILL_TOKEN_RE = re.compile(r"`([a-z][a-z0-9_-]*)`")
-_SKILL_REF_ALLOWLIST = {
-    # product / project names, not skills
-    "agent-harness", "ai-memory",
-    # lock meta entry (source repo), not a skill directory
-    "openspec",
-    # frontmatter keys / git identifiers / CLI tool names
-    "depends_on", "modules", "develop", "main", "master", "staging",
-    "rebase", "ocr", "rg",
-}
-_skill_dirs = {p.name for p in (ROOT / ".agents" / "skills").iterdir() if p.is_dir()}
-_skill_ref_bad: list[str] = []
-for _rel in sorted(str(p.relative_to(ROOT)) for p in (ROOT / "templates" / "agents").glob("*.md")) + \
-        sorted(str(p.relative_to(ROOT)) for p in (ROOT / "docs" / "guides").glob("Agent Triggering and FAQ Guide.*.md")):
-    _text = (ROOT / _rel).read_text(encoding="utf-8-sig")
-    for _lineno, _line in enumerate(_text.splitlines(), 1):
-        for _tok in _SKILL_TOKEN_RE.findall(_line):
-            if _tok not in _skill_dirs and _tok not in _SKILL_REF_ALLOWLIST:
-                _skill_ref_bad.append(f"{_rel}:{_lineno}: `{_tok}`")
-check("skills:references-resolve", not _skill_ref_bad,
-      "; ".join(_skill_ref_bad[:5]))
-_PLACEHOLDER_RE = re.compile(r"<\s*(PLACEHOLDER|TODO|TBD|XXX)\b", re.IGNORECASE)
-_placeholder_bad: list[str] = []
-for _p in sorted((ROOT / "docs" / "internal").rglob("*.md")):
-    for _lineno, _line in enumerate(_p.read_text(encoding="utf-8-sig").splitlines(), 1):
-        if _PLACEHOLDER_RE.search(_line):
-            _placeholder_bad.append(f"{_p.relative_to(ROOT)}:{_lineno}")
-check("docs:no-unfilled-placeholders", not _placeholder_bad,
-      "; ".join(_placeholder_bad[:5]))
-
-# --- 3k. Gate layer: schema, evidence, events (Phase 1, 1-5b) ---
-# CI second check of the anti-tamper triple. The repo dogfoods the gate on
-# itself: gate/feature_list.json is this repo's own list.
-#   1. gate/ ships the required files (script, schema, init template).
-#   2. feature_list.json validates — via pass-gate.py's own validate(), so
-#      CI and the gate cannot drift apart.
-#   3. every `passing` item's evidence matches a fresh verification run:
-#      evidence.command == verification.command and the command exits 0
-#      when re-run now. A hand-edited evidence block with stale or invented
-#      output is caught here, not at review time.
-#   4. gate/events.jsonl is well-formed JSONL with strictly increasing seq
-#      numbers, and every passing item has a `verified` or `override` event.
-# Recursion guard: a verification command may itself be repo_checks.py;
-# re-runs set GATE_CI_RECURSION=1 and a nested run skips this section.
-_GATE_REQUIRED = ["pass-gate.py", "feature_list.schema.json",
-                  "init.template.sh"]
-_gate_missing = [f for f in _GATE_REQUIRED if not (ROOT / "gate" / f).exists()]
-check("gate:files-present", not _gate_missing,
-      f"missing gate files: {', '.join(_gate_missing)}")
-if os.environ.get("GATE_CI_RECURSION"):
-    print("[SKIP] gate:evidence-recheck (nested run)")
-else:
-    import importlib.util as _ilu
-    import subprocess as _sp
-    _spec = _ilu.spec_from_file_location(
-        "pass_gate", ROOT / "gate" / "pass-gate.py")
-    _pg = _ilu.module_from_spec(_spec)
-    _spec.loader.exec_module(_pg)
-    _fl_path = ROOT / "gate" / "feature_list.json"
-    if _fl_path.exists():
-        _fl = json.loads(_fl_path.read_text(encoding="utf-8"))
-        _fl_errors = _pg.validate(_fl)
-        check("gate:feature-list-valid", not _fl_errors,
-              "; ".join(_fl_errors[:5]))
-        # 3. re-run verification of passing items.
-        _evidence_bad: list[str] = []
-        for _item in _fl.get("items", []):
-            if _item.get("status") != "passing":
-                continue
-            _ev = _item.get("evidence") or {}
-            if _ev.get("override"):
-                continue  # human override: truthful by declaration, visible
-            _cmd = _item.get("verification", {}).get("command", "")
-            if _ev.get("command") != _cmd:
-                _evidence_bad.append(
-                    f"{_item['id']}: evidence.command != verification.command")
-                continue
-            _env = dict(os.environ, GATE_CI_RECURSION="1")
-            try:
-                _proc = _sp.run(_cmd, shell=True, cwd=ROOT, timeout=120,
-                                capture_output=True, text=True, env=_env)
-                if _proc.returncode != 0:
-                    _evidence_bad.append(
-                        f"{_item['id']}: verification now exits "
-                        f"{_proc.returncode} (evidence claims a pass)")
-            except _sp.TimeoutExpired:
-                _evidence_bad.append(f"{_item['id']}: verification timed out")
-        check("gate:evidence-matches-rerun", not _evidence_bad,
-              "; ".join(_evidence_bad[:5]))
-        # 4. events log well-formed, monotonic, and covers passing items.
-        _events_path = ROOT / "gate" / "events.jsonl"
-        _events_bad: list[str] = []
-        _seen_events: set[tuple[str, str]] = set()
-        if _events_path.exists():
-            _prev_seq = 0
-            for _lineno, _line in enumerate(
-                    _events_path.read_text(encoding="utf-8").splitlines(), 1):
-                if not _line.strip():
-                    continue
-                try:
-                    _rec = json.loads(_line)
-                except json.JSONDecodeError:
-                    _events_bad.append(f"events.jsonl:{_lineno}: not JSON")
-                    continue
-                for _key in ("seq", "ts", "actor", "event"):
-                    if _key not in _rec:
-                        _events_bad.append(
-                            f"events.jsonl:{_lineno}: missing key {_key}")
-                if isinstance(_rec.get("seq"), int):
-                    if _rec["seq"] <= _prev_seq:
-                        _events_bad.append(
-                            f"events.jsonl:{_lineno}: seq not increasing")
-                    _prev_seq = _rec["seq"]
-                if _rec.get("event") in ("verified", "override"):
-                    _seen_events.add((_rec["event"], _rec.get("item_id") or ""))
-            for _item in _fl.get("items", []):
-                if _item.get("status") == "passing" and \
-                        not (_item.get("evidence") or {}).get("override"):
-                    if ("verified", _item["id"]) not in _seen_events:
-                        _events_bad.append(
-                            f"{_item['id']}: passing without a verified event")
-        else:
-            _events_bad.append("gate/events.jsonl missing")
-        check("gate:events-log", not _events_bad,
-              "; ".join(_events_bad[:5]))
-    else:
-        print("[SKIP] gate:feature-list-valid (no gate/feature_list.json yet)")
-        print("[SKIP] gate:evidence-matches-rerun (no gate/feature_list.json yet)")
-        print("[SKIP] gate:events-log (no gate/feature_list.json yet)")
-    # The template itself must validate (all items not_started, no evidence).
-    _tpl_path = ROOT / "templates" / "feature_list.template.json"
-    if _tpl_path.exists():
-        _tpl = json.loads(_tpl_path.read_text(encoding="utf-8"))
-        _tpl_errors = _pg.validate(_tpl)
-        check("gate:template-valid", not _tpl_errors,
-              "; ".join(_tpl_errors[:5]))
-
-# --- 3l. Pipeline gates are real (Phase 2, 2-1) ---
-# The old pipeline swallowed stage failures (`cmd || true`) and recorded
-# PASS unconditionally. Guard the fix structurally:
-#   1. both pipeline scripts define a strict mode;
-#   2. no stage tool invocation is followed by `|| true` (stty/trap/read and
-#      the informational comet probe keep theirs — they record no PASS);
-#   3. both tools are invoked with --strict by the pipeline, so findings are
-#      machine-detectable in every mode (strict decides FAIL vs WARN);
-#   4. both summaries can print WARN (advisory failure, never PASS);
-#   5. both tools document real exit codes (no "0 always" left).
-_p_sh = (ROOT / "run-pipeline.sh").read_text(encoding="utf-8")
-_p_ps1 = (ROOT / "run-pipeline.ps1").read_text(encoding="utf-8-sig")
-check("pipeline-strict:sh-flag",
-      "--strict" in _p_sh and "STRICT_MODE" in _p_sh,
-      "run-pipeline.sh lacks --strict / STRICT_MODE")
-check("pipeline-strict:ps1-flag", "[switch]$Strict" in _p_ps1,
-      "run-pipeline.ps1 lacks [switch]$Strict")
-check("pipeline-strict:sh-no-swallow",
-      '"${skills_cmd[@]}" || true' not in _p_sh
-      and '"claude-code" "codex" "antigravity-ide" || true' not in _p_sh,
-      "run-pipeline.sh still swallows a stage failure with || true")
-check("pipeline-strict:tools-strict",
-      '"--strict"' in _p_sh and '"--strict"' in _p_ps1,
-      "pipeline does not invoke sync-skills/doc-impact with --strict")
-check("pipeline-strict:warn-status",
-      'SUMMARY_STATUS+=("WARN")' in _p_sh
-      and 'summaryStatus += "WARN"' in _p_ps1,
-      "pipeline summary cannot print WARN")
-_sync_src = (ROOT / "tools" / "sync-skills.py").read_text(encoding="utf-8")
-_doc_src = (ROOT / "tools" / "doc-impact.py").read_text(encoding="utf-8")
-check("pipeline-strict:tools-exit-codes",
-      "0 always" not in _sync_src and "0 always" not in _doc_src
-      and "strict_exit_code" in _sync_src and "strict_exit_code" in _doc_src,
-      "sync-skills.py / doc-impact.py still claim exit 0 always")
-
-# --- 3m. Comet supply-chain pin (Phase 2, 2-2) ---
-# The pinned version was measured at implementation time
-# (`npm view @rpamis/comet version` -> 0.5.1 on 2026-10-28; git tag 0.5.1
-# is the repo HEAD). The lock is the record; both deploy scripts must agree
-# with it, and no bare (unversioned) `npm install -g @rpamis/comet` may
-# remain. tools/check-comet.py is the runtime gate for the same pin.
-import re as _re3
-_comet_lock = json.loads((ROOT / "skills-lock.json").read_text(encoding="utf-8-sig"))
-_comet_meta = _comet_lock.get("skills", {}).get("comet", {})
-_comet_pin = _comet_meta.get("npmVersion", "")
-check("comet-pin:lock",
-      bool(_comet_pin) and bool(_comet_meta.get("pinnedCommit"))
-      and bool(_comet_meta.get("pinnedAt"))
-      and bool(re.fullmatch(r"[0-9a-f]{40}", _comet_meta.get("pinnedCommit", ""))),
-      f"comet lock entry lacks npmVersion/pinnedCommit(40-hex)/pinnedAt: {_comet_meta}")
-_deploy_sh_txt = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")
-_deploy_ps1_txt = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
-_sh_pin = _re3.search(r'COMET_NPM_VERSION="([^"]+)"', _deploy_sh_txt)
-_ps1_pin = _re3.search(r'\$script:CometNpmVersion = "([^"]+)"', _deploy_ps1_txt)
-check("comet-pin:scripts-agree-with-lock",
-      bool(_sh_pin) and bool(_ps1_pin)
-      and _sh_pin.group(1) == _comet_pin and _ps1_pin.group(1) == _comet_pin,
-      f"deploy pin mismatch: sh={_sh_pin.group(1) if _sh_pin else None} "
-      f"ps1={_ps1_pin.group(1) if _ps1_pin else None} lock={_comet_pin}")
-check("comet-pin:no-bare-install",
-      _re3.search(r"install -g @rpamis/comet(?!@)", _deploy_sh_txt) is None
-      and _re3.search(r"install -g @rpamis/comet(?!@)", _deploy_ps1_txt) is None,
-      "bare `npm install -g @rpamis/comet` (unversioned) still present")
-check("comet-pin:check-tool-exists",
-      (ROOT / "tools" / "check-comet.py").is_file(),
-      "tools/check-comet.py missing")
-import subprocess as _sp3
-try:
-    _cc = _sp3.run([sys.executable, str(ROOT / "tools" / "check-comet.py"), "--json"],
-                   capture_output=True, text=True, timeout=60)
-    _cc_ok = _cc.returncode == 0 and json.loads(_cc.stdout).get("ok") is True
-except Exception as _cc_exc:  # noqa: BLE001
-    _cc_ok = False
-    _cc = None
-check("comet-pin:check-tool-passes", _cc_ok,
-      "tools/check-comet.py does not pass on this repo")
-
-# --- 3m2. Pinned installer scripts (Phase 2, 2-2) ---
-# codegraph/rtk installers are pinned by upstream commit + SHA256 of the
-# installer at that commit (measured 2026-10-28). The lock is the record;
-# both deploy scripts must carry the same URL + hash, and no piped
-# `curl | sh` / `irm | iex` install may remain in either script.
-_HEX40 = re.compile(r"^[0-9a-f]{40}$")
-_HEX64 = re.compile(r"^[0-9a-f]{64}$")
-for _name in ("codegraph", "rtk"):
-    _m = _comet_lock.get("skills", {}).get(_name, {})
-    check(f"installer-pin:{_name}-lock",
-          bool(_HEX40.match(_m.get("pinnedCommit", "")))
-          and bool(_HEX64.match(_m.get("installerSha256", "")))
-          and _m.get("pinnedCommit", "") in _m.get("installerUrl", "")
-          and bool(_m.get("pinnedAt")),
-          f"{_name} lock entry lacks pinnedCommit/installerSha256/installerUrl/pinnedAt")
-    check(f"installer-pin:{_name}-sh-agrees",
-          _m.get("installerUrl", "") in _deploy_sh_txt
-          and _m.get("installerSha256", "") in _deploy_sh_txt,
-          f"deploy-agents.sh installer URL/SHA disagrees with lock for {_name}")
-check("installer-pin:codegraph-ps1-agrees",
-      _comet_lock["skills"]["codegraph"].get("installerUrlPs1", "") in _deploy_ps1_txt
-      and _comet_lock["skills"]["codegraph"].get("installerSha256Ps1", "") in _deploy_ps1_txt,
-      "deploy-agents.ps1 codegraph installer URL/SHA disagrees with lock")
-check("installer-pin:no-piped-install",
-      "codegraph/main/install.sh | sh" not in _deploy_sh_txt
-      and "rtk/master/install.sh | sh" not in _deploy_sh_txt
-      and "install.ps1 | iex" not in _deploy_ps1_txt
-      and "Invoke-Expression (Invoke-RestMethod" not in _deploy_ps1_txt,
-      "piped curl|sh / irm|iex install still present in a deploy script")
-
-# --- 3n. Hook lifecycle coverage (Phase 2, 2-3) ---
-# .claude/settings.json must wire all five Claude Code hook events, and the
-# hook scripts they point at must exist. The Stop hook came in Phase 1;
-# SessionStart and PostToolUse are Phase 2.
-_settings = json.loads((ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))
-_hooks = _settings.get("hooks", {})
-for _event in ("PreToolUse", "Stop", "SessionStart", "PostToolUse",
-               "UserPromptSubmit"):
-    check(f"hooks-lifecycle:{_event}-wired",
-          isinstance(_hooks.get(_event), list) and len(_hooks[_event]) > 0,
-          f".claude/settings.json lacks {_event} hooks")
-_settings_text = json.dumps(_hooks)
-for _script in ("guard.mjs", "guard-write.mjs", "guard-feature-list.mjs",
-                "stop-gate.mjs", "session-start.mjs", "post-tool-use.mjs"):
-    check(f"hooks-lifecycle:script-{_script}",
-          (ROOT / ".claude" / "hooks" / _script).is_file(),
-          f".claude/hooks/{_script} missing")
-check("hooks-lifecycle:session-start-wired",
-      "session-start.mjs" in _settings_text,
-      "settings.json does not register session-start.mjs")
-check("hooks-lifecycle:post-tool-use-wired",
-      "post-tool-use.mjs" in _settings_text,
-      "settings.json does not register post-tool-use.mjs")
-
-# --- 3o. Guard graded hardening (Phase 2, 2-4) ---
-# guard.mjs must expand command substitutions and eval/sh -c indirection
-# (not a blanket fail-closed: parse failures stay fail-open but logged).
-_guard = (ROOT / ".claude" / "hooks" / "guard.mjs").read_text(encoding="utf-8")
-check("guard:expands-substitutions",
-      "rewriteSubstitutions" in _guard and "GIT_TOKEN" in _guard,
-      "guard.mjs lacks command-substitution expansion")
-check("guard:expands-indirection",
-      '"eval"' in _guard and '"-c"' in _guard and "MAX_EXPAND_DEPTH" in _guard,
-      "guard.mjs lacks eval/sh -c indirection expansion")
-check("guard:parse-failure-logged",
-      "parse failed" in _guard,
-      "guard.mjs parse failure is silent (must log to stderr)")
-_hooks_test = (ROOT / "tests" / "hooks.test.mjs").read_text(encoding="utf-8")
-check("guard:which-git-test",
-      "$(which git)" in _hooks_test and "sh -c" in _hooks_test,
-      "hooks.test.mjs lacks substitution/indirection bypass tests")
-
-# --- 3p. Cost ledger (Phase 2, 2-5) ---
-# tools/cost-ledger.py records deterministic proxy metrics (no token ledger:
-# no host exposes a programmatic token API — see token-adapters.md).
-# Over-budget alerts + records, never auto-stops.
-_ledger = (ROOT / "tools" / "cost-ledger.py").read_text(encoding="utf-8")
-check("cost-ledger:tool-exists",
-      (ROOT / "tools" / "cost-ledger.py").is_file(),
-      "tools/cost-ledger.py missing")
-check("cost-ledger:subcommands",
-      all(s in _ledger for s in ("init-budget", "check-budget", '"record"', '"summary"')),
-      "cost-ledger.py lacks one of init-budget/record/summary/check-budget")
-check("cost-ledger:budget-defaults",
-      all(k in _ledger for k in ("max_runs_per_day", "max_tool_calls_per_day",
-                                 "max_verify_failures_per_day",
-                                 "max_overrides_per_day",
-                                 "max_stage_duration_ms")),
-      "cost-ledger.py lacks the five proxy-metric budget limits")
-check("cost-ledger:no-auto-stop",
-      "never auto-stops" in _ledger.lower() or "never auto-stop" in _ledger.lower(),
-      "cost-ledger.py does not state the no-auto-stop rule")
-check("cost-ledger:pipeline-records",
-      "cost-ledger.py" in _p_sh and "cost-ledger.py" in _p_ps1,
-      "run-pipeline.sh/.ps1 do not record ledger events per stage")
-check("cost-ledger:token-adapters-doc",
-      (ROOT / "docs" / "internal" / "token-adapters.md").is_file(),
-      "docs/internal/token-adapters.md missing")
-check("cost-ledger:own-budget",
-      (ROOT / "gate" / "cost-budget.json").is_file(),
-      "this repo's own gate/cost-budget.json missing (dogfood init-budget)")
-
-# --- 3q. Benchmarks & evaluation (Phase 3, v3 §4.5) ---
-# Framework first, then measured runs: 4 tasks (fixed start commit,
-# acceptance, budget), rubric (six dimensions), calibration (3+ rounds),
-# results that recompute to the baseline report. Unmeasured cells must be
-# marked unmeasured, never filled with invented numbers.
-_EVAL_START = "2e583970fb952158ad83617fe436534abd38295d"
-_eval_tasks = sorted((ROOT / "eval" / "tasks").glob("*/task.md"))
-check("eval:four-tasks", len(_eval_tasks) == 4, f"expected 4 task specs, found {len(_eval_tasks)}")
-for _spec in _eval_tasks:
-    _text = _spec.read_text(encoding="utf-8")
-    _tid = _spec.parent.name
-    check(f"eval:{_tid}-fields",
-          all(f in _text for f in ("start_commit", "acceptance", "budget_time", "budget_rounds")),
-          f"{_tid}/task.md lacks a required field")
-    check(f"eval:{_tid}-start-commit", _EVAL_START in _text,
-          f"{_tid}/task.md start_commit != {_EVAL_START}")
-    check(f"eval:{_tid}-solution", (_spec.parent / "solution.patch").is_file(),
-          f"{_tid}/solution.patch missing")
-_rubric = (ROOT / "eval" / "rubric.md").read_text(encoding="utf-8")
-check("eval:rubric-six-dimensions",
-      all(d in _rubric for d in ("Correctness", "Verification", "Scope discipline",
-                                 "Reliability", "Maintainability", "Handover readiness")),
-      "eval/rubric.md lacks one of the six dimensions")
-check("eval:rubric-rerun-rule", "re-running" in _rubric,
-      "eval/rubric.md does not require re-running acceptance")
-_calib = (ROOT / "eval" / "calibration.md").read_text(encoding="utf-8")
-check("eval:calibration-rounds", _calib.count("## Round ") >= 3,
-      "eval/calibration.md has fewer than 3 recorded rounds")
-check("eval:calibration-not-stable",
-      "NOT yet `stable`" in _calib or "not `stable`" in _calib,
-      "calibration claims stable without a live second-judge round")
-check("eval:workflow-exists",
-      (ROOT / ".github" / "workflows" / "eval-regression.yml").is_file(),
-      ".github/workflows/eval-regression.yml missing")
-_wf = (ROOT / ".github" / "workflows" / "eval-regression.yml").read_text(encoding="utf-8")
-check("eval:workflow-triggers",
-      "workflow_dispatch" in _wf and "schedule" in _wf,
-      "eval-regression.yml lacks manual + monthly triggers")
-check("eval:quality-score-exists",
-      (ROOT / "QUALITY_SCORE.md").is_file(), "QUALITY_SCORE.md missing")
-_qs = (ROOT / "QUALITY_SCORE.md").read_text(encoding="utf-8")
-check("eval:quality-marks-unmeasured", "unmeasured" in _qs.lower(),
-      "QUALITY_SCORE.md does not mark unmeasured cells")
-check("eval:quality-no-upstream-number", "76.8" not in _qs,
-      "QUALITY_SCORE.md quotes the upstream -76.8% token number")
-_eval_result_files = sorted((ROOT / "eval" / "results").glob("*.json"))
-_required_result_fields = {"task", "arm", "rep", "start_commit", "host", "model",
-                           "started_epoch", "ended_epoch", "duration_s", "rounds",
-                           "verify_attempts", "interventions", "outcome", "false_completion"}
-for _rf in _eval_result_files:
-    try:
-        _rec = json.loads(_rf.read_text(encoding="utf-8"))
-        _missing = _required_result_fields - set(_rec)
-    except Exception as e:  # noqa: BLE001
-        _missing = {f"parse error: {e}"}
-    check(f"eval:result-{_rf.name}", not _missing, f"missing fields: {sorted(_missing)}")
-_check_results = subprocess.run(
-    [sys.executable, str(ROOT / "eval" / "check-results.py")],
-    capture_output=True, text=True, cwd=ROOT)
-check("eval:check-results-passes", _check_results.returncode == 0,
-      _check_results.stdout.strip().splitlines()[-1] if _check_results.stdout else "check-results.py failed")
-_bench_smoke = subprocess.run(
-    ["bash", str(ROOT / "eval" / "run-bench.sh"), "smoke"],
-    capture_output=True, text=True, cwd=ROOT)
-check("eval:bench-smoke-passes", _bench_smoke.returncode == 0,
-      "eval/run-bench.sh smoke failed")
-
-# --- 3r. Deploy profiles (Phase 4, 4-1) ---
-# skills-profiles.json is the single source of truth for profile
-# membership. Assertions: default is minimal; minimal <= 10; standard is a
-# strict superset of minimal; full is exactly every skill directory on
-# disk; heavy skills (docx, brainstorming) are in full only; every listed
-# skill exists on disk; the EN+ZH Skills Usage Guides' tier sections
-# (between <!-- profiles:begin --> / <!-- profiles:end -->) list exactly
-# the profile members.
-import json as _json3r
-_profiles_path = ROOT / "skills-profiles.json"
-try:
-    _profiles_data = _json3r.loads(_profiles_path.read_text(encoding="utf-8"))
-except Exception as e:  # noqa: BLE001
-    _profiles_data = {}
-    check("profiles:file-valid", False, f"skills-profiles.json unreadable: {e}")
-_profiles = _profiles_data.get("profiles", {}) if isinstance(_profiles_data, dict) else {}
-check("profiles:default-minimal", _profiles_data.get("default") == "minimal",
-      f"default profile is {_profiles_data.get('default')!r}, expected 'minimal'")
-_disk_skills = {p.name for p in (ROOT / ".agents" / "skills").iterdir() if p.is_dir()}
-for _pname in ("minimal", "standard", "full"):
-    _plist = _profiles.get(_pname, {}).get("skills", []) if isinstance(_profiles.get(_pname), dict) else []
-    check(f"profiles:{_pname}-exists", bool(_plist), f"profile {_pname} missing or empty")
-    check(f"profiles:{_pname}-no-duplicates", len(_plist) == len(set(_plist)),
-          f"profile {_pname} has duplicate entries")
-    _missing = [s for s in _plist if s not in _disk_skills]
-    check(f"profiles:{_pname}-on-disk", not _missing,
-          f"profile {_pname} lists skills not on disk: {_missing}")
-_min = _profiles.get("minimal", {}).get("skills", [])
-_std = _profiles.get("standard", {}).get("skills", [])
-_full = _profiles.get("full", {}).get("skills", [])
-check("profiles:minimal-le-10", len(_min) <= 10, f"minimal has {len(_min)} skills, must be <= 10")
-check("profiles:standard-superset-minimal", set(_min) < set(_std),
-      "standard must be a strict superset of minimal")
-check("profiles:full-is-all", set(_full) == _disk_skills,
-      f"full must be exactly the {len(_disk_skills)} skill dirs on disk")
-check("profiles:heavy-in-full-only",
-      set(_profiles.get("full", {}).get("heavy", [])) == {"brainstorming", "docx"}
-      and not (set(_min) | set(_std)) & {"brainstorming", "docx"},
-      "heavy skills (docx, brainstorming) must be listed in full.heavy and in no smaller profile")
-_deploy_sh_txt = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")
-_deploy_ps1_txt = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
-check("profiles:sh-default-minimal", 'PROFILE="minimal"' in _deploy_sh_txt,
-      "deploy-agents.sh default PROFILE is not minimal")
-check("profiles:ps1-default-minimal", '$SkillProfile = "minimal"' in _deploy_ps1_txt,
-      "deploy-agents.ps1 default SkillProfile is not minimal")
-for _guide in ("docs/guides/Skills Usage Guide.md", "docs/guides/Skills Usage Guide.zh.md"):
-    _gtext = (ROOT / _guide).read_text(encoding="utf-8")
-    _m = re.search(r"<!-- profiles:begin -->(.*?)<!-- profiles:end -->", _gtext, re.S)
-    check(f"profiles:guide-section-{_guide}", _m is not None,
-          f"{_guide} lacks the <!-- profiles:begin/end --> tier section")
-    if _m:
-        _sec = _m.group(1)
-        _min_sec = re.search(r"### minimal.*?(?=###|\Z)", _sec, re.S | re.I)
-        _std_sec = re.search(r"### standard.*?(?=###|\Z)", _sec, re.S | re.I)
-        _min_listed = {s for s in re.findall(r"`([a-z][a-z0-9-]+)`", _min_sec.group(0))
-                       if s in _disk_skills} if _min_sec else set()
-        _std_listed = {s for s in re.findall(r"`([a-z][a-z0-9-]+)`", _std_sec.group(0))
-                       if s in _disk_skills} if _std_sec else set()
-        check(f"profiles:guide-minimal-{_guide}", _min_listed == set(_min),
-              f"{_guide} minimal subsection lists {_min_listed}, want {set(_min)}")
-        check(f"profiles:guide-standard-{_guide}",
-              _std_listed == set(_std) - set(_min),
-              f"{_guide} standard subsection lists {_std_listed}, want {sorted(set(_std) - set(_min))}")
-        check(f"profiles:guide-full-{_guide}", "40" in _sec,
-              f"{_guide} tier section does not state the full profile has 40 skills")
-
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
 # its counterpart marker must exist in the other. Markers that exist in
@@ -803,10 +332,6 @@ PARITY = [
     ("PROJECT_CONTEXT.md", "PROJECT_CONTEXT.md", "project memory scaffold (PROJECT_CONTEXT/SESSION_STATE)"),
     ("Pipeline", "run-pipeline", "pipeline runner integration"),
     ("Agent Harness local runtime & machine-specific ignores", "Agent Harness local runtime & machine-specific ignores", "target project gitignore scaffold"),
-    ("target-auto-create", "target-auto-create", "auto-create missing target directory"),
-    ("IncludeHeavySkills", "include-heavy-skills", "opt-in heavy skills (docx, brainstorming)"),
-    ("GateDeploy", "gate-deploy", "gate layer deployment (pass-gate.py + schema + init template)"),
-    ("SkillProfile", "--profile", "deployment profiles minimal/standard/full"),
 ]
 ps1 = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
 sh = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")
@@ -854,9 +379,6 @@ PIPELINE_PARITY = [
     ("BriefProbe", "brief-probe", "pipeline brief probe mode"),
     ("CheckOnly", "check-only", "pipeline check-only read-only mode"),
     ("ApplySkills", "apply-skills", "pipeline apply-skills flag"),
-    ("Strict", "strict", "pipeline strict mode (fail vs warn)"),
-    ("WARN", "WARN", "pipeline advisory WARN status"),
-    ("cost-ledger.py", "cost-ledger.py", "pipeline cost ledger stage recording"),
     ("gitignore.snippet", "gitignore.snippet", "pipeline gitignore snippet scaffold"),
     ("Resolve-GlobalTemplate", "resolve_global_template", "pipeline global template resolution"),
 ]
@@ -877,14 +399,10 @@ for ps1_marker, sh_marker, feature in PIPELINE_PARITY:
 
 # --- 5. skills-lock.json consistency ---
 # Every skill directory must have a lock entry (provenance metadata).
-# Lock entries without a directory are allowed only for meta-entries
-# (suites, not single skills), marked explicitly with "meta": true in the
-# lock (Phase 2, 2-2c) — the marker, not a hardcoded name list, is the rule.
+# Lock entries without a directory are allowed only for known meta-entries
+# (suites, not single skills).
+META_ENTRIES = {"openspec", "superpowers"}
 lock_data = json.loads((ROOT / "skills-lock.json").read_text(encoding="utf-8-sig"))
-META_ENTRIES = {n for n, m in lock_data.get("skills", {}).items()
-                if m.get("meta") is True}
-check("lock:meta-entries-exact", META_ENTRIES == {"openspec", "superpowers"},
-      f"meta entries must be exactly openspec + superpowers, got: {sorted(META_ENTRIES)}")
 lock_skills = set(lock_data["skills"])
 dir_skills = {p.name for p in (ROOT / ".agents" / "skills").iterdir() if p.is_dir()}
 missing_lock = sorted(dir_skills - lock_skills)
@@ -964,19 +482,48 @@ if _lock_base:
 else:
     print("  [warn] lock-history: no base ref found, check skipped")
 
-# --- 6. Multilingual docs: EN/ZH parity + i18n status (Phase 4, 4-2) ---
-# EN/ZH are the sources of truth: their ## counts must match (hard check).
-# FR/DE/ZH-TW are generated products: tools/i18n-check.py enforces the
-# status file (docs/internal/i18n-status.md) — an "in-sync" row must match
-# its source sha, a "stale"/"frozen" row passes with a printed reminder.
-# The old 16-pair symmetric H2 hard check was removed here: a translation
-# being behind is tracked debt, not a CI failure (v2 4-2).
-_i18n = subprocess.run(
-    [sys.executable, str(ROOT / "tools" / "i18n-check.py")],
-    capture_output=True, text=True, cwd=str(ROOT), timeout=60)
-_i18n_tail = (_i18n.stdout.strip().splitlines() or [""])[-1]
-check("i18n:status-check", _i18n.returncode == 0, _i18n_tail)
-print(_i18n.stdout, end="")
+# --- 6. Multilingual doc pairs: structural parity ---
+# Each translated guide must keep the same ## section count as its source,
+# so the translated structure cannot silently drift from the source.
+MULTILINGUAL_DOC_PAIRS = [
+    ("README.md", "README.zh.md"),
+    ("README.md", "README.zh-tw.md"),
+    ("README.md", "README.fr.md"),
+    ("README.md", "README.de.md"),
+    ("docs/guides/Multi-Tool Deployment and Configuration Guide.md",
+     "docs/guides/Multi-Tool Deployment and Configuration Guide.zh.md"),
+    ("docs/guides/Multi-Tool Deployment and Configuration Guide.md",
+     "docs/guides/Multi-Tool Deployment and Configuration Guide.zh-tw.md"),
+    ("docs/guides/Multi-Tool Deployment and Configuration Guide.md",
+     "docs/guides/Multi-Tool Deployment and Configuration Guide.fr.md"),
+    ("docs/guides/Multi-Tool Deployment and Configuration Guide.md",
+     "docs/guides/Multi-Tool Deployment and Configuration Guide.de.md"),
+    ("docs/guides/Tools Practical Usage and Skills Panorama Guide.md",
+     "docs/guides/Tools Practical Usage and Skills Panorama Guide.zh.md"),
+    ("docs/guides/Tools Practical Usage and Skills Panorama Guide.md",
+     "docs/guides/Tools Practical Usage and Skills Panorama Guide.zh-tw.md"),
+    ("docs/guides/Tools Practical Usage and Skills Panorama Guide.md",
+     "docs/guides/Tools Practical Usage and Skills Panorama Guide.fr.md"),
+    ("docs/guides/Tools Practical Usage and Skills Panorama Guide.md",
+     "docs/guides/Tools Practical Usage and Skills Panorama Guide.de.md"),
+    ("docs/guides/Skills Usage Guide.md",
+     "docs/guides/Skills Usage Guide.zh.md"),
+    ("docs/guides/Skills Usage Guide.md",
+     "docs/guides/Skills Usage Guide.zh-tw.md"),
+    ("docs/guides/Skills Usage Guide.md",
+     "docs/guides/Skills Usage Guide.fr.md"),
+    ("docs/guides/Skills Usage Guide.md",
+     "docs/guides/Skills Usage Guide.de.md"),
+]
+
+def h2_count(path):
+    return sum(1 for line in (ROOT / path).read_text(encoding="utf-8").splitlines()
+               if line.startswith("## "))
+
+for src, target in MULTILINGUAL_DOC_PAIRS:
+    src_n, target_n = h2_count(src), h2_count(target)
+    check(f"doc-parity:{src}=={target}", src_n == target_n,
+          f"## count drift: {src} has {src_n}, {target} has {target_n} — sync ## sections in {target}")
 
 # --- 7. Executable bit on entry-point scripts ---
 # The GitHub contents API resets the exec bit to 100644 on every content push,

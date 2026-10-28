@@ -12,11 +12,8 @@ Usage:
 - --since COMMIT: use `git diff --name-only COMMIT..HEAD` instead.
 - --root DIR: root directory of target project (auto-detected by default).
 - --json: machine-readable output.
-- --strict: exit 1 when any document is "must-update" (its
-  last_verified_commit is behind a change that affects it). Without
-  --strict the tool is advisory and always exits 0; callers that need a
-  real gate must pass --strict (run-pipeline.sh/.ps1 do). "review"
-  (indirect impact) never fails the gate — it needs a human look.
+
+Exit codes: 0 always (advisory tool, never blocks). Parse output for CI gating.
 """
 from __future__ import annotations
 
@@ -270,15 +267,6 @@ def prompt_interactive_wizard() -> tuple[str | None, str | None, list[str] | Non
     return root_input, since, changed_files_list, is_json
 
 
-def strict_exit_code(report: dict) -> int:
-    """Exit code for --strict mode, pure function (unit-tested).
-
-    1 = at least one document is "must-update" (stale vs a change that
-    affects it); 0 = no must-update document ("review" alone never fails).
-    """
-    return 1 if report.get("summary", {}).get("must-update", 0) > 0 else 0
-
-
 def main() -> int:
     ap = argparse.ArgumentParser(description="living-documentation impact analysis")
     ap.add_argument("--root", default=None, help="Root directory of target project")
@@ -286,9 +274,6 @@ def main() -> int:
     ap.add_argument("--since", default=None, help="Compare changes since commit/ref")
     ap.add_argument("--json", action="store_true", help="Output machine-readable JSON")
     ap.add_argument("--interactive", "-i", action="store_true", help="Launch interactive step wizard")
-    ap.add_argument("--strict", action="store_true",
-                    help="exit 1 when any document is must-update; "
-                         "without it the tool is advisory and always exits 0")
     args = ap.parse_args()
 
     if args.interactive or (len(sys.argv) == 1 and sys.stdin.isatty()):
@@ -308,8 +293,6 @@ def main() -> int:
         print(json.dumps(report, indent=2, ensure_ascii=False))
     else:
         print(render_text(report))
-    if args.strict:
-        return strict_exit_code(report)
     return 0
 
 

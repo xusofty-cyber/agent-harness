@@ -8,7 +8,7 @@ AI coding assistant infrastructure terms used across agent-harness docs.
 | **Progressive Disclosure** | Loading rules/skills on-demand instead of all at once, to save context tokens. |
 | **frontmatter** | YAML metadata block at the top of a markdown file (`---` delimited), with `name`/`description`/`version`. |
 | **TUI** | Terminal User Interface — interactive CLI wizard (here: `run-pipeline.sh` / `tools/tui.py`). |
-| **Comet** | Optional adapter: the `comet` CLI runtime keeps versioned workflow state (declared in `templates/comet.config.yaml`); this repo ships no agent runtime or state machine of its own. |
+| **Comet** | Versioned workflow state machine skill (`.comet/config.yaml`), for phased tasks. |
 | **OpenSpec** | Spec-driven development skill family (proposal → tasks → implementation). |
 | **Superpowers** | Agent methodology skill family (obra/superpowers): TDD, debugging, etc. |
 | **CodeGraph** | Code intelligence index (`.codegraph/`), for semantic code navigation. |

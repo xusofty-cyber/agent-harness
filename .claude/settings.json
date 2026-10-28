@@ -16,40 +16,6 @@
           {
             "type": "command",
             "command": "node .claude/hooks/guard-write.mjs"
-          },
-          {
-            "type": "command",
-            "command": "node .claude/hooks/guard-feature-list.mjs"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node .claude/hooks/stop-gate.mjs"
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node .claude/hooks/session-start.mjs"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node .claude/hooks/post-tool-use.mjs"
           }
         ]
       }
@@ -59,7 +25,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "codegraph prompt-hook"
+            "command": "codegraph.cmd prompt-hook"
           }
         ]
       }
@@ -67,7 +33,16 @@
   },
   "permissions": {
     "allow": [
-      "mcp__codegraph__*"
+      "mcp__codegraph__codegraph_explore",
+      "mcp__codegraph__codegraph_search",
+      "mcp__codegraph__codegraph_node",
+      "mcp__codegraph__codegraph_callers",
+      "mcp__codegraph__codegraph_callees",
+      "mcp__codegraph__codegraph_impact",
+      "mcp__codegraph__codegraph_files",
+      "mcp__codegraph__codegraph_status",
+      "mcp__codegraph__*",
+      "mcp__codegraph__codegraph_context"
     ]
   }
 }

@@ -10,7 +10,7 @@ Ce guide fournit un manuel complet pour l'ingénierie logicielle et la documenta
 
 1. [Architecture centrale et matrice des outils (qui gère quoi)](#1-architecture-centrale-et-matrice-des-outils-qui-gère-quoi)
 2. [Inventaire des compétences et outils de l'écosystème](#2-inventaire-des-compétences-et-outils-de-lécosystème)
-   - 2.1 40 compétences natives intégrées par catégorie
+   - 2.1 44 compétences natives intégrées par catégorie
    - 2.2 Verrouillage de version, mises à jour en ligne et synchronisation des compétences (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
    - 2.3 Outils CLI optionnels du Harness
    - 2.4 Économie des tokens des compétences (pourquoi plus de 40 compétences n'explosent PAS le contexte)
@@ -92,14 +92,14 @@ Les scripts de déploiement écrivent des chemins ; vérifiez la documentation a
 ---
 ## 2. Inventaire des compétences et outils de l'écosystème
 
-### 2.1 40 compétences natives intégrées par catégorie
+### 2.1 44 compétences natives intégrées par catégorie
 
 L'installateur copie les répertoires de compétences du dépôt dans `.agents/skills/` ; la découverte réelle dépend de l'outil hôte et de sa configuration.
 
 #### 1. Point d'entrée du flux versionné
 - **`comet`** : le CLI Comet fournit des flux versionnés natifs et classiques. Ce dépôt ne livre qu'un guide de point d'entrée ; il n'implémente pas les gardes de phase Comet.
 
-#### 2. Suite pilotée par les spécifications OpenSpec (12 compétences)
+#### 2. Suite pilotée par les spécifications OpenSpec (16 compétences)
 - **`openspec`** : architecture centrale.
 - **`openspec-propose`** : propose des changements avec conception, spécifications et tâches en une étape.
 - **`openspec-new-change`** : création d'artefacts pas à pas.

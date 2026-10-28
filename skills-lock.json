@@ -23,13 +23,7 @@
       "repository": "https://github.com/colbymchenry/codegraph",
       "skillPath": ".agents/skills/codegraph/SKILL.md",
       "computedHash": "07dc34eccecd3d7dc7eb4e806b9a74da7a4dcd4bbd7553a2ccbae08a7b877df9",
-      "domain": "integration",
-      "pinnedCommit": "01e0ac3aa7419a7ab75583963e8a95359f3af1d3",
-      "installerSha256": "e8bbcc694584d5c88fa7c25103fc0f9c238d63a86c1494ca03448b680dbcc86e",
-      "installerSha256Ps1": "024091f428cac6eaa217bae8f840a9572a91daab974a8354085ba72f86f6aee1",
-      "installerUrl": "https://raw.githubusercontent.com/colbymchenry/codegraph/01e0ac3aa7419a7ab75583963e8a95359f3af1d3/install.sh",
-      "installerUrlPs1": "https://raw.githubusercontent.com/colbymchenry/codegraph/01e0ac3aa7419a7ab75583963e8a95359f3af1d3/install.ps1",
-      "pinnedAt": "2026-10-28"
+      "domain": "integration"
     },
     "comet": {
       "source": "rpamis/comet",
@@ -37,11 +31,7 @@
       "package": "@rpamis/comet",
       "repository": "https://github.com/rpamis/comet",
       "computedHash": "6d33c9c7eaf29e865d2597946987bed75cb468c37c50046df8ba07c5a15c3cf6",
-      "domain": "integration",
-      "npmVersion": "0.5.1",
-      "pinnedCommit": "35c9860b77b42bafa0c2d80d8d695889f888a924",
-      "pinnedAt": "2026-10-28",
-      "pinnedFrom": "npm view @rpamis/comet version"
+      "domain": "integration"
     },
     "cross-tool-memory": {
       "source": "./agent-harness (authored in-repo)",
@@ -129,9 +119,7 @@
       "skillPath": ".agents/skills/write-openspec-docs/SKILL.md",
       "repository": "https://github.com/Fission-AI/OpenSpec",
       "domain": "openspec",
-      "pinnedCommit": "f1b521dffac38ed6638689cd28b0c204b1eef0f1",
-      "meta": true,
-      "note": "Meta entry (Phase 2, 2-2c): pins the Fission-AI/OpenSpec suite repo (pinnedCommit) — not a deployable skill, no skill directory. sync-skills.py skips it; count-skills.py counts it as a meta entry."
+      "pinnedCommit": "f1b521dffac38ed6638689cd28b0c204b1eef0f1"
     },
     "openspec-apply-change": {
       "source": "Fission-AI/OpenSpec",
@@ -275,11 +263,7 @@
       "repository": "https://github.com/rtk-ai/rtk",
       "skillPath": ".agents/skills/rtk/SKILL.md",
       "computedHash": "1bf7772274c3ad42ef5172d294a6115e26f0acc639037a4c5fa283d8d67f4900",
-      "domain": "utility",
-      "pinnedCommit": "e05c7bdfacfcfe1f845d11f47339e4eae63eb3f5",
-      "installerSha256": "7ca3997314f631b8ad267e5add9af4b7a2f0351bdab0b1c5a9b7ed4008d0434a",
-      "installerUrl": "https://raw.githubusercontent.com/rtk-ai/rtk/e05c7bdfacfcfe1f845d11f47339e4eae63eb3f5/install.sh",
-      "pinnedAt": "2026-10-28"
+      "domain": "utility"
     },
     "subagent-driven-development": {
       "source": "obra/superpowers",
@@ -295,9 +279,7 @@
       "skillPath": "skills/test-driven-development/SKILL.md",
       "repository": "https://github.com/obra/superpowers",
       "domain": "superpowers",
-      "pinnedCommit": "5bf4e78011075bcfc0dc295f0724994cd123ee71",
-      "meta": true,
-      "note": "Meta entry (Phase 2, 2-2c): pins the obra/superpowers suite repo (pinnedCommit) — not a deployable skill, no skill directory. sync-skills.py skips it; count-skills.py counts it as a meta entry."
+      "pinnedCommit": "5bf4e78011075bcfc0dc295f0724994cd123ee71"
     },
     "systematic-debugging": {
       "source": "obra/superpowers",

@@ -52,24 +52,5 @@ class TestMatchGlob(unittest.TestCase):
         self.assertFalse(match_glob("src/other/file.py", "src/auth/*.py"))
 
 
-class TestStrictExitCode(unittest.TestCase):
-    """Phase 2, 2-1: --strict fails only on must-update, never on review."""
-
-    def test_clean_is_zero(self):
-        report = {"summary": {"must-update": 0, "review": 0, "in-sync": 3}}
-        self.assertEqual(doc_impact.strict_exit_code(report), 0)
-
-    def test_review_only_is_zero(self):
-        report = {"summary": {"must-update": 0, "review": 2, "in-sync": 1}}
-        self.assertEqual(doc_impact.strict_exit_code(report), 0)
-
-    def test_must_update_is_one(self):
-        report = {"summary": {"must-update": 1, "review": 0, "in-sync": 0}}
-        self.assertEqual(doc_impact.strict_exit_code(report), 1)
-
-    def test_missing_summary_is_zero(self):
-        self.assertEqual(doc_impact.strict_exit_code({}), 0)
-
-
 if __name__ == "__main__":
     unittest.main()
