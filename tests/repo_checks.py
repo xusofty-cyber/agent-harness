@@ -302,9 +302,10 @@ else:
     print("  [warn] comet-cfg: PyYAML not installed, validation skipped (pip install pyyaml)")
 
 # --- 3h. templates/agents canonical templates completeness ---
-# All 15 canonical templates (3 types x 5 languages) must exist under templates/agents/
+# All 9 canonical templates (3 types x 3 languages: base ZH, EN, ZH-TW;
+# FR/DE deleted by user final ruling 2026-10-29, D27) must exist under templates/agents/
 for tmpl_prefix in ("Global AGENTS", "Project AGENTS", "Directory AGENTS"):
-    for lang_suf in ("", ".en", ".zh-tw", ".fr", ".de"):
+    for lang_suf in ("", ".en", ".zh-tw"):
         expected_tmpl = ROOT / "templates" / "agents" / f"{tmpl_prefix}{lang_suf}.md"
         check(f"template-exists:{tmpl_prefix}{lang_suf}", expected_tmpl.is_file(),
               f"missing canonical template: {expected_tmpl}")
@@ -572,7 +573,7 @@ check("ocr-pin:no-bare-install",
 # must show only pinned installs — versioned npm packages and
 # download-then-verify installer flows. No bare `npm install -g <pkg>`
 # (unversioned) and no piped `curl | sh` / `irm | iex` install may appear.
-# FR/DE/ZH-TW are translations: tracked stale in docs/internal/i18n-status.md,
+# ZH-TW is a translation: tracked stale in docs/internal/i18n-status.md,
 # not hard-failed here (Phase 4, 4-2). The vendored comet skill
 # (.agents/skills/comet/SKILL.md) still shows an unversioned comet install
 # in upstream text — editing it would break the lock (§5); recorded as a
@@ -1227,7 +1228,7 @@ for _name, _meta in sorted(lock_data.get("skills", {}).items()):
 
 # --- 6. Multilingual docs: EN/ZH parity + i18n status (Phase 4, 4-2) ---
 # EN/ZH are the sources of truth: their ## counts must match (hard check).
-# FR/DE/ZH-TW are generated products: tools/i18n-check.py enforces the
+# ZH-TW is a generated product: tools/i18n-check.py enforces the
 # status file (docs/internal/i18n-status.md) — an "in-sync" row must match
 # its source sha, a "stale"/"frozen" row passes with a printed reminder.
 # The old 16-pair symmetric H2 hard check was removed here: a translation
@@ -1263,8 +1264,8 @@ for script in EXEC_SCRIPTS:
 import urllib.parse
 LINK_RE = re.compile(r'\[([^\]]*)\]\(([^)]+)\)')
 # Only check these user-facing docs (not .agents/skills which are vendored)
-LINK_CHECK_ROOTS = ["README.md", "README.zh.md", "README.zh-tw.md", "README.de.md",
-                    "README.fr.md", "CONTRIBUTING.md", "docs/guides"]
+LINK_CHECK_ROOTS = ["README.md", "README.zh.md", "README.zh-tw.md",
+                    "CONTRIBUTING.md", "docs/guides"]
 checked_links = 0
 broken_links = []
 for root in LINK_CHECK_ROOTS:

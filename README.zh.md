@@ -1,6 +1,6 @@
 # Agent Harness
 
-> **Language / 语言**: [English](README.md) | **简体中文** | [繁體中文](README.zh-tw.md) | [Français](README.fr.md) | [Deutsch](README.de.md)
+> **Language / 语言**: [English](README.md) | **简体中文** | [繁體中文](README.zh-tw.md)
 
 > **可复用的 AI 编程规范模板、Claude Code 安全钩子与多工具部署脚本**
 
@@ -54,7 +54,7 @@ graph TD
    - **输出与表达指导**：`rtk`（Rust Token Killer 可选 CLI 指引；需配置命令重写 Hook）与 `caveman`（简明表达 Skill）。
    - **事前决策评审与共享记忆**：`option-review`（5 维度多候选方案事前独立评审与决策矩阵）与 `cross-tool-memory`（跨工具项目长期记忆导航与经验检索）。
    - **专业文档处理**：`docx`（Word 专业排版）、`pdf`（结构化抽取与分析）。注：`docx` 自带完整 OOXML 校验工具链（约 1.3 MB），是仓库内最大的 skill，默认不再部署；需要时加 `--include-heavy-skills` / `-IncludeHeavySkills`（同时包含带本地服务 `scripts/server.cjs` 的 `brainstorming`）；已部署的旧副本不受影响，该选项只影响本次新复制；
-   - **技能使用与触发时机指南**：各 skill 的触发机制（自动/显式/混合）、分类速查与项目记忆使用说明详见 [`Skills Usage Guide.zh.md`](docs/guides/Skills%20Usage%20Guide.zh.md)（[English](docs/guides/Skills%20Usage%20Guide.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md) | [Français](docs/guides/Skills%20Usage%20Guide.fr.md) | [Deutsch](docs/guides/Skills%20Usage%20Guide.de.md)）。部署分层（Phase 4）：默认只部署 10 个核心技能（`--profile minimal`）；`--profile standard` 部署 18 个，`--profile full` 部署全部 40 个（重型技能仍需 `--include-heavy-skills`）。
+   - **技能使用与触发时机指南**：各 skill 的触发机制（自动/显式/混合）、分类速查与项目记忆使用说明详见 [`Skills Usage Guide.zh.md`](docs/guides/Skills%20Usage%20Guide.zh.md)（[English](docs/guides/Skills%20Usage%20Guide.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md)）。部署分层（Phase 4）：默认只部署 10 个核心技能（`--profile minimal`）；`--profile standard` 部署 18 个，`--profile full` 部署全部 40 个（重型技能仍需 `--include-heavy-skills`）。
    - **Agent 正确触发与常见问题排查指南 (FAQ)**：如何精准唤醒特定技能、避免角色扮演式脑补、正确配置 AI 记忆与状态机排障详见 [`Agent Triggering and FAQ Guide.zh.md`](docs/guides/Agent%20Triggering%20and%20FAQ%20Guide.zh.md)。
 
 4. **一键部署、交互向导与统一流水线（`deploy-agents` & `run-pipeline`）**：
@@ -264,13 +264,13 @@ ai-memory 采用安全优先的 Fail-closed 门禁，必须显式声明才激活
 ## 文档索引
 
 - 📖 **部署与配置指南**：
-  - [简体中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [English](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [繁體中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [Français](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [Deutsch](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.de.md)
+  - [简体中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [English](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [繁體中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md)
 - 📖 **实战使用与技能全景**：
-  - [简体中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [English](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [繁體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Français](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
+  - [简体中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [English](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [繁體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md)
 - 📜 **三级规则架构**：
-  - **全局宪法**：[`Global AGENTS.md`](templates/agents/Global%20AGENTS.md)（简体中文）| [`English`](templates/agents/Global%20AGENTS.en.md) | [`繁體中文`](templates/agents/Global%20AGENTS.zh-tw.md) | [`Français`](templates/agents/Global%20AGENTS.fr.md) | [`Deutsch`](templates/agents/Global%20AGENTS.de.md)
-  - **项目规范**：[`Project AGENTS.md`](templates/agents/Project%20AGENTS.md)（简体中文）| [`English`](templates/agents/Project%20AGENTS.en.md) | [`繁體中文`](templates/agents/Project%20AGENTS.zh-tw.md) | [`Français`](templates/agents/Project%20AGENTS.fr.md) | [`Deutsch`](templates/agents/Project%20AGENTS.de.md)
-  - **目录规则**：[`Directory AGENTS.md`](templates/agents/Directory%20AGENTS.md)（简体中文）| [`English`](templates/agents/Directory%20AGENTS.en.md) | [`繁體中文`](templates/agents/Directory%20AGENTS.zh-tw.md) | [`Français`](templates/agents/Directory%20AGENTS.fr.md) | [`Deutsch`](templates/agents/Directory%20AGENTS.de.md)
+  - **全局宪法**：[`Global AGENTS.md`](templates/agents/Global%20AGENTS.md)（简体中文）| [`English`](templates/agents/Global%20AGENTS.en.md) | [`繁體中文`](templates/agents/Global%20AGENTS.zh-tw.md)
+  - **项目规范**：[`Project AGENTS.md`](templates/agents/Project%20AGENTS.md)（简体中文）| [`English`](templates/agents/Project%20AGENTS.en.md) | [`繁體中文`](templates/agents/Project%20AGENTS.zh-tw.md)
+  - **目录规则**：[`Directory AGENTS.md`](templates/agents/Directory%20AGENTS.md)（简体中文）| [`English`](templates/agents/Directory%20AGENTS.en.md) | [`繁體中文`](templates/agents/Directory%20AGENTS.zh-tw.md)
 
 ---
 

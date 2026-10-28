@@ -1,6 +1,6 @@
 # Multi-Tool (Codex / Claude Code / Antigravity 2.0 / CLI / IDE / Zed) AI Engineering Deployment & Configuration Guide
 
-> **Language / 语言**: **English** | [简体中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [繁體中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [Français](Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [Deutsch](Multi-Tool%20Deployment%20and%20Configuration%20Guide.de.md)
+> **Language / 语言**: **English** | [简体中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [繁體中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md)
 
 This guide provides an end-to-end specification on how to deploy, configure, and collaboratively utilize the **Three-Tier AGENTS.md Architecture** (Global, Project, and Directory levels) across **OpenAI Codex / GitHub Copilot**, **Claude Code**, **Google Antigravity IDE**, and **Zed IDE**, tailored for real-world scenarios emphasizing software engineering while supporting professional technical documentation.
 
@@ -112,7 +112,7 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
        ├─ [Zero arguments in terminal OR with -Interactive / --interactive]
        │       ▼
        │  Phase 0: Interactive Step-by-Step Terminal Wizard (TUI Arrow-Key & Checkboxes)
-       │    ├─ [1/5] Select Template Language (English / 简体中文 / 繁體中文 / Français / Deutsch)
+       │    ├─ [1/5] Select Template Language (English / 简体中文 / 繁體中文)
        │    ├─ [2/5] Select Deployment Scope (Target Project only / Global Rules only / Both)
        │    ├─ [3/5] Enter Target Project Path (defaults to current directory [.])
        │    │        (Note: Codex, Antigravity, Zed natively read AGENTS.md without bridges)

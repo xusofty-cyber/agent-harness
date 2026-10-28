@@ -1,6 +1,6 @@
 # Agent Harness
 
-> **Language / 語言**: [English](README.md) | [簡體中文](README.zh.md) | **繁體中文** | [Français](README.fr.md) | [Deutsch](README.de.md)
+> **Language / 語言**: [English](README.md) | [簡體中文](README.zh.md) | **繁體中文**
 
 > **可複用的 AI 程式設計規範範本、Claude Code 安全攔截鉤子與多工具部署指令碼**
 
@@ -49,7 +49,7 @@ graph TD
    - **輸出與表達指引**：`rtk`（Rust Token Killer 可選 CLI 指引；需配置命令重寫 Hook）與 `caveman`（精簡表達 Skill）。
    - **事前決策評審與共享記憶**：`option-review`（5 維度多候選方案事前獨立評審與決策矩陣）與 `cross-tool-memory`（跨工具專案長期記憶導航與經驗檢索）。
    - **專業文件處理**：`docx`（Word 專業排版）、`pdf`（結構化擷取與分析）；
-   - **技能使用與觸發時機指南**：各 skill 的觸發機制（自動/顯式/混合）、分類速查與專案記憶使用說明詳見 [`Skills Usage Guide.zh-tw.md`](docs/guides/Skills%20Usage%20Guide.zh-tw.md)（[English](docs/guides/Skills%20Usage%20Guide.md) | [简体中文](docs/guides/Skills%20Usage%20Guide.zh.md) | [Français](docs/guides/Skills%20Usage%20Guide.fr.md) | [Deutsch](docs/guides/Skills%20Usage%20Guide.de.md)）。
+   - **技能使用與觸發時機指南**：各 skill 的觸發機制（自動/顯式/混合）、分類速查與專案記憶使用說明詳見 [`Skills Usage Guide.zh-tw.md`](docs/guides/Skills%20Usage%20Guide.zh-tw.md)（[English](docs/guides/Skills%20Usage%20Guide.md) | [简体中文](docs/guides/Skills%20Usage%20Guide.zh.md)）。
 
 4. **一鍵部署、互動精靈與統一流水線（`deploy-agents` & `run-pipeline`）**：
    - **互動式終端逐步選擇精靈**：執行指令碼時不帶任何參數（或顯式指定 `--interactive` / `-Interactive`）將自動拉起精靈（上下方向鍵選擇、空白鍵切選、Enter 確認），引導完成規則範本語言（`en`, `zh`, `zh-tw`, `fr`, `de`）、部署範圍（`project`, `global`, `both`）、目標專案路徑、12 種 Agent 橋接檔案多選（Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy）以及可選工作流程開關，徹底杜絕命令列參數遺漏與拼寫錯誤；
@@ -242,13 +242,13 @@ agent-harness/
 ## 文件索引
 
 - 📖 **部署與配置指南**：
-  - [繁體中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [English](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [簡體中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [Français](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [Deutsch](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.de.md)
+  - [繁體中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [English](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [簡體中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md)
 - 📖 **實戰使用與技能全景**：
-  - [繁體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [English](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [簡體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [Français](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
+  - [繁體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [English](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [簡體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md)
 - 📜 **三級規則架構**：
-  - **全域憲法**：[`Global AGENTS.zh-tw.md`](templates/agents/Global%20AGENTS.zh-tw.md)（繁體中文）| [`English`](templates/agents/Global%20AGENTS.en.md) | [`簡體中文`](templates/agents/Global%20AGENTS.md) | [`Français`](templates/agents/Global%20AGENTS.fr.md) | [`Deutsch`](templates/agents/Global%20AGENTS.de.md)
-  - **專案規範**：[`Project AGENTS.zh-tw.md`](templates/agents/Project%20AGENTS.zh-tw.md)（繁體中文）| [`English`](templates/agents/Project%20AGENTS.en.md) | [`簡體中文`](templates/agents/Project%20AGENTS.md) | [`Français`](templates/agents/Project%20AGENTS.fr.md) | [`Deutsch`](templates/agents/Project%20AGENTS.de.md)
-  - **目錄規則**：[`Directory AGENTS.zh-tw.md`](templates/agents/Directory%20AGENTS.zh-tw.md)（繁體中文）| [`English`](templates/agents/Directory%20AGENTS.en.md) | [`簡體中文`](templates/agents/Directory%20AGENTS.md) | [`Français`](templates/agents/Directory%20AGENTS.fr.md) | [`Deutsch`](templates/agents/Directory%20AGENTS.de.md)
+  - **全域憲法**：[`Global AGENTS.zh-tw.md`](templates/agents/Global%20AGENTS.zh-tw.md)（繁體中文）| [`English`](templates/agents/Global%20AGENTS.en.md) | [`簡體中文`](templates/agents/Global%20AGENTS.md)
+  - **專案規範**：[`Project AGENTS.zh-tw.md`](templates/agents/Project%20AGENTS.zh-tw.md)（繁體中文）| [`English`](templates/agents/Project%20AGENTS.en.md) | [`簡體中文`](templates/agents/Project%20AGENTS.md)
+  - **目錄規則**：[`Directory AGENTS.zh-tw.md`](templates/agents/Directory%20AGENTS.zh-tw.md)（繁體中文）| [`English`](templates/agents/Directory%20AGENTS.en.md) | [`簡體中文`](templates/agents/Directory%20AGENTS.md)
 
 ---
 

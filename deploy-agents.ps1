@@ -209,9 +209,7 @@ function Prompt-InteractiveWizard {
     $langOptions = @(
         @{ Label = "English (en)"; Value = "en" },
         @{ Label = "简体中文 (Simplified Chinese, zh)"; Value = "zh" },
-        @{ Label = "繁體中文 (Traditional Chinese, zh-tw)"; Value = "zh-tw" },
-        @{ Label = "Français (French, fr)"; Value = "fr" },
-        @{ Label = "Deutsch (German, de)"; Value = "de" }
+        @{ Label = "繁體中文 (Traditional Chinese, zh-tw)"; Value = "zh-tw" }
     )
     $script:Language = Prompt-SingleSelect "[1/5] 选择规则模板语言 (Select Template Language):" $langOptions
 
@@ -294,8 +292,8 @@ $LangSuffix = switch -Regex ($NormLang) {
     '^(zh|cn|zh-cn|zh-hans)$' { '' }
     '^(zh-tw|tw|zh-hk|hk|zh-hant)$' { '.zh-tw' }
     '^(en|en-us|en-gb)$' { '.en' }
-    '^(fr|fr-fr)$' { '.fr' }
-    '^(de|de-de)$' { '.de' }
+    # FR/DE removed by user final ruling 2026-10-29 (D27); those inputs
+    # fall through to the default below.
     Default { '.en' }
 }
 

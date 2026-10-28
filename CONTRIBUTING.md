@@ -6,18 +6,18 @@
 
 The long-form guides are maintained with English as source of truth and supported across multiple languages:
 
-| English (source) | 中文 (简体) | 中文 (繁體) | Français | Deutsch |
-|---|---|---|---|---|
-| `README.md` | `README.zh.md` | `README.zh-tw.md` | `README.fr.md` | `README.de.md` |
-| `docs/guides/Multi-Tool Deployment and Configuration Guide.md` | `docs/guides/Multi-Tool Deployment and Configuration Guide.zh.md` | `docs/guides/Multi-Tool Deployment and Configuration Guide.zh-tw.md` | `docs/guides/Multi-Tool Deployment and Configuration Guide.fr.md` | `docs/guides/Multi-Tool Deployment and Configuration Guide.de.md` |
-| `docs/guides/Tools Practical Usage and Skills Panorama Guide.md` | `docs/guides/Tools Practical Usage and Skills Panorama Guide.zh.md` | `docs/guides/Tools Practical Usage and Skills Panorama Guide.zh-tw.md` | `docs/guides/Tools Practical Usage and Skills Panorama Guide.fr.md` | `docs/guides/Tools Practical Usage and Skills Panorama Guide.de.md` |
-| `docs/guides/Skills Usage Guide.md` | `docs/guides/Skills Usage Guide.zh.md` | `docs/guides/Skills Usage Guide.zh-tw.md` | `docs/guides/Skills Usage Guide.fr.md` | `docs/guides/Skills Usage Guide.de.md` |
+| English (source) | 中文 (简体) | 中文 (繁體) |
+|---|---|---|
+| `README.md` | `README.zh.md` | `README.zh-tw.md` |
+| `docs/guides/Multi-Tool Deployment and Configuration Guide.md` | `docs/guides/Multi-Tool Deployment and Configuration Guide.zh.md` | `docs/guides/Multi-Tool Deployment and Configuration Guide.zh-tw.md` |
+| `docs/guides/Tools Practical Usage and Skills Panorama Guide.md` | `docs/guides/Tools Practical Usage and Skills Panorama Guide.zh.md` | `docs/guides/Tools Practical Usage and Skills Panorama Guide.zh-tw.md` |
+| `docs/guides/Skills Usage Guide.md` | `docs/guides/Skills Usage Guide.zh.md` | `docs/guides/Skills Usage Guide.zh-tw.md` |
 
 Rules:
 
 1. **English first**: write or change the English version first, then sync the translations in the same PR.
 2. **Structure parity**: keep the same section structure and heading hierarchy across all language variants, so anchors and the table of contents stay aligned. CI enforces `##` section-count parity via `tests/repo_checks.py`.
-3. **Filenames**: guides use ASCII filenames; translations use language code suffixes (`.zh.md`, `.zh-tw.md`, `.fr.md`, `.de.md`).
+3. **Filenames**: guides use ASCII filenames; translations use language code suffixes (`.zh.md`, `.zh-tw.md`). FR/DE translations were removed by user final ruling 2026-10-29 (D27).
 
 ## Templates stay generic（模板保持通用）
 

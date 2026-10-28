@@ -2,7 +2,7 @@
 
 > **版本说明**：本文档为中文扩展版，包含英文原版之外的补充内容（实战案例、本地化说明）。核心规范以英文版为准，扩展内容仅供参考。
 
-> **Language / 语言**: [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | **简体中文** | [繁體中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Français](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
+> **Language / 语言**: [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | **简体中文** | [繁體中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md)
 
 > 本指南针对日常“以软件研发为主、兼顾专业文档处理”的实际工程场景，系统解答：**需要安装哪些技能（Skills）与 Harness 工具、底层加载与 Token 经济学原理、各工具如何配置与接线、核心命令（如 `/comet`、`/plan`、`/opsx`、`codegraph` 等）在何时以及如何使用**，并提供端到端的实战流转演示与避坑自检指南。
 

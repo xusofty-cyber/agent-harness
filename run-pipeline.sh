@@ -299,8 +299,6 @@ get_lang_suffix() {
     case "$lang" in
         zh|zh-cn|cn) echo "" ;;
         zh-tw|tw)    echo ".zh-tw" ;;
-        fr|fr-fr)    echo ".fr" ;;
-        de|de-de)    echo ".de" ;;
         *)           echo ".en" ;;
     esac
 }
@@ -525,9 +523,7 @@ if [ "$NON_INTERACTIVE" = false ] && { [ "$EXPLICIT_CONFIG" = false ] || [ "$FOR
     prompt_select "[1/6] 选择规则与文档语言 (Select Language):" \
         "简体中文 (Simplified Chinese, zh)" "zh" \
         "English (en)" "en" \
-        "繁體中文 (Traditional Chinese, zh-tw)" "zh-tw" \
-        "Français (French, fr)" "fr" \
-        "Deutsch (German, de)" "de"
+        "繁體中文 (Traditional Chinese, zh-tw)" "zh-tw"
     LANG_OPTION="$SELECTED_VALUE"
 
     prompt_select "[2/6] 是否全局更新各工具的 agents (Global Agents Rules):" \
@@ -695,8 +691,6 @@ ensure_project_memory_scaffold() {
         zh|zh-cn|zh-hans) lang_suffix=".zh" ;;
         zh-tw|zh-hk|zh-hant) lang_suffix=".zh-tw" ;;
         en|en-us|en-gb) lang_suffix="" ;;
-        fr|fr-fr) lang_suffix=".fr" ;;
-        de|de-de) lang_suffix=".de" ;;
         *) lang_suffix="" ;;
     esac
 

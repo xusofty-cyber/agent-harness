@@ -592,14 +592,20 @@ plan's attribution is corrected here, not silently repeated.
 - **Reason:** user final ruling 2026-10-29, adopting yunkai D-004's
   downstream-convenience default. Per-project override stays cheap.
 
-## D27 — C2: FR/DE templates stay frozen, not deleted (merge ruling, provisional)
+## D27 — C2: FR/DE templates deleted (user final ruling, 2026-10-29)
 
-- **Decision:** FR/DE templates are frozen for new content (skeleton
-  D3/D19), not deleted. Yunkai's D-006 (delete 18 FR/DE files) is
-  recorded under "Pending ruling" below, not adopted.
-- **Reason:** v3 froze non-EN/ZH templates pending a usage decision;
-  deletion is irreversible for downstream users who may still read
-  those templates, and no usage evidence was presented for the merge.
+- **Decision:** the 18 FR/DE files are deleted (yunkai D-006 adopted):
+  README.fr/de, three guides × fr/de, PROJECT_CONTEXT/SESSION_STATE
+  templates × fr/de, Global/Project/Directory AGENTS × fr/de. References
+  cleaned in the same change: repo_checks §3h (3 types × 3 languages),
+  link-check roots, i18n-check GENERATED set (ZH-TW only), i18n-status
+  rows, README/guide language switchers, deploy language menus + mappings
+  (fr/de inputs now fall back to EN), CONTRIBUTING language table.
+  Skeleton D3/D19's freeze is superseded for FR/DE; ZH-TW stays frozen.
+- **Reason:** user final ruling 2026-10-29, adopting yunkai D-006. FR/DE
+  were stale, unmaintained translations; deleting them removes a standing
+  regeneration debt and the false impression of five-language support.
+  EN/ZH/ZH-TW remain.
   Freezing is the reversible option.
 - **Provisional:** 合并执行时暂定，用户复核时可改。
 
@@ -758,8 +764,8 @@ D57); the remaining items below are still pending.
   SETTLED by user final ruling 2026-10-29 (see D26): the template default
   is `automatic`; D4's `required` is superseded for the template.
 - **yunkai D-006 — delete the FR/DE rule templates (18 files).**
-  Conflicts with D3/D19/D27 (frozen, not deleted). Merge kept them
-  frozen.
+  SETTLED by user final ruling 2026-10-29 (see D27): the 18 files are
+  deleted and references cleaned; D3/D19's freeze is superseded for FR/DE.
 - **yunkai D-011 — human rubric calibration not run; rubric stays
   advisory-only.** Conflicts in direction with D28/C3: the merge
   ships a gated evaluator (provisional, `--gate` refuses) rather than

@@ -1,6 +1,6 @@
 # Skills Usage Guide
 
-> **Language / 语言**: **English** | [简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Français](Skills%20Usage%20Guide.fr.md) | [Deutsch](Skills%20Usage%20Guide.de.md)
+> **Language / 语言**: **English** | [简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md)
 
 How the 40 bundled skills actually work in practice: which ones trigger automatically,
 which ones you invoke explicitly, and when to use each.

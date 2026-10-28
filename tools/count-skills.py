@@ -57,8 +57,6 @@ LIVE_DOCS = [
     "README.md",
     "README.zh.md",
     "README.zh-tw.md",
-    "README.fr.md",
-    "README.de.md",
     "AGENTS.md",
     "docs/glossary.md",
     "CONTRIBUTING.md",

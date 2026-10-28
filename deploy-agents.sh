@@ -361,9 +361,7 @@ prompt_interactive_wizard() {
     prompt_select "[1/5] 选择规则模板语言 (Select Template Language):" \
         "English (en)" "en" \
         "简体中文 (Simplified Chinese, zh)" "zh" \
-        "繁體中文 (Traditional Chinese, zh-tw)" "zh-tw" \
-        "Français (French, fr)" "fr" \
-        "Deutsch (German, de)" "de"
+        "繁體中文 (Traditional Chinese, zh-tw)" "zh-tw"
     LANG_OPTION="$SELECTED_VALUE"
 
     prompt_select "[2/5] 选择部署范围 (Select Deployment Scope):" \
@@ -468,12 +466,8 @@ case "$NORM_LANG" in
     en|en-us|en-gb)
         LANG_SUFFIX=".en"
         ;;
-    fr|fr-fr)
-        LANG_SUFFIX=".fr"
-        ;;
-    de|de-de)
-        LANG_SUFFIX=".de"
-        ;;
+    # FR/DE removed by user final ruling 2026-10-29 (D27); those inputs
+    # fall through to the default below.
     *)
         LANG_SUFFIX=".en"
         ;;

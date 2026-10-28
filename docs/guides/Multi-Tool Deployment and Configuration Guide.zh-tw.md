@@ -1,6 +1,6 @@
 # 多工具（Codex / Claude Code / Antigravity 2.0 / CLI / IDE / Zed）AI 工程部署與配置指南
 
-> **Language / 語言**: [English](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [简体中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | **繁體中文** | [Français](Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [Deutsch](Multi-Tool%20Deployment%20and%20Configuration%20Guide.de.md)
+> **Language / 語言**: [English](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [简体中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | **繁體中文**
 
 本指南提供端到端的規範說明，闡述如何在 **OpenAI Codex / GitHub Copilot**、**Claude Code**、**Google Antigravity IDE** 以及 **Zed IDE** 中部署、配置並協同運用 **三層式 AGENTS.md 架構**（全域層、專案層與目錄層），針對以軟體工程為主、兼顧專業技術文件處理的實際場景。
 
@@ -112,7 +112,7 @@ PreToolUse hooks 是 Claude Code 專屬的；安裝程式不會為其他工具�
        ├─ [Zero arguments in terminal OR with -Interactive / --interactive]
        │       ▼
        │  Phase 0: Interactive Step-by-Step Terminal Wizard (TUI Arrow-Key & Checkboxes)
-       │    ├─ [1/5] Select Template Language (English / 简体中文 / 繁體中文 / Français / Deutsch)
+       │    ├─ [1/5] Select Template Language (English / 简体中文 / 繁體中文)
        │    ├─ [2/5] Select Deployment Scope (Target Project only / Global Rules only / Both)
        │    ├─ [3/5] Enter Target Project Path (defaults to current directory [.])
        │    │        (Note: Codex, Antigravity, Zed natively read AGENTS.md without bridges)

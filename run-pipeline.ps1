@@ -282,8 +282,6 @@ function Get-LangSuffix([string]$lang) {
     switch ($lang.ToLower()) {
         { $_ -in "zh", "zh-cn", "cn" } { return "" }
         { $_ -in "zh-tw", "tw" }       { return ".zh-tw" }
-        { $_ -in "fr", "fr-fr" }       { return ".fr" }
-        { $_ -in "de", "de-de" }       { return ".de" }
         default                         { return ".en" }
     }
 }
@@ -445,9 +443,7 @@ if (-not $explicit -and -not $Yes.IsPresent -and (-not [Console]::IsInputRedirec
     $Lang = Prompt-Select "[1/6] 选择规则与文档语言 (Select Language):" @(
         @{ Label = "简体中文 (Simplified Chinese, zh)"; Value = "zh" },
         @{ Label = "English (en)"; Value = "en" },
-        @{ Label = "繁體中文 (Traditional Chinese, zh-tw)"; Value = "zh-tw" },
-        @{ Label = "Français (French, fr)"; Value = "fr" },
-        @{ Label = "Deutsch (German, de)"; Value = "de" }
+        @{ Label = "繁體中文 (Traditional Chinese, zh-tw)"; Value = "zh-tw" }
     )
 
     $globalChoice = Prompt-Select "[2/6] 是否全局更新各工具的 agents (Global Agents Rules):" @(
@@ -591,8 +587,6 @@ function Ensure-ProjectMemoryScaffold([string]$targetDir, [string]$langOpt) {
     $langSuffix = switch -Regex ($langOpt) {
         '^(zh|zh-cn|zh-hans)$' { '.zh' }
         '^(zh-tw|zh-hk|zh-hant)$' { '.zh-tw' }
-        '^(fr|fr-fr)$' { '.fr' }
-        '^(de|de-de)$' { '.de' }
         Default { '' }
     }
 
