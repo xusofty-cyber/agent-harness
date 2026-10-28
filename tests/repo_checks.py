@@ -1055,6 +1055,26 @@ if _lock_base:
 else:
     print("  [warn] lock-history: no base ref found, check skipped")
 
+# --- 5c. True lock: every pin must resolve (Phase 6, 6-1) ---
+# A lock is only a lock if every pinned entry is actually pinned. Offline
+# part (no network): every github-source entry carries a 40-hex
+# pinnedCommit, and every meta entry carries a pinnedCommit + a note
+# explaining what it pins (D10: ghost meta entries are annotated, never
+# deleted). The online part — local content == content at pinnedCommit —
+# is enforced by the `sync-skills.py --check --strict` CI step (see
+# .github/workflows/ci.yml), which fetches each pin from upstream.
+for _name, _meta in sorted(lock_data.get("skills", {}).items()):
+    if _meta.get("sourceType") == "github":
+        check(f"lock-pin:{_name}",
+              bool(_HEX40.match(_meta.get("pinnedCommit", ""))),
+              f"github skill {_name} lacks a 40-hex pinnedCommit: "
+              f"{_meta.get('pinnedCommit')!r}")
+    if _meta.get("meta") is True:
+        check(f"lock-pin:meta-{_name}",
+              bool(_HEX40.match(_meta.get("pinnedCommit", "")))
+              and bool((_meta.get("note") or "").strip()),
+              f"meta entry {_name} lacks pinnedCommit and/or note")
+
 # --- 6. Multilingual docs: EN/ZH parity + i18n status (Phase 4, 4-2) ---
 # EN/ZH are the sources of truth: their ## counts must match (hard check).
 # FR/DE/ZH-TW are generated products: tools/i18n-check.py enforces the
