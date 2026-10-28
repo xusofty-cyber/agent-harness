@@ -58,7 +58,10 @@ jobs:
           node tests/hooks-lifecycle.test.mjs
 
       - name: Skill sync unit tests
-        run: python3 tests/sync_skills_test.py
+        run: |
+          python3 tests/sync_skills_test.py
+          python3 tests/doc_impact_test.py
+          python3 tests/cost_ledger_test.py
 
       - name: Repository static checks
         run: python3 tests/repo_checks.py

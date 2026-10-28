@@ -600,6 +600,36 @@ check("guard:which-git-test",
       "$(which git)" in _hooks_test and "sh -c" in _hooks_test,
       "hooks.test.mjs lacks substitution/indirection bypass tests")
 
+# --- 3p. Cost ledger (Phase 2, 2-5) ---
+# tools/cost-ledger.py records deterministic proxy metrics (no token ledger:
+# no host exposes a programmatic token API — see token-adapters.md).
+# Over-budget alerts + records, never auto-stops.
+_ledger = (ROOT / "tools" / "cost-ledger.py").read_text(encoding="utf-8")
+check("cost-ledger:tool-exists",
+      (ROOT / "tools" / "cost-ledger.py").is_file(),
+      "tools/cost-ledger.py missing")
+check("cost-ledger:subcommands",
+      all(s in _ledger for s in ("init-budget", "check-budget", '"record"', '"summary"')),
+      "cost-ledger.py lacks one of init-budget/record/summary/check-budget")
+check("cost-ledger:budget-defaults",
+      all(k in _ledger for k in ("max_runs_per_day", "max_tool_calls_per_day",
+                                 "max_verify_failures_per_day",
+                                 "max_overrides_per_day",
+                                 "max_stage_duration_ms")),
+      "cost-ledger.py lacks the five proxy-metric budget limits")
+check("cost-ledger:no-auto-stop",
+      "never auto-stops" in _ledger.lower() or "never auto-stop" in _ledger.lower(),
+      "cost-ledger.py does not state the no-auto-stop rule")
+check("cost-ledger:pipeline-records",
+      "cost-ledger.py" in _p_sh and "cost-ledger.py" in _p_ps1,
+      "run-pipeline.sh/.ps1 do not record ledger events per stage")
+check("cost-ledger:token-adapters-doc",
+      (ROOT / "docs" / "internal" / "token-adapters.md").is_file(),
+      "docs/internal/token-adapters.md missing")
+check("cost-ledger:own-budget",
+      (ROOT / "gate" / "cost-budget.json").is_file(),
+      "this repo's own gate/cost-budget.json missing (dogfood init-budget)")
+
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
 # its counterpart marker must exist in the other. Markers that exist in
@@ -692,6 +722,7 @@ PIPELINE_PARITY = [
     ("ApplySkills", "apply-skills", "pipeline apply-skills flag"),
     ("Strict", "strict", "pipeline strict mode (fail vs warn)"),
     ("WARN", "WARN", "pipeline advisory WARN status"),
+    ("cost-ledger.py", "cost-ledger.py", "pipeline cost ledger stage recording"),
     ("gitignore.snippet", "gitignore.snippet", "pipeline gitignore snippet scaffold"),
     ("Resolve-GlobalTemplate", "resolve_global_template", "pipeline global template resolution"),
 ]

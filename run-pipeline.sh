@@ -816,15 +816,38 @@ record_stage() {
         echo -e "${GREEN}✔ ${_label} 执行完成${NC}\n"
         SUMMARY_STATUS+=("PASS")
         SUMMARY_DETAIL+=("$_pass")
+        record_ledger "$_label" "pass"
     elif [ "$STRICT_MODE" = true ]; then
         echo -e "${RED}✖ ${_label} 出现错误（退出码 ${_rc}，--strict）${NC}\n"
         SUMMARY_STATUS+=("FAIL")
         SUMMARY_DETAIL+=("$_fail（--strict）")
+        record_ledger "$_label" "fail"
     else
         echo -e "${YELLOW}⚠ ${_label} 未完全成功（退出码 ${_rc}），记为 WARN（默认 advisory 模式；--strict 会记为 FAIL）${NC}\n"
         SUMMARY_STATUS+=("WARN")
         SUMMARY_DETAIL+=("$_fail（advisory）")
+        record_ledger "$_label" "warn"
     fi
+}
+
+# Phase 2 (2-5): one cost-ledger event per pipeline stage, keyed by run id.
+# Only when the target project has a gate/ directory, and only as advisory
+# telemetry: a ledger failure is reported to stderr but never fails the
+# pipeline and never changes the stage outcome. (The `||` below is on
+# telemetry, not on a stage tool — §3l guards stage-tool swallowing.)
+RUN_ID="$(date +%Y%m%d%H%M%S)-$$"
+record_ledger() {
+    local _gate_dir="${TARGET_ABS}/gate"
+    [ -d "$_gate_dir" ] || return 0
+    command -v python3 >/dev/null 2>&1 || return 0
+    local _dur=0
+    if [ -n "${STAGE_START_S:-}" ]; then
+        _dur=$(( ($(date +%s) - STAGE_START_S) * 1000 ))
+    fi
+    python3 "${REPO_ROOT}/tools/cost-ledger.py" record \
+        --gate-dir "$_gate_dir" --kind stage --stage "$1" --status "$2" \
+        --duration-ms "$_dur" --run-id "$RUN_ID" \
+        || echo "  [!] cost ledger record failed (telemetry only, stage outcome unaffected)" >&2
 }
 
 TOTAL_STAGES=0
@@ -840,6 +863,7 @@ CURRENT_STAGE=0
 # ==============================================================================
 if [ "$STAGE_DEPLOY" = true ]; then
     CURRENT_STAGE=$((CURRENT_STAGE+1))
+    STAGE_START_S=$(date +%s)  # Phase 2 (2-5): stage timing for the cost ledger
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${BOLD}[$CURRENT_STAGE/$TOTAL_STAGES] 阶段 1: 规则与 Agent 桥接部署 (deploy-agents)${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -869,10 +893,12 @@ if [ "$STAGE_DEPLOY" = true ]; then
         echo -e "${GREEN}✔ 阶段 1 执行完成${NC}\n"
         SUMMARY_STATUS+=("PASS")
         SUMMARY_DETAIL+=("规则与桥接文件配置就绪")
+        record_ledger "阶段 1" "pass"
     else
         echo -e "${RED}✖ 阶段 1 出现错误${NC}\n"
         SUMMARY_STATUS+=("FAIL")
         SUMMARY_DETAIL+=("部署脚本返回非零退出码")
+        record_ledger "阶段 1" "fail"
     fi
 fi
 
@@ -881,6 +907,7 @@ fi
 # ==============================================================================
 if [ "$STAGE_MEMORY" = true ]; then
     CURRENT_STAGE=$((CURRENT_STAGE+1))
+    STAGE_START_S=$(date +%s)  # Phase 2 (2-5): stage timing for the cost ledger
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${BOLD}[$CURRENT_STAGE/$TOTAL_STAGES] 阶段 2: 配置 AI-Memory 记忆服务 (setup-ai-memory)${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -956,6 +983,7 @@ fi
 # ==============================================================================
 if [ "$STAGE_SKILLS" = true ]; then
     CURRENT_STAGE=$((CURRENT_STAGE+1))
+    STAGE_START_S=$(date +%s)  # Phase 2 (2-5): stage timing for the cost ledger
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${BOLD}[$CURRENT_STAGE/$TOTAL_STAGES] 阶段 3: 校验/同步外部技能库 (sync-skills)${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -1005,6 +1033,7 @@ fi
 # ==============================================================================
 if [ "$STAGE_DOCS" = true ]; then
     CURRENT_STAGE=$((CURRENT_STAGE+1))
+    STAGE_START_S=$(date +%s)  # Phase 2 (2-5): stage timing for the cost ledger
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${BOLD}[$CURRENT_STAGE/$TOTAL_STAGES] 阶段 4: 活体文档影响分析与质检 (doc-impact)${NC}"
     echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"

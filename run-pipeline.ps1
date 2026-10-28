@@ -706,14 +706,39 @@ function Add-StageStatus([int]$Rc, [string]$Label, [string]$PassDetail, [string]
         Write-Host "`n✔ $Label 执行完成`n" -ForegroundColor Green
         $script:summaryStatus += "PASS"
         $script:summaryDetail += $PassDetail
+        Record-Ledger $Label "pass"
     } elseif ($Strict.IsPresent) {
         Write-Host "`n✖ $Label 出现错误 (退出码 $Rc, -Strict)`n" -ForegroundColor Red
         $script:summaryStatus += "FAIL"
         $script:summaryDetail += "$FailDetail (-Strict)"
+        Record-Ledger $Label "fail"
     } else {
         Write-Host "`n⚠ $Label 未完全成功 (退出码 $Rc), 记为 WARN (默认 advisory 模式; -Strict 会记为 FAIL)`n" -ForegroundColor Yellow
         $script:summaryStatus += "WARN"
         $script:summaryDetail += "$FailDetail (advisory)"
+        Record-Ledger $Label "warn"
+    }
+}
+# Phase 2 (2-5): one cost-ledger event per pipeline stage, keyed by run id.
+# Only when the target project has a gate/ directory, and only as advisory
+# telemetry: a ledger failure is reported but never fails the pipeline and
+# never changes the stage outcome.
+$script:runId = "$(Get-Date -Format 'yyyyMMddHHmmss')-$PID"
+$script:stageStartMs = 0
+function Record-Ledger([string]$Label, [string]$Status) {
+    $gateDir = Join-Path $targetAbs "gate"
+    if (-not (Test-Path $gateDir -PathType Container)) { return }
+    if (-not (Get-Command python3 -ErrorAction SilentlyContinue)) { return }
+    $dur = 0
+    if ($script:stageStartMs -gt 0) {
+        $dur = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds() - $script:stageStartMs
+    }
+    try {
+        $LASTEXITCODE = 0
+        & python3 "$PSScriptRoot/tools/cost-ledger.py" record --gate-dir $gateDir --kind stage --stage $Label --status $Status --duration-ms $dur --run-id $script:runId 2>$null
+        if ($LASTEXITCODE -ne 0) { Write-Host "  [!] cost ledger record failed (telemetry only, stage outcome unaffected)" -ForegroundColor Yellow }
+    } catch {
+        Write-Host "  [!] cost ledger record failed (telemetry only, stage outcome unaffected)" -ForegroundColor Yellow
     }
 }
 $summaryNames = @()
@@ -733,6 +758,7 @@ $currentStage = 0
 # ==============================================================================
 if ($stageDeploy) {
     $currentStage++
+    $script:stageStartMs = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()  # Phase 2 (2-5): stage timing for the cost ledger
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
     Write-Host "[$currentStage/$totalStages] 阶段 1: 规则与 Agent 桥接部署 (deploy-agents)" -ForegroundColor Cyan
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
@@ -758,15 +784,18 @@ if ($stageDeploy) {
             Write-Host "`n✖ 阶段 1 出现错误: 部署脚本退出码 $deployRc`n" -ForegroundColor Red
             $summaryStatus += "FAIL"
             $summaryDetail += "部署脚本返回非零退出码 $deployRc"
+            Record-Ledger "阶段 1" "fail"
         } else {
             Write-Host "`n✔ 阶段 1 执行完成`n" -ForegroundColor Green
             $summaryStatus += "PASS"
             $summaryDetail += "规则与桥接文件配置就绪"
+            Record-Ledger "阶段 1" "pass"
         }
     } catch {
         Write-Host "`n✖ 阶段 1 出现错误: $_`n" -ForegroundColor Red
         $summaryStatus += "FAIL"
         $summaryDetail += "部署脚本执行失败"
+        Record-Ledger "阶段 1" "fail"
     }
 }
 
@@ -775,6 +804,7 @@ if ($stageDeploy) {
 # ==============================================================================
 if ($stageMemory) {
     $currentStage++
+    $script:stageStartMs = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()  # Phase 2 (2-5): stage timing for the cost ledger
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
     Write-Host "[$currentStage/$totalStages] 阶段 2: 配置 AI-Memory 记忆服务 (setup-ai-memory)" -ForegroundColor Cyan
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
@@ -865,6 +895,7 @@ if ($stageMemory) {
 # ==============================================================================
 if ($stageSkills) {
     $currentStage++
+    $script:stageStartMs = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()  # Phase 2 (2-5): stage timing for the cost ledger
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
     Write-Host "[$currentStage/$totalStages] 阶段 3: 校验/同步外部技能库 (sync-skills)" -ForegroundColor Cyan
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
@@ -913,6 +944,7 @@ if ($stageSkills) {
 # ==============================================================================
 if ($stageDocs) {
     $currentStage++
+    $script:stageStartMs = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()  # Phase 2 (2-5): stage timing for the cost ledger
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
     Write-Host "[$currentStage/$totalStages] 阶段 4: 活体文档影响分析与质检 (doc-impact)" -ForegroundColor Cyan
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan

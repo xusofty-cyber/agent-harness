@@ -113,6 +113,27 @@ All three are Claude Code only — other hosts have no hook events, so on
 them these legs do nothing. Every hook is fail-open: a parse failure or
 an unreadable state file logs to stderr and exits 0.
 
+## Cost ledger (Phase 2, 2-5)
+
+The ledger records deterministic **proxy metrics** — it is not a token
+ledger (no host exposes a programmatic token API; see
+`docs/internal/token-adapters.md`):
+
+- `gate/cost-ledger.jsonl`: one line per PostToolUse tool call (hook) and
+  one line per pipeline stage (`run-pipeline.sh`/`.ps1`, only when the
+  target has a `gate/`). Local telemetry, **gitignored**.
+- `gate/cost-budget.json`: per-day caps (runs, tool calls, verify
+  failures, overrides) + a per-stage duration cap. Created by
+  `python3 tools/cost-ledger.py init-budget` (never overwrites). This file
+  is policy, so it **is** committed with the project.
+- `python3 tools/cost-ledger.py summary [--json]`: aggregates the ledger
+  plus `gate/events.jsonl` (verify_failed / override counts).
+- `python3 tools/cost-ledger.py check-budget`: exit 0 within budget;
+  exit 1 over budget — prints the exceeded limits to stderr and records
+  one `budget_exceeded` event in `gate/events.jsonl` (deduped per day).
+  Over-budget **never auto-stops a run**: budget semantics for auto-stop
+  are not defined yet.
+
 ## Human override (no deadlocks)
 
 Two logged escape hatches, both visible in the evidence and the log:
