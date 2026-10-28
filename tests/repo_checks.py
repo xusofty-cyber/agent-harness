@@ -12,6 +12,7 @@ Checks:
 
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -342,6 +343,113 @@ for _p in sorted((ROOT / "docs" / "internal").rglob("*.md")):
             _placeholder_bad.append(f"{_p.relative_to(ROOT)}:{_lineno}")
 check("docs:no-unfilled-placeholders", not _placeholder_bad,
       "; ".join(_placeholder_bad[:5]))
+
+# --- 3k. Gate layer: schema, evidence, events (Phase 1, 1-5b) ---
+# CI second check of the anti-tamper triple. The repo dogfoods the gate on
+# itself: gate/feature_list.json is this repo's own list.
+#   1. gate/ ships the required files (script, schema, init template).
+#   2. feature_list.json validates — via pass-gate.py's own validate(), so
+#      CI and the gate cannot drift apart.
+#   3. every `passing` item's evidence matches a fresh verification run:
+#      evidence.command == verification.command and the command exits 0
+#      when re-run now. A hand-edited evidence block with stale or invented
+#      output is caught here, not at review time.
+#   4. gate/events.jsonl is well-formed JSONL with strictly increasing seq
+#      numbers, and every passing item has a `verified` or `override` event.
+# Recursion guard: a verification command may itself be repo_checks.py;
+# re-runs set GATE_CI_RECURSION=1 and a nested run skips this section.
+_GATE_REQUIRED = ["pass-gate.py", "feature_list.schema.json",
+                  "init.template.sh"]
+_gate_missing = [f for f in _GATE_REQUIRED if not (ROOT / "gate" / f).exists()]
+check("gate:files-present", not _gate_missing,
+      f"missing gate files: {', '.join(_gate_missing)}")
+if os.environ.get("GATE_CI_RECURSION"):
+    print("[SKIP] gate:evidence-recheck (nested run)")
+else:
+    import importlib.util as _ilu
+    import subprocess as _sp
+    _spec = _ilu.spec_from_file_location(
+        "pass_gate", ROOT / "gate" / "pass-gate.py")
+    _pg = _ilu.module_from_spec(_spec)
+    _spec.loader.exec_module(_pg)
+    _fl_path = ROOT / "gate" / "feature_list.json"
+    if _fl_path.exists():
+        _fl = json.loads(_fl_path.read_text(encoding="utf-8"))
+        _fl_errors = _pg.validate(_fl)
+        check("gate:feature-list-valid", not _fl_errors,
+              "; ".join(_fl_errors[:5]))
+        # 3. re-run verification of passing items.
+        _evidence_bad: list[str] = []
+        for _item in _fl.get("items", []):
+            if _item.get("status") != "passing":
+                continue
+            _ev = _item.get("evidence") or {}
+            if _ev.get("override"):
+                continue  # human override: truthful by declaration, visible
+            _cmd = _item.get("verification", {}).get("command", "")
+            if _ev.get("command") != _cmd:
+                _evidence_bad.append(
+                    f"{_item['id']}: evidence.command != verification.command")
+                continue
+            _env = dict(os.environ, GATE_CI_RECURSION="1")
+            try:
+                _proc = _sp.run(_cmd, shell=True, cwd=ROOT, timeout=120,
+                                capture_output=True, text=True, env=_env)
+                if _proc.returncode != 0:
+                    _evidence_bad.append(
+                        f"{_item['id']}: verification now exits "
+                        f"{_proc.returncode} (evidence claims a pass)")
+            except _sp.TimeoutExpired:
+                _evidence_bad.append(f"{_item['id']}: verification timed out")
+        check("gate:evidence-matches-rerun", not _evidence_bad,
+              "; ".join(_evidence_bad[:5]))
+        # 4. events log well-formed, monotonic, and covers passing items.
+        _events_path = ROOT / "gate" / "events.jsonl"
+        _events_bad: list[str] = []
+        _seen_events: set[tuple[str, str]] = set()
+        if _events_path.exists():
+            _prev_seq = 0
+            for _lineno, _line in enumerate(
+                    _events_path.read_text(encoding="utf-8").splitlines(), 1):
+                if not _line.strip():
+                    continue
+                try:
+                    _rec = json.loads(_line)
+                except json.JSONDecodeError:
+                    _events_bad.append(f"events.jsonl:{_lineno}: not JSON")
+                    continue
+                for _key in ("seq", "ts", "actor", "event"):
+                    if _key not in _rec:
+                        _events_bad.append(
+                            f"events.jsonl:{_lineno}: missing key {_key}")
+                if isinstance(_rec.get("seq"), int):
+                    if _rec["seq"] <= _prev_seq:
+                        _events_bad.append(
+                            f"events.jsonl:{_lineno}: seq not increasing")
+                    _prev_seq = _rec["seq"]
+                if _rec.get("event") in ("verified", "override"):
+                    _seen_events.add((_rec["event"], _rec.get("item_id") or ""))
+            for _item in _fl.get("items", []):
+                if _item.get("status") == "passing" and \
+                        not (_item.get("evidence") or {}).get("override"):
+                    if ("verified", _item["id"]) not in _seen_events:
+                        _events_bad.append(
+                            f"{_item['id']}: passing without a verified event")
+        else:
+            _events_bad.append("gate/events.jsonl missing")
+        check("gate:events-log", not _events_bad,
+              "; ".join(_events_bad[:5]))
+    else:
+        print("[SKIP] gate:feature-list-valid (no gate/feature_list.json yet)")
+        print("[SKIP] gate:evidence-matches-rerun (no gate/feature_list.json yet)")
+        print("[SKIP] gate:events-log (no gate/feature_list.json yet)")
+    # The template itself must validate (all items not_started, no evidence).
+    _tpl_path = ROOT / "templates" / "feature_list.template.json"
+    if _tpl_path.exists():
+        _tpl = json.loads(_tpl_path.read_text(encoding="utf-8"))
+        _tpl_errors = _pg.validate(_tpl)
+        check("gate:template-valid", not _tpl_errors,
+              "; ".join(_tpl_errors[:5]))
 
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
