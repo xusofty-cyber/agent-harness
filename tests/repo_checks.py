@@ -113,6 +113,18 @@ check("version:matches-changelog",
       bool(cl_headings) and version_file == cl_headings[0],
       f"VERSION={version_file!r} vs CHANGELOG newest={cl_headings[0] if cl_headings else None!r}")
 
+# --- 3c2. Release gate (Phase 6, 6-3) ---
+# tools/check-release.py is the standalone release gate (VERSION/CHANGELOG/
+# skills-lock consistency + deprecation policy); CI runs it here so a
+# release can never be cut with an unpinned skill or an un-noted breaking
+# change. It is fast and offline.
+_rel = subprocess.run(
+    [sys.executable, str(ROOT / "tools" / "check-release.py")],
+    capture_output=True, text=True, cwd=str(ROOT), timeout=60)
+check("release:check-release-passes", _rel.returncode == 0,
+      (_rel.stdout.strip().splitlines() or [""])[-1])
+print(_rel.stdout, end="")
+
 # --- 3d. Living-doc frontmatter ---
 # docs/{specs,architecture,reference,guides,adr}/ .md files must declare
 # valid traceability frontmatter: id / type / status / modules (non-empty).

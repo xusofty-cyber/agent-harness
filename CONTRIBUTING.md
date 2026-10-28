@@ -98,11 +98,28 @@ repository version bump. Template changes under a skill's `templates/`
 count as behavior changes: field/section restructuring → minor bump,
 wording/example tweaks → patch bump; combined with body changes, bump once.
 
+### Deprecation policy（废弃策略，Phase 6, 6-3）
+
+- A template breaking change (renamed/removed field or section, changed
+  semantics) must be recorded in `CHANGELOG.md` under `[Unreleased]` as a
+  `**Breaking**` bullet (or under `### Deprecated`) **with a `Migration:`
+  note** explaining how existing users move to the new form. `tools/check-release.py`
+  fails the build if the note is missing.
+- The old form stays available for **one full version cycle**: it is kept
+  (deprecated, not deleted) in the release that introduces the replacement,
+  and may only be removed in the release after that. Removal itself is
+  recorded as a `**Breaking**` entry with a `Migration:` note.
+- A deprecated template/skill is marked `status: deprecated` in its
+  frontmatter and listed in `CHANGELOG.md` `### Deprecated`; removal needs
+  owner sign-off (same rule as the monthly ablation process).
+
 ### Release process
 
 1. Record entries under `CHANGELOG.md` → `## [Unreleased]`.
 2. To cut a release: rename `[Unreleased]` to `## [x.y.z] - YYYY-MM-DD`,
    write the same version into the `VERSION` file (CI checks they match),
+   run `python3 tools/check-release.py` (must exit 0: version/lock
+   consistency + every breaking entry has a `Migration:` note),
    merge to `main`.
 3. After merge: `git tag vx.y.z && git push origin vx.y.z`
    (tags can't be created through the GitHub App API — do it locally).
