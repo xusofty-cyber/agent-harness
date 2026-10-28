@@ -26,7 +26,8 @@ gate.mkdir(parents=True)
                "verification": {"command": "true", "timeout_seconds": 60},
                "evidence": None}]}))
 PYEOF
-out="$(python3 "$ROOT/gate/pass-gate.py" --root "$TMP/gate" status)"
+# NOTE: --root takes the PROJECT root; pass-gate appends gate/ itself.
+out="$(python3 "$ROOT/gate/pass-gate.py" --root "$TMP" status)"
 echo "$out" | grep -q "(1 item)" || { echo "verify: status does not say '(1 item)'"; exit 1; }
 echo "$out" | grep -q "(1 items)" && { echo "verify: status still says '(1 items)'"; exit 1; }
 [ -f "$ROOT/tests/pass_gate_test.py" ] || { echo "verify: tests/pass_gate_test.py missing"; exit 1; }

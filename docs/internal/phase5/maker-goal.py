@@ -50,8 +50,8 @@ def _status_with(n_items):
     # items from the template, so init+add can never produce exactly
     # 0/1/2 items. (Found by the verify script failing the first manual
     # baseline attempt — the verify caught the wrong assumption.)
-    tmp = tempfile.mkdtemp()
-    gate = Path(tmp) / "gate"
+    tmpdir = Path(tempfile.mkdtemp())
+    gate = tmpdir / "gate"
     gate.mkdir(parents=True)
     items = [{"id": f"item-{i}", "title": f"item {i}", "priority": "p1",
               "area": "gate", "user_visible_behavior": "x",
@@ -60,7 +60,8 @@ def _status_with(n_items):
               "evidence": None} for i in range(n_items)]
     (gate / "feature_list.json").write_text(
         json.dumps({"version": 1, "project": "plural-test", "items": items}))
-    out = subprocess.run([sys.executable, str(PASS_GATE), "--root", str(gate),
+    # NOTE: --root takes the PROJECT root; pass-gate appends gate/ itself.
+    out = subprocess.run([sys.executable, str(PASS_GATE), "--root", str(tmpdir),
                           "status"], check=True, capture_output=True, text=True)
     return out.stdout
 
