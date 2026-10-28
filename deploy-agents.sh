@@ -46,7 +46,7 @@ usage() {
     echo "  --check, -k       检查项目级规则中的初始化占位项；可搭配 --directory 检查模块规则。"
     echo "  --comet-init       若系统中已安装 comet CLI，自动在目标项目中运行 comet init。"
     echo "  --include-heavy-skills 部署可选重型技能 docx 与 brainstorming（默认跳过；docx 约 1.3 MB，brainstorming 含本地服务 server.cjs）。只影响本次新复制，不删除目标项目已有文件。"
-    echo "  --profile <minimal|standard|full> 部署技能分层（默认 minimal：10 个核心技能；standard：18 个；full：全部 40 个。成员见 skills-profiles.json）。"
+    echo "  --profile <minimal|standard|full> 部署分层（默认 minimal：10 个核心技能 + 门禁本身（不含 graph.py 与循环层）；standard：18 个技能 + 门禁 + 编排（graph.py、loop.py 与模板）；full：全部 40 个技能 + 门禁 + 编排。技能成员见 skills-profiles.json）。"
     echo "  --ai-memory-init, -m 初始化项目 .ai-memory.toml 并接入跨工具记忆 (ai-memory)。
   --pipeline         启动统一流水线 (Pipeline: 规则部署 + AI记忆 + 技能同步 + 文档质检)。"
     echo ""
@@ -1426,6 +1426,10 @@ fi
 # gate-deploy
 # graph-deploy (merged from v3-yunyi): gate/graph.py ships with the gate
 # layer — the graph executor, not per-project state.
+# tier-gate-graph-loop (D58, user final ruling 2026-10-29): graph.py ships
+# only on standard/full profiles. On minimal, a previously deployed
+# graph.py is backed up and removed (re-deploy with --profile standard
+# to keep it).
 # Only the code ships. feature_list.json / events.jsonl are per-project
 # state, created by `gate/init.template.sh` or `pass-gate.py init` — never
 # copied from this repo. Skipped on self-deploy (same directory).
@@ -1433,6 +1437,14 @@ if [ -d "${SCRIPT_DIR}/gate" ] && [ "${SCRIPT_DIR}" != "${TARGET_PROJECT_DIR}" ]
     TARGET_GATE_DIR="${TARGET_PROJECT_DIR}/gate"
     mkdir -p "${TARGET_GATE_DIR}"
     for gate_file in pass-gate.py graph.py comet_adapter.py feature_list.schema.json init.template.sh README.md; do
+        if [ "$gate_file" = "graph.py" ] && [ "$PROFILE" = "minimal" ]; then
+            if [ -f "${TARGET_GATE_DIR}/graph.py" ]; then
+                backup_path "${TARGET_GATE_DIR}/graph.py"
+                rm -f "${TARGET_GATE_DIR}/graph.py"
+                echo -e "  [i] minimal 档不部署 graph.py（已有文件已备份并移除；改用 --profile standard 可保留）"
+            fi
+            continue
+        fi
         if [ -f "${SCRIPT_DIR}/gate/${gate_file}" ]; then
             if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_GATE_DIR}/${gate_file}" ]; then
                 if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_GATE_DIR}/${gate_file}"; fi
@@ -1440,35 +1452,62 @@ if [ -d "${SCRIPT_DIR}/gate" ] && [ "${SCRIPT_DIR}" != "${TARGET_PROJECT_DIR}" ]
             fi
         fi
     done
-    echo -e "  ${GREEN}[√] 已部署门禁层: gate/ (pass-gate.py + graph.py + comet_adapter.py + schema + init.template.sh)${NC}"
+    if [ "$PROFILE" = "minimal" ]; then
+        echo -e "  ${GREEN}[√] 已部署门禁层: gate/ (pass-gate.py + comet_adapter.py + schema + init.template.sh；graph.py 随 standard+ 发货)${NC}"
+    else
+        echo -e "  ${GREEN}[√] 已部署门禁层: gate/ (pass-gate.py + graph.py + comet_adapter.py + schema + init.template.sh)${NC}"
+    fi
 fi
 
 # Deploy Loop layer (Phase 6, 6-5; D21 leftover): loop.py + templates.
 # loop-deploy
+# tier-gate-graph-loop (D58, user final ruling 2026-10-29): the loop layer
+# ships only on standard/full profiles. On minimal, previously deployed
+# loop files are backed up and removed (re-deploy with --profile standard
+# to keep them).
 # Only the code + templates ship. loop-state.json / loop-events.jsonl are
 # per-project state, created by `tools/loop.py` runs — never copied from
 # this repo. Skipped on self-deploy (same directory).
 if [ -d "${SCRIPT_DIR}/templates/loop" ] && [ "${SCRIPT_DIR}" != "${TARGET_PROJECT_DIR}" ]; then
     TARGET_LOOP_DIR="${TARGET_PROJECT_DIR}/templates/loop"
-    mkdir -p "${TARGET_LOOP_DIR}"
-    for loop_file in goal.template.md goal.template.zh.md loop-state.template.md loop-state.template.zh.md graph.template.md graph.template.zh.md; do
-        if [ -f "${SCRIPT_DIR}/templates/loop/${loop_file}" ]; then
-            if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_LOOP_DIR}/${loop_file}" ]; then
-                if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_LOOP_DIR}/${loop_file}"; fi
-                cp -f "${SCRIPT_DIR}/templates/loop/${loop_file}" "${TARGET_LOOP_DIR}/${loop_file}"
+    if [ "$PROFILE" = "minimal" ]; then
+        for loop_file in goal.template.md goal.template.zh.md loop-state.template.md loop-state.template.zh.md graph.template.md graph.template.zh.md; do
+            if [ -f "${TARGET_LOOP_DIR}/${loop_file}" ]; then
+                backup_path "${TARGET_LOOP_DIR}/${loop_file}"
+                rm -f "${TARGET_LOOP_DIR}/${loop_file}"
             fi
-        fi
-    done
-    echo -e "  ${GREEN}[√] 已部署循环层模板: templates/loop/ (goal / loop-state / graph，中英)${NC}"
+        done
+        rmdir "${TARGET_LOOP_DIR}" 2>/dev/null || true
+        echo -e "  [i] minimal 档不部署循环层模板（已有文件已备份并移除；改用 --profile standard 可保留）"
+    else
+        mkdir -p "${TARGET_LOOP_DIR}"
+        for loop_file in goal.template.md goal.template.zh.md loop-state.template.md loop-state.template.zh.md graph.template.md graph.template.zh.md; do
+            if [ -f "${SCRIPT_DIR}/templates/loop/${loop_file}" ]; then
+                if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_LOOP_DIR}/${loop_file}" ]; then
+                    if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_LOOP_DIR}/${loop_file}"; fi
+                    cp -f "${SCRIPT_DIR}/templates/loop/${loop_file}" "${TARGET_LOOP_DIR}/${loop_file}"
+                fi
+            fi
+        done
+        echo -e "  ${GREEN}[√] 已部署循环层模板: templates/loop/ (goal / loop-state / graph，中英)${NC}"
+    fi
 fi
 if [ -f "${SCRIPT_DIR}/tools/loop.py" ] && [ "${SCRIPT_DIR}" != "${TARGET_PROJECT_DIR}" ]; then
     TARGET_TOOLS_DIR="${TARGET_PROJECT_DIR}/tools"
-    mkdir -p "${TARGET_TOOLS_DIR}"
-    if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_TOOLS_DIR}/loop.py" ]; then
-        if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_TOOLS_DIR}/loop.py"; fi
-        cp -f "${SCRIPT_DIR}/tools/loop.py" "${TARGET_TOOLS_DIR}/loop.py"
+    if [ "$PROFILE" = "minimal" ]; then
+        if [ -f "${TARGET_TOOLS_DIR}/loop.py" ]; then
+            backup_path "${TARGET_TOOLS_DIR}/loop.py"
+            rm -f "${TARGET_TOOLS_DIR}/loop.py"
+            echo -e "  [i] minimal 档不部署循环层运行器（已有文件已备份并移除；改用 --profile standard 可保留）"
+        fi
+    else
+        mkdir -p "${TARGET_TOOLS_DIR}"
+        if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_TOOLS_DIR}/loop.py" ]; then
+            if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_TOOLS_DIR}/loop.py"; fi
+            cp -f "${SCRIPT_DIR}/tools/loop.py" "${TARGET_TOOLS_DIR}/loop.py"
+        fi
+        echo -e "  ${GREEN}[√] 已部署循环层运行器: tools/loop.py${NC}"
     fi
-    echo -e "  ${GREEN}[√] 已部署循环层运行器: tools/loop.py${NC}"
 fi
 
 # Sync .ai-memory.toml.example

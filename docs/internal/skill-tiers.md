@@ -27,6 +27,27 @@ larger (rules, templates, hooks) — Phase 3 `measure-load` reported the
 deployed directory at 1,790,367 bytes for the old 38-skill default. Do not
 compare the two numbers as if they measured the same thing.
 
+## What each tier ships beyond skills (D58, user final ruling 2026-10-29)
+
+Skills are only half the deploy. The gate/loop layers follow the same tiers:
+
+| Profile | Gate itself | Orchestration (graph + loop) |
+|---|---|---|
+| `minimal` (default) | yes — `pass-gate.py`, `comet_adapter.py`, schema, init template | **no** — `gate/graph.py`, `tools/loop.py`, `templates/loop/` are not shipped |
+| `standard` | yes | yes |
+| `full` | yes | yes |
+
+In short: minimal = the gate itself; standard = the gate + orchestration;
+full = everything. This is distribution only — the loop/graph
+implementations are untouched. Guarded by `tests/repo_checks.py` §3t
+(per-tier file-set assertions) and the `TierGateGraphLoop` PARITY row.
+
+**Migration:** a project previously deployed with `minimal` that already
+has graph/loop files will have those files **removed** on re-deploy with
+`minimal` (each file is backed up with a timestamped `.bak.` copy by the
+deploy scripts first). To keep them, re-deploy with `--profile standard`
+(`-SkillProfile standard`).
+
 **No token-saving claim is made here.** Bytes are bytes, not tokens; no
 host exposes a programmatic token API (see
 `docs/internal/token-adapters.md`). If a future measurement shows a token

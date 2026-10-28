@@ -817,3 +817,24 @@ D57); the remaining items below are still pending.
 - **Guard:** repo_checks `cost-gate:*` pins the tool, the enabled flag, and
   the ceilings; `tests/cost_test.py` covers OK / task-verification stop /
   task-duration stop / day stop / OFF-never-blocks.
+
+## D58 — Graph/Loop ship only on standard/full profiles (user final ruling, 2026-10-29)
+
+- **Decision:** minimal deployments no longer ship `gate/graph.py`,
+  `tools/loop.py`, or `templates/loop/` (6 templates). Standard and full
+  keep them. Tier narrative: minimal = the gate itself (`pass-gate.py`,
+  `comet_adapter.py`, schema, init template); standard = gate +
+  orchestration (graph executor + loop runner/templates); full =
+  everything.
+- **Migration:** a project previously deployed with minimal that already
+  has graph/loop files will have those files REMOVED on re-deploy with
+  minimal (each file is backed up with a timestamped `.bak.` copy by the
+  deploy scripts first). To keep them, re-deploy with `--profile standard`
+  (`-SkillProfile standard`). This sentence is also in
+  `docs/internal/skill-tiers.md`, the README profile paragraph (EN+ZH),
+  and `docs/internal/release-v0.3.0.md` upgrade notes.
+- **Scope:** distribution only. The loop/graph implementations are
+  untouched; only the deploy scripts' tier gating changed.
+- **Guard:** repo_checks §3t asserts the per-tier file sets (minimal
+  absent, standard present + runners execute); PARITY row
+  `TierGateGraphLoop` keeps the sh/ps1 gating in sync.

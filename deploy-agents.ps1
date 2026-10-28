@@ -1291,7 +1291,22 @@ if ((Test-Path $SourceGateDir) -and (-not $isSelfRepo)) {
     if (-not (Test-Path $TargetGateDir)) {
         New-Item -ItemType Directory -Path $TargetGateDir -Force | Out-Null
     }
-    foreach ($gateFile in @("pass-gate.py", "graph.py", "comet_adapter.py", "feature_list.schema.json", "init.template.sh", "README.md")) {
+# TierGateGraphLoop (D58, user final ruling 2026-10-29): graph.py ships
+# only on standard/full profiles. On minimal, a previously deployed
+# graph.py is backed up and removed (re-deploy with -SkillProfile standard
+# to keep it).
+    $gateFiles = @("pass-gate.py", "comet_adapter.py", "feature_list.schema.json", "init.template.sh", "README.md")
+    if ($SkillProfile -ne "minimal") {
+        $gateFiles = @("pass-gate.py", "graph.py", "comet_adapter.py", "feature_list.schema.json", "init.template.sh", "README.md")
+    } else {
+        $oldGraph = Join-Path $TargetGateDir "graph.py"
+        if (Test-Path $oldGraph) {
+            Backup-ManagedPath $oldGraph
+            Remove-Item -Path $oldGraph -Force
+            Write-Host "  [INFO] minimal tier does not ship graph.py (existing file backed up and removed; use -SkillProfile standard to keep it)"
+        }
+    }
+    foreach ($gateFile in $gateFiles) {
         $sourceFile = Join-Path $SourceGateDir $gateFile
         if (Test-Path $sourceFile) {
             $targetFile = Join-Path $TargetGateDir $gateFile
@@ -1301,7 +1316,11 @@ if ((Test-Path $SourceGateDir) -and (-not $isSelfRepo)) {
             }
         }
     }
-    Write-Host "  [OK] Deployed gate layer: gate/ (pass-gate.py + graph.py + comet_adapter.py + schema + init.template.sh)" -ForegroundColor Green
+    if ($SkillProfile -eq "minimal") {
+        Write-Host "  [OK] Deployed gate layer: gate/ (pass-gate.py + comet_adapter.py + schema + init.template.sh; graph.py ships with standard+)" -ForegroundColor Green
+    } else {
+        Write-Host "  [OK] Deployed gate layer: gate/ (pass-gate.py + graph.py + comet_adapter.py + schema + init.template.sh)" -ForegroundColor Green
+    }
 }
 
 # Deploy Loop layer (Phase 6, 6-5; D21 leftover): loop.py + templates.
@@ -1315,17 +1334,31 @@ if ((Test-Path $SourceLoopDir) -and (-not $isSelfRepo)) {
     if (-not (Test-Path $TargetLoopDir)) {
         New-Item -ItemType Directory -Path $TargetLoopDir -Force | Out-Null
     }
-    foreach ($loopFile in @("goal.template.md", "goal.template.zh.md", "loop-state.template.md", "loop-state.template.zh.md", "graph.template.md", "graph.template.zh.md")) {
-        $sourceFile = Join-Path $SourceLoopDir $loopFile
-        if (Test-Path $sourceFile) {
+    if ($SkillProfile -eq "minimal") {
+        foreach ($loopFile in @("goal.template.md", "goal.template.zh.md", "loop-state.template.md", "loop-state.template.zh.md", "graph.template.md", "graph.template.zh.md")) {
             $targetFile = Join-Path $TargetLoopDir $loopFile
-            if ($Update -or (-not (Test-Path $targetFile))) {
-                if ($Update) { Backup-ManagedPath $targetFile }
-                Copy-Item -Path $sourceFile -Destination $targetFile -Force
+            if (Test-Path $targetFile) {
+                Backup-ManagedPath $targetFile
+                Remove-Item -Path $targetFile -Force
             }
         }
+        if ((Test-Path $TargetLoopDir) -and ((Get-ChildItem $TargetLoopDir -Force).Count -eq 0)) {
+            Remove-Item -Path $TargetLoopDir -Force
+        }
+        Write-Host "  [INFO] minimal tier does not ship loop templates (existing files backed up and removed; use -SkillProfile standard to keep them)"
+    } else {
+        foreach ($loopFile in @("goal.template.md", "goal.template.zh.md", "loop-state.template.md", "loop-state.template.zh.md", "graph.template.md", "graph.template.zh.md")) {
+            $sourceFile = Join-Path $SourceLoopDir $loopFile
+            if (Test-Path $sourceFile) {
+                $targetFile = Join-Path $TargetLoopDir $loopFile
+                if ($Update -or (-not (Test-Path $targetFile))) {
+                    if ($Update) { Backup-ManagedPath $targetFile }
+                    Copy-Item -Path $sourceFile -Destination $targetFile -Force
+                }
+            }
+        }
+        Write-Host "  [OK] Deployed loop templates: templates/loop/ (goal / loop-state / graph, EN+ZH)" -ForegroundColor Green
     }
-    Write-Host "  [OK] Deployed loop templates: templates/loop/ (goal / loop-state / graph, EN+ZH)" -ForegroundColor Green
 }
 $SourceLoopRunner = Join-Path $ScriptDir "tools\loop.py"
 if ((Test-Path $SourceLoopRunner) -and (-not $isSelfRepo)) {
@@ -1334,11 +1367,19 @@ if ((Test-Path $SourceLoopRunner) -and (-not $isSelfRepo)) {
         New-Item -ItemType Directory -Path $TargetToolsDir -Force | Out-Null
     }
     $targetLoopRunner = Join-Path $TargetToolsDir "loop.py"
-    if ($Update -or (-not (Test-Path $targetLoopRunner))) {
-        if ($Update) { Backup-ManagedPath $targetLoopRunner }
-        Copy-Item -Path $SourceLoopRunner -Destination $targetLoopRunner -Force
+    if ($SkillProfile -eq "minimal") {
+        if (Test-Path $targetLoopRunner) {
+            Backup-ManagedPath $targetLoopRunner
+            Remove-Item -Path $targetLoopRunner -Force
+            Write-Host "  [INFO] minimal tier does not ship loop runner (existing file backed up and removed; use -SkillProfile standard to keep it)"
+        }
+    } else {
+        if ($Update -or (-not (Test-Path $targetLoopRunner))) {
+            if ($Update) { Backup-ManagedPath $targetLoopRunner }
+            Copy-Item -Path $SourceLoopRunner -Destination $targetLoopRunner -Force
+        }
+        Write-Host "  [OK] Deployed loop runner: tools/loop.py" -ForegroundColor Green
     }
-    Write-Host "  [OK] Deployed loop runner: tools/loop.py" -ForegroundColor Green
 }
 
 # Sync .ai-memory.toml.example

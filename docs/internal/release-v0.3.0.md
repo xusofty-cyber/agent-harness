@@ -91,5 +91,12 @@ verified with measured numbers, not claims.
 - No breaking changes to deployed templates in this release. The deploy
   profiles are additive: existing `full` deployments keep working;
   `minimal` is the new default for fresh deploys.
+- **Tier change (D58, user final ruling 2026-10-29): minimal no longer
+  ships graph/loop.** `minimal` = the gate itself; `standard` = gate +
+  orchestration (graph executor + loop runner/templates); `full` =
+  everything. Previously minimal-deployed projects that already have
+  graph/loop files will have those files **removed** on re-deploy with
+  `minimal` (each file is backed up with a timestamped `.bak.` copy
+  first); to keep them, re-deploy with `--profile standard`.
 - `skills-lock.json` format version stays `2`; entries are unchanged in
   meaning, only hardened (pins now enforced in CI).

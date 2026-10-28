@@ -942,64 +942,88 @@ _pass_gate_test = subprocess.run(
 check("loop:pass-gate-test-passes", _pass_gate_test.returncode == 0,
       "tests/pass_gate_test.py failed")
 
-# --- 3t. Loop deploy smoke (Phase 6, 6-5; D21 leftover) ---
-# Deploy to an empty temp dir (non-interactive, stdin closed — same shape
-# as the CI smoke test) and verify the Loop layer lands: all six templates
-# in templates/loop/ and the stdlib-only runner in tools/loop.py, and that
-# the deployed runner executes (--help exits 0). The gate deploy smoke
-# lives in CI; this one pins the Loop half of the same contract.
-# Merge addition: the same deploy must also land gate/graph.py (the graph
-# executor, merged from v3-yunyi) and it must execute (--help exits 0).
-_loop_deploy_tmp = tempfile.mkdtemp(prefix="loop-deploy-")
-try:
-    _loop_deploy = subprocess.run(
-        ["bash", str(ROOT / "deploy-agents.sh"), _loop_deploy_tmp],
+# --- 3t. Tiered gate/loop deploy smoke (Phase 6, 6-5; D58) ---
+# minimal (default) ships the gate itself only: pass-gate.py, comet_adapter,
+# schema, init — but NOT gate/graph.py, tools/loop.py, templates/loop/.
+# standard ships gate + orchestration (graph + loop). Deploy both profiles
+# to empty temp dirs (non-interactive, stdin closed — same shape as the CI
+# smoke test) and assert the per-tier file sets; the standard deploy must
+# also execute the shipped runners (--help exits 0) and the comet_adapter
+# map must work.
+def _deploy_tmp(profile_args):
+    tmp = tempfile.mkdtemp(prefix="tier-deploy-")
+    proc = subprocess.run(
+        ["bash", str(ROOT / "deploy-agents.sh")] + profile_args + [tmp],
         stdin=subprocess.DEVNULL, capture_output=True, text=True,
         cwd=str(ROOT), timeout=180)
-    check("loop-deploy:exit-0", _loop_deploy.returncode == 0,
-          f"deploy-agents.sh to empty dir exited {_loop_deploy.returncode}: "
-          f"{_loop_deploy.stderr.strip()[-200:]}")
+    return tmp, proc
+
+_min_tmp, _min_deploy = _deploy_tmp([])
+try:
+    check("tier-deploy:minimal-exit-0", _min_deploy.returncode == 0,
+          f"minimal deploy exited {_min_deploy.returncode}: "
+          f"{_min_deploy.stderr.strip()[-200:]}")
+    for _gf in ("pass-gate.py", "comet_adapter.py", "feature_list.schema.json",
+                "init.template.sh"):
+        check(f"tier-deploy:minimal-gate-{_gf}",
+              Path(_min_tmp, "gate", _gf).is_file(),
+              f"gate/{_gf} missing after minimal deploy")
+    check("tier-deploy:minimal-no-graph",
+          not Path(_min_tmp, "gate", "graph.py").exists(),
+          "gate/graph.py must NOT ship on minimal")
+    check("tier-deploy:minimal-no-loop-runner",
+          not Path(_min_tmp, "tools", "loop.py").exists(),
+          "tools/loop.py must NOT ship on minimal")
+    check("tier-deploy:minimal-no-loop-templates",
+          not Path(_min_tmp, "templates", "loop").exists()
+          or not any(Path(_min_tmp, "templates", "loop").iterdir()),
+          "templates/loop/ must NOT ship on minimal")
+finally:
+    shutil.rmtree(_min_tmp, ignore_errors=True)
+
+_std_tmp, _std_deploy = _deploy_tmp(["--profile", "standard"])
+try:
+    check("tier-deploy:standard-exit-0", _std_deploy.returncode == 0,
+          f"standard deploy exited {_std_deploy.returncode}: "
+          f"{_std_deploy.stderr.strip()[-200:]}")
     for _lf in ("goal.template.md", "goal.template.zh.md",
                 "loop-state.template.md", "loop-state.template.zh.md",
                 "graph.template.md", "graph.template.zh.md"):
         check(f"loop-deploy:template-{_lf}",
-              Path(_loop_deploy_tmp, "templates", "loop", _lf).is_file(),
-              f"templates/loop/{_lf} missing after deploy")
-    _deployed_loop = Path(_loop_deploy_tmp, "tools", "loop.py")
+              Path(_std_tmp, "templates", "loop", _lf).is_file(),
+              f"templates/loop/{_lf} missing after standard deploy")
+    _deployed_loop = Path(_std_tmp, "tools", "loop.py")
     check("loop-deploy:runner-present", _deployed_loop.is_file(),
-          "tools/loop.py missing after deploy")
+          "tools/loop.py missing after standard deploy")
     if _deployed_loop.is_file():
         _deployed_help = subprocess.run(
             [sys.executable, str(_deployed_loop), "--help"],
             capture_output=True, text=True, timeout=30)
         check("loop-deploy:runner-runs", _deployed_help.returncode == 0,
               "deployed tools/loop.py --help failed")
-    _deployed_graph = Path(_loop_deploy_tmp, "gate", "graph.py")
+    _deployed_graph = Path(_std_tmp, "gate", "graph.py")
     check("graph-deploy:present", _deployed_graph.is_file(),
-          "gate/graph.py missing after deploy")
+          "gate/graph.py missing after standard deploy")
     if _deployed_graph.is_file():
         _deployed_graph_help = subprocess.run(
             [sys.executable, str(_deployed_graph), "--help"],
             capture_output=True, text=True, timeout=30)
         check("graph-deploy:runs", _deployed_graph_help.returncode == 0,
               "deployed gate/graph.py --help failed")
-    # Merge addition (yunkai): the same deploy must land
-    # gate/comet_adapter.py and it must execute (map on an empty dir
-    # exits 0 with the "no comet change directories" line).
-    _deployed_adapter = Path(_loop_deploy_tmp, "gate", "comet_adapter.py")
+    _deployed_adapter = Path(_std_tmp, "gate", "comet_adapter.py")
     check("comet-adapter-deploy:present", _deployed_adapter.is_file(),
-          "gate/comet_adapter.py missing after deploy")
+          "gate/comet_adapter.py missing after standard deploy")
     if _deployed_adapter.is_file():
         _deployed_adapter_map = subprocess.run(
             [sys.executable, str(_deployed_adapter), "map",
-             "--root", _loop_deploy_tmp],
+             "--root", _std_tmp],
             capture_output=True, text=True, timeout=30)
         check("comet-adapter-deploy:runs",
               _deployed_adapter_map.returncode == 0
               and "no comet change directories" in _deployed_adapter_map.stdout,
               "deployed gate/comet_adapter.py map failed")
 finally:
-    shutil.rmtree(_loop_deploy_tmp, ignore_errors=True)
+    shutil.rmtree(_std_tmp, ignore_errors=True)
 
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
@@ -1049,6 +1073,7 @@ PARITY = [
     ("GraphDeploy", "graph-deploy", "graph executor deployment (gate/graph.py)"),
     ("SkillProfile", "--profile", "deployment profiles minimal/standard/full"),
     ("LoopDeploy", "loop-deploy", "loop layer deployment (loop.py + templates)"),
+    ("TierGateGraphLoop", "tier-gate-graph-loop", "graph/loop ship only on standard/full profiles (D58)"),
 ]
 ps1 = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
 sh = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")
