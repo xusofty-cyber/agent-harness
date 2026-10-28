@@ -52,7 +52,7 @@ graph TD
    - **技能使用與觸發時機指南**：各 skill 的觸發機制（自動/顯式/混合）、分類速查與專案記憶使用說明詳見 [`Skills Usage Guide.zh-tw.md`](docs/guides/Skills%20Usage%20Guide.zh-tw.md)（[English](docs/guides/Skills%20Usage%20Guide.md) | [简体中文](docs/guides/Skills%20Usage%20Guide.zh.md)）。
 
 4. **一鍵部署、互動精靈與統一流水線（`deploy-agents` & `run-pipeline`）**：
-   - **互動式終端逐步選擇精靈**：執行指令碼時不帶任何參數（或顯式指定 `--interactive` / `-Interactive`）將自動拉起精靈（上下方向鍵選擇、空白鍵切選、Enter 確認），引導完成規則範本語言（`en`, `zh`, `zh-tw`, `fr`, `de`）、部署範圍（`project`, `global`, `both`）、目標專案路徑、12 種 Agent 橋接檔案多選（Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy）以及可選工作流程開關，徹底杜絕命令列參數遺漏與拼寫錯誤；
+   - **互動式終端逐步選擇精靈**：執行指令碼時不帶任何參數（或顯式指定 `--interactive` / `-Interactive`）將自動拉起精靈（上下方向鍵選擇、空白鍵切選、Enter 確認），引導完成規則範本語言（`en`, `zh`, `zh-tw`）、部署範圍（`project`, `global`, `both`）、目標專案路徑、12 種 Agent 橋接檔案多選（Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy）以及可選工作流程開關，徹底杜絕命令列參數遺漏與拼寫錯誤；
    - **跨平台統一工程流水線執行器**（[`run-pipeline.sh`](run-pipeline.sh) 與 [`run-pipeline.ps1`](run-pipeline.ps1)）：一鍵按序貫通 4 大工程生命週期階段（規則分發與橋接部署 → AI 跨工具長效記憶配置 → 外部技能同步與雜湊鎖定 → 活体文檔溯源分析與質檢門禁），同時支援互動式自選與全自動無人值守（`--all -y` / `-All -Yes`）模式；
    - Windows PowerShell（[`deploy-agents.ps1`](deploy-agents.ps1)，內建 UTF-8 相容與 Junction 免提權穿透）與 Linux/macOS Bash（[`deploy-agents.sh`](deploy-agents.sh)）；
    - 專案指令碼自動建立 `AGENTS.md`（若不存在）、Claude Code 與 Copilot 橋接，並部署 Claude Code 鉤子；支援多語言切換（`-Language` / `--lang`）；

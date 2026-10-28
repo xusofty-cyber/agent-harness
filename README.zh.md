@@ -58,7 +58,7 @@ graph TD
    - **Agent 正确触发与常见问题排查指南 (FAQ)**：如何精准唤醒特定技能、避免角色扮演式脑补、正确配置 AI 记忆与状态机排障详见 [`Agent Triggering and FAQ Guide.zh.md`](docs/guides/Agent%20Triggering%20and%20FAQ%20Guide.zh.md)。
 
 4. **一键部署、交互向导与统一流水线（`deploy-agents` & `run-pipeline`）**：
-   - **交互式终端逐步选择向导**：执行脚本时不带任何参数（或显式指定 `--interactive` / `-Interactive`）将自动拉起向导（上下方向键选择、空格键切选、Enter 确认），引导完成规则模板语言（`en`, `zh`, `zh-tw`, `fr`, `de`）、部署范围（`project`, `global`, `both`）、目标项目路径、12 种 Agent 桥接文件多选（Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy）以及可选工作流开关，彻底杜绝命令行参数遗漏与拼写错误；
+   - **交互式终端逐步选择向导**：执行脚本时不带任何参数（或显式指定 `--interactive` / `-Interactive`）将自动拉起向导（上下方向键选择、空格键切选、Enter 确认），引导完成规则模板语言（`en`, `zh`, `zh-tw`）、部署范围（`project`, `global`, `both`）、目标项目路径、12 种 Agent 桥接文件多选（Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy）以及可选工作流开关，彻底杜绝命令行参数遗漏与拼写错误；
    - **跨平台统一工程流水线执行器**（[`run-pipeline.sh`](run-pipeline.sh) 与 [`run-pipeline.ps1`](run-pipeline.ps1)）：一键按序贯通 4 大工程生命周期阶段（规则分发与桥接部署 → AI 跨工具长效记忆配置 → 外部技能同步与哈希锁定 → 活体文档溯源分析与质检门禁），同时支持交互式自选与全自动无人值守（`--all -y` / `-All -Yes`）模式；
    - Windows PowerShell（[`deploy-agents.ps1`](deploy-agents.ps1)，内置 UTF-8 兼容与 Junction 权限免提权穿透）与 Linux/macOS Bash（[`deploy-agents.sh`](deploy-agents.sh)）；
    - 项目脚本创建 `AGENTS.md`（若不存在）、Claude Code 与 Copilot 桥接，并部署 Claude Code Hook；其他工具的具体加载行为以支持矩阵为准；

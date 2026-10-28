@@ -183,7 +183,7 @@ PreToolUse hooks 是 Claude Code 專屬的；安裝程式不會為其他工具�
 **參數**：
 - `-ProjectPath`（位置參數 0）：目標專案的路徑。若與 `-Global` 同時省略，則僅更新使用者全域規則。
 - `-Global`（`-g`）：初始化缺失的 `~/.claude/CLAUDE.md`、`~/.gemini/AGENTS.md` 以及 Codex 的 `$CODEX_HOME/AGENTS.md`（預設為 `~/.codex/AGENTS.md`）。若未使用 `-Update`，現有檔案會被保留。
-- `-Language`（`-l`）：選擇範本語言（`en`、`zh`、`zh-tw`、`fr`、`de`；預設為 `en`）。
+- `-Language`（`-l`）：選擇範本語言（`en`、`zh`、`zh-tw`；預設為 `en`）。
 - `-Interactive`（`-i`）：啟動逐步互動式選擇精靈（單選語言與範圍，多選 Agent 橋接檔案與選項）。在互動式終端中以零參數執行時會自動觸發。
 - `-Update`（`-u`）：快轉更新範本倉庫，自動呼叫 `tools/sync-skills.py --check` 掃描外部 skills 的上游更新並進行互動式確認，然後將檔案同步到目標。與 `-Global` 組合使用時，會備份並取代現有的全域規則檔案。Codex 的非空 `$CODEX_HOME/AGENTS.override.md` 具有優先權，會作為作用中檔案進行更新。現有的專案管理規則、hooks、skills 和鎖定中繼資料遵循其文件中記載的備份/更新行為。不會升級全域 CLI。
 - `-CometInit`（`-c`）：若已安裝 Comet CLI，自動在目標專案中執行 `comet init`。

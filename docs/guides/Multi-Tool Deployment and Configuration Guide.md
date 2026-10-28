@@ -183,7 +183,7 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 **Parameters**:
 - `-ProjectPath` (Positional 0): Path to target project. If omitted with `-Global`, only updates user global rules.
 - `-Global` (`-g`): Initializes missing `~/.claude/CLAUDE.md`, `~/.gemini/AGENTS.md`, and Codex `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`). Existing files are preserved without `-Update`.
-- `-Language` (`-l`): Selects template language (`en`, `zh`, `zh-tw`, `fr`, `de`; defaults to `en`).
+- `-Language` (`-l`): Selects template language (`en`, `zh`, `zh-tw`; defaults to `en`).
 - `-Interactive` (`-i`): Launches the step-by-step interactive selection wizard (single-select language & scope, multi-select agent bridges and options). Triggered automatically when run with zero arguments in an interactive terminal.
 - `-Update` (`-u`): Fast-forwards the template repository, automatically invokes `tools/sync-skills.py --check` to scan external skills for upstream updates with interactive confirmation, and syncs files to the target. Combined with `-Global`, it backs up and replaces existing global rule files. Codex's non-empty `$CODEX_HOME/AGENTS.override.md` takes precedence and is updated as the active file. Existing project-managed rules, hooks, skills, and lock metadata follow their documented backup/update behavior. It does not upgrade global CLIs.
 - `-CometInit` (`-c`): Automatically executes `comet init` in the target project if Comet CLI is installed.
