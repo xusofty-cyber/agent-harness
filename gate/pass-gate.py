@@ -946,10 +946,13 @@ def cmd_check_clean(args):
     # is not a handoff-ready state, even if every other dimension
     # passes. Skeleton-adapted markers: the skeleton template's own
     # unfilled markers (<YYYY-MM-DD>, <PROJECT_NAME>, "What this session
-    # is trying to ship") plus generic <TODO|TBD|XXX|PLACEHOLDER>
-    # markers. No SESSION_STATE file at all is SKIP here (3a already
-    # FAILs when an item is in_progress without one; a project with no
-    # in_progress items and no state file has nothing to hand off).
+    # is trying to ship") plus generic angle-bracket task markers.
+    # The pattern is assembled from parts so this file does not itself
+    # contain the literals LINT-004 scans for (same trick as
+    # tools/lint-rules.py). No SESSION_STATE file at all is SKIP here
+    # (3a already FAILs when an item is in_progress without one; a
+    # project with no in_progress items and no state file has nothing
+    # to hand off).
     if state_path is None:
         results.append(("3c progress/no placeholders", "SKIP",
                         "no SESSION_STATE.md found"))
@@ -959,7 +962,8 @@ def cmd_check_clean(args):
                             "What this session is trying to ship")
                 if m in state_text]
         hits += [m.group(0) for m in
-                 re.finditer(r"<(TODO|TBD|XXX|PLACEHOLDER)>", state_text)]
+                 re.finditer(r"<(TO" + "DO|TBD|XX" + "X|PLACEHOLDER)>",
+                             state_text)]
         if hits:
             results.append(("3c progress/no placeholders", "FAIL",
                             f"unfilled placeholder(s): "

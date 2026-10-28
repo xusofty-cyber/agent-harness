@@ -889,3 +889,30 @@ D57); the remaining items below are still pending.
   warning until regenerated). FR/DE variants were deleted per D27.
 - **Guard:** `tools/i18n-check.py` template-drift check (warning only,
   never fails the build; same >5-line tolerance as yunyi's lint LINT-006).
+
+## D62 — Lint-rules ported (yunyi 6 rules, skeleton-adapted) (review ruling, 2026-10-29)
+
+- **Decision:** yunyi's 6 lint rules are ported to `tools/lint-rules.py`
+  + repo_checks `lint-rules:exit-0` (CI runs repo_checks, so CI is
+  covered). Rule-by-rule reconciliation (full table in
+  docs/internal/merge-review-optimization-2026-10-29.md):
+  LINT-001 entry presence — NEW coverage, ENTRY_FILES adapted to
+  skeleton reality (yunyi's `gate/harness.py` and
+  `templates/feature_list.template.json` do not exist here and are
+  dropped); LINT-002 hook wiring — overlaps the skeleton's five-event
+  settings check, extended to the six hook files; LINT-003 schema
+  parse — adapted to `gate/feature_list.schema.json` (a JSON Schema
+  document: version const 1, items array) plus non-empty state
+  templates, NEW coverage; LINT-004 placeholder residue — NEW scope
+  (the skeleton's placeholder check covers only docs/internal/*.md
+  with angle-bracket markers); LINT-005 dead refs — equivalent coverage
+  already exists in repo_checks Phase 0, port kept for defense in
+  depth; LINT-006 translation drift — NEW alert, overlaps the
+  i18n-check drift warning by design (linter view vs
+  translation-tracker view).
+- **Porting notes:** the first LINT-003 draft wrongly required a
+  feature_list instance shape (top-level version + items list) and
+  failed on the real schema; fixed to read properties.version.const
+  and properties.items.type. The first run also caught LINT-004
+  residue in the new 3c code itself (D59 literals); the 3c pattern is
+  now assembled from parts, the same trick lint-rules uses.

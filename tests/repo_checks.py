@@ -1265,6 +1265,16 @@ _i18n_tail = (_i18n.stdout.strip().splitlines() or [""])[-1]
 check("i18n:status-check", _i18n.returncode == 0, _i18n_tail)
 print(_i18n.stdout, end="")
 
+# Lint-rules (ported from v3-yunyi, skeleton-adapted, D62): the entry
+# linter must exit 0 on this tree (warnings allowed — LINT-006 drift is
+# a warning, not a failure). CI runs repo_checks, so this covers CI too.
+_lint = subprocess.run(
+    [sys.executable, str(ROOT / "tools" / "lint-rules.py")],
+    capture_output=True, text=True, cwd=str(ROOT), timeout=60)
+_lint_tail = (_lint.stdout.strip().splitlines() or [""])[-1]
+check("lint-rules:exit-0", _lint.returncode == 0, _lint_tail)
+print(_lint.stdout, end="")
+
 # --- 7. Executable bit on entry-point scripts ---
 # The GitHub contents API resets the exec bit to 100644 on every content push,
 # so this guard catches the regression in CI. If it fails, run locally:
