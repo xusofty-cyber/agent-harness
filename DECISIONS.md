@@ -458,3 +458,93 @@ Phase 0 decision meeting.
   templates into deploy before Phase 6; auto-approving loops (approval
   is always human, recorded).
 - **Date:** 2026-10-28.
+
+## D22 — The lock is a true lock; ghost meta entries stay annotated, never deleted (Phase 6, 6-1)
+
+- **Decision:** `skills-lock.json` is enforced as a real lock, in two layers.
+  Offline (`tests/repo_checks.py` §5/§5b/§5c): every github-source entry
+  must carry a 40-hex `pinnedCommit`; every meta entry must carry a
+  `pinnedCommit` + a non-empty `note`; a hash-only lock edit with no
+  corresponding file change fails. Online (CI step
+  `python3 tools/sync-skills.py --check --strict`): every vendored skill's
+  local content is verified against the content at its pinnedCommit
+  upstream; drift, tampering, or an unresolvable pin fails the build
+  (measured locally: 34 s, all in-sync).
+- **Continuation of D10:** v2 §6-1 originally said "delete the ghost
+  entries". D10 already ruled the opposite — annotate (`meta: true` +
+  note), never delete — because the entries pin suite repos that are the
+  provenance of the vendored skills. Phase 6 keeps D10: the true-lock
+  checks apply to real entries, and meta entries are checked for
+  pin+note, not deleted. Deleting one would destroy the provenance trail
+  the lock exists to preserve.
+- **Update process:** upstream updates go through a reviewed PR
+  (`sync-skills.py --apply` on a branch, never on main; never hand-edit
+  `computedHash`); re-pinning updates `pinnedCommit` + `pinnedAt` (+
+  `pinnedFrom`). Documented in CONTRIBUTING.md "Updating vendored skills".
+- **Date:** 2026-10-28.
+
+## D23 — Supply-chain close-out: every install is pinned or a recorded gap (Phase 6, 6-2)
+
+- **Decision:** no unpinned install vector may remain in the repo's own
+  instructions or deploy scripts. Closed in Phase 6: OCR CLI pinned
+  1.13.3 (lock `npmVersion`/`pinnedAt`/`pinnedFrom` + `OCR_NPM_VERSION` /
+  `$script:OcrNpmVersion` in both deploy scripts + `ocr-pin` guards);
+  EN+ZH Panorama Guide show pinned installs only — versioned npm
+  (`comet@0.5.1`, `codegraph@1.6.2`, `open-code-review@1.13.3`) and
+  download-then-SHA256-verify flows for the codegraph/rtk installers
+  (hashes taken from `skills-lock.json`, the record) — guarded by
+  `docs-pin` checks in `tests/repo_checks.py` §3m1b.
+- **Known gaps, recorded not hidden:**
+  - The vendored comet skill (`.agents/skills/comet/SKILL.md:84`) still
+    shows an unversioned comet install in upstream text. Editing a
+    vendored skill would break the lock (§5 hash check and pin check),
+    so it is left as-is and recorded here. It is upstream's text, not
+    this repo's instruction.
+  - RTK winget (`winget install rtk-ai.rtk`) has no version pin (D13
+    known gap, unchanged).
+  - FR/DE/ZH-TW Panorama Guide rows are `stale` in
+    `docs/internal/i18n-status.md` (they still show curl|sh and
+    unversioned npm install); translation is tracked debt, not a CI
+    failure (D19).
+- **Date:** 2026-10-28.
+
+## D24 — Version and deprecation policy (Phase 6, 6-3)
+
+- **Decision:** `tools/check-release.py` (stdlib-only) is the release
+  gate, wired into `tests/repo_checks.py` §3c2: VERSION must be semver
+  and equal the newest `## [x.y.z]` in CHANGELOG.md; every released
+  heading must carry a `- YYYY-MM-DD` date; the lock must be
+  release-ready (github entries: pin + hash; local entries: version +
+  hash; meta entries: pin + note). A release can never be cut with an
+  unpinned skill.
+- **Deprecation:** a template breaking change must be recorded as a
+  `**Breaking**` bullet (or under `### Deprecated`) in CHANGELOG
+  `[Unreleased]` **with a `Migration:` note** — the tool fails the build
+  if the note is missing (negative-tested). The old form stays available
+  for **one full version cycle** (kept deprecated in the release that
+  introduces the replacement, removable only in the release after that);
+  removal is itself a `**Breaking**` entry with a `Migration:` note and
+  needs owner sign-off.
+- **Release notes:** v0.3.0 draft prepared in
+  `docs/internal/release-v0.3.0.md` (what was done / not done / measured
+  numbers); procedure in `docs/internal/release-checklist.md`. VERSION
+  stays 0.2.1 and no tag is created in Phase 6 — tagging needs separate
+  user approval.
+- **Date:** 2026-10-28.
+
+## D25 — Loop layer ships with deploy (Phase 6, 6-5; closes D21 leftover)
+
+- **Decision:** the Loop layer is now part of the distribution, not just
+  repo tooling. Both deploy scripts ship `templates/loop/` (all six
+  templates: goal / loop-state / graph × EN+ZH) to
+  `${TARGET}/templates/loop/` and the stdlib-only runner to
+  `${TARGET}/tools/loop.py`, mirroring the gate precedent (ship code +
+  templates; per-project state — `loop-state.json` /
+  `loop-events.jsonl` — is created by runs, never copied). Skipped on
+  self-deploy. PARITY row `LoopDeploy`/`loop-deploy` added; `tests/
+  repo_checks.py` §3t deploys to an empty temp dir and verifies all six
+  templates + the runner land and the deployed runner executes.
+- **Unchanged from D21:** Loop's need is still unproven (2 met + 2
+  partial + 1 not met on the L14 criteria); shipping it in deploy does
+  not claim otherwise. Approval stays human, always.
+- **Date:** 2026-10-28.
