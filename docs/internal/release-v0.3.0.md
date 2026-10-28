@@ -21,7 +21,8 @@ verified with measured numbers, not claims.
 - **Phase 0 — foundations**: skill count single source of truth
   (`tools/count-skills.py`, 40 skills on disk); `DECISIONS.md` D1–D4;
   `AGENTS.md` 156 → 61 lines; positioning + support matrix;
-  `archive_confirmation` → `required`; dead `comet-archive` refs removed;
+  `archive_confirmation` → `required` (superseded 2026-10-29 by user final
+  ruling D26: the template default is `automatic`); dead `comet-archive` refs removed;
   `.comet/config.yaml` deduped; deploy auto-mkdir; docx/brainstorming opt-in.
 - **Phase 1 — gate layer**: `gate/` (feature_list schema, stdlib-only
   `pass-gate.py`, init template, append-only events) + session templates +

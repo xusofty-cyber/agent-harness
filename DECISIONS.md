@@ -579,16 +579,18 @@ work is recursive substitution parsing plus 5 hardening tests (see
 D36–D56 table). The merge took D27 from yunyi (correct source); the
 plan's attribution is corrected here, not silently repeated.
 
-## D26 — C1: `archive_confirmation` defaults to `required` (merge ruling, provisional)
+## D26 — C1: `archive_confirmation` defaults to `automatic` (user final ruling, 2026-10-29)
 
-- **Decision:** the template default stays `required` (skeleton D4,
-  v3 D4). Yunkai's D-004 (keep `automatic`) is recorded under
-  "Pending ruling" below, not adopted.
-- **Reason:** the v3 consensus (D4) already settled this; the merge
-  does not re-open a settled v3 decision on a donor branch's say-so.
-  Changing the default to `automatic` would silently weaken every new
-  deployment's archive safety.
-- **Provisional:** 合并执行时暂定，用户复核时可改。
+- **Decision:** the template default is `automatic` (yunkai D-004 adopted).
+  Skeleton D4 / v3 D4 (`required`) is superseded for the template going
+  forward; D4 remains as Phase 0 history. Deployed projects' own
+  `.comet/config.yaml` files are untouched (deploy only copies the template
+  when the target lacks one). This repo carries no `.comet/config.yaml` of
+  its own (removed in Phase 0 dedup), so no in-tree own-config change
+  applies; a project that wants the stricter behavior sets `required` in
+  its own config.
+- **Reason:** user final ruling 2026-10-29, adopting yunkai D-004's
+  downstream-convenience default. Per-project override stays cheap.
 
 ## D27 — C2: FR/DE templates stay frozen, not deleted (merge ruling, provisional)
 
@@ -753,7 +755,8 @@ D23 were decided by user final rulings on 2026-10-29 (see D26, D27,
 D57); the remaining items below are still pending.
 
 - **yunkai D-004 — `archive_confirmation` stays `automatic`.**
-  Conflicts with D4/D26 (`required`). Merge kept `required`.
+  SETTLED by user final ruling 2026-10-29 (see D26): the template default
+  is `automatic`; D4's `required` is superseded for the template.
 - **yunkai D-006 — delete the FR/DE rule templates (18 files).**
   Conflicts with D3/D19/D27 (frozen, not deleted). Merge kept them
   frozen.
