@@ -170,5 +170,29 @@ class TestLocalSkillsFilter(unittest.TestCase):
         self.assertEqual(sorted(names), ["a", "c"])
 
 
+class TestStrictExitCode(unittest.TestCase):
+    """Phase 2, 2-1: --strict exit codes are a pure function of the summary."""
+
+    def test_clean_is_zero(self):
+        self.assertEqual(mod.strict_exit_code({"in-sync": 12}), 0)
+        self.assertEqual(mod.strict_exit_code({}), 0)
+
+    def test_drift_is_one(self):
+        for status in ("outdated", "tampered", "tampered-local",
+                       "missing-hash", "missing-local"):
+            self.assertEqual(mod.strict_exit_code({status: 1}), 1, status)
+            self.assertEqual(
+                mod.strict_exit_code({"in-sync": 5, status: 2}), 1, status)
+
+    def test_fetch_failed_is_two_and_dominates(self):
+        self.assertEqual(mod.strict_exit_code({"fetch-failed": 1}), 2)
+        self.assertEqual(
+            mod.strict_exit_code({"fetch-failed": 1, "outdated": 3}), 2)
+
+    def test_updated_does_not_fail(self):
+        # --apply refreshed the lock; nothing is wrong anymore.
+        self.assertEqual(mod.strict_exit_code({"updated": 2}), 0)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)
