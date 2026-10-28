@@ -39,7 +39,10 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq shellcheck
           npm install -g markdownlint-cli
-          pip install pyyaml
+          # pytest: the bench smoke inside repo_checks runs the fixture
+          # acceptance command (python3 -m pytest ...); setup-python
+          # does not ship it.
+          pip install pyyaml pytest
 
       - name: Markdown lint
         run: markdownlint '**/*.md'
