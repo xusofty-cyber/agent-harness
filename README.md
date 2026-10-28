@@ -9,6 +9,8 @@
 
 This repository provides global, project, and directory rule templates, Claude Code PreToolUse hooks, skill files, and Windows/Linux/macOS deployment scripts. Rule loading and hook behavior vary by tool. Hooks are client-side mechanisms, not operating-system or server-side security boundaries.
 
+> **Positioning**: this repository is a config + skill distribution pack with a minimal gate scaffold (from Phase 1). It contains no agent runtime: the core gate is self-owned and host-agnostic, and Comet is an optional adapter, not the harness itself.
+
 ## Prerequisites
 
 - **Linux/macOS**: `bash`, `git`, `python3` (pre-installed on most systems)
@@ -69,15 +71,15 @@ graph TD
 
 ### Support scope
 
-| Tool | Configuration provided here | Status |
-|---|---|---|
-| Claude Code | `CLAUDE.md` bridge, `.claude/skills/` links, `.claude/settings.json` hooks | Configured by script; hooks run only in the Claude Code client |
-| Antigravity 2.0 / CLI / IDE & extensions | Project rules/skills; `--global` writes `~/.gemini/AGENTS.md` plus a `GEMINI.md` compatibility pointer | Current surfaces load both global names; older IDE releases can follow the pointer. CLI-only rules remain separate |
-| Codex | Global `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`), project `AGENTS.md`, and `.agents/skills/` | `-Global` initializes the Codex global file; `-Global -Update` backs up and replaces the active global instructions |
-| ai-memory | Optional MCP/hooks for Claude Code, Codex CLI, and Antigravity CLI; MCP-only setup for Antigravity 2.0 and IDE | Explicit per-project opt-in; Codex desktop must be checked against its installed version; ChatGPT web uses manual handoff |
-| GitHub Copilot | `.github/copilot-instructions.md` bridge | Configured by script; behavior depends on Copilot version/mode |
-| Zed | `AGENTS.md` | Reusable files only; no Zed-specific setup by script |
-| Pi / OpenCode | No dedicated entry point or script validation | Not adapted; automatic loading is not implied |
+| Tool | Configuration provided here | Enforcement | Status |
+|---|---|---|---|
+| Claude Code | `CLAUDE.md` bridge, `.claude/skills/` links, `.claude/settings.json` hooks | Enforced (hooks) | Configured by script; hooks run only in the Claude Code client |
+| Antigravity 2.0 / CLI / IDE & extensions | Project rules/skills; `--global` writes `~/.gemini/AGENTS.md` plus a `GEMINI.md` compatibility pointer | Config only | Current surfaces load both global names; older IDE releases can follow the pointer. CLI-only rules remain separate |
+| Codex | Global `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`), project `AGENTS.md`, and `.agents/skills/` | Config only | `-Global` initializes the Codex global file; `-Global -Update` backs up and replaces the active global instructions |
+| ai-memory | Optional MCP/hooks for Claude Code, Codex CLI, and Antigravity CLI; MCP-only setup for Antigravity 2.0 and IDE | Config only | Explicit per-project opt-in; Codex desktop must be checked against its installed version; ChatGPT web uses manual handoff |
+| GitHub Copilot | `.github/copilot-instructions.md` bridge | Config only | Configured by script; behavior depends on Copilot version/mode |
+| Zed | `AGENTS.md` | Files only | Reusable files only; no Zed-specific setup by script |
+| Pi / OpenCode | No dedicated entry point or script validation | Files only | Not adapted; automatic loading is not implied |
 
 Use `-Initialize` / `--initialize` during deployment to create guidance with locally verifiable project facts and a checklist for unknowns. Add `-DirectoryPath` / `--directory` with an existing module path to generate its directory-level guidance too. The scripts only infer facts supported by local Git metadata, manifests, lockfiles, and CI files. For `package.json`, detected scripts and common framework/storage dependencies are marked as suggestions for review, not verified facts. Users or the active coding agent must confirm purpose, ownership, module responsibility, and boundaries. Existing `AGENTS.md` files are preserved; a review copy is written as `AGENTS.generated.md`. Run `-Check` / `--check` to find unresolved items.
 

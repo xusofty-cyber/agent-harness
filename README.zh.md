@@ -9,6 +9,8 @@
 
 本项目提供全局、项目和目录级规范模板、Claude Code PreToolUse 钩子、技能文件，以及 Windows/Linux/macOS 部署脚本。各工具的规则加载方式和钩子能力不同；请以支持矩阵和部署脚本实际行为为准。钩子属于客户端机制，不是操作系统或服务端安全边界。
 
+> **定位**：本仓库是配置 + 技能分发包，外加自 Phase 1 起的最小门禁脚手架；不包含任何 Agent 运行时。核心门禁自有且与宿主无关，Comet 只是可选适配器，不是本仓库本身。
+
 ## 前置要求
 
 - **Linux/macOS**：`bash`、`git`、`python3`（大多数系统已预装）
@@ -71,15 +73,15 @@ graph TD
 
 ### 支持范围
 
-| 工具 | 本仓库提供的配置/接线 | 状态 |
-|---|---|---|
-| Claude Code | `CLAUDE.md` 桥接、`.claude/skills/` 链接、`.claude/settings.json` Hook | 脚本配置；Hook 仅在 Claude Code 客户端运行 |
-| Antigravity 2.0 / CLI / IDE 与扩展 | 项目规则/技能目录；`--global` 写入 `~/.gemini/AGENTS.md` 和 `GEMINI.md` 兼容指针 | 当前表面支持两个全局文件名；较早 IDE 可跟随指针读取规范文件；CLI 专属规则另行配置 |
-| Codex | 全局 `$CODEX_HOME/AGENTS.md`（默认 `~/.codex/AGENTS.md`）、项目 `AGENTS.md` 与 `.agents/skills/` | `-Global` 初始化 Codex 全局文件；`-Global -Update` 备份后覆盖当前生效的全局规则 |
-| ai-memory | Claude Code、Codex CLI、Antigravity CLI 的可选 MCP/hooks；Antigravity 2.0 与 IDE 提供 MCP-only 设置 | 项目显式选择加入；Codex 桌面版按安装版本核实；ChatGPT 网页版人工交接 |
-| GitHub Copilot | `.github/copilot-instructions.md` 桥接 | 脚本配置；具体行为依 Copilot 版本/模式 |
-| Zed | `AGENTS.md` 文件 | 提供可复用文件；脚本不创建 Zed 专属配置 |
-| Pi / OpenCode | 未提供专用入口或脚本验证 | 未适配；不能据此推断自动加载 |
+| 工具 | 本仓库提供的配置/接线 | 执行档 | 状态 |
+|---|---|---|---|
+| Claude Code | `CLAUDE.md` 桥接、`.claude/skills/` 链接、`.claude/settings.json` Hook | 强制（钩子） | 脚本配置；Hook 仅在 Claude Code 客户端运行 |
+| Antigravity 2.0 / CLI / IDE 与扩展 | 项目规则/技能目录；`--global` 写入 `~/.gemini/AGENTS.md` 和 `GEMINI.md` 兼容指针 | 配置 | 当前表面支持两个全局文件名；较早 IDE 可跟随指针读取规范文件；CLI 专属规则另行配置 |
+| Codex | 全局 `$CODEX_HOME/AGENTS.md`（默认 `~/.codex/AGENTS.md`）、项目 `AGENTS.md` 与 `.agents/skills/` | 配置 | `-Global` 初始化 Codex 全局文件；`-Global -Update` 备份后覆盖当前生效的全局规则 |
+| ai-memory | Claude Code、Codex CLI、Antigravity CLI 的可选 MCP/hooks；Antigravity 2.0 与 IDE 提供 MCP-only 设置 | 配置 | 项目显式选择加入；Codex 桌面版按安装版本核实；ChatGPT 网页版人工交接 |
+| GitHub Copilot | `.github/copilot-instructions.md` 桥接 | 配置 | 脚本配置；具体行为依 Copilot 版本/模式 |
+| Zed | `AGENTS.md` 文件 | 仅文件 | 提供可复用文件；脚本不创建 Zed 专属配置 |
+| Pi / OpenCode | 未提供专用入口或脚本验证 | 仅文件 | 未适配；不能据此推断自动加载 |
 
 ---
 
