@@ -341,6 +341,14 @@ if (-not (Test-Path $ResolvedProjectTemplate)) {
     if ($found) { $ResolvedProjectTemplate = $found.FullName }
 }
 
+# TIER_SLIM_TEMPLATE (merged from v3-yunkai, D-009): minimal/standard
+# profiles ship the slim Project template when a .slim.md variant exists
+# for the resolved language; full always ships the full text.
+if ($SkillProfile -ne "full") {
+    $slimTemplate = $ResolvedProjectTemplate -replace '\.md$', '.slim.md'
+    if (Test-Path $slimTemplate) { $ResolvedProjectTemplate = $slimTemplate }
+}
+
 $ResolvedDirectoryTemplate = Resolve-TemplateFile "Directory AGENTS" $LangSuffix
 if (-not (Test-Path $ResolvedDirectoryTemplate)) {
     $found = Get-ChildItem -Path (Join-Path (Join-Path $ScriptDir "templates") "agents") -Filter "*Directory*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1

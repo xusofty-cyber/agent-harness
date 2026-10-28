@@ -544,6 +544,16 @@ if [ ! -f "${PROJECT_TEMPLATE}" ]; then
     fi
 fi
 
+# TIER_SLIM_TEMPLATE (merged from v3-yunkai, D-009): minimal/standard
+# profiles ship the slim Project template when a .slim.md variant exists
+# for the resolved language; full always ships the full text. Ablation #2
+# showed the slim template is outcome-neutral on t3/t4 with ~31% less
+# apparatus context.
+if [ "$PROFILE" != "full" ]; then
+    _slim_tpl="${PROJECT_TEMPLATE%.md}.slim.md"
+    if [ -f "$_slim_tpl" ]; then PROJECT_TEMPLATE="$_slim_tpl"; fi
+fi
+
 DIRECTORY_TEMPLATE="$(resolve_template "Directory AGENTS" "$LANG_SUFFIX")"
 if [ ! -f "${DIRECTORY_TEMPLATE}" ]; then
     DIRECTORY_TEMPLATE="${SCRIPT_DIR}/templates/agents/Directory AGENTS.md"
