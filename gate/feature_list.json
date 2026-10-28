@@ -1,0 +1,54 @@
+{
+  "items": [
+    {
+      "area": "docs",
+      "evidence": {
+        "command": "python3 -c \"import pathlib; t=pathlib.Path('docs/internal/SESSION_STATE.md').read_text(); assert len(t.splitlines())<=60, len(t.splitlines()); assert 'p1-dogfood-session-state' in t; assert all(h in t for h in ['## Goal','## In progress','## Next','## Blocked','## Last verification'])\"",
+        "exit_code": 0,
+        "ran_at": "2026-10-28T09:20:05Z",
+        "output_tail": "",
+        "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "id": "p1-dogfood-session-state",
+      "notes": "Real change, not a fixture: the repo's own SESSION_STATE.md (docs/internal/) is a long achievement log; migrate it to the new breakpoint template.",
+      "priority": "p0",
+      "status": "passing",
+      "title": "Migrate this repo's SESSION_STATE.md to breakpoint format",
+      "user_visible_behavior": "docs/internal/SESSION_STATE.md is at most 60 lines, has the five breakpoint sections, and names this item id.",
+      "verification": {
+        "command": "python3 -c \"import pathlib; t=pathlib.Path('docs/internal/SESSION_STATE.md').read_text(); assert len(t.splitlines())<=60, len(t.splitlines()); assert 'p1-dogfood-session-state' in t; assert all(h in t for h in ['## Goal','## In progress','## Next','## Blocked','## Last verification'])\"",
+        "timeout_seconds": 60
+      }
+    },
+    {
+      "area": "gate",
+      "evidence": null,
+      "id": "p1-dogfood-gate-readme",
+      "notes": "Verifies the gate is documented, including its limits.",
+      "priority": "p1",
+      "status": "in_progress",
+      "title": "gate/README.md documents the gate and its limits",
+      "user_visible_behavior": "gate/README.md exists, states the anti-tamper limits honestly, and docs/internal/phase1-dogfood.md records the dogfood run.",
+      "verification": {
+        "command": "test -f gate/README.md && test -f docs/internal/phase1-dogfood.md && grep -q 'defence in depth' gate/README.md && grep -q 'p1-dogfood-session-state' docs/internal/phase1-dogfood.md",
+        "timeout_seconds": 60
+      }
+    },
+    {
+      "area": "gate",
+      "evidence": null,
+      "id": "p1-dogfood-hooks-tests",
+      "notes": "The gate hook tests must pass on this machine, not just in CI.",
+      "priority": "p1",
+      "status": "not_started",
+      "title": "Gate hook tests pass",
+      "user_visible_behavior": "node tests/hooks-gate.test.mjs reports 10 pass / 0 fail.",
+      "verification": {
+        "command": "node tests/hooks-gate.test.mjs",
+        "timeout_seconds": 120
+      }
+    }
+  ],
+  "project": "agent-harness",
+  "version": 1
+}
