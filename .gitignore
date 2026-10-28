@@ -33,3 +33,4 @@ gate/cost-ledger.jsonl
 # Python bytecode
 __pycache__/
 *.pyc
+eval/cost-ledger.jsonl

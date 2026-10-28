@@ -748,7 +748,9 @@ of truth), D-007 (≈D12 + D15).
 These donor decisions conflict with the skeleton or with the merge
 rulings above. They are recorded here, not silently absorbed, and
 need a user ruling. Until then, the merge ruling (or skeleton
-decision) stands.
+decision) stands. Settled since: yunkai D-004, yunkai D-006, and yunyi
+D23 were decided by user final rulings on 2026-10-29 (see D26, D27,
+D57); the remaining items below are still pending.
 
 - **yunkai D-004 — `archive_confirmation` stays `automatic`.**
   Conflicts with D4/D26 (`required`). Merge kept `required`.
@@ -762,10 +764,15 @@ decision) stands.
   open question is whether to ever run the calibration or keep the
   rubric advisory forever.
 - **yunyi D23 — cost hard stop ENABLED (user chose the ceilings).**
-  Conflicts with skeleton D12 (budgets warn, never auto-stop) and the
-  merge's do-not-take list. Merge kept the hard stop OFF (no
-  `eval/cost.py` hard-stop gate). The ceilings and the zero-stop-event
-  status are recorded in yunyi's branch if the user wants to revisit.
+  SETTLED by user final ruling 2026-10-29 (see D57): hard stop is ON in
+  this branch. `eval/cost.py` + `eval/cost-budget.json` are ported from
+  yunyi with the D23 ceilings (task 10 verifications / 3600 s / 5 retries;
+  day 100 verifications / 28800 s); `cost.py check` refuses new verification
+  runs past a ceiling (exit 2) and never kills an in-flight run. The
+  skeleton D12 proxy ledger (`tools/cost-ledger.py`) keeps its own
+  warn-only property — two ledgers, two roles — so D12 is narrowed, not
+  contradicted, and yunkai D-007's warn-only stance is superseded for
+  verification runs by the same ruling.
 - **yunyi D31 — lock pins with PIN_EXEMPT = {codegraph, comet, rtk}.**
   Conflicts with skeleton D22 (true lock, no exemptions). Merge kept
   the true lock — all three are pinned in `skills-lock.json` — and
@@ -777,3 +784,27 @@ decision) stands.
   second-judge round). Merge did NOT carry the stable claim over;
   `eval/rubric-status.json` is provisional with auto-approve off.
   A live second-person calibration round is the way to settle this.
+
+## D57 — Cost hard stop ON (user final ruling, 2026-10-29)
+
+- **Decision:** the cost hard-stop gate is ON in this branch. `eval/cost.py`
+  (ported from yunyi, D23) + `eval/cost-budget.json` carry the D23 ceilings:
+  per task max 10 verifications / 3600 s / 5 retries; per day max 100
+  verifications / 28800 s. `cost.py check` must be consulted before starting
+  a new verification run; past a ceiling it exits 2 (BUDGET STOP), logs the
+  stop to `eval/cost-ledger.jsonl` (local-only, gitignored), and the task is
+  recorded as blocked (not passing, not failed). A stopped task resumes only
+  after a human raises the budget or a new day starts. Checking never kills
+  an in-flight run.
+- **Supersedes:** the merge's provisional OFF (the pending-ruling entry for
+  yunyi D23) and the merge's do-not-take list entry for the hard-stop gate.
+- **Conflict resolved:** skeleton D12 (proxy ledger warns, never auto-stops)
+  and yunkai D-007 (budgets warn, rubrics advise) described the skeleton's
+  proxy ledger and yunkai's line, respectively. This ruling does not change
+  `tools/cost-ledger.py` (it stays warn-only; repo_checks
+  `cost-ledger:no-auto-stop` still holds for that tool). The hard stop lives
+  in a separate gate over a separate task/day ledger, so D12/D-007 stand for
+  their own tools while the branch-wide policy for verification runs is ON.
+- **Guard:** repo_checks `cost-gate:*` pins the tool, the enabled flag, and
+  the ceilings; `tests/cost_test.py` covers OK / task-verification stop /
+  task-duration stop / day stop / OFF-never-blocks.

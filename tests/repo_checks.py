@@ -692,6 +692,33 @@ check("cost-ledger:own-budget",
       (ROOT / "gate" / "cost-budget.json").is_file(),
       "this repo's own gate/cost-budget.json missing (dogfood init-budget)")
 
+# --- 3p2. Hard-stop gate (yunyi D23, merge D57: user final ruling 2026-10-29) ---
+# eval/cost.py check refuses new verification runs past the ceilings (exit 2);
+# it never kills an in-flight run. This guard pins the ruling so the gate
+# cannot silently regress to alert-only. The proxy ledger above (3p) keeps
+# its own no-auto-stop property: two ledgers, two roles.
+_cost_budget = {}
+try:
+    _cost_budget = json.loads((ROOT / "eval" / "cost-budget.json").read_text(encoding="utf-8"))
+except Exception:
+    _cost_budget = {}
+check("cost-gate:tool-exists",
+      (ROOT / "eval" / "cost.py").is_file(),
+      "eval/cost.py hard-stop gate missing")
+check("cost-gate:enabled",
+      _cost_budget.get("hard_stop_enabled") is True,
+      "eval/cost-budget.json must set hard_stop_enabled=true (D57)")
+check("cost-gate:ceilings",
+      _cost_budget.get("hard_stop_task") == {"max_duration_s": 3600,
+                                             "max_retries": 5,
+                                             "max_verifications": 10}
+      and _cost_budget.get("hard_stop_day") == {"max_duration_s": 28800,
+                                                "max_verifications": 100},
+      "eval/cost-budget.json ceilings must match yunyi D23 (task 10/3600s/5, day 100/28800s)")
+check("cost-gate:ledger-gitignored",
+      "eval/cost-ledger.jsonl" in (ROOT / ".gitignore").read_text(encoding="utf-8"),
+      "eval/cost-ledger.jsonl must be gitignored (local-only ledger)")
+
 # --- 3q. Benchmarks & evaluation (Phase 3, v3 §4.5) ---
 # Framework first, then measured runs: 4 tasks (fixed start commit,
 # acceptance, budget), rubric (six dimensions), calibration (3+ rounds),

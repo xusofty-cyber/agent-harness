@@ -1,0 +1,16 @@
+{
+  "hard_stop_day": {
+    "max_duration_s": 28800,
+    "max_verifications": 100
+  },
+  "hard_stop_enabled": true,
+  "hard_stop_enabled_since": "2026-10-29",
+  "hard_stop_task": {
+    "max_duration_s": 3600,
+    "max_retries": 5,
+    "max_verifications": 10
+  },
+  "max_total_duration_ms": 3600000,
+  "max_verifications": 1000,
+  "note": "Alert thresholds (max_total_duration_ms, max_verifications) are for report only. Hard-stop ceilings (hard_stop_task, hard_stop_day) are enforced by 'cost.py check' since yunyi D23 (2026-10-28), adopted in feat/merge-v3 by user final ruling 2026-10-29 (D57): exceeding one refuses starting a new verification run (exit 2), never kills an in-flight run. Ledger file eval/cost-ledger.jsonl is local and must not be committed."
+}
