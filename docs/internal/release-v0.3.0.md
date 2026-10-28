@@ -34,7 +34,9 @@ verified with measured numbers, not claims.
   all five hook events wired; Guard expands indirect execution; cost ledger
   - budget alerts (never auto-stop).
 - **Phase 3 — self-built benchmark**: 4 tasks (fixed start commit),
-  `eval/run-bench.sh`, six-dimension rubric (5 calibration rounds), eval
+  `eval/run-bench.sh`, six-dimension rubric (5 calibration rounds;
+  standing advisory-only per D28, user final ruling 2026-10-29 — the
+  rubric provides advisory opinions only and never auto-approves), eval
   regression CI, first `QUALITY_SCORE.md`.
 - **Phase 4 — slimming**: deploy profiles minimal (default, 10 skills,
   212,777 bytes) / standard (18) / full (38 gated, 40 with heavy;

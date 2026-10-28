@@ -745,6 +745,13 @@ check("eval:rubric-six-dimensions",
       "eval/rubric.md lacks one of the six dimensions")
 check("eval:rubric-rerun-rule", "re-running" in _rubric,
       "eval/rubric.md does not require re-running acceptance")
+_rubric_status = json.loads(
+    (ROOT / "eval" / "rubric-status.json").read_text(encoding="utf-8"))
+check("eval:rubric-advisory-only",
+      _rubric_status.get("status") == "advisory-only"
+      and _rubric_status.get("auto_approve_allowed") is False,
+      "rubric-status.json must stay advisory-only with auto-approve "
+      "off (D28, user final ruling 2026-10-29)")
 _calib = (ROOT / "eval" / "calibration.md").read_text(encoding="utf-8")
 check("eval:calibration-rounds", _calib.count("## Round ") >= 3,
       "eval/calibration.md has fewer than 3 recorded rounds")

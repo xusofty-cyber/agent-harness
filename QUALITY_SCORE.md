@@ -14,7 +14,7 @@ skeleton's baseline numbers are kept as an appendix below.
 | Hooks & guard | 7 | 108 hook tests green (hooks 73 + write 12 + gate 11 + lifecycle 12) + 5 server tests; guard expands substitutions recursively, enforces the D27 resolver conjunction (13 tests), logs parse failures to guard-alerts.jsonl and still fails open; yunkai's nested-substitution hardening tests added in this merge. Not higher: guard remains a guardrail, not a sandbox (documented); Stop hook has no soak time yet. |
 | Distribution (templates + 40 skills) | 5 | Counts machine-guarded (skills-lock: 36 github entries pinned, CI `--check --strict`); licensing inventoried; template-size ablation done — slim Project template adopted for minimal/standard tiers (D-009). Still: ~99K tokens of SKILL.md for 40 skills with zero per-skill usage evidence and known overlaps (e.g. two debugging skills); the skill catalog is the ablation cadence's next target. |
 | Numbers & claims hygiene | 6 | Repo's own stale figures fixed in Phase 0 and now CI-guarded (repo_checks 662 PASS); upstream figures (comet skill) dispositioned in the 2026-10-28 bench baseline; this merge's numbers are all re-measured (see verification record). Not higher: the upstream text still ships un-annotated in the synced skill (cannot edit without breaking sync). |
-| Evaluation | 4 | t1–t4: 36-run matrix, 36/36 pass, 0 false completions (but ceiling effect — tasks too trivial to discriminate arms); t5–t8: one-round matrix 13/13 accepted, 0 false completions (this merge, `eval/results/bench-t5-t8-merge-round1.md`), but the executor reused one implementation per task across arms, so no arm discrimination was measured; rubric calibrated 5 rounds, still not `stable` (no live second-judge round); thresholds provisional. But tasks are minutes-scale and arms are same-model — scores here measure provability and cost, not capability deltas. |
+| Evaluation | 4 | t1–t4: 36-run matrix, 36/36 pass, 0 false completions (but ceiling effect — tasks too trivial to discriminate arms); t5–t8: one-round matrix 13/13 accepted, 0 false completions (this merge, `eval/results/bench-t5-t8-merge-round1.md`), but the executor reused one implementation per task across arms, so no arm discrimination was measured; rubric calibrated 5 rounds, standing advisory-only (D28, user final ruling 2026-10-29; live second review deferred, not owed); thresholds provisional. But tasks are minutes-scale and arms are same-model — scores here measure provability and cost, not capability deltas. |
 
 Overall posture: the enforcement and measurement spine is real; the
 distribution bulk is unproven value and the evaluation is young.
@@ -30,7 +30,7 @@ distribution score is supposed to move — by shrinking, not growing.
    but one implementation per task was reused across arms, so no arm
    separation was measured; the score stays 4 until independent
    per-run executions (or harder tasks) separate the arms.
-2. One live second-person rubric calibration round → rubric `stable`.
+2. Live second-person rubric calibration round — DEFERRED, not owed (D28): only on a real project the user knows well, when conditions mature; only then revisit `stable`/auto-approval.
 3. Monthly ablation continues (next run 2026-11); `writing-skills`
    removal still awaits owner sign-off.
 4. Re-issue this scorecard when the evidence above changes.
@@ -105,8 +105,9 @@ demonstrated in Phase 1 dogfood, not by this matrix. Pack-vs-gate
 | Pipeline (`--strict`) | Accept | Phase 2 verification: strict FAIL exit 1 / advisory WARN exit 0, no PASS on failure |
 | Hooks (5 events) | Accept | 56 + 10 + 11 + 12 hook tests pass; parse failures logged, still fail-open |
 | Benchmarks (`eval/`) | Accept | 36/36 runs pass (12 per arm); thresholds re-derived from the full matrix, still provisional |
-| Docs / i18n | Revise | EN/ZH current; FR/DE/ZH-TW frozen per D3; rubric not yet `stable` (no live second-judge calibration round yet) |
+| Docs / i18n | Revise | EN/ZH current; FR/DE/ZH-TW frozen per D3; rubric standing advisory-only (D28) |
 
 Module scores are judgement calls anchored to the evidence cited, not
 measurements. The rubric itself is **calibrated (5 rounds, 0 divergences)**
-but not `stable` — see `eval/calibration.md`.
+but standing advisory-only, not `stable` — see D28 and
+`eval/calibration.md`.

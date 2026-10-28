@@ -29,13 +29,20 @@ single failing dimension blocks, however good the rest is.
 
 ## Calibration
 
-The rubric is **provisional** until 3–5 calibration rounds are recorded in
-`eval/calibration.md` (evaluator score vs. known outcome, divergences and
-wording fixes). Only after calibration may the rubric be marked `stable`;
-before that, every scored item must also carry the evaluator's reasoning
-per dimension. Calibration rounds in this session used recorded phase
+The rubric is **standing advisory-only** (user final ruling 2026-10-29,
+D28, aligned with yunkai D-011): it provides advisory opinions only and
+never auto-approves — a human always decides. 5 calibration rounds are
+recorded in `eval/calibration.md` (evaluator score vs. known outcome,
+divergences and wording fixes); those rounds used recorded phase
 outcomes as the "human" side (no live second judge was available — see
-`eval/calibration.md` for that limitation).
+`eval/calibration.md` for that limitation). A live second review is
+DEFERRED, not owed: it runs only when conditions mature, and it must
+run on a real project the user knows well — bench toy tasks do not
+count, because a second review on toy tasks cannot measure
+discrimination. Only if such a round actually runs and consistency
+meets the bar may `stable` and auto-approval be reconsidered. Until
+then, every scored item must also carry the evaluator's reasoning per
+dimension.
 
 ## What the rubric does NOT do
 

@@ -609,22 +609,34 @@ plan's attribution is corrected here, not silently repeated.
   Freezing is the reversible option.
 - **Provisional:** 合并执行时暂定，用户复核时可改。
 
-## D28 — C3: rubric stays provisional, no auto-approve (merge ruling, provisional)
+## D28 — C3: rubric is standing advisory-only, never auto-approves (user final ruling, 2026-10-29)
 
 - **Decision:** the rubric (yunyi's `eval/evaluate.py` + gate) is
-  merged with `eval/rubric-status.json` provisional and
-  `auto_approve_allowed: false`; `--gate` always refuses (exit 2)
-  until a real second-reviewer calibration round marks it stable.
-  Yunyi's all-2 (12/12) Accept rule is NOT adopted — the verdict rule
-  follows the skeleton's `eval/rubric.md` (Accept = total ≥ 9 and no
-  0; Block = any 0). Yunkai's D-011 (rubric advisory-only, never
-  calibrate) is recorded under "Pending ruling" below.
+  standing advisory-only: `eval/rubric-status.json` status
+  `advisory-only`, `auto_approve_allowed: false`; `--gate` always
+  refuses (exit 2) and there is no auto-approve path. A human always
+  decides. Yunyi's all-2 (12/12) Accept rule is NOT adopted — the
+  verdict rule follows the skeleton's `eval/rubric.md` (Accept =
+  total ≥ 9 and no 0; Block = any 0). This ruling aligns with yunkai
+  D-011 and supersedes the merge's provisional wording (which held
+  the rubric "provisional until a live second-reviewer round marks it
+  stable").
 - **Reason:** yunyi's own D16 refused a stable claim until a
   confirmation round ran with fixed wording; the skeleton's D15
   likewise keeps the rubric un-stable for lack of a live second-judge
   round. Auto-approval on an un-stable rubric would let a gate pass
-  work no human reviewed.
-- **Provisional:** 合并执行时暂定，用户复核时可改。
+  work no human reviewed. The user ruling settles the direction:
+  advisory is the standing state, not a waiting room.
+- **Future trigger (deferred, NOT owed):** a live second review is
+  not cancelled, but it is not outstanding homework either. It runs
+  only when conditions mature, and it must run on a real project the
+  user knows well — bench toy tasks do not count, because a second
+  review on toy tasks cannot measure discrimination. Only if such a
+  round actually runs and consistency meets the bar may `stable` and
+  auto-approval be reconsidered. Until then, nothing is owed on this
+  item.
+- **Guard:** repo_checks `eval:rubric-advisory-only` pins status
+  `advisory-only` with auto-approve off.
 
 ## D29 — C4: the skeleton's schema is the standard (merge ruling, provisional)
 
@@ -767,11 +779,10 @@ D57); the remaining items below are still pending.
   SETTLED by user final ruling 2026-10-29 (see D27): the 18 files are
   deleted and references cleaned; D3/D19's freeze is superseded for FR/DE.
 - **yunkai D-011 — human rubric calibration not run; rubric stays
-  advisory-only.** Conflicts in direction with D28/C3: the merge
-  ships a gated evaluator (provisional, `--gate` refuses) rather than
-  an advisory-only rubric, but agrees calibration has not run. The
-  open question is whether to ever run the calibration or keep the
-  rubric advisory forever.
+  advisory-only.** SETTLED by user final ruling 2026-10-29 (see
+  D28): the rubric is standing advisory-only, aligned with D-011.
+  The live second review is deferred, not owed — it runs only when
+  conditions mature, on a real project the user knows well.
 - **yunyi D23 — cost hard stop ENABLED (user chose the ceilings).**
   SETTLED by user final ruling 2026-10-29 (see D57): hard stop is ON in
   this branch. `eval/cost.py` + `eval/cost-budget.json` are ported from
@@ -804,8 +815,10 @@ D57); the remaining items below are still pending.
 - **yunyi D16/D21 — rubric `stable` claimed after confirmation round
   4.** Conflicts with skeleton D15 and D28/C3 (not stable, no live
   second-judge round). Merge did NOT carry the stable claim over;
-  `eval/rubric-status.json` is provisional with auto-approve off.
-  A live second-person calibration round is the way to settle this.
+  `eval/rubric-status.json` was provisional with auto-approve off.
+  Settled by user final ruling 2026-10-29 (see D28): the rubric is
+  standing advisory-only; a live second-person round is deferred, not
+  owed, and must run on a real project the user knows well.
 
 ## D57 — Cost hard stop ON (user final ruling, 2026-10-29)
 

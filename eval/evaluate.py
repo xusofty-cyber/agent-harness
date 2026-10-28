@@ -7,10 +7,12 @@ Usage:
         non-empty evidence citation; verdict must match the computed
         verdict. Exit 0 = valid, 1 = invalid.
     python3 eval/evaluate.py --gate <scorecard.json>
-        Auto-approval gate. While eval/rubric-status.json is not
-        "stable", this ALWAYS refuses (exit 2) — there is no auto-approve
-        path before calibration is complete. When stable, it approves
-        only Accept verdicts.
+        Auto-approval gate. The rubric is standing advisory-only (user
+        final ruling 2026-10-29, D28), so this ALWAYS refuses (exit 2)
+        — the rubric provides advisory opinions only and never
+        auto-approves; a human decides. Stable + auto-approval may only
+        be reconsidered after a live second review on a real project
+        the user knows well, if consistency meets the bar.
     python3 eval/evaluate.py status
         Print the current rubric status.
 
@@ -93,8 +95,9 @@ def main() -> int:
           f"(total {sum(card['scores'][d]['score'] for d in DIMS)}/12)")
     if args.gate:
         if status.get("status") != "stable" or not status.get("auto_approve_allowed"):
-            print("GATE REFUSED: rubric status is not stable; auto-approval is not "
-                  "available before calibration completes (v3 2.2).", file=sys.stderr)
+            print("GATE REFUSED: rubric is advisory-only (D28, user final "
+                  "ruling 2026-10-29); it provides advisory opinions only "
+                  "and never auto-approves — a human decides.", file=sys.stderr)
             return 2
         if card["verdict"] != "Accept":
             print(f"GATE REFUSED: verdict is {card['verdict']}, only Accept auto-approves.", file=sys.stderr)
