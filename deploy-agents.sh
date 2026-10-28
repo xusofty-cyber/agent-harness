@@ -927,10 +927,14 @@ if [ -z "$TARGET_PROJECT_ARG" ]; then
     exit 0
 fi
 
-# Validate target project directory
-if [ ! -d "${TARGET_PROJECT_ARG}" ]; then
-    echo -e "${RED}[Error] Target project path does not exist or is not a directory: / 目标项目路径不存在或不是目录: ${TARGET_PROJECT_ARG}${NC}"
+# Validate target project directory (target-auto-create: create it if missing)
+if [ -e "${TARGET_PROJECT_ARG}" ] && [ ! -d "${TARGET_PROJECT_ARG}" ]; then
+    echo -e "${RED}[Error] Target project path exists but is not a directory: / 目标项目路径已存在但不是目录: ${TARGET_PROJECT_ARG}${NC}"
     exit 1
+fi
+if [ ! -d "${TARGET_PROJECT_ARG}" ]; then
+    echo -e "  ${YELLOW}[i] Target project directory does not exist; creating it: / 目标项目目录不存在，自动创建: ${TARGET_PROJECT_ARG}${NC}"
+    mkdir -p "${TARGET_PROJECT_ARG}" || { echo -e "${RED}[Error] Failed to create target directory: ${TARGET_PROJECT_ARG}${NC}"; exit 1; }
 fi
 
 TARGET_PROJECT_DIR="$(cd "${TARGET_PROJECT_ARG}" && pwd)"

@@ -383,6 +383,7 @@ PARITY = [
     ("PROJECT_CONTEXT.md", "PROJECT_CONTEXT.md", "project memory scaffold (PROJECT_CONTEXT/SESSION_STATE)"),
     ("Pipeline", "run-pipeline", "pipeline runner integration"),
     ("Agent Harness local runtime & machine-specific ignores", "Agent Harness local runtime & machine-specific ignores", "target project gitignore scaffold"),
+    ("target-auto-create", "target-auto-create", "auto-create missing target directory"),
 ]
 ps1 = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
 sh = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")

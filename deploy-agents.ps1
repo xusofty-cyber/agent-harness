@@ -765,10 +765,14 @@ if (-not $ProjectPath) {
     exit 0
 }
 
-# Validate target project directory
-if (-not (Test-Path $ProjectPath)) {
-    Write-Host "`n[ERROR] Target project path does not exist: $ProjectPath" -ForegroundColor Red
+# Validate target project directory (target-auto-create: create it if missing)
+if (Test-Path -LiteralPath $ProjectPath -PathType Leaf) {
+    Write-Host "`n[ERROR] Target project path exists but is not a directory: $ProjectPath" -ForegroundColor Red
     exit 1
+}
+if (-not (Test-Path -LiteralPath $ProjectPath -PathType Container)) {
+    Write-Host "  [INFO] Target project directory does not exist; creating it: $ProjectPath" -ForegroundColor Yellow
+    try { New-Item -ItemType Directory -Force -Path $ProjectPath | Out-Null } catch { Write-Host "`n[ERROR] Failed to create target directory: $ProjectPath" -ForegroundColor Red; exit 1 }
 }
 $ResolvedProjectPath = (Resolve-Path $ProjectPath).Path
 if (($Initialize -or $Check) -and $DirectoryPath) {
