@@ -11,7 +11,12 @@
 #          --started <epoch> --ended <epoch> --rounds <n> \
 #          --verify-attempts <n> --outcome <pass|fail> \
 #          --false-completion <0|1> [--interventions <n>] [--notes TEXT]
+#          [--ablation <skill>]
 #          Append the run record to eval/results/<task>_<arm>_rep<n>.json.
+#          With --ablation, the record goes to
+#          eval/results/ablation/<task>_pack-no-<skill>_rep<n>.json with an
+#          "ablation" field instead, so ablation runs never pollute the
+#          three-arm matrix (check-results.py only globs the top level).
 #   smoke  Run the CI smoke: T1 bare setup, start-commit hash check,
 #          solution.patch applies, acceptance passes; all task specs valid.
 #   measure-load
@@ -118,6 +123,7 @@ do_setup() {
 do_record() {
     local task="" arm="" rep="" dir="" started="" ended="" rounds=""
     local verify_attempts="" outcome="" false_completion="" interventions=0 notes=""
+    local ablation=""
     while [ $# -gt 0 ]; do
         case "$1" in
             --task) task="$(task_id_to_dir "$2")"; shift 2 ;;
@@ -132,6 +138,7 @@ do_record() {
             --false-completion) false_completion="$2"; shift 2 ;;
             --interventions) interventions="$2"; shift 2 ;;
             --notes) notes="$2"; shift 2 ;;
+            --ablation) ablation="$2"; shift 2 ;;
             *) echo "record: unknown option $1" >&2; exit 2 ;;
         esac
     done
@@ -144,7 +151,13 @@ do_record() {
     local host model
     host="$(hostname)"
     model="${BENCH_MODEL:-Muse Spark}"
-    local out="$RESULTS/${task}_${arm}_rep${rep}.json"
+    local out
+    if [ -n "$ablation" ]; then
+        mkdir -p "$RESULTS/ablation"
+        out="$RESULTS/ablation/${task}_pack-no-${ablation}_rep${rep}.json"
+    else
+        out="$RESULTS/${task}_${arm}_rep${rep}.json"
+    fi
     mkdir -p "$RESULTS"
     python3 - "$out" <<PYEOF
 import json, sys
@@ -165,6 +178,7 @@ rec = {
     "outcome": "$outcome",
     "false_completion": $false_completion,
     "notes": "$notes",
+    "ablation": "$ablation",
 }
 with open(sys.argv[1], "w", encoding="utf-8") as f:
     json.dump(rec, f, indent=2, sort_keys=True)

@@ -1,0 +1,19 @@
+{
+  "ablation": "writing-skills",
+  "arm": "pack",
+  "duration_s": 25,
+  "ended_epoch": 1793183137,
+  "false_completion": 0,
+  "host": "htch-runtime",
+  "interventions": 0,
+  "model": "Muse Spark",
+  "notes": "first-try pass; writing-skills removed; batched prepare, duration includes batch latency",
+  "outcome": "pass",
+  "rep": 2,
+  "rounds": 1,
+  "run_dir": "/tmp/ablation/writing-skills/t1-bugfix/rep2",
+  "start_commit": "2e583970fb952158ad83617fe436534abd38295d",
+  "started_epoch": 1793183112,
+  "task": "t1-bugfix",
+  "verify_attempts": 1
+}
