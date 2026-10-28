@@ -28,12 +28,23 @@ completion is a red-line breach.
 - **Token cost: unmeasured.** No host exposes a programmatic token API
   (see `docs/internal/token-adapters.md`). Cost is tracked via Phase 2
   proxy metrics only (runs, duration, verify failures, interventions).
-- **Skill-load cost (measured, v2 3-4):** default deploy carries **38
-  skill dirs, 1,790,367 bytes** total deployed (`eval/run-bench.sh
-  measure-load`, 2026-10-28). Largest SKILL.md files:
+- **Skill-load cost (measured, v2 3-4; re-measured per profile in Phase
+  4):** `eval/run-bench.sh measure-load` now reports all three profiles
+  (2026-10-28). `minimal` (default): **10 skill dirs, 212,777 skills
+  bytes, 700,569 deployed-total bytes**. `standard`: **18 dirs, 301,118
+  skills bytes, 877,254 deployed-total bytes**. `full`: **38 dirs (heavy
+  skills gated), 757,688 skills bytes, 1,790,382 deployed-total bytes**
+  (Phase 3 reported 1,790,367 for the same 38 — re-measured now, 15 bytes
+  difference from a deployed file changed since; the current figure is
+  the one to quote). Largest SKILL.md files:
   `subagent-driven-development` (32,577 B), `openspec-bulk-archive-change`
-  (22,296 B), `executing-plans` (20,405 B). This is the input to Phase 4
-  ablation — it is a size measurement, not a token measurement.
+  (22,296 B), `executing-plans` (20,405 B). Skills bytes count
+  `.agents/skills/` only; deployed-total counts the whole deployed
+  directory. This is a size measurement, not a token measurement.
+- **Ablation (Phase 4, first run 2026-10):** `writing-skills` (107,640 B)
+  ablated over 12 pack-arm runs: 12/12 pass, 0 false completions — no
+  outcome regression (see `docs/ablation/ablation-2026-10-writing-skills.md`).
+  Candidate for removal on bench evidence only; owner decision pending.
 
 ## Module snapshot (rubric-scored, see `eval/rubric.md`)
 

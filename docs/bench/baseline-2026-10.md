@@ -91,3 +91,13 @@ after the full matrix.
   metrics only.
 - Any comparison with upstream token-reduction claims: those numbers are
   not ours, are not reproduced here, and are not used as thresholds.
+
+## Addendum (Phase 4, 2026-10-28) — pack/gate arms pinned to `--profile full`
+
+`eval/run-bench.sh setup` for the `pack` and `gate` arms now passes
+`--profile full` to `deploy-agents.sh`. Reason: Phase 4 changed the deploy
+default to `minimal` (10 skills); without the pin, the pack arm would no
+longer be the distribution pack Phase 3 designed the comparison around
+(38 skills). The pack arm was never measured before this change (0/12), so
+no measured data is redefined by pinning it now. The bare-arm numbers above
+are unaffected.

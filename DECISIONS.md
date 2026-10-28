@@ -357,3 +357,56 @@ Phase 0 decision meeting.
   review date, the review records a new date in writing — the decision
   does not silently lapse.
 - **Date:** 2026-10-28.
+
+## D18 — Skill tiers: minimal (10) is the default; the core list is provisional (Phase 4, 4-1)
+
+- **Decision:** deploy profiles `minimal` (10 skills, default) /
+  `standard` (18) / `full` (40) as defined in `skills-profiles.json`
+  (single source of truth; CI §3r asserts it). Default deploys minimal.
+  Bench pack/gate arms pin `--profile full` so the Phase 3 comparison
+  keeps its meaning.
+- **Rationale:** the old default (38 skills, 1,790,367 deployed-total
+  bytes) shipped everything to everyone. Minimal carries 212,777
+  skills-only bytes; the cut is a size cut, not a token claim — no token
+  number is asserted anywhere.
+- **Provisional:** the core-10 selection has no usage data behind it (U1).
+  Each skill's basis is tagged [measured] / [dependency] / [provisional]
+  in `docs/internal/skill-tiers.md`. Re-selection after the 36-run bench
+  matrix completes; review date **2026-11-28**.
+- **Rejected:** picking the core by author preference without tagging the
+  evidence class; claiming token savings from byte counts.
+- **Date:** 2026-10-28.
+
+## D19 — EN/ZH are the sources of truth; FR/DE/ZH-TW are generated products (Phase 4, 4-2)
+
+- **Decision:** EN/ZH `##` parity stays a hard CI check; the 16-pair
+  symmetric H2 hard check is removed. FR/DE/ZH-TW status is tracked in
+  `docs/internal/i18n-status.md` (source sha per target) and enforced by
+  `tools/i18n-check.py`: an `in-sync` claim must match the current source
+  sha; `stale`/`frozen` pass with a printed reminder. Regeneration from
+  the EN source + spot-check (`--spot-check`) happen before a release.
+- **Rationale:** a translation being behind is tracked debt, not a build
+  failure; the old check made every EN edit fail CI in three languages
+  the owner does not maintain by hand.
+- **Rejected:** keeping the symmetric hard check; deleting the FR/DE/ZH-TW
+  files outright (D3 freeze stands — they stay, marked stale where the
+  source moved).
+- **Date:** 2026-10-28.
+
+## D20 — Monthly ablation: one component, dependency gate, owner sign-off (Phase 4, 4-4)
+
+- **Decision:** one ablation per month (`tools/ablation.py` + process in
+  `docs/ablation/README.md`): dependency gate first (template/hook
+  references block removal), then 4 tasks × 3 reps with the component
+  removed from pack-arm run dirs, then a report against the bare-arm
+  thresholds. No-regression is necessary but not sufficient for removal;
+  the owner fills in the Human decision line. The script never removes
+  anything itself. First run (2026-10, `writing-skills`): 12/12 pass, 0
+  false completions — candidate for removal on bench evidence only,
+  decision pending.
+- **Rationale:** without a repeatable removal process, subtraction is a
+  one-off opinion. With it, each removal has a gate, a run, and a named
+  decider.
+- **Rejected:** removing on bench data alone; ablating single OpenSpec
+  loop steps (the family is decided as a whole).
+- **Date:** 2026-10-28.
