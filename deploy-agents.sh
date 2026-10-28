@@ -1315,6 +1315,25 @@ if [ -f "${SOURCE_SKILLS_LOCK}" ]; then
     fi
 fi
 
+# Deploy gate layer (Phase 1): pass-gate.py + schema + init template.
+# gate-deploy
+# Only the code ships. feature_list.json / events.jsonl are per-project
+# state, created by `gate/init.template.sh` or `pass-gate.py init` — never
+# copied from this repo. Skipped on self-deploy (same directory).
+if [ -d "${SCRIPT_DIR}/gate" ] && [ "${SCRIPT_DIR}" != "${TARGET_PROJECT_DIR}" ]; then
+    TARGET_GATE_DIR="${TARGET_PROJECT_DIR}/gate"
+    mkdir -p "${TARGET_GATE_DIR}"
+    for gate_file in pass-gate.py feature_list.schema.json init.template.sh README.md; do
+        if [ -f "${SCRIPT_DIR}/gate/${gate_file}" ]; then
+            if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_GATE_DIR}/${gate_file}" ]; then
+                if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_GATE_DIR}/${gate_file}"; fi
+                cp -f "${SCRIPT_DIR}/gate/${gate_file}" "${TARGET_GATE_DIR}/${gate_file}"
+            fi
+        fi
+    done
+    echo -e "  ${GREEN}[√] 已部署门禁层: gate/ (pass-gate.py + schema + init.template.sh)${NC}"
+fi
+
 # Sync .ai-memory.toml.example
 if [ -f "${SOURCE_AI_MEMORY_EXAMPLE}" ]; then
     TARGET_AI_MEMORY_EXAMPLE="${TARGET_PROJECT_DIR}/.ai-memory.toml.example"

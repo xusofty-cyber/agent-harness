@@ -385,6 +385,7 @@ PARITY = [
     ("Agent Harness local runtime & machine-specific ignores", "Agent Harness local runtime & machine-specific ignores", "target project gitignore scaffold"),
     ("target-auto-create", "target-auto-create", "auto-create missing target directory"),
     ("IncludeHeavySkills", "include-heavy-skills", "opt-in heavy skills (docx, brainstorming)"),
+    ("GateDeploy", "gate-deploy", "gate layer deployment (pass-gate.py + schema + init template)"),
 ]
 ps1 = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
 sh = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")

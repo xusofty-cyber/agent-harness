@@ -1209,6 +1209,30 @@ if ((Test-Path $SourceSkillsLock) -and (-not $isSelfRepo)) {
     }
 }
 
+# Deploy gate layer (Phase 1): pass-gate.py + schema + init template.
+# GateDeploy
+# Only the code ships. feature_list.json / events.jsonl are per-project
+# state, created by `gate/init.template.sh` or `pass-gate.py init` — never
+# copied from this repo. Skipped on self-deploy (same directory).
+$SourceGateDir = Join-Path $ScriptDir "gate"
+if ((Test-Path $SourceGateDir) -and (-not $isSelfRepo)) {
+    $TargetGateDir = Join-Path $ResolvedProjectPath "gate"
+    if (-not (Test-Path $TargetGateDir)) {
+        New-Item -ItemType Directory -Path $TargetGateDir -Force | Out-Null
+    }
+    foreach ($gateFile in @("pass-gate.py", "feature_list.schema.json", "init.template.sh", "README.md")) {
+        $sourceFile = Join-Path $SourceGateDir $gateFile
+        if (Test-Path $sourceFile) {
+            $targetFile = Join-Path $TargetGateDir $gateFile
+            if ($Update -or (-not (Test-Path $targetFile))) {
+                if ($Update) { Backup-ManagedPath $targetFile }
+                Copy-Item -Path $sourceFile -Destination $targetFile -Force
+            }
+        }
+    }
+    Write-Host "  [OK] Deployed gate layer: gate/ (pass-gate.py + schema + init.template.sh)" -ForegroundColor Green
+}
+
 # Sync .ai-memory.toml.example
 if ((Test-Path $SourceAiMemoryExample) -and (-not $isSelfRepo)) {
     $targetAiMemoryExample = Join-Path $ResolvedProjectPath ".ai-memory.toml.example"
