@@ -168,4 +168,103 @@ Phase 0 decision meeting.
 - **Caveat:** whether Comet state files actually contain machine paths
   was never measured (U2) — the Phase 1 dogfood did not run Comet, so
   this stays open for Phase 1 dogfooding on a Comet-using project.
+- **Update (Phase 2, measured 2026-10-28):** U2 is now settled — see
+  `docs/internal/phase2-verification.md` (comet interrupt-recovery
+  test). The Native change state
+  (`docs/comet/changes/<name>/comet-state.yaml`) uses relative refs
+  only; `.comet/current-change.json` carries no machine paths; the
+  `~/.comet/workspaces/<hash>/...` runtime directory named in comet's
+  JSON envelope is not materialised on disk (lazy). No machine-path
+  contamination was observed in any file a project would commit, which
+  confirms the "comet state stays out of git" half of this decision.
+  The decision itself is unchanged.
+- **Date:** 2026-10-28.
+
+## D9 — Comet is pinned to the version measured at implementation time (Phase 2, 2-2a)
+
+- **Decision:** the pinned Comet version is the one measured at
+  implementation time: `npm view @rpamis/comet version` → **0.5.1** on
+  2026-10-28 (git tag 0.5.1 = the repo HEAD commit). The pin lives only
+  in machine-read files: `skills-lock.json` (`npmVersion` /
+  `pinnedCommit` / `pinnedAt` / `pinnedFrom`), `deploy-agents.sh`
+  (`COMET_NPM_VERSION`), `deploy-agents.ps1`
+  (`$script:CometNpmVersion`). `tools/check-comet.py` is the runtime
+  gate: installed `comet --version` must equal the pin and the template
+  must declare `schema: comet.project.v1`. Guide prose keeps the
+  unversioned `npm install -g @rpamis/comet` command intentionally —
+  human instructions, not machine-executed paths.
+- **Rationale:** a version in prose rots; a version in machine-read
+  files is checkable (`tests/repo_checks.py` §3m). No version number
+  appears in any plan document.
+- **Rejected:** hardcoding a version in the plan docs, and leaving the
+  install unpinned.
+- **Date:** 2026-10-28.
+
+## D10 — Ghost lock entries are annotated, not deleted (Phase 2, 2-2c)
+
+- **Decision:** the lock entries `openspec` and `superpowers` (suite
+  level, no directory) get `"meta": true` + a note, and stay in
+  `skills-lock.json`. Consumers derive the meta set from the marker,
+  not from hardcoded names (`tools/count-skills.py`,
+  `tests/repo_checks.py` §3b2/§5, `tools/sync-skills.py`
+  `external_skills()` skips `meta` entries).
+- **Rationale:** deleting would lose `pinnedCommit` provenance for
+  suite-level pins; annotation keeps the pin while making the
+  non-deployable nature explicit. The lock-hash refresh was a verified
+  no-op: every `computedHash` already matched the current SHA256 of the
+  vendored files (STALE: []).
+- **Rejected:** deleting the two entries (provenance loss).
+- **Date:** 2026-10-28.
+
+## D11 — Guard hardening is graded, never blanket fail-closed (Phase 2, 2-4)
+
+- **Decision:** `guard.mjs` expands command substitution
+  (`$(...)` / backticks) that resolves to git (`which` /
+  `command -v` / `type [-p]` git, paths ending in `/git`) and
+  `eval` / `sh -c` indirection, recursively with a depth limit of 3 —
+  beyond the limit it warns and stops expanding. Stdin parse failures
+  stay fail-open (exit 0) but are now logged to stderr; the same
+  one-line pattern was applied to `guard-write.mjs`,
+  `guard-feature-list.mjs` and `stop-gate.mjs`. Known remaining gap:
+  `xargs` / `find -exec` indirection is not expanded.
+- **Rationale:** a blanket fail-closed would wedge sessions on
+  malformed input; graded handling raises the bypass cost while
+  keeping the hook usable. Fourteen new tests pin both the blocked
+  cases and the must-stay-allowed cases (e.g. `echo $(git rev-parse
+  HEAD)`, `x=$(which git) push --force`).
+- **Rejected:** blanket fail-closed, and leaving the `$(which git)`
+  bypass open.
+- **Date:** 2026-10-28.
+
+## D12 — Cost ledger is graded proxy metrics; no auto-stop, no unified token ledger (Phase 2, 2-3/2-5)
+
+- **Decision:** the ledger records deterministic proxy metrics only:
+  tool calls (PostToolUse hook → `gate/cost-ledger.jsonl`) and one
+  stage event per pipeline run (only when the target has a `gate/`).
+  Budget caps live in `gate/cost-budget.json` (per-day: runs, tool
+  calls, verify failures, overrides; per-stage duration cap).
+  `check-budget` exits 1 over budget, prints the exceeded limits to
+  stderr, and records one deduped `budget_exceeded` event in
+  `gate/events.jsonl` — it **never auto-stops a run**. The unified
+  token ledger stays deferred: no host exposes a programmatic token
+  API (inventory in `docs/internal/token-adapters.md`).
+  `gate/cost-ledger.jsonl` is local telemetry (gitignored); the budget
+  file is policy (committed).
+- **Rationale:** proxy metrics are measurable today; a token number
+  without a source would be invented. Auto-stop waits until budget
+  semantics are explicit.
+- **Rejected:** auto-stop before budget semantics are explicit, and a
+  token ledger built on dashboard scraping.
+- **Date:** 2026-10-28.
+
+## D13 — PowerShell installer caveats, recorded honestly (Phase 2, 2-2b)
+
+- **Decision:** codegraph's PowerShell installer is hash-verified
+  (`Get-FileHash` against the lock's `installerSha256Ps1`); rtk's
+  PowerShell install stays `winget install rtk-ai.rtk` — winget offers
+  no git-commit pin, so the asymmetry is recorded, not hidden. The
+  `ocr` skill's `npm install -g @alibaba-group/open-code-review`
+  remains unpinned (out of scope for Phase 2, known gap).
+- **Rationale:** record the platform asymmetry honestly rather than
+  claiming full parity where the platform offers none.
 - **Date:** 2026-10-28.
