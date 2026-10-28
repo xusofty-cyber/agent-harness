@@ -15,6 +15,13 @@ YELLOW='\033[0;33m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
+# Phase 2 (2-2): pinned Comet CLI version, measured 2026-10-28 with
+# `npm view @rpamis/comet version` (0.5.1; git tag 0.5.1 =
+# 35c9860b77b42bafa0c2d80d8d695889f888a924). Must match
+# skills-lock.json comet.npmVersion — tests/repo_checks.py guards it.
+# Never write a different version in docs; the lock is the record.
+COMET_NPM_VERSION="0.5.1"
+
 # Print usage
 usage() {
     echo -e "${CYAN}用法 (Usage):${NC}"
@@ -682,13 +689,23 @@ guide_optional_cli_tools() {
     else
         echo "  Comet CLI 未安装。Comet 工作流 skill 仅提供入口指引，不实现状态机；安装后可用 --comet-init 初始化项目。"
         if prompt_yes_no "现在安装 Comet CLI？"; then
-            if npm install -g @rpamis/comet; then
+            if npm install -g "@rpamis/comet@${COMET_NPM_VERSION}"; then
                 echo -e "  ${GREEN}[√] comet 已安装。${NC}"
             else
-                echo "  [!] comet 安装失败。可手动执行：npm install -g @rpamis/comet"
+                echo "  [!] comet 安装失败。可手动执行：npm install -g @rpamis/comet@${COMET_NPM_VERSION}"
             fi
         else
-            echo "  安装命令：npm install -g @rpamis/comet"
+            echo "  安装命令：npm install -g @rpamis/comet@${COMET_NPM_VERSION}"
+        fi
+    fi
+    # Phase 2 (2-2): verify the installed comet matches the pinned version.
+    # A mismatch is a loud warning here (install already succeeded or the user
+    # already had a different version); tools/check-comet.py is the hard gate.
+    if command -v comet >/dev/null 2>&1 && command -v python3 >/dev/null 2>&1; then
+        _comet_check_rc=0
+        python3 "${SCRIPT_DIR}/tools/check-comet.py" || _comet_check_rc=$?
+        if [ "$_comet_check_rc" -ne 0 ]; then
+            echo -e "  ${YELLOW}[!] 已安装的 comet 与锁定版本不一致（锁定 @rpamis/comet@${COMET_NPM_VERSION}，2026-10-28 实测）。请运行 npm install -g @rpamis/comet@${COMET_NPM_VERSION} 更新。${NC}"
         fi
     fi
 }
@@ -1413,7 +1430,7 @@ if [ "$DO_COMET_INIT" = true ]; then
         (cd "${TARGET_PROJECT_DIR}" && comet init) || echo -e "  ${YELLOW}[!] comet init 执行存在告警。${NC}"
     else
         echo -e "  ${YELLOW}[!] 指定了 --comet-init，但在系统 PATH 中未找到 comet CLI。${NC}"
-        echo -e "      可通过以下命令安装: npm install -g @rpamis/comet"
+        echo -e "      可通过以下命令安装: npm install -g @rpamis/comet@${COMET_NPM_VERSION}"
     fi
 fi
 

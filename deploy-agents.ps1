@@ -40,6 +40,12 @@ param (
     [switch]$IncludeHeavySkills
 )
 
+# Phase 2 (2-2): pinned Comet CLI version, measured 2026-10-28 with
+# `npm view @rpamis/comet version` (0.5.1; git tag 0.5.1 =
+# 35c9860b77b42bafa0c2d80d8d695889f888a924). Must match
+# skills-lock.json comet.npmVersion — tests/repo_checks.py guards it.
+$script:CometNpmVersion = "0.5.1"
+
 $ToolClaude = $true
 $ToolCopilot = $true
 $ToolCursor = $true
@@ -499,12 +505,18 @@ function Guide-OptionalCliTools([string]$TargetPath) {
     } else {
         Write-Host "  Comet CLI is optional. The comet skill only provides entry guidance; install to use --comet-init for project init."
         if (Confirm-OptionalStep "Install Comet CLI now?") {
-            & $npmCmd install -g @rpamis/comet
-            if ($LASTEXITCODE -ne 0) { Write-Warning "comet installation failed. Manual command: npm install -g @rpamis/comet" }
+            & $npmCmd install -g "@rpamis/comet@$script:CometNpmVersion"
+            if ($LASTEXITCODE -ne 0) { Write-Warning "comet installation failed. Manual command: npm install -g @rpamis/comet@$script:CometNpmVersion" }
             else { Write-Host "  [INFO] comet installed." -ForegroundColor Yellow }
         } else {
-            Write-Host "  Install command: npm install -g @rpamis/comet"
+            Write-Host "  Install command: npm install -g @rpamis/comet@$script:CometNpmVersion"
         }
+    }
+    # Phase 2 (2-2): verify the installed comet matches the pinned version.
+    # A mismatch is a loud warning here; tools/check-comet.py is the hard gate.
+    if ((Get-Command comet -ErrorAction SilentlyContinue) -and (Get-Command python -ErrorAction SilentlyContinue)) {
+        & python (Join-Path $PSScriptRoot "tools\check-comet.py")
+        if ($LASTEXITCODE -ne 0) { Write-Warning "Installed comet does not match the pinned version (@rpamis/comet@$script:CometNpmVersion, measured 2026-10-28). Run npm install -g @rpamis/comet@$script:CometNpmVersion to update." }
     }
 }
 
@@ -1328,7 +1340,7 @@ if ($CometInit) {
             Write-Warning "comet init encountered an issue: $_"
         }
     } else {
-        Write-Warning "'-CometInit' was specified, but 'comet' CLI is not found in PATH. Install via: npm install -g @rpamis/comet"
+        Write-Warning "'-CometInit' was specified, but 'comet' CLI is not found in PATH. Install via: npm install -g @rpamis/comet@$script:CometNpmVersion"
     }
 }
 

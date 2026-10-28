@@ -31,7 +31,11 @@
       "package": "@rpamis/comet",
       "repository": "https://github.com/rpamis/comet",
       "computedHash": "6d33c9c7eaf29e865d2597946987bed75cb468c37c50046df8ba07c5a15c3cf6",
-      "domain": "integration"
+      "domain": "integration",
+      "npmVersion": "0.5.1",
+      "pinnedCommit": "35c9860b77b42bafa0c2d80d8d695889f888a924",
+      "pinnedAt": "2026-10-28",
+      "pinnedFrom": "npm view @rpamis/comet version"
     },
     "cross-tool-memory": {
       "source": "./agent-harness (authored in-repo)",

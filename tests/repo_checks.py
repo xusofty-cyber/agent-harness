@@ -486,6 +486,48 @@ check("pipeline-strict:tools-exit-codes",
       and "strict_exit_code" in _sync_src and "strict_exit_code" in _doc_src,
       "sync-skills.py / doc-impact.py still claim exit 0 always")
 
+# --- 3m. Comet supply-chain pin (Phase 2, 2-2) ---
+# The pinned version was measured at implementation time
+# (`npm view @rpamis/comet version` -> 0.5.1 on 2026-10-28; git tag 0.5.1
+# is the repo HEAD). The lock is the record; both deploy scripts must agree
+# with it, and no bare (unversioned) `npm install -g @rpamis/comet` may
+# remain. tools/check-comet.py is the runtime gate for the same pin.
+import re as _re3
+_comet_lock = json.loads((ROOT / "skills-lock.json").read_text(encoding="utf-8-sig"))
+_comet_meta = _comet_lock.get("skills", {}).get("comet", {})
+_comet_pin = _comet_meta.get("npmVersion", "")
+check("comet-pin:lock",
+      bool(_comet_pin) and bool(_comet_meta.get("pinnedCommit"))
+      and bool(_comet_meta.get("pinnedAt"))
+      and bool(re.fullmatch(r"[0-9a-f]{40}", _comet_meta.get("pinnedCommit", ""))),
+      f"comet lock entry lacks npmVersion/pinnedCommit(40-hex)/pinnedAt: {_comet_meta}")
+_deploy_sh_txt = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")
+_deploy_ps1_txt = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
+_sh_pin = _re3.search(r'COMET_NPM_VERSION="([^"]+)"', _deploy_sh_txt)
+_ps1_pin = _re3.search(r'\$script:CometNpmVersion = "([^"]+)"', _deploy_ps1_txt)
+check("comet-pin:scripts-agree-with-lock",
+      bool(_sh_pin) and bool(_ps1_pin)
+      and _sh_pin.group(1) == _comet_pin and _ps1_pin.group(1) == _comet_pin,
+      f"deploy pin mismatch: sh={_sh_pin.group(1) if _sh_pin else None} "
+      f"ps1={_ps1_pin.group(1) if _ps1_pin else None} lock={_comet_pin}")
+check("comet-pin:no-bare-install",
+      _re3.search(r"install -g @rpamis/comet(?!@)", _deploy_sh_txt) is None
+      and _re3.search(r"install -g @rpamis/comet(?!@)", _deploy_ps1_txt) is None,
+      "bare `npm install -g @rpamis/comet` (unversioned) still present")
+check("comet-pin:check-tool-exists",
+      (ROOT / "tools" / "check-comet.py").is_file(),
+      "tools/check-comet.py missing")
+import subprocess as _sp3
+try:
+    _cc = _sp3.run([sys.executable, str(ROOT / "tools" / "check-comet.py"), "--json"],
+                   capture_output=True, text=True, timeout=60)
+    _cc_ok = _cc.returncode == 0 and json.loads(_cc.stdout).get("ok") is True
+except Exception as _cc_exc:  # noqa: BLE001
+    _cc_ok = False
+    _cc = None
+check("comet-pin:check-tool-passes", _cc_ok,
+      "tools/check-comet.py does not pass on this repo")
+
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
 # its counterpart marker must exist in the other. Markers that exist in
