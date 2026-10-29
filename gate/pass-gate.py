@@ -51,14 +51,20 @@ PRIORITIES = ("p0", "p1", "p2")
 ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 ITEM_REQUIRED = ("id", "priority", "area", "title",
                  "user_visible_behavior", "status", "verification")
-# Allowed transitions. `passing -> in_progress` is only reachable through
-# `reopen`, which forces a reason and logs an event.
-ALLOWED = {
-    "not_started": ("in_progress",),
-    "in_progress": ("blocked", "passing"),
-    "blocked": ("in_progress", "not_started"),
-    "passing": ("in_progress",),  # via reopen only
-}
+# NOTE (panel P1-5): the old ALLOWED transition table was defined here
+# but never referenced by any command — dead code that implied a
+# guarantee nothing enforced. It is deleted, not wired in: transitions
+# are enforced per-command by the status checks in cmd_start,
+# cmd_block, cmd_reopen, cmd_verify, cmd_override and cmd_terminate
+# (e.g. start only from not_started/blocked, override only from
+# in_progress). A single-snapshot validator cannot check transitions.
+ITEM_KEYS = set(ITEM_REQUIRED) | {"evidence", "notes", "external_evidence"}
+TOP_KEYS = {"version", "project", "items"}
+VERIFICATION_KEYS = {"command", "timeout_seconds"}
+EVIDENCE_KEYS = {"command", "exit_code", "ran_at", "output_tail", "override",
+                 "output_sha256"}
+OVERRIDE_KEYS = {"by", "reason", "at"}
+EXTERNAL_EVIDENCE_KEYS = {"source", "path", "sha256_16", "imported_at"}
 MAX_OUTPUT_TAIL = 2048
 
 
@@ -100,16 +106,36 @@ def _save(root, data):
     os.replace(tmp, path)
 
 
-def validate(data):
-    """Validate a feature list against the schema subset this gate enforces.
+def _is_int(v):
+    return isinstance(v, int) and not isinstance(v, bool)
 
-    Mirrors gate/feature_list.schema.json. Returns a list of error strings
-    (empty = valid). tests/repo_checks.py §3k imports this function so the
-    CI check and the gate cannot drift apart.
+
+def _extra_keys(where, obj, allowed, errors):
+    extra = sorted(set(obj) - allowed)
+    if extra:
+        errors.append(f"{where} has unknown fields (schema "
+                      f"additionalProperties:false): {', '.join(extra)}")
+
+
+def validate(data):
+    """Validate a feature list against gate/feature_list.schema.json.
+
+    Returns a list of error strings (empty = valid).
+    tests/repo_checks.py §3k imports this function so the CI check and
+    the gate cannot drift apart. Panel P1-5 closed the drift: this now
+    enforces the schema's additionalProperties:false at every level,
+    verification.timeout_seconds 1..3600, and the evidence object's
+    required fields (command/exit_code/ran_at/output_tail) — plus the
+    type guards that used to crash on a non-dict verification.
+    Deliberately NOT enforced (documented, not drift): nothing — every
+    constraint in the schema file is covered except the prose
+    descriptions. If a future schema constraint is added without a
+    check here, update this docstring to name it.
     """
     errors = []
     if not isinstance(data, dict):
         return ["feature list must be a JSON object"]
+    _extra_keys("feature list", data, TOP_KEYS, errors)
     if data.get("version") != SCHEMA_VERSION:
         errors.append(f"version must be {SCHEMA_VERSION}")
     if not isinstance(data.get("project"), str) or not data["project"]:
@@ -124,11 +150,14 @@ def validate(data):
         if not isinstance(item, dict):
             errors.append(f"{where} must be an object")
             continue
+        _extra_keys(where, item, ITEM_KEYS, errors)
         for field in ITEM_REQUIRED:
             if field not in item:
                 errors.append(f"{where} missing required field: {field}")
         item_id = item.get("id", "")
-        if isinstance(item_id, str):
+        if not isinstance(item_id, str):
+            errors.append(f"{where}.id must be a string")
+        else:
             if not ID_RE.match(item_id):
                 errors.append(f"{where}.id {item_id!r} must match "
                               "^[a-z0-9][a-z0-9-]*$")
@@ -137,41 +166,95 @@ def validate(data):
             seen_ids.add(item_id)
         if item.get("priority") not in PRIORITIES:
             errors.append(f"{where}.priority must be one of {PRIORITIES}")
+        for field in ("area", "title", "user_visible_behavior"):
+            if field in item and (not isinstance(item[field], str)
+                                  or not item[field].strip()):
+                errors.append(f"{where}.{field} must be a non-empty string")
+        if "notes" in item and not isinstance(item["notes"], str):
+            errors.append(f"{where}.notes must be a string")
         status = item.get("status")
         if status not in STATUSES:
             errors.append(f"{where}.status must be one of {STATUSES}")
         elif status == "in_progress":
             in_progress.append(item_id)
         verification = item.get("verification")
+        v_command = None
         if not isinstance(verification, dict):
             errors.append(f"{where}.verification must be an object")
-        elif not isinstance(verification.get("command"), str) \
-                or not verification["command"].strip():
-            errors.append(f"{where}.verification.command must be a "
-                          "non-empty string")
+        else:
+            _extra_keys(f"{where}.verification", verification,
+                        VERIFICATION_KEYS, errors)
+            v_command = verification.get("command")
+            if not isinstance(v_command, str) or not v_command.strip():
+                errors.append(f"{where}.verification.command must be a "
+                              "non-empty string")
+            if "timeout_seconds" in verification:
+                timeout = verification["timeout_seconds"]
+                if not _is_int(timeout) or not 1 <= timeout <= 3600:
+                    errors.append(f"{where}.verification.timeout_seconds "
+                                  "must be an integer in 1..3600")
         evidence = item.get("evidence")
-        if status == "passing":
-            if not isinstance(evidence, dict):
-                errors.append(f"{where}: status=passing requires "
-                              "non-empty evidence (run pass-gate.py verify)")
-            else:
-                override = evidence.get("override")
-                exit_code = evidence.get("exit_code")
-                if override is None and exit_code != 0:
-                    errors.append(f"{where}: passing evidence must have "
-                                  "exit_code 0 (or a logged override)")
-                if override is not None and not isinstance(override, dict):
-                    errors.append(f"{where}: evidence.override must be "
-                                  "an object with by/reason/at")
-                elif isinstance(override, dict) and not override.get("reason"):
-                    errors.append(f"{where}: evidence.override requires a "
-                                  "non-empty reason")
-                if evidence.get("command") != verification.get("command") \
-                        and override is None:
-                    errors.append(f"{where}: evidence.command must equal "
-                                  "verification.command (or be an override)")
         if evidence is not None and not isinstance(evidence, dict):
             errors.append(f"{where}.evidence must be an object or null")
+        elif isinstance(evidence, dict):
+            _extra_keys(f"{where}.evidence", evidence, EVIDENCE_KEYS, errors)
+            if not isinstance(evidence.get("command"), str):
+                errors.append(f"{where}.evidence.command must be a string")
+            if not _is_int(evidence.get("exit_code")):
+                errors.append(f"{where}.evidence.exit_code must be an integer")
+            if not isinstance(evidence.get("ran_at"), str) \
+                    or not evidence["ran_at"]:
+                errors.append(f"{where}.evidence.ran_at must be a "
+                              "non-empty string")
+            if not isinstance(evidence.get("output_tail"), str):
+                errors.append(f"{where}.evidence.output_tail must be a string")
+            if "output_sha256" in evidence \
+                    and not isinstance(evidence["output_sha256"], str):
+                errors.append(f"{where}.evidence.output_sha256 must be a string")
+            override = evidence.get("override")
+            if override is not None:
+                if not isinstance(override, dict):
+                    errors.append(f"{where}: evidence.override must be "
+                                  "an object with by/reason/at")
+                else:
+                    _extra_keys(f"{where}.evidence.override", override,
+                                OVERRIDE_KEYS, errors)
+                    for field in ("by", "reason", "at"):
+                        if not isinstance(override.get(field), str) \
+                                or not override[field]:
+                            errors.append(f"{where}: evidence.override.{field} "
+                                          "must be a non-empty string")
+            if status == "passing":
+                if override is None and evidence.get("exit_code") != 0:
+                    errors.append(f"{where}: passing evidence must have "
+                                  "exit_code 0 (or a logged override)")
+                # Guarded by the verification-is-dict check above: a
+                # non-dict verification used to crash here with
+                # AttributeError (panel P1-5). The verification error
+                # is already recorded, so skip the comparison then.
+                if isinstance(verification, dict) and override is None \
+                        and evidence.get("command") != v_command:
+                    errors.append(f"{where}: evidence.command must equal "
+                                  "verification.command (or be an override)")
+        elif status == "passing":
+            errors.append(f"{where}: status=passing requires "
+                          "non-empty evidence (run pass-gate.py verify)")
+        external = item.get("external_evidence")
+        if external is not None:
+            if not isinstance(external, list):
+                errors.append(f"{where}.external_evidence must be an array")
+            else:
+                for j, entry in enumerate(external):
+                    ewhere = f"{where}.external_evidence[{j}]"
+                    if not isinstance(entry, dict):
+                        errors.append(f"{ewhere} must be an object")
+                        continue
+                    _extra_keys(ewhere, entry, EXTERNAL_EVIDENCE_KEYS, errors)
+                    for field in EXTERNAL_EVIDENCE_KEYS:
+                        if not isinstance(entry.get(field), str) \
+                                or not entry[field]:
+                            errors.append(f"{ewhere}.{field} must be a "
+                                          "non-empty string")
     if len(in_progress) > 1:
         errors.append(f"WIP=1 violated: more than one in_progress item: "
                       f"{', '.join(in_progress)}")

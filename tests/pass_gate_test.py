@@ -116,6 +116,66 @@ class EventsLogToleranceTest(unittest.TestCase):
             self.assertEqual(data["items"][0]["status"], "in_progress")
 
 
+class ValidateSchemaDriftTest(unittest.TestCase):
+    """P1-5: validate() must not crash and must not drift from the schema.
+
+    A non-dict verification used to crash the evidence comparison with
+    AttributeError; timeout_seconds 99999 and evidence missing
+    ran_at/output_tail used to validate clean; additionalProperties
+    was never enforced; and the schema itself omitted output_sha256
+    which verify/terminate actually write.
+    """
+
+    def _item(self, **over):
+        item = {"id": "x", "priority": "p0", "area": "g", "title": "t",
+                "user_visible_behavior": "b", "status": "not_started",
+                "verification": {"command": "true", "timeout_seconds": 60},
+                "evidence": None}
+        item.update(over)
+        return item
+
+    def test_non_dict_verification_does_not_crash(self):
+        mod = _load_pass_gate()
+        data = {"version": 1, "project": "p",
+                "items": [self._item(status="passing",
+                                     verification="not-a-dict",
+                                     evidence={"command": "true", "exit_code": 0,
+                                               "ran_at": "2026-10-29T00:00:00Z",
+                                               "output_tail": "ok"})]}
+        errors = mod.validate(data)
+        self.assertIn("items[0].verification must be an object", errors)
+
+    def test_timeout_range_and_evidence_required_fields(self):
+        mod = _load_pass_gate()
+        data = {"version": 1, "project": "p",
+                "items": [self._item(status="passing",
+                                     verification={"command": "true",
+                                                   "timeout_seconds": 99999},
+                                     evidence={"command": "true",
+                                               "exit_code": 0})]}
+        errors = mod.validate(data)
+        self.assertTrue(any("timeout_seconds" in e for e in errors), errors)
+        self.assertTrue(any("ran_at" in e for e in errors), errors)
+        self.assertTrue(any("output_tail" in e for e in errors), errors)
+
+    def test_additional_properties_enforced(self):
+        mod = _load_pass_gate()
+        data = {"version": 1, "project": "p",
+                "items": [self._item(surprise=1)]}
+        errors = mod.validate(data)
+        self.assertTrue(any("unknown fields" in e for e in errors), errors)
+
+    def test_tool_written_evidence_shape_validates(self):
+        mod = _load_pass_gate()
+        data = {"version": 1, "project": "p",
+                "items": [self._item(status="passing",
+                                     evidence={"command": "true", "exit_code": 0,
+                                               "ran_at": "2026-10-29T00:00:00Z",
+                                               "output_tail": "ok",
+                                               "output_sha256": "ab" * 32})]}
+        self.assertEqual(mod.validate(data), [])
+
+
 class StatusPluralTest(unittest.TestCase):
     def test_zero_items(self):
         self.assertIn("(0 items)", _status_with(0))
