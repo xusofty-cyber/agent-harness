@@ -83,7 +83,8 @@
 | Antigravity CLI | 项目/目录规则；全局 `~/.gemini/AGENTS.md` 与 `GEMINI.md` 兼容指针；另支持 `~/.gemini/antigravity-cli/rules/*.md` | 通用规则使用规范入口；CLI 专用 rules 可按需另行配置 |
 | Antigravity IDE / Extensions | 项目/目录规则；全局 `~/.gemini/AGENTS.md` 与 `GEMINI.md` 兼容指针 | 当前版本支持两种全局文件名；较早 IDE 可跟随指针 |
 | WorkBuddy | `.workbuddy/rules/agent-harness.md` 规则桥接（软链到 `AGENTS.md`，失败时回落为指针文件）；已部署 `.workbuddy/settings.json` 门禁钩子及 `.workbuddy/hooks/` 下的适配器与六个 Claude 门禁脚本副本 | 腾讯 CodeBuddy 的后续产品。部署桥接文件不等于验证加载，请在已装的 WorkBuddy 版本上确认。门禁钩子（PreToolUse/Stop/SessionStart/PostToolUse）把 Claude 形负载原样交给 Claude 门禁钩子；构建本层的环境里无法做 WorkBuddy 真机运行验证，协议级测试通过。配置文件位置另有说明：钩子格式与配置文件位置本轮均未对照官方文档或真机核实（见下文 WorkBuddy 一节），本仓库发到 `.workbuddy/settings.json` |
-| DeepSeek Harness (dsh) | 全局 `${DSH_HOME:-~/.dsh}/AGENTS.md`（经 `-g` 部署）；项目 `AGENTS.md` 原生读取；技能走 `.agents/skills/`；另部署 `.dsh/agent-harness-gate.mjs` Cordis 门禁插件（TypeScript 源码 `.dsh/agent-harness-gate.ts`）+ `.dsh/cordis.patch.yml` 挂载行 | dsh 原生读取 `AGENTS.md`，因此不创建项目级桥接文件。门禁插件把 dsh 工具调用翻译成 Claude 门禁钩子；激活需手动（把挂载行并入 profile 或 home patch，或以 `--patch` 传入），且 dsh 插件 API 未在官方文档/真机上核实，仍欠一次真机运行与文档复核——见下文 dsh 门禁段落 || GitHub Copilot | `.github/copilot-instructions.md` 桥接 | 按 Copilot 当前产品配置单独确认加载方式 |
+| DeepSeek Harness (dsh) | 全局 `${DSH_HOME:-~/.dsh}/AGENTS.md`（经 `-g` 部署）；项目 `AGENTS.md` 原生读取；技能走 `.agents/skills/`；另部署 `.dsh/agent-harness-gate.mjs` Cordis 门禁插件（TypeScript 源码 `.dsh/agent-harness-gate.ts`）+ `.dsh/cordis.patch.yml` 挂载行 | dsh 原生读取 `AGENTS.md`，因此不创建项目级桥接文件。门禁插件把 dsh 工具调用翻译成 Claude 门禁钩子；激活需手动（把挂载行并入 profile 或 home patch，或以 `--patch` 传入），且 dsh 插件 API 未在官方文档/真机上核实，仍欠一次真机运行与文档复核——见下文 dsh 门禁段落 |
+| GitHub Copilot | `.github/copilot-instructions.md` 桥接 | 按 Copilot 当前产品配置单独确认加载方式 |
 | Zed / Pi / OpenCode | 可复用 Markdown；无专属部署接线 | 不据文件存在推断自动发现或全局加载 |
 
 参考：[Codex AGENTS.md](https://developers.openai.com/codex/guides/agents-md)、[Claude Code memory](https://code.claude.com/docs/en/memory)、[Antigravity rules](https://www.antigravity.google/docs/rules/)。
