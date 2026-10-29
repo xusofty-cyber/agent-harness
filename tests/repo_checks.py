@@ -34,7 +34,7 @@ def check(name: str, ok: bool, detail: str = "") -> None:
 
 
 # --- 1. JSON validity ---
-for rel in [".claude/settings.json", ".agents/hooks.json", "skills-lock.json"]:
+for rel in [".claude/settings.json", ".agents/hooks.json", ".workbuddy/settings.json", "skills-lock.json"]:
     p = ROOT / rel
     try:
         json.loads(p.read_text(encoding="utf-8-sig"))
@@ -45,6 +45,13 @@ for rel in [".claude/settings.json", ".agents/hooks.json", "skills-lock.json"]:
 # --- 1b. Antigravity hooks wiring ---
 # .agents/hooks.json must name the agent-harness-gate hook set, cover the
 # four gate events, and point only at adapter scripts that exist.
+# Hook-command cwd (observed, agy CLI 1.4.10 --print): agy runs the
+# commands with cwd = <project>/.agents, so every command must be
+# `node hooks/antigravity-*.mjs` (relative to .agents/). The old
+# `node .agents/hooks/...` form doubles to .agents/.agents/hooks/...
+# under that cwd and makes agy reject the tool call instead of failing
+# open. This check therefore asserts the .agents-cwd resolvability
+# explicitly and fails if any command re-introduces the .agents/ prefix.
 hooks_json_path = ROOT / ".agents" / "hooks.json"
 try:
     hooks_data = json.loads(hooks_json_path.read_text(encoding="utf-8-sig"))
@@ -53,16 +60,29 @@ try:
     for event in ["PreToolUse", "PostToolUse", "SessionStart", "Stop"]:
         check(f"antigravity-hooks:event:{event}", event in gate_hooks)
     adapter_files = set()
+    all_commands = []
     for event, entries in gate_hooks.items():
         if not isinstance(entries, list):
             continue
         for entry in entries:
             for h in entry.get("hooks", [entry]):
                 cmd = h.get("command", "") if isinstance(h, dict) else ""
-                if cmd.startswith("node .agents/hooks/antigravity-"):
+                if cmd:
+                    all_commands.append(cmd)
+                if cmd.startswith("node hooks/antigravity-"):
                     adapter_files.add(cmd.split()[1])
+    check("antigravity-hooks:four-commands", len(all_commands) == 4,
+          f"expected 4 hook commands, got {len(all_commands)}: {all_commands}")
+    check("antigravity-hooks:no-agents-prefix",
+          not any(".agents/hooks/" in c for c in all_commands),
+          f"hook command must not re-prefix .agents/hooks/: {all_commands}")
     for rel in sorted(adapter_files):
-        check(f"antigravity-hooks:adapter:{rel}", (ROOT / rel).exists())
+        # rel is relative to .agents/ (the hook cwd), not to the repo root.
+        check(f"antigravity-hooks:adapter:{rel}",
+              (ROOT / ".agents" / rel).exists())
+        check(f"antigravity-hooks:cwd-agents:{rel}",
+              (ROOT / ".agents" / rel).exists(),
+              f"{rel} must resolve with cwd=.agents/")
     check(
         "antigravity-hooks:common",
         (ROOT / ".agents" / "hooks" / "antigravity-common.mjs").exists(),
@@ -70,6 +90,75 @@ try:
 except Exception as e:  # noqa: BLE001
     check("antigravity-hooks:parse", False, str(e))
 
+# --- 1c. dsh gate plugin wiring ---
+# The dsh gate plugin (.dsh/agent-harness-gate.mjs) must exist, register
+# the documented dsh extension points, delegate to the Claude hook
+# scripts (never a second copy of the guard rules), and ship a patch
+# template with the placeholder the deploy scripts fill in.
+dsh_plugin = ROOT / ".dsh" / "agent-harness-gate.mjs"
+check("dsh-gate:plugin-exists", dsh_plugin.exists())
+if dsh_plugin.exists():
+    dsh_text = dsh_plugin.read_text(encoding="utf-8-sig")
+    check("dsh-gate:name", "agent-harness-gate" in dsh_text)
+    for event in ["tools/pre-execute", "tools/result", "agent/created", "agent/turn-stopping"]:
+        check(f"dsh-gate:event:{event}", event in dsh_text)
+    check("dsh-gate:delegates-guard", "guard.mjs" in dsh_text)
+    check("dsh-gate:delegates-stop", "stop-gate.mjs" in dsh_text)
+    check("dsh-gate:delegates-session", "session-start.mjs" in dsh_text)
+    check("dsh-gate:delegates-ledger", "post-tool-use.mjs" in dsh_text)
+    check("dsh-gate:no-guard-copy", "PROTECTED_BRANCHES" not in dsh_text)
+    check("dsh-gate:deny-contract", '"deny"' in dsh_text or "'deny'" in dsh_text)
+dsh_patch = ROOT / ".dsh" / "cordis.patch.template.yml"
+check("dsh-gate:patch-template-exists", dsh_patch.exists())
+if dsh_patch.exists():
+    patch_text = dsh_patch.read_text(encoding="utf-8-sig")
+    check("dsh-gate:patch-insert", "- insert:" in patch_text)
+    check("dsh-gate:patch-id", "agent-harness-gate" in patch_text)
+    check("dsh-gate:patch-placeholder", "__PLUGIN_PATH__" in patch_text)
+check("dsh-gate:test-exists", (ROOT / "tests" / "dsh-gate.test.mjs").exists())
+# The TypeScript source is canonical: the .mjs is its type-stripped
+# artifact, so the source, its minimal tsconfig, and the node shims
+# that make an isolated tsc check possible must all be present, and
+# the .mjs must carry the same unverified-contract honesty note.
+dsh_ts = ROOT / ".dsh" / "agent-harness-gate.ts"
+check("dsh-gate:ts-exists", dsh_ts.exists())
+check("dsh-gate:tsconfig-exists", (ROOT / ".dsh" / "tsconfig.json").exists())
+check("dsh-gate:node-shims-exists", (ROOT / ".dsh" / "node-shims.d.ts").exists())
+if dsh_ts.exists():
+    dsh_ts_text = dsh_ts.read_text(encoding="utf-8-sig")
+    check("dsh-gate:ts-apply", "export function apply" in dsh_ts_text)
+    check("dsh-gate:ts-name", '"agent-harness-gate"' in dsh_ts_text)
+    check("dsh-gate:ts-no-enum", "enum " not in dsh_ts_text)
+    check("dsh-gate:ts-honesty", "未在官方文档/真机上核实" in dsh_ts_text)
+if dsh_plugin.exists():
+    check("dsh-gate:mjs-honesty", "未在官方文档/真机上核实" in dsh_text)
+# --- 1c. WorkBuddy hooks wiring ---
+# .workbuddy/settings.json must cover the four gate events and point
+# only at adapter scripts that exist (mirrors 1b for Antigravity).
+wb_settings_path = ROOT / ".workbuddy" / "settings.json"
+try:
+    wb_data = json.loads(wb_settings_path.read_text(encoding="utf-8-sig"))
+    wb_hooks = wb_data.get("hooks", {})
+    check("workbuddy-hooks:settings", isinstance(wb_hooks, dict) and wb_hooks)
+    for event in ["PreToolUse", "PostToolUse", "SessionStart", "Stop"]:
+        check(f"workbuddy-hooks:event:{event}", event in wb_hooks)
+    wb_adapter_files = set()
+    for event, entries in wb_hooks.items():
+        if not isinstance(entries, list):
+            continue
+        for entry in entries:
+            for h in entry.get("hooks", [entry]):
+                cmd = h.get("command", "") if isinstance(h, dict) else ""
+                if cmd.startswith("node .workbuddy/hooks/workbuddy-"):
+                    wb_adapter_files.add(cmd.split()[1])
+    for rel in sorted(wb_adapter_files):
+        check(f"workbuddy-hooks:adapter:{rel}", (ROOT / rel).exists())
+    check(
+        "workbuddy-hooks:common",
+        (ROOT / ".workbuddy" / "hooks" / "workbuddy-common.mjs").exists(),
+    )
+except Exception as e:  # noqa: BLE001
+    check("workbuddy-hooks:parse", False, str(e))
 # --- 2. TOML example validity (branch-aware: only on branches that have it) ---
 toml_example = ROOT / "templates" / "ai-memory.toml.example"
 if toml_example.exists():
@@ -339,8 +428,8 @@ for tmpl_prefix in ("Global AGENTS", "Project AGENTS", "Directory AGENTS"):
               f"missing canonical template: {expected_tmpl}")
 
 # --- 3i. Skill counts: single source of truth (Phase 0, 0-1) ---
-# tools/count-skills.py owns the expected composition (40 dirs on disk,
-# 42 lock entries incl. 2 meta entries) and scans live docs for stale
+# tools/count-skills.py owns the expected composition (39 dirs on disk,
+# 41 lock entries incl. 2 meta entries) and scans live docs for stale
 # counts (44/43/42 in a skill context, openspec suite != 12). The script
 # is the single implementation; this check only asserts it passes.
 _count = subprocess.run(
@@ -952,8 +1041,8 @@ for _guide in ("docs/guides/Skills Usage Guide.md", "docs/guides/Skills Usage Gu
         check(f"profiles:guide-standard-{_guide}",
               _std_listed == set(_std) - set(_min),
               f"{_guide} standard subsection lists {_std_listed}, want {sorted(set(_std) - set(_min))}")
-        check(f"profiles:guide-full-{_guide}", "40" in _sec,
-              f"{_guide} tier section does not state the full profile has 40 skills")
+        check(f"profiles:guide-full-{_guide}", "39" in _sec,
+              f"{_guide} tier section does not state the full profile has 39 skills")
 
 # --- 3s. Loop layer (Phase 5, v3 §4.6) ---
 # tools/loop.py (stdlib only) + templates/loop/ (goal / loop-state / graph,
@@ -1163,6 +1252,9 @@ PARITY = [
     ("DSH_HOME", "DSH_HOME", "DeepSeek Harness global rules"),
     ("Antigravity rules adapter", "Antigravity rules adapter", "Antigravity .agents/rules frontmatter adapter"),
     ("Antigravity hooks", "Antigravity hooks", "Antigravity .agents/hooks.json gate hooks"),
+    ("Dsh gate", "Dsh gate", "dsh gate plugin deployment"),
+    ("WorkBuddy hooks", "WorkBuddy hooks", "WorkBuddy .workbuddy/settings.json gate hooks"),
+    ("Antigravity hooks cwd=.agents", "Antigravity hooks cwd=.agents", "Antigravity hooks.json commands relative to .agents cwd"),
     ("PrepushGate", "prepush-gate", "template gate deployment (pre-push hook + checker + CI template)"),
     ("New-RuleDirBridge", "bridge_rule_dir", "rule-directory bridge helper"),
     (".windsurf/rules", ".windsurf/rules", "Windsurf bridge"),

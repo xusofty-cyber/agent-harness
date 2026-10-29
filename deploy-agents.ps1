@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 # deploy-agents.ps1
 # Platforms: Windows (PowerShell 5.1 / PowerShell 7+)
 # Purpose: One-click deploy & online update AI Agents Harness spec, rules & skills
@@ -1213,6 +1213,10 @@ if (-not $isSelfRepo) {
 # Antigravity payloads into the Claude hook scripts, which are copied
 # here too so Antigravity-only projects (no .claude/hooks/) still gate.
 # Adapters fall back to .claude/hooks/ when the copy is absent.
+# Antigravity hooks cwd=.agents: commands in .agents/hooks.json are relative
+# to .agents/ (agy CLI 1.4.10 runs hooks with cwd=.agents/); do not re-prefix
+# them with .agents/hooks/ in the template, or agy resolves
+# .agents/.agents/hooks/... and rejects the tool call.
 if (-not $isSelfRepo) {
     $SourceAgentsHooksJson = Join-Path $ScriptDir ".agents\hooks.json"
     if (Test-Path $SourceAgentsHooksJson) {
@@ -1259,7 +1263,138 @@ if (-not $isSelfRepo) {
     }
 }
 
-# Template gate (pre-push hook + checker + CI template, on by default,
+# Dsh gate (DeepSeek Harness Cordis plugin: .dsh/agent-harness-gate.mjs)
+# NOTE: the Cordis contract here is unverified in this round (see .dsh/agent-harness-gate.ts header).
+# dsh has no hooks.json surface: the gate ships as a Cordis plugin file
+# plus a generated cordis.patch.yml row (absolute plugin path, filled
+# in at deploy time). The plugin translates dsh tool calls into the
+# Claude hook scripts, which are copied here too (into .dsh/hooks/,
+# falling back to .claude/hooks/) so dsh-only projects still gate.
+# Activation is NOT automatic: the user merges the generated row into
+# $DSH_HOME/profiles/<profile>/cordis.patch.yml (or the home patch) or
+# passes it per launch with `dsh --profile <profile> --patch
+# .dsh/cordis.patch.yml` -- profiles live in $DSH_HOME and may not
+# exist yet when this script runs. Until a live dsh run confirms the
+# agent/turn-stopping steering path, dsh stop enforcement is
+# provisional; tools/pre-execute denial is the documented contract.
+# Existing target files are skipped (update mode backs up first, then
+# overwrites), matching the other deploy sections.
+if (-not $isSelfRepo) {
+    $SourceDshPlugin = Join-Path $ScriptDir ".dsh\agent-harness-gate.mjs"
+    $SourceDshPatchTemplate = Join-Path $ScriptDir ".dsh\cordis.patch.template.yml"
+    if (Test-Path $SourceDshPlugin) {
+        $TargetDshDir = Join-Path $ResolvedProjectPath ".dsh"
+        if (-not (Test-Path $TargetDshDir)) {
+            New-Item -ItemType Directory -Path $TargetDshDir -Force | Out-Null
+        }
+        $TargetDshPlugin = Join-Path $TargetDshDir "agent-harness-gate.mjs"
+        if ($Update -or (-not (Test-Path $TargetDshPlugin))) {
+            if ($Update) { Backup-ManagedPath $TargetDshPlugin }
+            Copy-Item -Path $SourceDshPlugin -Destination $TargetDshPlugin -Force
+            Write-Host "  [OK] Deployed Dsh gate plugin: .dsh/agent-harness-gate.mjs" -ForegroundColor Green
+        } else {
+            Write-Host "  [INFO] .dsh/agent-harness-gate.mjs already exists, keeping existing file." -ForegroundColor Gray
+        }
+        $SourceClaudeHooksDir = Join-Path $ScriptDir ".claude\hooks"
+        if (Test-Path $SourceClaudeHooksDir) {
+            $TargetDshHooksDir = Join-Path $TargetDshDir "hooks"
+            if (-not (Test-Path $TargetDshHooksDir)) {
+                New-Item -ItemType Directory -Path $TargetDshHooksDir -Force | Out-Null
+            }
+            foreach ($guard in @("guard.mjs", "guard-write.mjs", "guard-feature-list.mjs", "stop-gate.mjs", "session-start.mjs", "post-tool-use.mjs")) {
+                $srcGuard = Join-Path $SourceClaudeHooksDir $guard
+                if (Test-Path $srcGuard) {
+                    $destGuard = Join-Path $TargetDshHooksDir $guard
+                    if ($Update -or (-not (Test-Path $destGuard))) {
+                        if ($Update) { Backup-ManagedPath $destGuard }
+                        Copy-Item -Path $srcGuard -Destination $destGuard -Force
+                    }
+                }
+            }
+            Write-Host "  [OK] Deployed Dsh gate hook scripts: .dsh/hooks/" -ForegroundColor Green
+        }
+        if (Test-Path $SourceDshPatchTemplate) {
+            $TargetDshPatch = Join-Path $TargetDshDir "cordis.patch.yml"
+            if ($Update -or (-not (Test-Path $TargetDshPatch))) {
+                if ($Update) { Backup-ManagedPath $TargetDshPatch }
+                $patchContent = Get-Content -Path $SourceDshPatchTemplate -Raw -Encoding utf8
+                $patchContent = $patchContent.Replace("__PLUGIN_PATH__", $TargetDshPlugin)
+                $patchContent | Out-File -FilePath $TargetDshPatch -Encoding utf8
+                Write-Host "  [OK] Generated Dsh gate mount row: .dsh/cordis.patch.yml (merge into a profile or home patch to activate)" -ForegroundColor Green
+            } else {
+                Write-Host "  [INFO] .dsh/cordis.patch.yml already exists, keeping existing file." -ForegroundColor Gray
+            }
+        }
+    }
+}
+
+# WorkBuddy hooks (.workbuddy/settings.json + .workbuddy/hooks/)
+# WorkBuddy (Tencent CodeBuddy successor) hooks ASSUME a Claude Code-
+# compatible protocol (UNVERIFIED: official WorkBuddy/CodeBuddy hook docs
+# were not fetched in this run and no installed WorkBuddy build was
+# available; confirm on an installed build before calling this enforced):
+# settings.json
+# declares {hooks: {PreToolUse/Stop/SessionStart/PostToolUse}} with
+# {type: command} entries, stdin is {tool_name, tool_input, cwd, ...},
+# PreToolUse denies with exit 2 / hookSpecificOutput permissionDecision,
+# Stop blocks with {"continue": false, "reason": ...} and SessionStart
+# injects hookSpecificOutput.additionalContext. The adapters forward the
+# Claude-shaped payload unchanged to the Claude hook scripts, which are
+# copied here too so WorkBuddy-only projects (no .claude/hooks/) still
+# gate. Adapters fall back to .claude/hooks/ when the copy is absent.
+# Settings-file location caveat: the legacy CodeBuddy path cited by a
+# prior draft is .codebuddy/settings.json (unverified here); this
+# repository deploys the WorkBuddy build's
+# settings to .workbuddy/settings.json (the directory already used for
+# the WorkBuddy rules bridge). If an installed WorkBuddy build still reads
+# the legacy path, copy the deployed settings file there — the hook
+# commands are project-root-relative and need no change. Not verified on
+# an installed WorkBuddy build (none in this environment).
+if ($ToolWorkbuddy -and (-not $isSelfRepo)) {
+    $SourceWorkbuddySettings = Join-Path $ScriptDir ".workbuddy\settings.json"
+    if (Test-Path $SourceWorkbuddySettings) {
+        $TargetWorkbuddyDir = Join-Path $ResolvedProjectPath ".workbuddy"
+        if (-not (Test-Path $TargetWorkbuddyDir)) {
+            New-Item -ItemType Directory -Path $TargetWorkbuddyDir -Force | Out-Null
+        }
+        $TargetWorkbuddySettings = Join-Path $TargetWorkbuddyDir "settings.json"
+        if ($Update -or (-not (Test-Path $TargetWorkbuddySettings))) {
+            if ($Update) { Backup-ManagedPath $TargetWorkbuddySettings }
+            Copy-Item -Path $SourceWorkbuddySettings -Destination $TargetWorkbuddySettings -Force
+            Write-Host "  [OK] Deployed WorkBuddy hooks: .workbuddy/settings.json" -ForegroundColor Green
+        } else {
+            Write-Host "  [INFO] .workbuddy/settings.json already exists, keeping existing file." -ForegroundColor Gray
+        }
+        $SourceWorkbuddyHooksDir = Join-Path $ScriptDir ".workbuddy\hooks"
+        if (Test-Path $SourceWorkbuddyHooksDir) {
+            $TargetWorkbuddyHooksDir = Join-Path $TargetWorkbuddyDir "hooks"
+            if (-not (Test-Path $TargetWorkbuddyHooksDir)) {
+                New-Item -ItemType Directory -Path $TargetWorkbuddyHooksDir -Force | Out-Null
+            }
+            Get-ChildItem -Path $SourceWorkbuddyHooksDir -Filter "*.mjs" | ForEach-Object {
+                $targetHook = Join-Path $TargetWorkbuddyHooksDir $_.Name
+                if ($Update -or (-not (Test-Path $targetHook))) {
+                    if ($Update) { Backup-ManagedPath $targetHook }
+                    Copy-Item -Path $_.FullName -Destination $targetHook -Force
+                }
+            }
+            $SourceClaudeHooksDir = Join-Path $ScriptDir ".claude\hooks"
+            if (Test-Path $SourceClaudeHooksDir) {
+                foreach ($guard in @("guard.mjs", "guard-write.mjs", "guard-feature-list.mjs", "stop-gate.mjs", "session-start.mjs", "post-tool-use.mjs")) {
+                    $srcGuard = Join-Path $SourceClaudeHooksDir $guard
+                    if (Test-Path $srcGuard) {
+                        $destGuard = Join-Path $TargetWorkbuddyHooksDir $guard
+                        if ($Update -or (-not (Test-Path $destGuard))) {
+                            if ($Update) { Backup-ManagedPath $destGuard }
+                            Copy-Item -Path $srcGuard -Destination $destGuard -Force
+                        }
+                    }
+                }
+            }
+            Write-Host "  [OK] Deployed WorkBuddy hook scripts: .workbuddy/hooks/" -ForegroundColor Green
+        }
+    }
+}# Template gate (pre-push hook + checker + CI template, on by default,
 # opt-out via -NoPrepushGate; -PrepushGate is retained for compatibility)
 # Host-independent: no agent host is required, only git, Python 3, and the
 # project's own gate/ directory. On by default; this block runs unless
@@ -1759,7 +1894,7 @@ Write-Host " Target Project: $ResolvedProjectPath" -ForegroundColor Cyan
 Write-Host " Rules Directory: $TargetRulesDir" -ForegroundColor Cyan
 Write-Host " Skills Directory: $TargetSkillsDir" -ForegroundColor Cyan
 Write-Host " Profile: $SkillProfile (minimal ships the gate only, no graph.py or loop layer; standard/full add orchestration)" -ForegroundColor Cyan
-Write-Host " Gate enforcement: Claude Code hooks only, in the client. On other hosts, run gate/pass-gate.py verify and check-clean manually; CI re-runs passing items." -ForegroundColor Cyan
+Write-Host " Gate enforcement: Claude Code, Antigravity and WorkBuddy hooks enforce the gate in the client. On other hosts, run gate/pass-gate.py verify and check-clean manually; CI re-runs passing items." -ForegroundColor Cyan
 if ($cometCli) {
     Write-Host "`n[TIP] Comet CLI is installed. Use its current documentation to configure a workflow for this project." -ForegroundColor Yellow
 } elseif ($aiMemoryCli) {

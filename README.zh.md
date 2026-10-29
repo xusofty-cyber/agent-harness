@@ -26,7 +26,7 @@ graph TD
     G[Global AGENTS.md<br/>cross-project constitution] --> P[Project AGENTS.md<br/>project template]
     P --> D[Directory AGENTS.md<br/>monorepo micro-boundaries]
     P --> R[.agents/rules/<br/>on-demand sub-rules]
-    R --> S[.agents/skills/<br/>40 on-demand skills]
+    R --> S[.agents/skills/<br/>39 on-demand skills]
     G --> H[.claude/hooks/<br/>PreToolUse guards]
     S --> T[tools/<br/>sync, tui, doc-impact]
 ```
@@ -45,7 +45,7 @@ graph TD
    - 永久硬拦截（`exit 2`）：受保护分支（`develop`/`master`/`main`/`release*`/`staging`）直改提交、`git push --force`、删除受保护远端分支、受保护分支 rebase；
    - 部分命令会硬拒绝，其他情况只是非阻断警告；正则检查不能覆盖所有命令形式，也不能替代 Git 服务端分支保护。
 
-3. **40 个可复用技能目录（[`.agents/skills/`](.agents/skills/)）**：
+3. **39 个可复用技能目录（[`.agents/skills/`](.agents/skills/)）**：
    - **Comet 集成说明**：引导检查已安装版本和项目配置；此技能本身不实现 Comet 状态机或阶段守卫。
    - **活体文档与工程文档规范**：`living-documentation`（六阶文档体系：specs/architecture/reference/guides，Frontmatter 代码双向追溯关联，L0/L1/L2 变更门禁与文档演进）与 `engineering-docs`（31 种研发文档类型，15 个中英双语门禁模板，确保各 Agent 阶段输出格式一致）。
    - **规范驱动开发（SDD）**：`openspec` 全套 12 个技能（提案、变更应用、验证、主文档同步、归档）。
@@ -54,7 +54,7 @@ graph TD
    - **输出与表达指导**：`rtk`（Rust Token Killer 可选 CLI 指引；需配置命令重写 Hook）与 `caveman`（简明表达 Skill）。
    - **事前决策评审与共享记忆**：`option-review`（5 维度多候选方案事前独立评审与决策矩阵）与 `cross-tool-memory`（跨工具项目长期记忆导航与经验检索）。
    - **专业文档处理**：`docx`（Word 专业排版）、`pdf`（结构化抽取与分析）。注：`docx` 自带完整 OOXML 校验工具链（约 1.3 MB），是仓库内最大的 skill，默认不再部署；需要时加 `--include-heavy-skills` / `-IncludeHeavySkills`（同时包含带本地服务 `scripts/server.cjs` 的 `brainstorming`）；已部署的旧副本不受影响，该选项只影响本次新复制；
-   - **技能使用与触发时机指南**：各 skill 的触发机制（自动/显式/混合）、分类速查与项目记忆使用说明详见 [`Skills Usage Guide.zh.md`](docs/guides/Skills%20Usage%20Guide.zh.md)（[English](docs/guides/Skills%20Usage%20Guide.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md)）。部署分层（Phase 4，D58；成员以 `skills-profiles.json` 为唯一事实源）：默认只部署 15 个技能（`--profile minimal`：10 个门禁核心 + 5 个 openspec 核心）加门禁本身（不含 `gate/graph.py` 与循环层）；`--profile standard` 部署 20 个技能加门禁 + 编排（graph + loop）；`--profile full` 默认部署 38 个技能加门禁 + 编排，加 `--include-heavy-skills` 才到全部 40 个。此前以 minimal 部署过、已带有 graph/loop 的项目，重新以 minimal 部署后这些文件会被移除（部署脚本会先备份）；如需保留请改用 `--profile standard`。
+   - **技能使用与触发时机指南**：各 skill 的触发机制（自动/显式/混合）、分类速查与项目记忆使用说明详见 [`Skills Usage Guide.zh.md`](docs/guides/Skills%20Usage%20Guide.zh.md)（[English](docs/guides/Skills%20Usage%20Guide.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md)）。部署分层（Phase 4，D58；成员以 `skills-profiles.json` 为唯一事实源）：默认只部署 15 个技能（`--profile minimal`：10 个门禁核心 + 5 个 openspec 核心）加门禁本身（不含 `gate/graph.py` 与循环层）；`--profile standard` 部署 20 个技能加门禁 + 编排（graph + loop）；`--profile full` 默认部署 37 个技能加门禁 + 编排，加 `--include-heavy-skills` 才到全部 39 个。此前以 minimal 部署过、已带有 graph/loop 的项目，重新以 minimal 部署后这些文件会被移除（部署脚本会先备份）；如需保留请改用 `--profile standard`。
    - **Agent 正确触发与常见问题排查指南 (FAQ)**：如何精准唤醒特定技能、避免角色扮演式脑补、正确配置 AI 记忆与状态机排障详见 [`Agent Triggering and FAQ Guide.zh.md`](docs/guides/Agent%20Triggering%20and%20FAQ%20Guide.zh.md)。
 
 4. **一键部署、交互向导与统一流水线（`deploy-agents` & `run-pipeline`）**：
@@ -78,8 +78,8 @@ graph TD
 | Claude Code | `CLAUDE.md` 桥接、`.claude/skills/` 链接、`.claude/settings.json` Hook | 强制（钩子） | 脚本配置；Hook 仅在 Claude Code 客户端运行 |
 | Antigravity 2.0 / CLI / IDE 与扩展 | 项目规则/技能目录；`--global` 写入 `~/.gemini/AGENTS.md` 和 `GEMINI.md` 兼容指针 | 钩子强制 | 当前表面支持两个全局文件名；较早 IDE 可跟随指针读取规范文件；CLI 专属规则另行配置。项目另部署 Antigravity 规则适配文件（`.agents/rules/agent-harness.md`，trigger: always_on），指向 `AGENTS.md`，以及门禁钩子集（`.agents/hooks.json`：PreToolUse/Stop/SessionStart/PostToolUse），把 Antigravity 负载翻译成 Claude 门禁钩子。构建环境无 `agy` 二进制，Antigravity CLI/IDE 真机运行未验证；协议级测试通过（`tests/antigravity-hooks.test.mjs`） |
 | Codex | 全局 `$CODEX_HOME/AGENTS.md`（默认 `~/.codex/AGENTS.md`）、项目 `AGENTS.md` 与 `.agents/skills/` | 配置 | `-Global` 初始化 Codex 全局文件；`-Global -Update` 备份后覆盖当前生效的全局规则 |
-| WorkBuddy | `.workbuddy/rules/agent-harness.md` 规则桥接 | 配置 | 仅桥接文件；本层不为 WorkBuddy 安装钩子；未在每个 WorkBuddy 版本上验证加载，请在已装版本上确认 |
-| DeepSeek Harness (dsh) | 全局 `${DSH_HOME:-~/.dsh}/AGENTS.md`（经 `--global` 部署）；项目 `AGENTS.md` 原生读取；技能走 `.agents/skills/` | 配置 | 不创建项目级桥接文件（`AGENTS.md` 原生读取）；经 `cordis.patch.yml` 的 MCP 接入与门禁强制不在本桥接层内 |
+| WorkBuddy | `.workbuddy/rules/agent-harness.md` 规则桥接 + `.workbuddy/settings.json` 门禁钩子 | 门禁钩子 | 钩子把假定的 Claude 形负载原样交给 Claude 门禁脚本（PreToolUse/Stop/SessionStart/PostToolUse）；钩子格式与配置文件位置均未对照官方文档（本轮未抓取）或真机核实，协议级测试通过；本仓库发到 `.workbuddy/settings.json`，请在已装版本上确认 |
+| DeepSeek Harness (dsh) | 全局 `${DSH_HOME:-~/.dsh}/AGENTS.md`（经 `--global` 部署）；项目 `AGENTS.md` 原生读取；技能走 `.agents/skills/` | 门禁插件（需手动激活，dsh 真机未验证） | 不创建项目级桥接文件（`AGENTS.md` 原生读取）；部署脚本另装 Cordis 门禁插件（`.dsh/agent-harness-gate.mjs`，TypeScript 源码为 `.dsh/agent-harness-gate.ts`）与 `.dsh/cordis.patch.yml` 挂载行——激活需手动，且 dsh 插件 API 未在官方文档/真机上核实，不要把它当作已验证的强制执行 |
 | ai-memory | Claude Code、Codex CLI、Antigravity CLI 的可选 MCP/hooks；Antigravity 2.0 与 IDE 提供 MCP-only 设置 | 配置 | 项目显式选择加入；Codex 桌面版按安装版本核实；ChatGPT 网页版人工交接 |
 | GitHub Copilot | `.github/copilot-instructions.md` 桥接 | 配置 | 脚本配置；具体行为依 Copilot 版本/模式 |
 | Zed | `AGENTS.md` 文件 | 仅文件 | 提供可复用文件；脚本不创建 Zed 专属配置 |
@@ -97,7 +97,7 @@ agent-harness/
 │   │   ├── git-workflow.md          # Git 授权模型、受保护分支强隔离、提交规范
 │   │   ├── security-boundary.md     # 八大高风险操作防呆矩阵、凭证零泄露
 │   │   └── token-discipline.md      # 读拿说三道闸门、上下文防漏与日志截断
-│   └── skills/                      # 40 个原生工程技能库（Comet, OpenSpec, Superpowers...）
+│   └── skills/                      # 39 个原生工程技能库（Comet, OpenSpec, Superpowers...）
 ├── .claude/
 │   ├── settings.json                # Claude Code 钩子配置（五类钩子事件全接线）
 │   └── hooks/                       # 钩子脚本（Node.js，读取 stdin JSON）
@@ -136,7 +136,7 @@ agent-harness/
 
 ### 当前状态（v0.3.0）——依赖门禁前请先读
 
-- **强制力取决于宿主。** Claude Code 钩子在客户端强制执行门禁（见上表）。其他宿主上，门禁是一套纪律加手动命令：自己跑 `python3 gate/pass-gate.py verify` 和 `python3 gate/pass-gate.py check-clean`。与宿主无关的兜底是 CI，它会重跑每个 `passing` 项的验证命令（`tests/repo_checks.py` §3k）。已知绕过方式见 [`gate/README.md`](gate/README.md)，包括经 Bash 直接改写、明文成本账本。
+- **强制力取决于宿主。** Claude Code 钩子在客户端强制执行门禁（见上表）。Antigravity 钩子与 dsh 门禁插件虽已部署，但其真机强制执行均未验证（见上表）。其他宿主上，门禁是一套纪律加手动命令：自己跑 `python3 gate/pass-gate.py verify` 和 `python3 gate/pass-gate.py check-clean`。与宿主无关的兜底是 CI，它会重跑每个 `passing` 项的验证命令（`tests/repo_checks.py` §3k）。已知绕过方式见 [`gate/README.md`](gate/README.md)，包括经 Bash 直接改写、明文成本账本。
 - **基准结论如实表述。** 预注册 B1 轮（t1–t8 × bare/pack/gate × 3 轮 = 72 轮）72/72 通过、每臂 0 错误完成，按事前规则判为 NO DISCRIMINATION。本版本不宣称门禁降低了错误完成率；唯一的拦截证据是 Phase 1 dogfood（植入的假通过被钩子和 CI 抓住）。
 - **B2 更难基准，已预注册、尚未跑。** `eval/results/b2-preregistration-2026-10-29.md` 预注册了 t9–t12（多文件 + 文档同步、隐藏边界用例、断点续跑、歧义需求先写决策记录）× bare/pack/gate × 3 轮 = 36 轮，沿用 B1 的判定规则：只有 gate 比 bare 少至少 2 次错误完成才算 DISCRIMINATION，各臂仍为 0 还是 NO DISCRIMINATION，不是成功。B2 目前没有任何轮次记录；任务与参考解已验证（setup + solution + acceptance 走通），但还没有任何一臂被实测。
 - **宿主无关的第二道门（pre-push + CI 模板）。** `templates/pre-push-gate/`（钩子模板、检查器、opt-in 安装器）与 `templates/ci-gate-check.yml` 给没有运行时钩子的项目一道不依赖任何宿主的门：检查器重跑每个 `passing` 项的验证并拒绝过期证据，与 §3k 对齐。安装有两种形式：独立安装器仍是显式 opt-in；部署脚本则默认就装齐三件文件（传 `--no-prepush-gate` / `-NoPrepushGate` 可跳过，`--prepush-gate` / `-PrepushGate` 保留兼容），按跳过已有 / 更新先备份的规矩。边界见指南：pre-push 钩子检查的是工作区，不是被推送的提交；`git push --no-verify` 可绕过——要配 CI 模板和服务端分支保护一起用。

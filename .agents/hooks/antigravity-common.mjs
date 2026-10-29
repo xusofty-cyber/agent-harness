@@ -26,6 +26,16 @@
 // truth for the gate rules (guard.mjs, guard-write.mjs,
 // guard-feature-list.mjs, stop-gate.mjs, session-start.mjs,
 // post-tool-use.mjs) instead of a second, drifting copy.
+// Hook command cwd (observed, agy CLI 1.4.10 --print): hook commands in
+// .agents/hooks.json run with cwd = <project>/.agents (the directory
+// containing hooks.json), NOT the workspace root. That is why every
+// command in .agents/hooks.json is written as `node hooks/<adapter>.mjs`
+// and must NOT be re-prefixed with `.agents/hooks/` (that doubles the
+// path to .agents/.agents/hooks/... and makes agy reject the tool call
+// instead of failing open). Antigravity IDE cwd is NOT verified by a
+// live run; if a future IDE run shows a workspace-root cwd, this file
+// (one workspace hooks.json for CLI and IDE alike) must be revisited
+// rather than silently re-prefixed for one host at the other's expense.
 // Guard script resolution: prefer <project>/.agents/hooks/<name> (where the
 // deploy scripts copy the Claude hook scripts for Antigravity-only
 // projects), fall back to <project>/.claude/hooks/<name> (projects that
@@ -40,7 +50,7 @@ import {
   unlinkSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HOOKS_DIR = dirname(fileURLToPath(import.meta.url));
@@ -57,14 +67,19 @@ export function readStdin() {
 }
 
 // Project root: the first mounted workspace, if it exists; else the
-// process working directory (Antigravity runs hook commands from the
-// workspace root, so these agree in practice).
+// process working directory, with one correction for the observed hook
+// cwd: when the hook process runs with cwd = <project>/.agents (agy CLI
+// 1.4.10), the project root is the parent of that directory, not the
+// .agents directory itself. A workspace-root cwd is returned unchanged,
+// so this fallback is correct for either cwd.
 export function resolveProjectRoot(input) {
   const paths = input.workspacePaths || [];
   for (const p of paths) {
     if (typeof p === "string" && p && existsSync(p)) return p;
   }
-  return process.cwd();
+  const cwd = process.cwd();
+  if (basename(cwd) === ".agents") return dirname(cwd);
+  return cwd;
 }
 
 export function resolveClaudeScript(projectRoot, scriptName) {

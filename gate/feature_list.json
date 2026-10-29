@@ -59,6 +59,66 @@
         "command": "node tests/hooks-gate.test.mjs",
         "timeout_seconds": 120
       }
+    },
+    {
+      "id": "night-dogfood-session-state",
+      "priority": "p0",
+      "area": "docs",
+      "title": "Refresh SESSION_STATE breakpoint for post-5fd31c7 main",
+      "user_visible_behavior": "docs/internal/SESSION_STATE.md is a current breakpoint (<=60 lines, five sections), names the night dogfood item, keeps the p1 item id so the old verification still passes, and drops the stale feat/phase0-v3 next step",
+      "status": "passing",
+      "verification": {
+        "command": "python3 -c \"import pathlib; t=pathlib.Path('docs/internal/SESSION_STATE.md').read_text(); assert len(t.splitlines())<=60, len(t.splitlines()); assert all(h in t for h in ['## Goal','## In progress','## Next','## Blocked','## Last verification']); assert 'night-dogfood-session-state' in t; assert 'p1-dogfood-session-state' in t; assert 'feat/phase0-v3' not in t\"",
+        "timeout_seconds": 300
+      },
+      "evidence": {
+        "command": "python3 -c \"import pathlib; t=pathlib.Path('docs/internal/SESSION_STATE.md').read_text(); assert len(t.splitlines())<=60, len(t.splitlines()); assert all(h in t for h in ['## Goal','## In progress','## Next','## Blocked','## Last verification']); assert 'night-dogfood-session-state' in t; assert 'p1-dogfood-session-state' in t; assert 'feat/phase0-v3' not in t\"",
+        "exit_code": 0,
+        "ran_at": "2026-10-29T13:50:16Z",
+        "output_tail": "",
+        "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "notes": "Observed staleness: pre-run SESSION_STATE still listed pushing feat/phase0-v3 as Next, long superseded by main 5fd31c7."
+    },
+    {
+      "id": "night-dogfood-report",
+      "priority": "p0",
+      "area": "docs",
+      "title": "Night dogfood report 2026-10-29",
+      "user_visible_behavior": "docs/internal/dogfood-2026-10-29.md records the task, simulated sessions, per-item evidence, check-clean result, gate friction and suggestions, and unverified gaps, without claiming an unmerged PR as merged",
+      "status": "passing",
+      "verification": {
+        "command": "python3 -c \"import pathlib; t=pathlib.Path('docs/internal/dogfood-2026-10-29.md').read_text(); assert all(h in t for h in ['## Task','## Sessions','## Evidence','## Check-clean','## Friction and suggestions','## Unverified']); assert 'night/dogfood' in t; assert 'agy --print' in t; assert 'not merged' in t\"",
+        "timeout_seconds": 300
+      },
+      "evidence": {
+        "command": "python3 -c \"import pathlib; t=pathlib.Path('docs/internal/dogfood-2026-10-29.md').read_text(); assert all(h in t for h in ['## Task','## Sessions','## Evidence','## Check-clean','## Friction and suggestions','## Unverified']); assert 'night/dogfood' in t; assert 'agy --print' in t; assert 'not merged' in t\"",
+        "exit_code": 0,
+        "ran_at": "2026-10-29T13:59:39Z",
+        "output_tail": "",
+        "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "notes": "Report is evidence, not a gate-behavior change."
+    },
+    {
+      "id": "night-dogfood-checklist",
+      "priority": "p1",
+      "area": "docs",
+      "title": "Short gate operator checklist for hosts without hooks",
+      "user_visible_behavior": "docs/internal/gate-operator-checklist.md is a short checklist (<=80 lines) for running the gate manually on hosts with no Claude hooks, covering WIP=1, no hand-edits, verify-before-passing and check-clean reading",
+      "status": "passing",
+      "verification": {
+        "command": "python3 -c \"import pathlib; t=pathlib.Path('docs/internal/gate-operator-checklist.md').read_text(); assert len(t.splitlines())<=80, len(t.splitlines()); assert 'WIP=1' in t; assert 'check-clean' in t; assert 'pass-gate.py verify' in t; assert 'never hand-edit' in t\"",
+        "timeout_seconds": 300
+      },
+      "evidence": {
+        "command": "python3 -c \"import pathlib; t=pathlib.Path('docs/internal/gate-operator-checklist.md').read_text(); assert len(t.splitlines())<=80, len(t.splitlines()); assert 'WIP=1' in t; assert 'check-clean' in t; assert 'pass-gate.py verify' in t; assert 'never hand-edit' in t\"",
+        "exit_code": 0,
+        "ran_at": "2026-10-29T13:50:38Z",
+        "output_tail": "",
+        "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "notes": "This night run itself ran on Muse/agy without Claude hooks, so manual discipline was the only enforcement; the checklist captures that."
     }
   ],
   "project": "agent-harness",
