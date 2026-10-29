@@ -700,7 +700,7 @@ plan's attribution is corrected here, not silently repeated.
   carries continue + update per D30).
 - **Amends:** merge-time D31 (minimal = 10) and the D18 count.
 
-## D32 — C7: gate state files live inside `gate/` (merge ruling, provisional)
+## D32 — C7: gate state files live inside `gate/` (merge ruling, confirmed by user 2026-10-29)
 
 - **Decision:** `feature_list.json` / `events.jsonl` live in `gate/`
   (skeleton layout). Yunkai's root-level state files are NOT adopted;
@@ -710,7 +710,7 @@ plan's attribution is corrected here, not silently repeated.
   the engine that owns it, and the deploy scripts ship `gate/` as one
   unit. Root-level state files would collide with the repo's own
   root-level files in deployed projects and split state from engine.
-- **Provisional:** 合并执行时暂定，用户复核时可改。
+- **Confirmed:** 用户 2026-10-29 逐项过批准时通过（第 4 项），不再暂定。
 
 ## D33 — C8: DECISIONS.md lives at the root, skeleton numbering is the base (merge ruling, provisional)
 
