@@ -117,12 +117,19 @@ function isProtectedBranch(branch) {
 //   - quotes/escapes: "git" push, 'git' push, g\it push, gi''t push
 //   - global options between git and subcommand: git -c x=y push, git -C dir push
 //   - command substitution resolving to git: $(which git) push, `which git` push
-//   - indirection: eval "...", sh -c "...", bash -c "..."
+//   - indirection: eval "...", sh -c "...", bash -c "...",
+//     xargs git ..., find ... -exec git ...
 // Phase 2 (2-4): substitutions and indirections are expanded recursively
 // (depth-limited; beyond the limit we warn and stop expanding — graded,
 // fail-open, never a blanket deny). A substitution inside single quotes is
-// literal text, not a substitution, and is left alone. Known remaining gap:
-// xargs/find -exec indirection is not expanded (out of scope for 2-4).
+// literal text, not a substitution, and is left alone. P1-2 closure:
+// wrapper options (sudo -u, env -u/-i, timeout duration, nice -n) are
+// skipped when resolving argv[0]; -c alias.* definitions deny outright;
+// same-command variables (G=$(which git); $G ...) are tracked at argv[0]
+// and eval-argument positions. Known remaining gaps: cross-call variables
+// (set in an earlier tool call), PATH shims, shell functions/aliases,
+// and eval of strings built at runtime — server-side branch protection
+// is the boundary for those.
 // We normalize the command into argv tokens before matching.
 // ============================================================
 
@@ -188,12 +195,29 @@ function findSubstitutions(cmd) {
 // Does this substitution evaluate to the git binary?
 // Covered forms: $(which git), $(command -v git), $(type git),
 // $(type -p git), $(git), $(/usr/bin/git) — and the backtick equivalents.
-// Anything else is opaque: the inner text is still analyzed recursively (it
-// may itself contain a git call), but the outer segment gains no git argv[0].
-function substitutionResolvesToGit(inner) {
+// Nested forms resolve too: the inner substitutions are expanded first,
+// so $(echo $(which git)) counts (it prints the git path). Anything else
+// is opaque: the inner text is still analyzed recursively (it may itself
+// contain a git call), but the outer segment gains no git argv[0].
+function substitutionResolvesToGit(inner, depth = 0) {
   const t = inner.trim();
-  return /^(which|command\s+-v|type(?:\s+-[pP])?)\s+git$/.test(t)
-    || /(?:^|\/)git$/.test(t);
+  if (/^(which|command\s+-v|type(?:\s+-[pP])?)\s+git$/.test(t)
+    || /(?:^|\/)git$/.test(t)) return true;
+  if (depth >= MAX_EXPAND_DEPTH) return false;
+  const spans = findSubstitutions(t);
+  if (!spans.length) return false;
+  let expanded = "";
+  let last = 0;
+  for (const s of spans) {
+    expanded += t.slice(last, s.start);
+    expanded += substitutionResolvesToGit(s.inner, depth + 1)
+      ? " /usr/bin/git " : " ";
+    last = s.end;
+  }
+  expanded += t.slice(last);
+  const e = expanded.trim().replace(/^echo\s+/, "");
+  return /(?:^|\/)git$/.test(e)
+    || /^(which|command\s+-v|type(?:\s+-[pP])?)\s+git$/.test(e);
 }
 
 // Rewrite cmd: a git-resolving substitution becomes GIT_TOKEN, any other
@@ -288,15 +312,67 @@ const GIT_GLOBAL_OPTS_WITH_VALUE = new Set([
   "--git-dir", "--work-tree", "--namespace", "--super-prefix",
 ]);
 
+// Wrapper options that consume the next token as a value.
+const WRAPPER_VALUE_OPTS = {
+  sudo: new Set(["-u", "-g", "-C", "-D", "-R", "-r", "-t", "-T", "-p", "-U",
+                 "--user", "--group", "--chdir", "--role", "--type",
+                 "--prompt", "--other-user", "--command-timeout",
+                 "--closefrom"]),
+  env: new Set(["-u", "--unset", "-C", "--chdir", "-S", "--split-string",
+                "--argv0"]),
+  timeout: new Set(["-s", "--signal", "-k", "--kill-after"]),
+  nice: new Set(["-n", "--adjustment"]),
+  command: new Set([]),
+};
+// Wrapper options that do NOT execute anything (describe/list/validate
+// modes): seeing one means the rest of the line never runs.
+const WRAPPER_NON_EXEC_OPTS = {
+  sudo: new Set(["-l", "-v", "-k", "-K", "-V", "-h", "--list", "--validate",
+                 "--reset-timestamp", "--remove-timestamp", "--version",
+                 "--help"]),
+  env: new Set(["--help", "--version"]),
+  timeout: new Set(["--help", "--version"]),
+  nice: new Set(["--help", "--version"]),
+  command: new Set(["-v", "-V"]),
+};
+
+// Skip a wrapper's options starting at idx; returns the new idx, or -1
+// when the wrapper is in a non-executing mode (nothing after it runs).
+// Unknown dash-options are skipped as single tokens (flags); the known
+// value-options above additionally consume their value. A truly unknown
+// value-option plus its value is the one residual gap (documented).
+function skipWrapperOptions(tokens, idx, wrapper) {
+  const valueOpts = WRAPPER_VALUE_OPTS[wrapper] || new Set();
+  const nonExec = WRAPPER_NON_EXEC_OPTS[wrapper] || new Set();
+  while (idx < tokens.length) {
+    const t = tokens[idx];
+    if (/^[A-Za-z_][A-Za-z0-9_]*=/.test(t)) { idx++; continue; }
+    if (t === "--") { idx++; break; }
+    if (!t.startsWith("-") || t === "-") break;
+    if (nonExec.has(t)) return -1;
+    if (t.includes("=")) { idx++; continue; } // --opt=val form
+    if (valueOpts.has(t)) { idx += 2; continue; }
+    idx++; // flag option (known or unknown)
+  }
+  return idx;
+}
+
 // Resolve argv[0] of a token list: strip path, leading VAR=value assignments,
-// and env/command/sudo wrappers. Returns { prog, idx } or null.
+// and env/command/sudo/timeout/nice wrappers (including their options:
+// sudo -u root, env -i, timeout 5, nice -n 5 must not hide the real
+// program). Returns { prog, idx } or null.
 function resolveProg(tokens) {
   let idx = 0;
   while (idx < tokens.length && /^[A-Za-z_][A-Za-z0-9_]*=/.test(tokens[idx])) idx++;
   if (idx >= tokens.length) return null;
   let prog = tokens[idx].split("/").pop();
-  while ((prog === "env" || prog === "command" || prog === "sudo") && idx + 1 < tokens.length) {
+  while (["env", "command", "sudo", "timeout", "nice"].includes(prog)
+         && idx + 1 < tokens.length) {
+    const wrapper = prog;
     idx++;
+    idx = skipWrapperOptions(tokens, idx, wrapper);
+    if (idx === -1) return null; // non-executing mode: nothing runs
+    if (wrapper === "timeout" && idx < tokens.length) idx++; // DURATION operand
     while (idx < tokens.length && /^[A-Za-z_][A-Za-z0-9_]*=/.test(tokens[idx])) idx++;
     if (idx >= tokens.length) return null;
     prog = tokens[idx].split("/").pop();
@@ -359,19 +435,130 @@ function parseGitInvocation(tokens) {
 // Phase 2 (2-4): expands command substitutions and eval/sh -c indirection
 // recursively (depth-limited). Beyond MAX_EXPAND_DEPTH we warn and stop —
 // graded fail-open, never a blanket deny.
+// Same-command variable map for VAR=git indirection: VAR=$(which git),
+// VAR=/usr/bin/git, or VAR="git ..." (a command string, for eval $VAR).
+// Built from the RAW command (the rewrite erases assignment values), and
+// only consulted at argv[0] / eval-argument positions — a variable used
+// as an argument never resolves, so `echo $G` stays allowed. Cross-call
+// variables (set in an earlier tool call) remain a documented residual:
+// server-side branch protection is the boundary for those.
+// True when s is a single shell word (quoted spans and $(...) groups
+// may contain whitespace; unquoted top-level whitespace ends the word).
+function isSingleWord(s) {
+  let inS = false, inD = false, depth = 0, inBt = false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (inS) { if (c === "'") inS = false; continue; }
+    if (inBt) { if (c === "`") inBt = false; continue; }
+    if (inD) { if (c === '"') inD = false; continue; }
+    if (c === "'") inS = true;
+    else if (c === '"') inD = true;
+    else if (c === "`") inBt = true;
+    else if (c === "$" && s[i + 1] === "(") { depth++; i++; }
+    else if (c === "(") depth++;
+    else if (c === ")") { if (depth > 0) depth--; }
+    else if (/\s/.test(c) && depth === 0) return false;
+  }
+  return true;
+}
+
+function collectVarGitMap(cmd) {
+  const map = new Map();
+  for (const seg of rawSegments(cmd)) {
+    const text = seg.trim().replace(/^(export|declare|local|readonly|typeset)\s+/, "");
+    const m = /^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/.exec(text);
+    if (!m) continue;
+    let value = m[2].trim();
+    // A whole-segment assignment only: `VAR=$(which git) push` is an
+    // env prefix for `push`, not a variable definition, and must not
+    // be recorded. It is a definition only when the value is a single
+    // word (a quoted command string counts as one word).
+    if (!isSingleWord(value)) continue;
+    if ((value.startsWith('"') && value.endsWith('"') && value.length >= 2)
+        || (value.startsWith("'") && value.endsWith("'") && value.length >= 2)) {
+      value = value.slice(1, -1);
+    }
+    const v = value.trim();
+    if (/^(?:\/\S*\/)?git$/.test(v)) { map.set(m[1], GIT_TOKEN); continue; }
+    const sub = /^\$\((.*)\)$/.exec(v) || /^`(.*)`$/.exec(v);
+    if (sub && substitutionResolvesToGit(sub[1])) { map.set(m[1], GIT_TOKEN); continue; }
+    if (/^git\s+\S/.test(v)) map.set(m[1], v);
+  }
+  return map;
+}
+
+// Substitute a $VAR argv[0] (or eval argument) from the variable map.
+// Returns a new token list, or the original when nothing applies.
+function substituteVarArgv0(seg, envMap) {
+  let idx = 0;
+  while (idx < seg.length && /^[A-Za-z_][A-Za-z0-9_]*=/.test(seg[idx])) idx++;
+  if (idx >= seg.length) return seg;
+  const m = /^\$([A-Za-z_][A-Za-z0-9_]*)$/.exec(seg[idx]);
+  if (!m || !envMap.has(m[1])) return seg;
+  const mapped = envMap.get(m[1]);
+  const head = seg.slice(0, idx);
+  const tail = seg.slice(idx + 1);
+  if (mapped === GIT_TOKEN) return [...head, GIT_TOKEN, ...tail];
+  return [...head, ...shellSplit(mapped), ...tail];
+}
+
+// Words following an xargs / find -exec indirection, as their own
+// command (or null when the segment has no such indirection).
+function indirectGitWords(seg) {
+  const resolved = resolveProg(seg);
+  if (!resolved) return null;
+  const { prog } = resolved;
+  const rest = seg.slice(resolved.idx + 1);
+  if (prog === "xargs") {
+    // xargs [options] [command [args...]]: skip xargs options to the
+    // command words. Unknown dash-options are skipped as flags; the
+    // known value-options consume their value.
+    const valueOpts = new Set(["-n", "--max-args", "-I", "--replace", "-d",
+      "--delimiter", "-L", "--max-lines", "-P", "--max-procs", "-a",
+      "--arg-file", "-E", "--eof", "-s", "--max-chars"]);
+    let i = 0;
+    while (i < rest.length) {
+      const t = rest[i];
+      if (t === "--") { i++; break; }
+      if (!t.startsWith("-") || t === "-") break;
+      if (t.includes("=")) { i++; continue; }
+      if (valueOpts.has(t)) { i += 2; continue; }
+      i++;
+    }
+    const words = rest.slice(i);
+    return words.length ? words : null;
+  }
+  if (prog === "find") {
+    const eIdx = rest.findIndex((t) => t === "-exec" || t === "-execdir");
+    if (eIdx === -1) return null;
+    const words = rest.slice(eIdx + 1).filter((t) => t !== ";" && t !== "+");
+    return words.length ? words : null;
+  }
+  return null;
+}
+
 function findGitInvocations(cmd, depth = 0) {
   if (depth > MAX_EXPAND_DEPTH) {
     warn(`Deeply nested command indirection (depth > ${MAX_EXPAND_DEPTH}) — manual review recommended. / 命令嵌套过深，建议人工复核。`);
     return [];
   }
   const out = [];
+  const envMap = collectVarGitMap(cmd);
   const { rewritten, innerCommands } = rewriteSubstitutions(cmd);
   for (const inner of innerCommands) {
     out.push(...findGitInvocations(inner, depth + 1));
   }
-  for (const seg of commandSegments(rewritten)) {
+  for (const rawSeg of commandSegments(rewritten)) {
+    const seg = substituteVarArgv0(rawSeg, envMap);
     const inv = parseGitInvocation(seg);
     if (inv) { out.push(inv); continue; }
+    // Indirection: xargs / find -exec — analyze the command words
+    // that follow the indirection as their own command.
+    const words = indirectGitWords(seg);
+    if (words) {
+      out.push(...findGitInvocations(words.join(" "), depth + 1));
+      continue;
+    }
     // Indirection: eval "..." / sh|bash|zsh|dash -c "..." — analyze the
     // argument as a command of its own.
     const resolved = resolveProg(seg);
@@ -379,7 +566,11 @@ function findGitInvocations(cmd, depth = 0) {
     const { prog } = resolved;
     const rest = seg.slice(resolved.idx + 1);
     if (prog === "eval") {
-      out.push(...findGitInvocations(rest.join(" "), depth + 1));
+      const expanded = rest.map((t) => {
+        const vm = /^\$([A-Za-z_][A-Za-z0-9_]*)$/.exec(t);
+        return vm && envMap.has(vm[1]) ? envMap.get(vm[1]) : t;
+      });
+      out.push(...findGitInvocations(expanded.join(" "), depth + 1));
     } else if (["sh", "bash", "zsh", "dash"].includes(prog)) {
       const cIdx = rest.indexOf("-c");
       if (cIdx !== -1 && rest[cIdx + 1] !== undefined) {
@@ -583,10 +774,13 @@ function isForcePush(inv) {
 }
 
 for (const inv of gitInvocations) {
-  // SECURITY: Inline git aliases obscure the real subcommand - warn user
+  // SECURITY: Inline git aliases obscure the real subcommand - deny.
+  // (Previously warn-only; a -c alias.p=push definition followed by
+  // the alias name is a force push the parser cannot see, so warn was
+  // a hole, not a safeguard.)
   if (inv.suspicious && inv.subcommand === "__alias__") {
-    warn(
-      `⚠️ Inline git alias detected - subcommand obfuscated, manual review recommended. / 检测到内联 git 别名，子命令被混淆，建议人工复核。`
+    deny(
+      `[SECURITY-HOOK] ❌ Inline git alias definition (-c alias.*) permanently prohibited: the real subcommand is obfuscated. / 内联 git 别名定义会混淆真实子命令，永久禁止！`
     );
   }
   if (isForcePush(inv)) {
@@ -644,7 +838,12 @@ function rawSegments(cmd) {
     if (c === "'") { inS = true; cur += c; continue; }
     if (c === '"') { inD = true; cur += c; continue; }
     if (c === "`") { inBt = true; cur += c; continue; }
-    if (c === "$" && cmd[i + 1] === "(") { depth++; cur += c; continue; }
+    // NB: do NOT count depth here for `$(`: the `(` branch below counts
+    // it once. Counting twice left depth > 0 forever, so every later
+    // `;`/`&`/`|` was treated as nested and segments never split
+    // (which is also why a `VAR=$(which git); $VAR ...` line used to
+    // parse as a single segment).
+    if (c === "$" && cmd[i + 1] === "(") { cur += c; continue; }
     if (c === "(") { depth++; cur += c; continue; }
     if (c === ")") { if (depth > 0) depth--; cur += c; continue; }
     if (depth === 0 && (c === ";" || c === "&" || c === "|")) {

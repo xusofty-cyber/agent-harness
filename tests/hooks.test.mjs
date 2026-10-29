@@ -510,7 +510,45 @@ test("malformed stdin is fail-open but logs the parse failure", () => {
   assert.match(res.stderr || "", /parse failed/i);
 });
 
-test("warns on inline git alias", () => {
+test("denies inline git alias", () => {
+  // P1-2: previously warn-only; an alias definition hides the real
+  // subcommand, so a -c alias.p=push + p --force line must deny.
   const r = runHook("git -c alias.p=push p --force origin main");
-  assert.match(r.stderr, /alias/i);
+  assert.equal(r.exitCode, 2);
+  assert.match(r.stdout, /alias/i);
 });
+
+// --- P1-2 guard bypass closures (each was ALLOW before the fix) ---
+for (const cmd of [
+  "sudo -u root git push --force origin main",
+  "env -i git push --force origin main",
+  "timeout 5 git push --force origin main",
+  "nice git push --force origin main",
+  "nice -n 5 git push --force origin main",
+  "git -c alias.p=push p origin main",
+  "G=$(which git); $G push --force origin main",
+  "$(echo $(which git)) push --force origin main",
+  "x=\"git push --force origin main\"; eval $x",
+  "xargs git push --force origin main",
+  "find . -exec git push --force origin main \\;",
+]) {
+  test(`denies guard bypass: ${cmd}`, () => {
+    const r = runHook(cmd);
+    assert.equal(r.exitCode, 2, `expected deny for: ${cmd}\n${r.stdout}\n${r.stderr}`);
+  });
+}
+
+// And the harmless forms must stay allowed.
+for (const cmd of [
+  "git push origin main",
+  "echo $(git rev-parse HEAD)",
+  "git rev-parse HEAD",
+  "x=$(which git)",
+  "sudo -l",
+  "command -v git",
+]) {
+  test(`still allows harmless: ${cmd}`, () => {
+    const r = runHook(cmd);
+    assert.equal(r.exitCode, 0, `expected allow for: ${cmd}\n${r.stdout}\n${r.stderr}`);
+  });
+}
