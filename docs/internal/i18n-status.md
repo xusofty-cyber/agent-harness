@@ -31,7 +31,7 @@ behind is tracked debt, not a CI failure.
 
 | Target | Source | Status | Source SHA (last synced) | Note |
 |---|---|---|---|---|
-| README.zh-tw.md | README.md | in-sync | 2432c5e99ca3 | Regenerated from EN (base main e9b32ab) |
+| README.zh-tw.md | README.md | in-sync | 3446767a288d | Regenerated from EN (B2 paragraph + eval tree + enforcement bullet synced) |
 | docs/guides/Multi-Tool Deployment and Configuration Guide.zh-tw.md | docs/guides/Multi-Tool Deployment and Configuration Guide.md | in-sync | b99ed7e36870 | Regenerated from EN (base main e9b32ab) |
 | docs/guides/Tools Practical Usage and Skills Panorama Guide.zh-tw.md | docs/guides/Tools Practical Usage and Skills Panorama Guide.md | in-sync | 00305df7d61e | Regenerated from EN (base main e9b32ab); MD012 extra blank line fixed; §2.3 pinned versions match EN |
 | docs/guides/Skills Usage Guide.zh-tw.md | docs/guides/Skills Usage Guide.md | in-sync | d1297c2d3797 | Regenerated from EN (base main e9b32ab) |

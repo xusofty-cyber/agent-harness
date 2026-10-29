@@ -87,9 +87,9 @@ graph TD
 
 ### 目前狀態（v0.3.0）——在依賴閘門之前請先閱讀
 
-- **強制執行取決於宿主。** Claude Code 鉤子會在用戶端中強制執行閘門（見上表）。Antigravity 鉤子與 dsh 閘門外掛雖已部署，但其真機強制執行均未驗證（見上表）。在其他所有宿主上，閘門是一套紀律外加一道人工命令：請自行執行 `python3 gate/pass-gate.py verify` 與 `python3 gate/pass-gate.py check-clean`。與宿主無關的後備措施是 CI，它會重新執行每個 `passing` 項目的驗證命令（`tests/repo_checks.py` §3k）。已知繞過方式詳見 [`gate/README.md`](gate/README.md)，包括透過 Bash 直接編輯，以及純文字的成本帳本。
+- **強制執行取決於宿主。** Claude Code 鉤子會在用戶端中強制執行閘門（見上表）。Antigravity 鉤子、WorkBuddy 閘門鉤子與 dsh 閘門外掛雖已部署，但其真機強制執行均未驗證（見上表）。在其他所有宿主上，閘門是一套紀律外加一道人工命令：請自行執行 `python3 gate/pass-gate.py verify` 與 `python3 gate/pass-gate.py check-clean`。與宿主無關的後備措施是 CI，它會重新執行每個 `passing` 項目的驗證命令（`tests/repo_checks.py` §3k）。已知繞過方式詳見 [`gate/README.md`](gate/README.md)，包括透過 Bash 直接編輯，以及純文字的成本帳本。
 - **基準聲明，如實陳述。** 預先註冊的 B1 回合（t1–t8 × bare/pack/gate × 3 回合＝72 次執行）72/72 通過，每個組別皆為 0 次錯誤完成，因此依其預先註冊的規則，結果為 NO DISCRIMINATION。本版本不聲稱閘門能減少錯誤完成；唯一的攔截證據是 Phase 1 的 dogfood（一個被鉤子與 CI 攔下的植入式假通過）。
-- **B2 更難的基準，已預先註冊但尚未執行。** `eval/results/b2-preregistration-2026-10-29.md` 註冊了 t9–t12（多檔案＋文件同步、隱藏邊界案例、斷點續跑、含決策記錄優先的模糊需求）× bare/pack/gate × 3 回合＝36 次執行，沿用 B1 的決策規則：只有當 gate 比 bare 少至少 2 次錯誤完成時才算 DISCRIMINATION，而全零組別同樣意味著 NO DISCRIMINATION，而非成功。目前尚無 B2 執行；任務與其參照解答已驗證（設定＋解答＋驗收），但尚未量測任何組別。
+- **B2 更難的基準，已執行並記錄。** `eval/results/b2-2026-10-29.md` 記錄了預先註冊的 t9–t12 回合（多檔案＋文件同步、隱藏邊界案例、斷點續跑、含決策記錄優先的模糊需求）× bare/pack/gate × 3 回合＝36 次執行，沿用 B1 的決策規則：36/36 通過、每個組別皆為 0 次錯誤完成（bare 12/12、pack 12/12、gate 12/12），因此依預先註冊的規則，結果為 NO DISCRIMINATION，與 B1 結論相同，而非成功。本版本不聲稱閘門能減少錯誤完成。
 - **與宿主無關的第二道閘門（pre-push＋CI 範本）。** `templates/pre-push-gate/`（鉤子範本、檢查器、可選安裝器）與 `templates/ci-gate-check.yml` 為沒有執行期鉤子的專案提供一道不依賴任何宿主的閘門：檢查器會重新執行每個 `passing` 項目的驗證，並拒絕過時的證據，呼應 §3k。安裝方式有兩種：執行安裝器（明確選擇加入），或使用部署指令碼，部署指令碼目前預設會安裝這三個檔案（以 `--no-prepush-gate` / `-NoPrepushGate` 停用；保留 `--prepush-gate` / `-PrepushGate` 以相容），並遵循慣常的「已存在則跳過／更新時備份」規則。指南中所述的限制：pre-push 鉤子檢查的是工作樹，而不是被推送的提交，而 `git push --no-verify` 可以繞過它——請搭配 CI 範本與伺服器端分支保護。
 - **評估器僅供建議（D28）。** `eval/rubric.md` 評分六個維度，但 `evaluate.py --gate` 永遠拒絕，最終由人類決定。評分表的五輪校準使用的是記錄下來的階段結果，而非即時的第二位評判。
 - **翻譯。** EN 與 ZH 是事實來源。ZH-TW 各列依 `docs/internal/i18n-status.md` 為 stale/frozen；在下一次發行前請從 EN 重新生成，不要逐句手工同步。
@@ -126,7 +126,7 @@ agent-harness/
 │   ├── loop.py                      # Goal Loop／Maker-Checker 執行器（僅 standard/full 設定檔）
 │   ├── sync-skills.py               # 外部技能同步與上游更新檢查
 │   └── doc-impact.py                # 活文件影響分析與品質閘門
-├── eval/                            # 自建基準（t1–t8）＋評分表（僅供建議）
+├── eval/                            # 自建基準（t1–t12）＋評分表（僅供建議）
 ├── templates/
 │   └── agents/                      # 標準規則範本（Global／Project／Directory × en／zh／zh-tw）
 ├── run-pipeline.ps1                 # Windows PowerShell 統一流水線執行器
