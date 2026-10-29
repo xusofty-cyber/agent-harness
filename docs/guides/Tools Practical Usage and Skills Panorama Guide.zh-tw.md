@@ -1,38 +1,39 @@
 # AI 工具與技能全景實戰指南（Claude Code / Codex / Antigravity IDE / Zed IDE）
 
-> **Language / 語言**: [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [简体中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | **繁體中文**
+> **Language / 語言**: [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [簡體中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | **繁體中文**
 
 本指南為使用 AI 代理進行軟體工程與技術文件撰寫提供全面的手冊：**應安裝哪些 skills 和 Harness 工具、底層的 token 經濟學、工具配置與接線、何時以及如何呼叫核心斜線命令（例如 `/comet`、`/plan`、`/opsx`、`codegraph`），以及端到端的實戰演練。**
+
 
 ---
 
 ## 目錄
 
-1. [Core Architecture & Tool Matrix (Who Manages What)](#1-核心架構與工具矩陣誰負責什麼)
-2. [Skills & Ecosystem Tools Inventory](#2-skills-與生態系工具盤點)
-   - 2.1 40 Integrated Native Skills Categorized
-   - 2.2 Version Locking, Online Updates & Skill Sync (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
-   - 2.3 Optional Harness CLI Tools
-   - 2.4 Token Economics of Skills (Why 40+ Skills Do NOT Blow Up Context)
-   - 2.5 Engineering Skills & Rules Dispatching Matrix
-3. [Deep Dive into Core Harness Tools & Slash Commands](#3-核心-harness-工具與斜線命令深度解析)
-   - 3.1 Comet: Versioned Workflow Entry Point
-   - 3.2 OpenSpec: Spec-Driven Development (`/opsx:propose`, `/opsx:apply`, etc.)
-   - 3.3 Superpowers: TDD, Systematic Debugging & Verification Gate
-   - 3.4 CodeGraph: Optional MCP Code-Graph Integration
-   - 3.5 Ponytail: Minimal Implementation Ladder (Generation Gate)
-   - 3.6 Caveman: Ultra-Compressed Output (Communication Gate)
-   - 3.7 RTK: Output Truncation & Log Shielding (Execution Gate)
-   - 3.8 Git Authorization Model & Protected Branch Workflow
-   - 3.9 3-Step Session Ceremony & Dynamic Memory Loop
-   - 3.10 8 High-Risk Operations Protection Matrix
-4. [Platform-Specific Native Commands & Best Practices](#4-平台特定的原生命令與最佳實踐)
-   - 4.1 Google Antigravity IDE
-   - 4.2 Claude Code & PreToolUse Hooks
-   - 4.3 OpenAI Codex / GitHub Copilot
+1. [核心架構與工具矩陣（誰負責什麼）](#1-核心架構與工具矩陣誰負責什麼)
+2. [Skills 與生態系工具盤點](#2-skills-與生態系工具盤點)
+   - 2.1 40 個內建原生 Skills 分類
+   - 2.2 版本鎖定、線上更新與 Skill 同步（`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`）
+   - 2.3 可選的 Harness CLI 工具
+   - 2.4 Skill 載入與可選 CLI 設定
+   - 2.5 工程 Skills 與規則分派矩陣
+3. [核心 Harness 工具與斜線命令深度解析](#3-核心-harness-工具與斜線命令深度解析)
+   - 3.1 Comet：版本化工作流程進入點
+   - 3.2 OpenSpec：規格驅動開發（`/opsx:propose`、`/opsx:apply` 等）
+   - 3.3 Superpowers：TDD、系統化除錯與驗證閘門
+   - 3.4 CodeGraph：可選的 MCP 程式碼圖整合
+   - 3.5 Ponytail：最小實作階梯（生成閘門）
+   - 3.6 Caveman：極致壓縮輸出（溝通閘門）
+   - 3.7 RTK：輸出截斷與日誌遮蔽（執行閘門）
+   - 3.8 Git 授權模型與受保護分支工作流程
+   - 3.9 專案記憶與工作階段檢查點（`PROJECT_CONTEXT.md` / `SESSION_STATE.md`）
+   - 3.10 8 項高風險操作保護矩陣
+4. [平台特定的原生命令與最佳實踐](#4-平台特定的原生命令與最佳實踐)
+   - 4.1 Google Antigravity CLI 與 IDE
+   - 4.2 Claude Code 與 PreToolUse 用戶端 Hook
+   - 4.3 ChatGPT 中的 Codex、Codex CLI 與 GitHub Copilot
    - 4.4 Zed IDE
-5. [End-to-End Practical Walkthrough (Real-World Feature Development)](#5-端到端實戰演練真實功能開發)
-6. [Daily Health Checks & Troubleshooting](#6-每日健康檢查與故障排除)
+5. [端到端實戰演練（真實功能開發）](#5-端到端實戰演練真實功能開發)
+6. [每日健康檢查與故障排除](#6-每日健康檢查與故障排除)
 
 ---
 
@@ -68,24 +69,24 @@
 
 | 元件 | 核心責任 | 解決的痛點 | 介面 |
 |---|---|---|---|
-| **Comet** | Versioned Native/Classic workflows | Resumable, verifiable task workflows | Follow installed version and `.comet/config.yaml` |
-| **OpenSpec** | Spec-Driven Development (SDD) | Requirement amnesia, untracked delta changes | `/opsx:propose`, `docs/openspec/` live docs |
-| **Superpowers** | TDD & Verification evidence gate | Hallucinated task completion, missing physical proof | Red test $\rightarrow$ Green test $\rightarrow$ Verification report |
-| **CodeGraph** | Optional semantic code-search integration | Requires CLI, agent MCP wiring, and a project index | Query through configured CodeGraph MCP tools |
-| **Ponytail** | Minimal-implementation guidance Skill | Unneeded dependencies and abstractions | Guidance only when the host loads the Skill |
-| **Caveman** | Concise-communication guidance Skill | Overlong responses | Style guidance when loaded; preserve clarity and safety details |
-| **RTK** | Optional Rust Token Killer CLI | Verbose terminal output | Requires CLI installation and a supported agent hook |
-| **Git Auth** | Protected branch guidance plus limited client hook checks | Preventing accidental shared-branch operations | Rules, Claude Code client hook, and server-side branch protection |
+| **Comet** | 版本化的 Native/Classic 工作流程 | 可續跑、可驗證的任務工作流程 | 遵循已安裝版本與 `.comet/config.yaml` |
+| **OpenSpec** | 規格驅動開發（SDD） | 需求失憶、未追蹤的增量變更 | `/opsx:propose`、`docs/openspec/` 活文件 |
+| **Superpowers** | TDD 與驗證證據閘門 | 幻覺式任務完成、缺少實體證明 | 紅色測試 $\rightarrow$ 綠色測試 $\rightarrow$ 驗證報告 |
+| **CodeGraph** | 可選的語義程式碼搜尋整合 | 需要 CLI、agent MCP 接線與專案索引 | 透過已配置的 CodeGraph MCP 工具查詢 |
+| **Ponytail** | 最小實作指引 Skill | 不必要的依賴與抽象 | 僅在宿主載入該 Skill 時提供指引 |
+| **Caveman** | 精簡溝通指引 Skill | 過長的回應 | 載入時提供風格指引；保留清晰度與安全細節 |
+| **RTK** | 可選的 Rust Token Killer CLI | 冗長的終端機輸出 | 需要安裝 CLI 與支援的 agent hook |
+| **Git Auth** | 受保護分支指引外加有限的用戶端鉤子檢查 | 防止意外的共享分支操作 | 規則、Claude Code 用戶端鉤子與伺服器端分支保護 |
 
 ### 各程式設計工具的規則與記憶範圍
 
 | 工具/介面 | 指示進入點 | 記憶範圍 |
 |---|---|---|
-| Codex desktop app | Project `AGENTS.md`; ai-memory can use the local Codex integration where the installed app exposes configured MCP/hooks | Verify the exact desktop version; ChatGPT web conversation memory is separate |
-| Codex CLI | Codex home and `AGENTS.md` files from repository root through the current directory; ai-memory upstream installer supports MCP/hooks | Project context/checkpoint files remain repository-managed |
-| Claude Code | User/project/directory `CLAUDE.md` or supported `AGENTS.md` | Optional Auto memory is machine-local and Claude-specific; `/memory` opens its controls |
-| Antigravity CLI | Global, workspace, and directory `AGENTS.md` / `.agents/rules/*.md`; ai-memory upstream supports MCP/hooks | Run setup in the same environment as the CLI |
-| Antigravity IDE | Project Markdown rules/skills plus a manually configured ai-memory MCP server | MCP provides explicit retrieval/write tools; no automatic lifecycle capture is claimed |
+| Codex desktop app | 專案 `AGENTS.md`；在已安裝應用程式暴露已配置 MCP/hooks 的地方，ai-memory 可以使用本地 Codex 整合 | 驗證確切的桌面版版本；ChatGPT 網頁版對話記憶是獨立的 |
+| Codex CLI | Codex 家目錄，以及從倉庫根目錄到目前目錄的 `AGENTS.md` 檔案；ai-memory 上游安裝器支援 MCP/hooks | 專案上下文／檢查點檔案仍由倉庫管理 |
+| Claude Code | 使用者／專案／目錄 `CLAUDE.md` 或支援的 `AGENTS.md` | 可選的 Auto memory 僅限本機且為 Claude 專屬；`/memory` 開啟其控制項 |
+| Antigravity CLI | 全域、工作區與目錄 `AGENTS.md` / `.agents/rules/*.md`；ai-memory 上游支援 MCP/hooks | 在與 CLI 相同的環境中執行設定 |
+| Antigravity IDE | 專案 Markdown 規則／技能，外加手動配置的 ai-memory MCP 伺服器 | MCP 提供明確的檢索／寫入工具；不宣稱會自動擷取生命週期 |
 
 部署腳本負責寫入路徑；在假設檔案已被取用之前，請先查閱各宿主的最新文件和已載入的上下文。
 
@@ -164,10 +165,10 @@
    - 區分本地撰寫的核心 skills（`sourceType: local`）與外部上游 skills（`sourceType: github`）。
 2. **外部 Skill 上游同步（`tools/sync-skills.py`）**：
    - 內建的外部 vendored skills 更新器；
-   - **Check mode**: `python3 tools/sync-skills.py --check` (read-only, compares local and upstream `SKILL.md` hashes, reports 🟢 in-sync / 🟡 outdated);
-   - **Apply mode**: `python3 tools/sync-skills.py --apply` (updates outdated `SKILL.md` files in-place and refreshes lock hashes; locally-authored skills are strictly protected);
-   - Interactive terminal UI powered by `tools/tui.py` when invoked without arguments;
-   - Supports `--skill <name>` for targeted updates and `--json` for automation.
+   - **檢查模式**：`python3 tools/sync-skills.py --check`（唯讀，比較本地與上游 `SKILL.md` 的雜湊，回報 🟢 已同步／🟡 已過時）；
+   - **套用模式**：`python3 tools/sync-skills.py --apply`（就地更新過時的 `SKILL.md` 檔案並重新整理鎖定雜湊；本地撰寫的 skills 受到嚴格保護）；
+   - 不帶參數呼叫時，由 `tools/tui.py` 驅動互動式終端機 UI；
+   - 支援 `--skill <name>` 進行針對性更新，以及 `--json` 供自動化使用。
 3. **活文件影響分析（`tools/doc-impact.py`）**：
    - 依據活文件追溯中繼資料分析程式碼變更（`docs/{specs,architecture,reference,guides,adr}/`）；
    - 支援工作樹檢查、提交基準線（`--since`）、明確檔案清單和互動式精靈模式（`--interactive`）。
@@ -176,8 +177,8 @@
    - 互動式精靈：`./run-pipeline.sh`（Linux/macOS）或 `.\run-pipeline.ps1`（Windows）；
    - 無人值守自動化：`./run-pipeline.sh --all -y` 或 `.\run-pipeline.ps1 -All -Yes`。
 5. **終端互動式 TUI 元件（`tools/tui.py`）**：
-   - 提供鍵盤驅動的單選（方向鍵 + Enter）和多選（方向鍵 + 空白鍵核取方塊切換 + Enter 確認）互動式選單；
-   - 內建 TTY 和 ANSI 相容性偵測，在非互動式或非 ANSI 管道中優雅地退回為編號文字提示，作為所有部署和維護工具的基礎。
+   - 提供鍵盤驅動的單選（方向鍵＋Enter）與多選（方向鍵＋空白鍵核取方塊切換＋Enter 確認）互動式選單；
+   - 內建 TTY 與 ANSI 相容性偵測，在非互動式或非 ANSI 管道中優雅地退回為編號文字提示，作為所有部署與維護工具的基礎。
 6. **整合式線上更新流程**：
    ```powershell
    # Windows
@@ -193,10 +194,22 @@
 ### 2.3 可選的 Harness CLI 工具
 
 Skill 的可用性取決於宿主工具及其配置。終端層級的 CLI 工具為可選：
-- **Comet CLI**：透過 `npm install -g @rpamis/comet` 安裝；提供 native/classic 工作流程執行和 `--comet-init` 初始化。
-- **CodeGraph CLI**: macOS/Linux: `curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.sh | sh`; Windows PowerShell: `irm https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.ps1 | iex`. Run `codegraph install` to wire agents and `codegraph init` in the project.
-- **RTK (Rust Token Killer) CLI**: macOS/Linux: `curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh`; Windows: `winget install rtk-ai.rtk`. Verify with `rtk gain`. Run `rtk init` in the project to configure agent hooks.
-- **Open Code Review (OCR) CLI**：透過 `npm install -g @alibaba-group/open-code-review` 安裝；透過 `open-code-review` skill 啟用 Tier A 零 LLM 成本委派審查。
+- **Comet CLI**：透過 `npm install -g @rpamis/comet@0.5.1` 安裝（2026-10-28 釘選；必須與 `skills-lock.json` 的 `comet.npmVersion` 相符）；提供 native/classic 工作流程執行與 `--comet-init` 初始化。
+- **CodeGraph CLI**：絕不要把安裝器用管線傳給 shell。macOS/Linux——下載 `skills-lock.json` 中釘選的安裝器（`codegraph.installerUrl`），驗證其 SHA256 後再執行：
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/01e0ac3aa7419a7ab75583963e8a95359f3af1d3/install.sh -o /tmp/codegraph-install.sh
+  echo "e8bbcc694584d5c88fa7c25103fc0f9c238d63a86c1494ca03448b680dbcc86e  /tmp/codegraph-install.sh" | sha256sum -c -
+  sh /tmp/codegraph-install.sh
+  ```
+  或執行 `npm install -g @colbymchenry/codegraph@1.6.2`。Windows PowerShell——下載釘選的 `install.ps1`（`codegraph.installerUrlPs1`），驗證其 SHA256（`024091f428cac6eaa217bae8f840a9572a91daab974a8354085ba72f86f6aee1`）後再執行，或使用相同版本號的 npm 安裝。執行 `codegraph install` 接線 agent，並在專案中執行 `codegraph init`。
+- **RTK (Rust Token Killer) CLI**：絕不要把安裝器用管線傳給 shell。macOS/Linux——下載 `skills-lock.json` 中釘選的安裝器（`rtk.installerUrl`），驗證其 SHA256 後再執行：
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/7e92da00a5cf737dc87850505aa3dea603454613/install.sh -o /tmp/rtk-install.sh
+  echo "7ca3997314f631b8ad267e5add9af4b7a2f0351bdab0b1c5a9b7ed4008d0434a  /tmp/rtk-install.sh" | sha256sum -c -
+  sh /tmp/rtk-install.sh
+  ```
+  Windows：`winget install rtk-ai.rtk`（winget 沒有版本釘選——已知缺口，D13）。使用 `rtk gain` 驗證。在專案中執行 `rtk init` 以設定 agent hooks。
+- **Open Code Review (OCR) CLI**：透過 `npm install -g @alibaba-group/open-code-review@1.13.3` 安裝（2026-10-28 釘選；必須與 `skills-lock.json` 的 `open-code-review.npmVersion` 相符）；透過 `open-code-review` skill 啟用 Tier A 零 LLM 成本委派審查。
 
 部署腳本在初始設定期間會自動偵測這些可選的 CLI，並在適當時機引導安裝。
 
@@ -212,19 +225,19 @@ Skill 的探索與上下文成本取決於宿主代理及其配置。僅有檔�
 
 | 場景 | 規則 / Skill | 觸發條件 / 關鍵字 | 預期行為 |
 |---|---|---|---|
-| **Branching / Commit / Push** | [`git-workflow.md`](../../.agents/rules/git-workflow.md) | `git commit` / `git push` | Commit only on temp branches; no `git add .`; human authorization required for remote push |
-| **High-Risk Operations** | [`security-boundary.md`](../../.agents/rules/security-boundary.md) | Modifying build configs, protocols, public structs | Pause and confirm impact with human |
-| **Complex Requirements** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `comet` / `openspec` | `/comet` or "use openspec" | Propose change under `docs/openspec/changes/`; wait for confirmation |
-| **Symbol Discovery** | [`token-discipline.md`](../../.agents/rules/token-discipline.md) + optional `codegraph` | CodeGraph MCP when configured; otherwise scoped `rg` | Do not assume CodeGraph is installed or available |
-| **Feature Implementation** | `ponytail` + `test-driven-development` | Consult loaded Skills as appropriate | Understand current code, then choose the smallest correct implementation and suitable validation |
-| **Bug Investigation** | `systematic-debugging` | Error trace pasted | Gather evidence $\rightarrow$ form hypothesis $\rightarrow$ minimal repro $\rightarrow$ fix |
-| **Long Terminal Output** | optional `rtk` | Only when installed and its agent hook is configured | Otherwise use native concise flags; keep required validation and preserve relevant logs |
-| **Token Conservation** | `caveman` | Only when the host loads the Skill or plugin | Be concise while preserving necessary context, technical accuracy, and safety details |
-| **Document Processing** | `docx` / `pdf` | Mentions `.docx` or `.pdf` | Professional formatting without running code test suites |
-| **Living Docs & Traceability** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `living-documentation` | `/living-documentation` / sync trace docs | Maintain 4-tier docs (specs/architecture/reference/guides) via L0/L1/L2 impact thresholds and frontmatter traceability |
-| **Phase Gate Docs / Templates** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `engineering-docs` | `/engineering-docs` / SRS/HLD/spec requests | Standardize AI agent outputs across phases using 15 bilingual phase-gate templates, connecting Comet artifacts with living documentation |
-| **Code Review & Quality Gate** | `open-code-review` + `requesting-code-review` | Before merge or after task completion | Rule-first, line-anchored, coverage-mandated; Tier A delegation if `ocr` CLI exists, otherwise Tier B methodology |
-| **Task Completion** | `verification-before-completion` | End of task | Present physical command execution evidence |
+| **分支／提交／推送** | [`git-workflow.md`](../../.agents/rules/git-workflow.md) | `git commit` / `git push` | 僅在臨時分支上提交；不得 `git add .`；遠端推送需要人工授權 |
+| **高風險操作** | [`security-boundary.md`](../../.agents/rules/security-boundary.md) | 修改建置配置、協定、公開結構 | 暫停並與人工確認影響 |
+| **複雜需求** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `comet` / `openspec` | `/comet` 或 "use openspec" | 在 `docs/openspec/changes/` 下提出變更；等待確認 |
+| **符號探索** | [`token-discipline.md`](../../.agents/rules/token-discipline.md) + 可選的 `codegraph` | 已配置時的 CodeGraph MCP；否則使用限定範圍的 `rg` | 不要假設已安裝或可用 CodeGraph |
+| **功能實作** | `ponytail` + `test-driven-development` | 視情況諮詢已載入的 Skills | 理解現有程式碼，然後選擇最小的正確實作與適當的驗證 |
+| **Bug 調查** | `systematic-debugging` | 貼上錯誤追蹤 | 收集證據 $\rightarrow$ 形成假設 $\rightarrow$ 最小重現 $\rightarrow$ 修復 |
+| **冗長終端機輸出** | 可選的 `rtk` | 僅在已安裝且其 agent hook 已配置時 | 否則使用原生的簡潔旗標；保留必要的驗證並保存相關日誌 |
+| **Token 節省** | `caveman` | 僅在宿主載入該 Skill 或外掛時 | 保持簡潔，同時保留必要的上下文、技術準確性與安全細節 |
+| **文件處理** | `docx` / `pdf` | 提及 `.docx` 或 `.pdf` | 專業排版，不執行程式碼測試套件 |
+| **活文件與可追溯性** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `living-documentation` | `/living-documentation`／同步追溯文件 | 透過 L0/L1/L2 影響閾值與 frontmatter 可追溯性，維護四層文件（specs/architecture/reference/guides） |
+| **階段閘門文件／範本** | [`engineering-spec.md`](../../.agents/rules/engineering-spec.md) + `engineering-docs` | `/engineering-docs`／SRS/HLD/spec 請求 | 以 15 個雙語階段閘門範本統一各階段 AI agent 的輸出，並將 Comet 產物與活文件連結 |
+| **程式碼審查與品質閘門** | `open-code-review` + `requesting-code-review` | 合併前或任務完成後 | 規則優先、行級錨定、覆蓋率強制；若存在 `ocr` CLI 則採 Tier A 委派，否則採 Tier B 方法 |
+| **任務完成** | `verification-before-completion` | 任務結束時 | 出示實際命令執行證據 |
 
 ---
 
@@ -244,11 +257,11 @@ Comet 是獨立版本化的工作流程工具。請查看專案的 `.comet/confi
 
 ### 3.2 OpenSpec：規格驅動開發
 
-- `/opsx:propose <name>`: Proposes new change under `docs/openspec/changes/`;
-- `/opsx:apply`: Implements approved change;
-- `/opsx:verify`: Compares actual implementation with delta specification;
-- `/opsx:sync`: Syncs delta specifications into main docs;
-- `/opsx:archive`: Moves finished change to `docs/openspec/changes/archive/`.
+- `/opsx:propose <name>`：在 `docs/openspec/changes/` 下提出新的變更；
+- `/opsx:apply`：實作已核准的變更；
+- `/opsx:verify`：將實際實作與增量規格比較；
+- `/opsx:sync`：將增量規格同步到主文件；
+- `/opsx:archive`：將已完成的變更移至 `docs/openspec/changes/archive/`。
 
 ---
 
@@ -272,11 +285,11 @@ Comet 是獨立版本化的工作流程工具。請查看專案的 `.comet/confi
 ### 3.4 CodeGraph：可選的 MCP 程式碼圖整合
 
 ```bash
-# Explore call chains and architecture
-Query the CodeGraph MCP tool configured for the current agent: “User authentication and JWT token flow”.
+# 探索呼叫鏈與架構
+向為目前 agent 設定的 CodeGraph MCP 工具查詢：「使用者驗證與 JWT token 流程」。
 
-# Find definitions and all call references
-Query the configured CodeGraph MCP tool for `OrderService::calculateDiscount`.
+# 尋找定義與全部呼叫參照
+向已設定的 CodeGraph MCP 工具查詢 `OrderService::calculateDiscount`。
 ```
 
 ---
@@ -329,66 +342,66 @@ Query the configured CodeGraph MCP tool for `OrderService::calculateDiscount`.
 ### 3.9 專案記憶與工作階段檢查點（`PROJECT_CONTEXT.md` / `SESSION_STATE.md`）
 
 將記憶視為可驗證的摘要和導航輔助，而非程式碼或維護中文件的替代品：
-1. **Task start:** Read `PROJECT_CONTEXT.md` (verified durable project facts) and `SESSION_STATE.md` (current checkpoint) only when present and relevant; verify branch, configuration, and implementation facts that affect the task.
-2. **During work:** Keep plans when useful for multi-step work. Do not add automatic capture of prompts, tool inputs/outputs, source files, or terminal commands.
-3. **Meaningful closeout:** Update `SESSION_STATE.md` with completed work, actual verification evidence, remaining steps, and still-relevant risks; remove stale items. Update `PROJECT_CONTEXT.md` only when durable architecture, constraints, or confirmed decisions change. No-op sessions need no empty update.
-4. **Sources and conflicts:** Label uncertainty and date/source facts likely to change. Current user instructions and current code/configuration/reproducible evidence take precedence over memory summaries.
-5. **Privacy:** Do not record credentials, private keys, raw personal data, full conversation/tool logs, or unnecessary personal information. Shared global templates must not contain private user preferences.
-6. **Directory scope:** A directory `AGENTS.md` contains only local boundaries and constraints. Do not create directory memory files by default; keep project facts and checkpoints in their root files.
+1. **任務開始：** 僅在存在且相關時，才讀取 `PROJECT_CONTEXT.md`（已驗證的持久專案事實）與 `SESSION_STATE.md`（目前檢查點）；驗證影響任務的分支、配置與實作事實。
+2. **工作期間：** 在多步驟工作需要時保留計畫。不要自動擷取提示、工具輸入／輸出、原始檔或終端機命令。
+3. **有意義的收尾：** 以已完成的工作、實際驗證證據、剩餘步驟與仍相關的風險更新 `SESSION_STATE.md`；移除過時項目。僅在持久架構、約束或已確認決策變更時才更新 `PROJECT_CONTEXT.md`。無實質變更的工作階段不需要空更新。
+4. **來源與衝突：** 標註不確定性，以及可能變更的日期／來源事實。目前的使用者指示與目前的程式碼／配置／可重現證據優先於記憶摘要。
+5. **隱私：** 不要記錄憑證、私鑰、原始個人資料、完整對話／工具日誌或不必要的個人資訊。共享的全域範本絕不能包含私人使用者偏好。
+6. **目錄範圍：** 目錄 `AGENTS.md` 只包含本地邊界與約束。預設不要建立目錄記憶檔案；專案事實與檢查點保留在其根目錄檔案中。
 
-**Claude Code native Auto memory** is a separate machine-local project memory that can be inspected, edited, or deleted with `/memory`. It is not shared across tools or machines and does not replace the project files above. Claude Code manages this feature; this repository's deployer does not enable, disable, or capture it. See the [Claude Code memory docs](https://code.claude.com/docs/en/memory).
+**Claude Code 原生 Auto memory** 是獨立的本機專案記憶，可以用 `/memory` 檢視、編輯或刪除。它不跨工具或機器共享，也不能取代上述專案檔案。Claude Code 負責管理此功能；本倉庫的部署器不會啟用、停用或擷取它。詳見 [Claude Code memory 文件](https://code.claude.com/docs/en/memory)。
 
-#### Optional cross-agent memory: ai-memory
+#### 可選的跨 agent 記憶：ai-memory
 
-This repository selects only [ai-memory](https://github.com/akitaonrails/ai-memory) as an optional cross-agent backend. Its local Markdown and full-text search path uses no LLM, embedding provider, or API key. The repository does not install or start it automatically.
+本倉庫僅選擇 [ai-memory](https://github.com/akitaonrails/ai-memory) 作為可選的跨 agent 後端。它的本地 Markdown 與全文檢索路徑不使用 LLM、embedding 提供者或 API 金鑰。本倉庫不會自動安裝或啟動它。
 
-To opt in one repository, copy `.ai-memory.toml.example` to the ignored `.ai-memory.toml`, replace the workspace/project names, then run `setup-ai-memory.ps1 -Agent <claude-code|codex|antigravity-cli>` or `./setup-ai-memory.sh <claude-code|codex|antigravity-cli>`. The helper requires an existing ai-memory install and delegates configuration to its upstream merge-aware commands. Review the hook capability output; allowlist mode is effective only for hooks that enforce native capture policy.
+若要讓一個倉庫選擇加入，請將 `.ai-memory.toml.example` 複製為被忽略的 `.ai-memory.toml`，取代 workspace/project 名稱，然後執行 `setup-ai-memory.ps1 -Agent <claude-code|codex|antigravity-cli>` 或 `./setup-ai-memory.sh <claude-code|codex|antigravity-cli>`。輔助工具需要現有的 ai-memory 安裝，並將配置委派給其上游合併式命令。請檢視鉤子能力輸出；allowlist 模式僅對強制執行原生擷取政策的鉤子有效。
 
-The setup includes Claude Code and Codex CLI MCP/hooks, plus Antigravity CLI MCP/hooks. Codex desktop support depends on the installed desktop version exposing the local Codex integration; verify it in the app. Antigravity IDE is MCP-only: add `http://127.0.0.1:49374/mcp` as `serverUrl` through its MCP settings or the documented config file. For Docker deployment, run `docker run -d --name ai-memory --restart unless-stopped -p 127.0.0.1:49374:49374 -v "${HOME}/env/ai-memory-data:/data" docker.io/akitaonrails/ai-memory:latest` (the container storage path is fixed to `/data`). ChatGPT web uses manual Markdown handoff in the free local setup.
+設定內容包括 Claude Code 與 Codex CLI 的 MCP/hooks，以及 Antigravity CLI 的 MCP/hooks。Codex 桌面版支援取決於已安裝的桌面版是否暴露本地 Codex 整合；請在應用程式中驗證。Antigravity IDE 僅支援 MCP：透過其 MCP 設定或記載的設定檔，將 `http://127.0.0.1:49374/mcp` 加入為 `serverUrl`。Docker 部署請執行 `docker run -d --name ai-memory --restart unless-stopped -p 127.0.0.1:49374:49374 -v "${HOME}/env/ai-memory-data:/data" docker.io/akitaonrails/ai-memory:latest`（容器儲存路徑固定為 `/data`）。ChatGPT 網頁版在免費本地設定中使用人工 Markdown 交接。
 
-Windows supports both WSL2 and native modes upstream. Install and configure ai-memory in the same environment that launches the agent; see the [Windows guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/windows.md). Path exclusions do not redact arbitrary prompt text. Back up with `ai-memory --data-dir <data-dir> backup --to <archive-path>`; uninstall removes integrations but not data. Stop the service and verify the configured data directory before intentionally deleting it. See the [marker reference](https://github.com/akitaonrails/ai-memory/blob/main/docs/marker-file.md) and [installation guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md) for platform paths and Docker commands.
+Windows 在上游同時支援 WSL2 與原生模式。請在啟動 agent 的同一個環境中安裝並設定 ai-memory；詳見 [Windows 指南](https://github.com/akitaonrails/ai-memory/blob/main/docs/windows.md)。路徑排除不會塗銷任意的提示文字。使用 `ai-memory --data-dir <data-dir> backup --to <archive-path>` 備份；解除安裝會移除整合但不刪除資料。在刻意刪除之前，請先停止服務並驗證設定的資料目錄。關於平台路徑與 Docker 命令，詳見 [marker 參照](https://github.com/akitaonrails/ai-memory/blob/main/docs/marker-file.md)與[安裝指南](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md)。
 
 ### 3.10 8 項高風險操作保護矩陣
 
 在以下操作前必須經過人工確認：
-- [ ] 1. Modifying build configs (`package.json`, `CMakeLists.txt`, `.pro`, `Cargo.toml`);
-- [ ] 2. Adding new third-party dependencies;
-- [ ] 3. Modifying global public data structures (`public_struct.h`, `types.ts`);
-- [ ] 4. Modifying core dispatch singletons or public service APIs;
-- [ ] 5. Changing wire protocols or serialization contracts (`protofile/`);
-- [ ] 6. Altering license, cryptography, or auth code;
-- [ ] 7. Modifying `.gitignore` or CI/CD pipelines;
-- [ ] 8. High-impact cross-module changes that affect shared contracts or require broad coordination (file count alone is not a risk trigger).
+- [ ] 1. 修改建置配置（`package.json`、`CMakeLists.txt`、`.pro`、`Cargo.toml`）；
+- [ ] 2. 新增第三方依賴；
+- [ ] 3. 修改全域公開資料結構（`public_struct.h`、`types.ts`）；
+- [ ] 4. 修改核心分派單例或公開服務 API；
+- [ ] 5. 變更線路協定或序列化契約（`protofile/`）；
+- [ ] 6. 變更授權、密碼學或驗證程式碼；
+- [ ] 7. 修改 `.gitignore` 或 CI/CD 流水線；
+- [ ] 8. 影響共享契約或需要廣泛協調的高影響跨模組變更（僅檔案數量本身不是風險觸發條件）。
 
 ---
 
 ## 4. 平台特定的原生命令與最佳實踐
 
 ### 4.1 Google Antigravity CLI 與 IDE
-- The CLI runs as `agy`; the desktop IDE is a separate surface. Both document file-based workspace/global rules, but CLI slash commands and IDE controls are surface-specific.
-- `/plan`: Structured task planning for $\ge 3$ steps;
-- `/goal`: Unattended autonomous loop until verified completion;
-- `/grill-me`: Interactive discovery interview when requirements are ambiguous;
-- `/learn`: Captures lessons learned into `tasks/lessons.md`;
-- `/schedule`: Background timers and recurring cron monitoring.
+- CLI 以 `agy` 執行；桌面版 IDE 是另一個介面。兩者都以檔案記載工作區／全域規則，但 CLI 斜線命令與 IDE 控制項各屬其介面。
+- `/plan`：$\ge 3$ 個步驟的結構化任務規劃；
+- `/goal`：直至驗證完成為止的無人值守自主迴圈；
+- `/grill-me`：需求不明確時的互動式探索訪談；
+- `/learn`：將經驗教訓記錄到 `tasks/lessons.md`；
+- `/schedule`：背景計時器與週期性 cron 監控。
 
 ### 4.2 Claude Code 與 PreToolUse 用戶端 Hook
-- `/compact`: Compresses conversation history when token count is high;
-- `/cost`: Real-time session token usage;
-- `/review`: Reviews working copy diffs;
-- `@<path>`: Dynamically loads specific rules on demand.
-- **Security hook**: `.claude/settings.json` runs Claude Code client-side checks for matching tool calls. It can reject selected patterns or warn; it is not an operating-system control or memory collector.
+- `/compact`：token 數量偏高時壓縮對話歷史；
+- `/cost`：即時的工作階段 token 用量；
+- `/review`：審查工作副本的 diff；
+- `@<path>`：按需動態載入特定規則。
+- **安全鉤子**：`.claude/settings.json` 會對相符的工具呼叫執行 Claude Code 用戶端檢查。它可以拒絕選定的模式或發出警告；它不是作業系統控制項，也不是記憶收集器。
 
 ### 4.3 ChatGPT 中的 Codex、Codex CLI 與 GitHub Copilot
-- Codex CLI documents `AGENTS.md` discovery from Codex home and the repository path to the current directory. Do not infer that exact behavior for ChatGPT/desktop; check its current product behavior and configuration.
-- `/hooks`: Inspects and trusts lifecycle hooks;
-- `$comet`: Triggers Comet state machine in Codex CLI;
-- `@workspace`: Scans workspace context in VS Code.
+- Codex CLI 的文件記載 `AGENTS.md` 會從 Codex 家目錄與倉庫路徑一路探索到目前目錄。不得據此推斷 ChatGPT／桌面版有完全相同的行為；請查核其目前的產品行為與設定。
+- `/hooks`：檢查並信任生命週期鉤子；
+- `$comet`：在 Codex CLI 中觸發 Comet 狀態機；
+- `@workspace`：在 VS Code 中掃描工作區上下文。
 
 ### 4.4 Zed IDE
-- Reuse the project `AGENTS.md`; this installer does not create a Zed-specific file;
-- `Ctrl+Enter` (Inline Assist) with `follow ponytail principles`;
-- Assistant Panel (`Ctrl+?`) for multi-turn architectural planning.
+- 沿用專案的 `AGENTS.md`；此安裝器不會建立 Zed 專用檔案；
+- `Ctrl+Enter`（Inline Assist）搭配 `follow ponytail principles`；
+- Assistant Panel（`Ctrl+?`）用於多輪架構規劃。
 
 ---
 

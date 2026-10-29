@@ -31,10 +31,10 @@ behind is tracked debt, not a CI failure.
 
 | Target | Source | Status | Source SHA (last synced) | Note |
 |---|---|---|---|---|
-| README.zh-tw.md | README.md | stale | 3ee95251d864 | EN changed in Phase 4-1d (profile notes); last synced at 7aadadf |
-| docs/guides/Multi-Tool Deployment and Configuration Guide.zh-tw.md | docs/guides/Multi-Tool Deployment and Configuration Guide.md | stale | c702baf26aa3 | EN changed 2026-10-29 (fr/de links removed, D27); regeneration owed |
-| docs/guides/Tools Practical Usage and Skills Panorama Guide.zh-tw.md | docs/guides/Tools Practical Usage and Skills Panorama Guide.md | stale | 160ef6246eff | EN §2.3 pinned install instructions (Phase 6, 6-2b); ZH-TW still shows curl\|sh and unversioned npm install |
-| docs/guides/Skills Usage Guide.zh-tw.md | docs/guides/Skills Usage Guide.md | stale | 99a37475bf2e | EN changed in Phase 4-1d (tier section added, `##` 12→13); last synced at b2b73b4 (2026-10-16) |
-| templates/agents/Global AGENTS.zh-tw.md | templates/agents/Global AGENTS.md | stale | e670c1fb9a40 | EN changed in Phase 0-11 (terminology ruling line, EN+ZH only); last synced at f98adbb (2026-10-16) |
+| README.zh-tw.md | README.md | in-sync | 4187497f1a6e | Regenerated from EN (base main 5fd31c7) |
+| docs/guides/Multi-Tool Deployment and Configuration Guide.zh-tw.md | docs/guides/Multi-Tool Deployment and Configuration Guide.md | in-sync | acceae1cb84a | Regenerated from EN (base main 5fd31c7) |
+| docs/guides/Tools Practical Usage and Skills Panorama Guide.zh-tw.md | docs/guides/Tools Practical Usage and Skills Panorama Guide.md | in-sync | 1ee72f22b182 | Regenerated from EN (base main 5fd31c7); §2.3 pinned versions match EN |
+| docs/guides/Skills Usage Guide.zh-tw.md | docs/guides/Skills Usage Guide.md | in-sync | 6b46f61ac95b | Regenerated from EN (base main 5fd31c7) |
+| templates/agents/Global AGENTS.zh-tw.md | templates/agents/Global AGENTS.md | in-sync | 0794aec75e66 | Checked against Global AGENTS.en.md (base main 5fd31c7); restored the dropped source-of-truth line, rest already faithful |
 | templates/agents/Project AGENTS.zh-tw.md | templates/agents/Project AGENTS.md | in-sync | fd6b35ddfd15 | Source and target last changed in the same commit (f3f3568, Phase 0-6) |
 | templates/agents/Directory AGENTS.zh-tw.md | templates/agents/Directory AGENTS.md | in-sync | 911d13caaf6f | Source and target moved together (2026-10-13 templates move) |

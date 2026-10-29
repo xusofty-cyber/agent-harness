@@ -1,6 +1,6 @@
 # 多工具（Codex / Claude Code / Antigravity 2.0 / CLI / IDE / Zed）AI 工程部署與配置指南
 
-> **Language / 語言**: [English](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [简体中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | **繁體中文**
+> **Language / 語言**: [English](Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [簡體中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | **繁體中文**
 
 本指南提供端到端的規範說明，闡述如何在 **OpenAI Codex / GitHub Copilot**、**Claude Code**、**Google Antigravity IDE** 以及 **Zed IDE** 中部署、配置並協同運用 **三層式 AGENTS.md 架構**（全域層、專案層與目錄層），針對以軟體工程為主、兼顧專業技術文件處理的實際場景。
 
@@ -71,13 +71,15 @@
 
 | 工具/介面 | 本倉庫提供或寫入的內容 | 載入說明 |
 | :--- | :--- | :--- |
-| Codex (local app / IDE / CLI) | Global `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`); project and directory `AGENTS.md` | `-Global` creates the global file; `-Global -Update` backs up and replaces the active global instruction file. Codex uses a non-empty `AGENTS.override.md` in Codex home in preference to `AGENTS.md` |
-| Claude Code | `CLAUDE.md` bridge, `~/.claude/CLAUDE.md`, project hooks/skills | `CLAUDE.md` is an instruction entry point; Claude Auto memory is a separate optional machine-local project memory, not shared across tools |
-| Antigravity 2.0 | Project `AGENTS.md` / `GEMINI.md` / `.agents/rules/`; global `~/.gemini/AGENTS.md` and `GEMINI.md` compatibility pointer | Current docs list both global names; older releases can follow the pointer to the canonical file |
-| Antigravity CLI | Project/directory rules; global `~/.gemini/AGENTS.md` and `GEMINI.md` compatibility pointer; optional `~/.gemini/antigravity-cli/rules/*.md` | Common rules use the canonical entry; configure CLI-only rules separately |
-| Antigravity IDE / extensions | Project/directory rules; global `~/.gemini/AGENTS.md` and `GEMINI.md` compatibility pointer | Current IDE supports both global names; older IDE generations can follow the pointer |
-| GitHub Copilot | `.github/copilot-instructions.md` bridge | Confirm loading in Copilot's current product settings/docs |
-| Zed / Pi / OpenCode | Reusable Markdown only; no dedicated setup from this repository | Do not infer automatic discovery or global loading from file presence |
+| Codex (local app / IDE / CLI) | 全域 `$CODEX_HOME/AGENTS.md`（預設 `~/.codex/AGENTS.md`）；專案與目錄 `AGENTS.md` | `-Global` 會建立全域檔案；`-Global -Update` 會備份並取代作用中的全域指示檔案。Codex 會優先使用 Codex 家目錄中非空的 `AGENTS.override.md`，而非 `AGENTS.md` |
+| Claude Code | `CLAUDE.md` 橋接、`~/.claude/CLAUDE.md`、專案鉤子／技能 | `CLAUDE.md` 是指示進入點；Claude Auto memory 是獨立的可選本機專案記憶，不跨工具共享 |
+| Antigravity 2.0 | 專案 `AGENTS.md` / `GEMINI.md` / `.agents/rules/`；全域 `~/.gemini/AGENTS.md` 與 `GEMINI.md` 相容性指針；已部署的 `.agents/rules/agent-harness.md`（觸發條件：always_on）；已部署的 `.agents/hooks.json` 閘門鉤子 | 目前的文件列出兩個全域名稱；較舊版本可以跟隨指針找到規範檔案。Antigravity 要求 `.agents/rules/*.md` 具備含觸發條件的 YAML frontmatter，因此已部署的轉接器只是一個指向 `AGENTS.md` 的小型 always_on 指針，而非重複的規則集。閘門鉤子（PreToolUse/Stop/SessionStart/PostToolUse）會將 Antigravity 酬載轉譯為 Claude 閘門鉤子；建置環境中未驗證過實際的 Antigravity CLI/IDE 執行，協定層級測試通過 |
+| Antigravity CLI | 專案／目錄規則；全域 `~/.gemini/AGENTS.md` 與 `GEMINI.md` 相容性指針；可選的 `~/.gemini/antigravity-cli/rules/*.md` | 通用規則使用規範進入點；CLI 專用規則請另外設定 |
+| Antigravity IDE / extensions | 專案／目錄規則；全域 `~/.gemini/AGENTS.md` 與 `GEMINI.md` 相容性指針 | 目前的 IDE 支援兩個全域名稱；較舊世代的 IDE 可以跟隨指針 |
+| WorkBuddy | `.workbuddy/rules/agent-harness.md` 規則橋接（指向 `AGENTS.md` 的符號連結，備援為指針） | Tencent CodeBuddy 的後繼者。橋接檔案部署不等同於載入驗證；請在已安裝的 WorkBuddy 版本上確認。此層未為 WorkBuddy 安裝鉤子 |
+| DeepSeek Harness (dsh) | 透過 `-Global` 設定全域 `${DSH_HOME:-~/.dsh}/AGENTS.md`；專案 `AGENTS.md` 原生讀取；技能透過 `.agents/skills/` | dsh 會原生讀取 `AGENTS.md`，因此不會建立專案橋接檔案。透過 `cordis.patch.yml` 的 MCP 與閘門強制執行不屬於此橋接層 |
+| GitHub Copilot | `.github/copilot-instructions.md` 橋接 | 請在 Copilot 目前的產品設定／文件中確認載入行為 |
+| Zed / Pi / OpenCode | 僅可重複使用的 Markdown；本倉庫不提供專用設定 | 不得僅憑檔案存在就推斷會自動探索或全域載入 |
 
 References: [Codex AGENTS.md](https://developers.openai.com/codex/guides/agents-md), [Claude Code memory](https://code.claude.com/docs/en/memory), [Antigravity rules](https://www.antigravity.google/docs/rules/).
 
@@ -90,17 +92,21 @@ References: [Codex AGENTS.md](https://developers.openai.com/codex/guides/agents-
 
 ### 配置與實作
 
-安裝程式會複製 [`.claude/settings.json`](../../.claude/settings.json) 並部署 [`.claude/hooks/guard.mjs`](../../.claude/hooks/guard.mjs) 與 [`guard-write.mjs`](../../.claude/hooks/guard-write.mjs)。請直接檢視這些原始檔；不要從舊版指南複製 hook 範例，因為協定和實作可能會變更。
+安裝程式會複製 [`.claude/settings.json`](../../.claude/settings.json)（它接線了全部五個 Claude Code 鉤子事件），並部署 [`.claude/hooks/`](../../.claude/hooks/) 中的完整鉤子集：[`guard.mjs`](../../.claude/hooks/guard.mjs)（PreToolUse Bash 守衛）、[`guard-write.mjs`](../../.claude/hooks/guard-write.mjs)（Write/Edit 警告）、[`guard-feature-list.mjs`](../../.claude/hooks/guard-feature-list.mjs)（拒絕直接編輯 `feature_list.json`）、[`stop-gate.mjs`](../../.claude/hooks/stop-gate.mjs)（Stop 閘門）、[`session-start.mjs`](../../.claude/hooks/session-start.mjs)（SessionStart 續跑）與 [`post-tool-use.mjs`](../../.claude/hooks/post-tool-use.mjs)（成本帳本遙測）。請直接檢視這些原始檔；不要從舊版指南複製 hook 範例，因為協定和實作可能會變更。在 Claude Code 與 Antigravity 之外的宿主上，這些鉤子都不會執行；WorkBuddy 與 dsh 在此層仍沒有鉤子，因此在它們上面請手動使用 `gate/pass-gate.py verify` / `check-clean`，並依賴 [`gate/README.md`](../../gate/README.md) 中所述的 CI 重新執行。
+
+與宿主無關的第二道閘門（pre-push＋CI 範本）：對於沒有執行期鉤子的宿主，本倉庫提供一道完全不依賴任何宿主的閘門——只依賴 git、Python 3 與專案自身的 `gate/` 目錄。`templates/pre-push-gate/` 包含一個 `pre-push` 鉤子範本、其檢查器 `gate-prepush-check.py`，以及安裝器 `install-pre-push-gate.sh`；`templates/ci-gate-check.yml` 是 GitHub Actions 工作流程範本，請複製到專案的 `.github/workflows/gate-check.yml`。檢查器會重新執行每個 `passing` 項目的驗證命令，並拒絕過時的證據（evidence.command 必須等於 verification.command），呼應本倉庫自身的 CI 重新驗證（`tests/repo_checks.py` §3k）；人工覆寫的證據會被跳過，如 §3k 所述。獨立安裝器的安裝是明確選擇加入，而部署指令碼則預設開啟，分兩種形式：自行執行安裝器（除非傳入 `--force`，否則它會拒絕覆寫現有的鉤子；傳入 `--force` 時會先備份舊鉤子），或直接執行部署指令碼，部署指令碼會以慣常的「已存在則跳過／更新時備份」規則安裝這三個檔案（`.git/hooks/pre-push`、`scripts/gate-prepush-check.py`、`.github/workflows/gate-check.yml`）；傳入 `--no-prepush-gate`（PowerShell 為 `-NoPrepushGate`）可跳過它們（保留 `--prepush-gate` / `-PrepushGate` 以相容）。這道閘門的兩項誠實限制，無論在哪裡描述它都必須一併附上：它檢查的是工作樹的閘門狀態，而不是被推送提交的閘門狀態；而且 `git push --no-verify` 會完全繞過它，因此它只是本地的絆線，而非伺服器端控制——請搭配 CI 範本與伺服器端分支保護。pre-push 鉤子預設將 `check-clean` 作為警告執行（進行中的工作樹本來就不一定是可交接的乾淨狀態），只有設定 `GATE_PREPUSH_STRICT=1` 時才會因此阻擋；CI 範本則會在兩個步驟上都阻擋，因為 CI 檢查的是已提交的狀態。
+
+Antigravity 閘門鉤子（專案 `.agents/hooks.json`，鉤子集 `agent-harness-gate`，遵循官方 [Antigravity hooks 參照](https://antigravity.google/docs/hooks/)）：部署指令碼會複製 [`.agents/hooks.json`](../../.agents/hooks.json) 與 [`.agents/hooks/`](../../.agents/hooks/) 中的轉接器（`antigravity-pre-tool-use.mjs`、`antigravity-stop.mjs`、`antigravity-session-start.mjs`、`antigravity-post-tool-use.mjs`，外加共用的 `antigravity-common.mjs`），以及它們所委派的六個 Claude 閘門指令碼的副本，因此僅有 Antigravity 的專案不需 `.claude/hooks/` 也能設閘門。對應關係為：`run_command`（參數 `CommandLine`）→ Bash 守衛；`write_to_file` / `replace_file_content` / `multi_replace_file_content`（參數 `TargetFile`）→ 寫入警告外加功能清單寫入阻擋；`Stop` → 停止閘門；`SessionStart` → 以系統訊息注入的閘門續跑；`PostToolUse` → 成本帳本記錄。閘門規則沒有重複：每個轉接器會將 Antigravity 酬載轉譯為 Claude 酬載，執行現有的 Claude 鉤子，再把決定轉譯回去。兩項形塑實作的協定事實絕不能被「簡化」掉：PreToolUse 的決定是必要且明確的——轉接器絕不會為 PreToolUse 印出 `{}`（它在各 Antigravity 版本中的處理方式仍有爭議），而是印出 `{"decision":"allow"}` 或 `{"decision":"deny","reason":...}`；而且鉤子在 Antigravity 本身是 fail-open 的（缺少二進位檔、逾時或無效 JSON 都只會記錄並讓工作階段繼續），因此每個轉接器的錯誤路徑同樣是 fail-open，並會在 stderr 上說明。Stop 轉接器會在 `gate/antigravity-stop-state.json` 中保存自己的第二次嘗試狀態（Antigravity 的 Stop 酬載沒有相當於 Claude Code `stop_hook_active` 旗標的欄位），因此工作階段不會被困在 `continue` 迴圈中；人工覆寫通道（`GATE_ALLOW_STOP=1`＋`GATE_STOP_REASON`）不變。驗證狀態如實陳述：協定層級測試通過（[`tests/antigravity-hooks.test.mjs`](../../tests/antigravity-hooks.test.mjs)，15 項測試：deny/allow、stop 先 continue 再 allow、工作階段續跑、帳本、fail-open），部署冒煙測試也確認已部署的檔案能為臨時專案設閘門——但在建置此層的環境中無法進行實際的 Antigravity CLI/IDE 執行（沒有 `agy` 二進位檔），因此在稱此強制執行為久經考驗之前，仍欠一次在已安裝 Antigravity 版本上的實際執行。官方 hooks 參照將工作區 `.agents/hooks.json` 介面同時列給 App、CLI 與 IDE；這就是出貨單一工作區檔案的依據，而非實際的 IDE 驗證。
 
 ### 其他工具的對應方案（擴充點）
 
-PreToolUse hooks 是 Claude Code 專屬的；安裝程式不會為其他工具安裝攔截器。若要達到同等保護，請接上各工具自身的 hook/審批機制：`guard.mjs` 中的決策邏輯（受保護分支、危險命令模式）是純 Node.js——重用其正則表達式和分支表，並調整以適應目標工具的 hook 進入點。無論在哪一層掛接 hook，都無法取代伺服器端分支保護；用戶端攔截只是縱深防禦中的一層。
+PreToolUse 風格的攔截不再是 Claude Code 專屬：安裝程式現在也會部署上述的 Antigravity 鉤子。它仍不會為 WorkBuddy 或 dsh 安裝攔截器。若要在這些工具上達到同等保護，請接上各工具自身的 hook/審批機制：`guard.mjs` 中的決策邏輯（受保護分支、危險命令模式）是純 Node.js——重用其正則表達式和分支表，並調整以適應目標工具的 hook 進入點。無論在哪一層掛接 hook，都無法取代伺服器端分支保護；用戶端攔截只是縱深防禦中的一層。
 
 ---
 
 ## 4. 跨工具部署與範本更新（deploy-agents）
 
-腳本將檔案部署到配置的路徑。檔案部署並不保證工具特定的載入行為。`-Global` 會初始化缺失的全域規則檔案並保留現有檔案。組合使用 `-Global -Update` 會先建立時間戳記備份，然後用當前範本取代作用中的全域規則。Antigravity 會收到規範的 `~/.gemini/AGENTS.md` 加上一個小型的 `GEMINI.md` 相容性指針，而非重複的完整規則集。Codex 在設定了 `$CODEX_HOME` 時使用該路徑（否則使用 `~/.codex`）；如果其中存在非空的 `AGENTS.override.md`，則會備份並更新該作用中檔案，而非 `AGENTS.md`：
+腳本將檔案部署到配置的路徑。檔案部署並不保證工具特定的載入行為。`-Global` 會初始化缺失的全域規則檔案並保留現有檔案。組合使用 `-Global -Update` 會先建立時間戳記備份，然後用當前範本取代作用中的全域規則。Antigravity 會收到規範的 `~/.gemini/AGENTS.md` 加上一個小型的 `GEMINI.md` 相容性指針，而非重複的完整規則集。DeepSeek Harness（dsh）會在相同的保留／備份規則下，從 `$DSH_HOME`（預設為 `~/.dsh`）收到一份全域 `AGENTS.md`。WorkBuddy 在此層沒有全域檔案；它的專案橋接是 `.workbuddy/rules/agent-harness.md`，若想要機器層級的 WorkBuddy 規則檔案，請手動在 `~/.workbuddy/rules/` 下建立。Codex 在設定了 `$CODEX_HOME` 時使用該路徑（否則使用 `~/.codex`）；如果其中存在非空的 `AGENTS.override.md`，則會備份並更新該作用中檔案，而非 `AGENTS.md`：
 - **Windows PowerShell**：[`deploy-agents.ps1`](../../deploy-agents.ps1)
 - **Linux / macOS Bash**：[`deploy-agents.sh`](../../deploy-agents.sh)
 
@@ -307,10 +313,10 @@ chmod +x ./deploy-agents.sh ./run-pipeline.sh
 1. 依照其[官方安裝指南](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md)單獨安裝並啟動 ai-memory。若要使用免費的零金鑰路徑，請不要配置 LLM 和 embedding 提供者。
 2. 檢視 `.ai-memory.toml.example`，將其複製為 `.ai-memory.toml`，並取代其中的兩個名稱。`.ai-memory.toml` 被 Git 忽略；刻意避免提交此 opt-in 檔案。
 3. 在 Linux/macOS/WSL2 上執行 `./setup-ai-memory.sh <claude-code|codex|antigravity|antigravity-ide|antigravity-cli>`，或在 PowerShell 中使用對應的 `-Agent` 值。Antigravity 2.0 使用 `antigravity`，IDE 使用 `antigravity-ide`；兩者都會配置 MCP 和受管指示。CLI 目標還會額外安裝 allowlist hooks。原生可執行檔和 hook 模式預檢適用於 hook 目標；僅 MCP 的目標不需要。該助手不會下載軟體或啟動伺服器。
-4. Keep the server bound to loopback for same-machine use. Default data locations are `~/.local/share/ai-memory` on Linux, `~/Library/Application Support/ai-memory` on macOS, and typically `%LOCALAPPDATA%\ai-memory` on Windows; `AI_MEMORY_DATA_DIR` can override them.
+4. 讓伺服器僅綁定 loopback，供同一台機器使用。預設資料位置在 Linux 上為 `~/.local/share/ai-memory`，在 macOS 上為 `~/Library/Application Support/ai-memory`，在 Windows 上通常為 `%LOCALAPPDATA%\ai-memory`；`AI_MEMORY_DATA_DIR` 可以覆寫它們。
    - **Docker 部署（用於 Antigravity IDE HTTP MCP）**：
      ```bash
-     # In-container storage path must be /data; binds to loopback 127.0.0.1
+     # 容器內儲存路徑必須為 /data；僅綁定 loopback 127.0.0.1
      mkdir -p "${HOME}/env/ai-memory-data"
      docker run -d --name ai-memory \
        --restart unless-stopped \
@@ -319,41 +325,41 @@ chmod +x ./deploy-agents.sh ./run-pipeline.sh
        docker.io/akitaonrails/ai-memory:latest
      ```
      *注意：Docker 容器不需要掛載倉庫目錄樹或 `.ai-memory.toml`。Antigravity IDE 透過 MCP 工具呼叫傳遞專案上下文（`workspace`/`project`）。*
-   - Back up with `ai-memory --data-dir <data-dir> backup --to <archive-path>` (for Docker deployments, use the upstream container command). `ai-memory uninstall --apply` removes managed client integrations but does not delete the data. To erase memory, stop the service and remove its configured data directory only after confirming the backup and target. See the [official installation/operations guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md).
+   - 使用 `ai-memory --data-dir <data-dir> backup --to <archive-path>` 備份（Docker 部署請使用上游的容器命令）。`ai-memory uninstall --apply` 會移除受管的用戶端整合，但不會刪除資料。若要清除記憶，請先確認備份與目標，再停止服務並移除其設定的資料目錄。詳見[官方安裝／操作指南](https://github.com/akitaonrails/ai-memory/blob/main/docs/install.md)。
 
 #### 宿主邊界
 
-- **Claude Code:** upstream MCP/hooks; ai-memory owns only its entries and preserves unrelated hooks. The existing Claude `PreToolUse` security hook remains separate. Claude Code's default auto-memory is also separate and machine-local.
-- **Codex CLI:** upstream `--client codex` / `--agent codex` integration. **Codex desktop:** uses the local Codex configuration surface where supported; verify the installed app's hook/MCP availability instead of assuming every CLI version behaves identically.
-- **Antigravity CLI:** upstream `antigravity-cli` MCP/hooks. On Windows, run setup in the same environment that launches the agent.
-- **Antigravity 2.0 and IDE:** the helper uses the upstream Antigravity MCP installer to write the shared `~/.gemini/config/mcp_config.json` and managed project instructions. The current ai-memory upstream has no dedicated 2.0/IDE lifecycle-hook target, so this is MCP-only and does not automatically capture session events. Manual MCP setup uses `serverUrl=http://127.0.0.1:49374/mcp`; see [Antigravity MCP docs](https://www.antigravity.google/docs/mcp).
-- **ChatGPT web:** the no-key, loopback setup has no direct connection to a remote web chat. Use a concise Markdown handoff manually. Remote MCP/write access is outside this free local setup.
-- **Windows:** upstream documents both WSL2 and native Windows. Install and configure ai-memory in the same environment that launches each agent; do not mix WSL and Windows hook paths. Review the [Windows guide](https://github.com/akitaonrails/ai-memory/blob/main/docs/windows.md) for client-specific support.
+- **Claude Code：** 上游 MCP/hooks；ai-memory 只擁有自己的條目，並保留無關的鉤子。現有的 Claude `PreToolUse` 安全鉤子維持獨立。Claude Code 預設的 auto-memory 同樣獨立且僅限本機。
+- **Codex CLI：** 上游 `--client codex` / `--agent codex` 整合。**Codex desktop：** 在支援的地方使用本地 Codex 配置介面；請驗證已安裝應用程式的 hook/MCP 可用性，而非假設每個 CLI 版本的行為都相同。
+- **Antigravity CLI：** 上游 `antigravity-cli` MCP/hooks。在 Windows 上，請在啟動 agent 的同一個環境中執行設定。
+- **Antigravity 2.0 與 IDE：** 輔助工具使用上游 Antigravity MCP 安裝器，寫入共用的 `~/.gemini/config/mcp_config.json` 與受管的專案指示。目前的 ai-memory 上游沒有專門的 2.0/IDE 生命週期鉤子目標，因此這只是 MCP-only，不會自動擷取工作階段事件。手動 MCP 設定使用 `serverUrl=http://127.0.0.1:49374/mcp`；詳見 [Antigravity MCP 文件](https://www.antigravity.google/docs/mcp)。
+- **ChatGPT web：** 零金鑰、loopback 的設定與遠端網頁聊天沒有直接連接。請手動使用簡潔的 Markdown 交接。遠端 MCP／寫入存取不在此免費本地設定的範圍內。
+- **Windows：** 上游同時記載了 WSL2 與原生 Windows。請在啟動各 agent 的同一個環境中安裝並設定 ai-memory；不要混用 WSL 與 Windows 的鉤子路徑。關於用戶端特定的支援，請檢視 [Windows 指南](https://github.com/akitaonrails/ai-memory/blob/main/docs/windows.md)。
 
-ai-memory allowlist mode only guarantees no capture for repositories without a marker when the installed native hook enforces capture policy. Its path exclusions do not redact arbitrary prompt text; never include secrets in prompts. See the [marker-file reference](https://github.com/akitaonrails/ai-memory/blob/main/docs/marker-file.md).
+ai-memory 的 allowlist 模式僅在已安裝的原生鉤子強制執行擷取政策時，才能保證不擷取沒有標記的倉庫。它的路徑排除不會塗銷任意的提示文字；絕不要在提示中包含機密。詳見 [marker-file 參照](https://github.com/akitaonrails/ai-memory/blob/main/docs/marker-file.md)。
 
 ### 5.2 專案路由器：`Project AGENTS.md`
 - 可調整的倉庫級範本。
-- Add `-Initialize` / `--initialize` to deployment to generate a draft from verifiable local facts and a pending-items checklist. `-DirectoryPath <relative-path>` / `--directory <relative-path>` also initializes an existing module directory. The scripts do not guess project purpose, owners, or module boundaries. Existing `AGENTS.md` files are preserved; generated review copies use `AGENTS.generated.md`.
-- Detected `package.json` scripts and common framework/storage dependencies appear as review suggestions, not verified facts; confirm them before relying on those commands or boundaries.
-- Run `-Check` / `--check` (optionally with the directory parameter) to scan for unresolved template fields before adopting the generated rules; the command returns a nonzero exit status when it finds any.
-- Provides standard CLI command slots (install, dev, build, targeted test, lint, format, migration), architecture red lines, the **Rule & Skill Dispatching Matrix**, selective Markdown memory rules, and optional ai-memory integration guidance.
+- 在部署時加上 `-Initialize` / `--initialize`，可從可驗證的本地事實與待處理事項檢查清單產生草稿。`-DirectoryPath <relative-path>` / `--directory <relative-path>` 也會初始化現有的模組目錄。指令碼不會猜測專案用途、所有者或模組邊界。現有的 `AGENTS.md` 檔案會被保留；產生的審查副本使用 `AGENTS.generated.md`。
+- 偵測到的 `package.json` 指令碼與常見框架／儲存依賴會顯示為待審查的建議，而非已驗證的事實；在依賴這些命令或邊界之前請先確認。
+- 在採用產生的規則之前，執行 `-Check` / `--check`（可選擇性地加上目錄參數）掃描未解決的範本欄位；發現任何未解決欄位時，命令會以非零結束狀態回傳。
+- 提供標準的 CLI 命令欄位（install、dev、build、針對性測試、lint、format、migration）、架構紅線、**規則與技能分派矩陣**、選擇性的 Markdown 記憶規則，以及可選的 ai-memory 整合指引。
 
 ---
 
 ### 5.3 模組化子規則：`.agents/rules/`
 按需漸進式載入：
-- **`token-discipline.md`**: Restricts reading, fetching, and speaking; mandates AST index over blind grep;
-- **`engineering-spec.md`**: SDD spec-first (In/Out scope), TDD verification gate (physical proof required);
-- **`security-boundary.md`**: 8 high-risk operations confirmation matrix, zero credentials leak, large file safety;
-- **`git-workflow.md`**: Protected branch isolation (zero direct commits), mandatory authorization for remote push, commit format `{type}: {description}`.
+- **`token-discipline.md`**：限制讀取、擷取與表達；要求使用 AST 索引而非盲目 grep；
+- **`engineering-spec.md`**：SDD 規格優先（In/Out scope）、TDD 驗證閘門（需要實體證明）；
+- **`security-boundary.md`**：8 項高風險操作確認矩陣、憑證零洩漏、大檔案安全；
+- **`git-workflow.md`**：受保護分支隔離（零直接提交）、遠端推送必須授權、提交格式 `{type}: {description}`。
 
 ---
 
 ### 5.4 微邊界補丁：`Directory AGENTS.md`
 - 僅在**必要時**於 monorepo 套件（`packages/*`）或隔離的子模組中建立。
-- Generate one with `-Initialize -DirectoryPath <relative-path>` (PowerShell) or `--initialize --directory <relative-path>` (Bash); the target must already exist inside the project root. Module path/name are detected, while responsibility and boundaries remain explicit review items.
-- Defines In/Out scope, permitted/forbidden dependencies, and targeted local test commands (e.g., `pytest tests/submodule -q`).
+- 使用 `-Initialize -DirectoryPath <relative-path>`（PowerShell）或 `--initialize --directory <relative-path>`（Bash）產生一份；目標必須已存在於專案根目錄內。模組路徑／名稱會被偵測，而責任與邊界仍是明確的審查項目。
+- 定義 In/Out scope、允許／禁止的依賴，以及針對性的本地測試命令（例如 `pytest tests/submodule -q`）。
 
 ---
 
@@ -361,16 +367,16 @@ ai-memory allowlist mode only guarantees no capture for repositories without a m
 
 ### 1. 軟體工程軌（嚴格閘門）
 - 範圍：API、功能、錯誤修復、重構。
-- Rules:
-  - Read `PROJECT_CONTEXT.md` and `SESSION_STATE.md` at task start only when present and relevant, then verify material facts;
-  - Always work on temporary branches (`feature/*`, `fix/*`);
-  - TDD red-green cycle, verify with actual test runs;
-  - Follow Git authorization model;
-  - **Selective memory updates**: Update `SESSION_STATE.md` at meaningful closeout; update `PROJECT_CONTEXT.md` only when durable project facts change.
+- 規則：
+  - 僅在存在且相關時，才在任務開始時讀取 `PROJECT_CONTEXT.md` 與 `SESSION_STATE.md`，然後驗證實質事實；
+  - 一律在臨時分支（`feature/*`、`fix/*`）上工作；
+  - TDD 紅綠循環，以實際測試執行驗證；
+  - 遵循 Git 授權模型；
+  - **選擇性記憶更新**：在有意義的收尾時更新 `SESSION_STATE.md`；僅在持久專案事實變更時才更新 `PROJECT_CONTEXT.md`。
 
 ### 2. 技術文件軌（輕量旁路）
 - 範圍：Markdown 文件、README、API 規格、Word/PDF 報告。
-- Rules: **Exempt from running test suites**; leverage specialized skills (`docx`, `pdf`, `write-openspec-docs`); maintain GitHub Flavored Markdown standards.
+- 規則：**豁免執行測試套件**；善用專門技能（`docx`、`pdf`、`write-openspec-docs`）；維持 GitHub Flavored Markdown 標準。
 
 ---
 
@@ -380,21 +386,21 @@ ai-memory allowlist mode only guarantees no capture for repositories without a m
 > **答**：全域規則常駐於機器上的所有工作階段。加入專案特定的命令會造成跨專案的上下文污染並浪費提示 tokens。
 
 ### Q2：線上更新（`-Update`）如何保護自訂的專案配置？
-> **Answer**: Existing project `AGENTS.md` is preserved and an `AGENTS.template.md` is generated for review. `-Global` initializes missing Claude Code, Antigravity, and Codex global instructions while preserving existing files. Combining `-Global -Update` makes timestamped backups and replaces those global files with the current template; Codex's active non-empty `AGENTS.override.md` is updated in place of `AGENTS.md`.
+> **答**：現有的專案 `AGENTS.md` 會被保留，並產生一份 `AGENTS.template.md` 供審查。`-Global` 會在保留現有檔案的同時，初始化缺失的 Claude Code、Antigravity 與 Codex 全域指示。組合使用 `-Global -Update` 會建立時間戳記備份，並以當前範本取代這些全域檔案；Codex 作用中的非空 `AGENTS.override.md` 會就地更新，取代 `AGENTS.md`。
 
 ### Q3：40+ 個 skills 如何避免撐爆上下文視窗？
 > **答**：取決於宿主如何探索和載入 Skills。不要假設固定的中繼資料成本或快取折扣；僅保持有用的 Skills 啟用，並在目標宿主中驗證行為。
 
 ### Q4：什麼是 8 項高風險操作保護矩陣？
 > **答**：定義於 `security-boundary.md`，在以下操作前需要人工確認：
-> 1. Modifying build configs (`package.json`, `CMakeLists.txt`, `.pro`, `Cargo.toml`);
-> 2. Introducing new third-party dependencies;
-> 3. Modifying global public data structures (`public_struct.h`, `types.ts`);
-> 4. Changing core dispatch singletons or public service interfaces;
-> 5. Modifying communication protocols or wire contracts (`protofile/`);
-> 6. Altering license, cryptography, or auth code;
-> 7. Modifying `.gitignore` or CI/CD pipelines;
-> 8. High-impact cross-module changes affecting shared contracts or requiring broad coordination; file count alone is not a risk trigger.
+> 1. 修改建置配置（`package.json`、`CMakeLists.txt`、`.pro`、`Cargo.toml`）；
+> 2. 引入新的第三方依賴；
+> 3. 修改全域公開資料結構（`public_struct.h`、`types.ts`）；
+> 4. 變更核心分派單例或公開服務介面；
+> 5. 修改通訊協定或線路契約（`protofile/`）；
+> 6. 變更授權、密碼學或驗證程式碼；
+> 7. 修改 `.gitignore` 或 CI/CD 流水線；
+> 8. 影響共享契約或需要廣泛協調的高影響跨模組變更；僅檔案數量本身不是風險觸發條件。
 
 ### Q5：何時應該更新 `PROJECT_CONTEXT.md` 和 `SESSION_STATE.md`？
 > 在有意義的任務/工作階段邊界，用已完成的工作、實際驗證證據、剩餘步驟和仍相關的風險更新 `SESSION_STATE.md`。僅在持久的架構、約束或已確認的決策變更時才更新 `PROJECT_CONTEXT.md`。不要建立無實質變更的更新。這兩個檔案都是專案記憶的摘要；它們不會覆蓋當前使用者指示、程式碼、配置或可重現的證據。絕不儲存憑證、原始個人資料或完整對話/工具日誌。
@@ -404,4 +410,4 @@ ai-memory allowlist mode only guarantees no capture for repositories without a m
 ## 8. 實戰用法與技能全景指南參考
 
 有關 Slash Commands（`/comet`、`/plan`、`/opsx`）、CodeGraph、TDD 以及完整端到端執行演練的詳細教學，請參閱：
-👉 [Tools Practical Usage and Skills Panorama Guide (English)](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [中文说明](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md)
+👉 [Tools Practical Usage and Skills Panorama Guide（繁體中文）](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Tools Practical Usage and Skills Panorama Guide (English)](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [簡體中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md)
