@@ -301,6 +301,10 @@ Phase 0 decision meeting.
   `eval/calibration.md`. The rubric stays **provisional, not `stable`**:
   all four rounds used recorded outcomes as the "human" side; a live
   second-person calibration round is still owed.
+  [Superseded by D28 (user final ruling, 2026-10-29): the live second
+  review is DEFERRED, not owed — it runs only when conditions mature,
+  and then on a real project the user knows well (bench toy tasks do
+  not count). The rubric stands advisory-only; panel fix P1-10.]
 - **Rationale:** a rubric nobody calibrated is an opinion with a table.
   The negative control (retrospective Block of the pre-Phase-0 pack)
   shows the rubric can say no.
