@@ -34,7 +34,7 @@ def check(name: str, ok: bool, detail: str = "") -> None:
 
 
 # --- 1. JSON validity ---
-for rel in [".claude/settings.json", ".agents/hooks.json", "skills-lock.json"]:
+for rel in [".claude/settings.json", ".agents/hooks.json", ".workbuddy/settings.json", "skills-lock.json"]:
     p = ROOT / rel
     try:
         json.loads(p.read_text(encoding="utf-8-sig"))
@@ -69,6 +69,34 @@ try:
     )
 except Exception as e:  # noqa: BLE001
     check("antigravity-hooks:parse", False, str(e))
+
+# --- 1c. WorkBuddy hooks wiring ---
+# .workbuddy/settings.json must cover the four gate events and point
+# only at adapter scripts that exist (mirrors 1b for Antigravity).
+wb_settings_path = ROOT / ".workbuddy" / "settings.json"
+try:
+    wb_data = json.loads(wb_settings_path.read_text(encoding="utf-8-sig"))
+    wb_hooks = wb_data.get("hooks", {})
+    check("workbuddy-hooks:settings", isinstance(wb_hooks, dict) and wb_hooks)
+    for event in ["PreToolUse", "PostToolUse", "SessionStart", "Stop"]:
+        check(f"workbuddy-hooks:event:{event}", event in wb_hooks)
+    wb_adapter_files = set()
+    for event, entries in wb_hooks.items():
+        if not isinstance(entries, list):
+            continue
+        for entry in entries:
+            for h in entry.get("hooks", [entry]):
+                cmd = h.get("command", "") if isinstance(h, dict) else ""
+                if cmd.startswith("node .workbuddy/hooks/workbuddy-"):
+                    wb_adapter_files.add(cmd.split()[1])
+    for rel in sorted(wb_adapter_files):
+        check(f"workbuddy-hooks:adapter:{rel}", (ROOT / rel).exists())
+    check(
+        "workbuddy-hooks:common",
+        (ROOT / ".workbuddy" / "hooks" / "workbuddy-common.mjs").exists(),
+    )
+except Exception as e:  # noqa: BLE001
+    check("workbuddy-hooks:parse", False, str(e))
 
 # --- 2. TOML example validity (branch-aware: only on branches that have it) ---
 toml_example = ROOT / "templates" / "ai-memory.toml.example"
@@ -1163,6 +1191,7 @@ PARITY = [
     ("DSH_HOME", "DSH_HOME", "DeepSeek Harness global rules"),
     ("Antigravity rules adapter", "Antigravity rules adapter", "Antigravity .agents/rules frontmatter adapter"),
     ("Antigravity hooks", "Antigravity hooks", "Antigravity .agents/hooks.json gate hooks"),
+    ("WorkBuddy hooks", "WorkBuddy hooks", "WorkBuddy .workbuddy/settings.json gate hooks"),
     ("PrepushGate", "prepush-gate", "template gate deployment (pre-push hook + checker + CI template)"),
     ("New-RuleDirBridge", "bridge_rule_dir", "rule-directory bridge helper"),
     (".windsurf/rules", ".windsurf/rules", "Windsurf bridge"),
