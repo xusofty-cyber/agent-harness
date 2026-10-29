@@ -49,7 +49,7 @@ usage() {
     echo "  --profile <minimal|standard|full> 部署分层（默认 minimal：15 个技能（10 个门禁核心 + 5 个 openspec 核心）+ 门禁本身（不含 graph.py 与循环层）；standard：20 个技能 + 门禁 + 编排（graph.py、loop.py 与模板）；full：默认 38 个技能 + 门禁 + 编排，加 --include-heavy-skills 才到全部 40 个。技能成员见 skills-profiles.json）。"
     echo "  --ai-memory-init, -m 初始化项目 .ai-memory.toml 并接入跨工具记忆 (ai-memory)。
   --pipeline         启动统一流水线 (Pipeline: 规则部署 + AI记忆 + 技能同步 + 文档质检)。
-  --prepush-gate     部署模板门到目标项目（.git/hooks/pre-push、scripts/gate-prepush-check.py、.github/workflows/gate-check.yml；默认关闭；已有文件跳过，--update 先备份再覆盖）。"
+  --prepush-gate / --no-prepush-gate  部署模板门到目标项目（.git/hooks/pre-push、scripts/gate-prepush-check.py、.github/workflows/gate-check.yml；默认开启，--no-prepush-gate 关闭；已有文件跳过，--update 先备份再覆盖）。"
     echo ""
     echo -e "${CYAN}示例 (Examples):${NC}"
     echo "  $0 /path/to/my-project --lang en"
@@ -69,7 +69,7 @@ DEPLOY_GLOBAL=false
 DO_UPDATE=false
 DO_COMET_INIT=false
 DO_AI_MEMORY_INIT=false
-DO_PREPUSH_GATE=false
+DO_PREPUSH_GATE=true
 DO_INITIALIZE=false
 DO_CHECK=false
 INCLUDE_HEAVY_SKILLS=false
@@ -127,6 +127,9 @@ while [ "$arg_index" -lt "$#" ]; do
             ;;
         --prepush-gate)
             DO_PREPUSH_GATE=true
+            ;;
+        --no-prepush-gate)
+            DO_PREPUSH_GATE=false
             ;;
         --initialize|-i)
             DO_INITIALIZE=true
@@ -1426,10 +1429,11 @@ if [ -f "${ANTIGRAVITY_HOOKS_JSON}" ]; then
     fi
 fi
 
-# Template gate (pre-push hook + checker + CI template, opt-in via --prepush-gate)
+# Template gate (pre-push hook + checker + CI template, on by default,
+# opt-out via --no-prepush-gate)
 # Host-independent: no agent host is required, only git, Python 3, and the
-# project's own gate/ directory. Off by default; this block runs only when
-# DO_PREPUSH_GATE=true. Existing target files are skipped (update mode
+# project's own gate/ directory. On by default; this block runs when
+# DO_PREPUSH_GATE=true (disable with --no-prepush-gate). Existing target files are skipped (update mode
 # backs up first, then overwrites), matching the other deploy sections.
 # The pre-push hook blocks on passing-item re-verification failure and
 # only warns on check-clean unless GATE_PREPUSH_STRICT=1; the CI template

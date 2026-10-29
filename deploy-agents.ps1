@@ -41,6 +41,8 @@ param (
 
     [switch]$PrepushGate,
 
+    [switch]$NoPrepushGate,
+
     # Phase 4 (4-1): deployment profile. Default minimal (15 skills: 10 gate core + 5 openspec core);
     # membership lives in skills-profiles.json. D58 (user final ruling
     # 2026-10-29): minimal ships the gate itself only (no graph.py, no
@@ -633,7 +635,7 @@ if (-not $ProjectPath -and -not $Global) {
     Write-Host "  -Global (-g)   初始化 Claude、Antigravity 2.0/CLI/IDE、Codex 用户全局规则。"
     Write-Host "  -Update (-u)   更新模板仓库；与 -Global 一起使用时，先备份再覆盖全局规则。"
     Write-Host "  -IncludeHeavySkills   部署可选重型技能 docx 与 brainstorming（默认跳过；docx 约 1.3 MB，brainstorming 含本地服务 server.cjs）。只影响本次新复制，不删除目标项目已有文件。"
-    Write-Host "  -PrepushGate     部署模板门到目标项目（.git/hooks/pre-push、scripts/gate-prepush-check.py、.github/workflows/gate-check.yml；默认关闭；已有文件跳过，-Update 先备份再覆盖）。"
+    Write-Host "  -PrepushGate / -NoPrepushGate  部署模板门到目标项目（.git/hooks/pre-push、scripts/gate-prepush-check.py、.github/workflows/gate-check.yml；默认开启，-NoPrepushGate 关闭，-PrepushGate 保留兼容；已有文件跳过，-Update 先备份再覆盖）。"
     exit 0
 }
 if ($DirectoryPath -and -not ($Initialize -or $Check)) { throw "-DirectoryPath requires -Initialize or -Check." }
@@ -1257,17 +1259,19 @@ if (-not $isSelfRepo) {
     }
 }
 
-# Template gate (pre-push hook + checker + CI template, opt-in via -PrepushGate)
+# Template gate (pre-push hook + checker + CI template, on by default,
+# opt-out via -NoPrepushGate; -PrepushGate is retained for compatibility)
 # Host-independent: no agent host is required, only git, Python 3, and the
-# project's own gate/ directory. Off by default; this block runs only when
-# -PrepushGate is passed. Existing target files are skipped (update mode
+# project's own gate/ directory. On by default; this block runs unless
+# -NoPrepushGate is passed (an explicit -NoPrepushGate wins over
+# -PrepushGate). Existing target files are skipped (update mode
 # backs up first, then overwrites), matching the other deploy sections.
 # The pre-push hook blocks on passing-item re-verification failure and
 # only warns on check-clean unless GATE_PREPUSH_STRICT=1; the CI template
 # blocks on both. The hook can be bypassed with `git push --no-verify`
 # and checks the working tree, not the pushed commits — it is a local
 # tripwire, not server-side control.
-if ($PrepushGate -and (-not $isSelfRepo)) {
+if ((-not $NoPrepushGate) -and (-not $isSelfRepo)) {
     $SourcePrepushDir = Join-Path $ScriptDir "templates\pre-push-gate"
     $SourceCiGateTemplate = Join-Path $ScriptDir "templates\ci-gate-check.yml"
     # 1. .git/hooks/pre-push — only inside a git work tree; never create .git.
