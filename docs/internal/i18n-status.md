@@ -32,8 +32,8 @@ behind is tracked debt, not a CI failure.
 | Target | Source | Status | Source SHA (last synced) | Note |
 |---|---|---|---|---|
 | README.zh-tw.md | README.md | in-sync | 3446767a288d | Regenerated from EN (B2 paragraph + eval tree + enforcement bullet synced) |
-| docs/guides/Multi-Tool Deployment and Configuration Guide.zh-tw.md | docs/guides/Multi-Tool Deployment and Configuration Guide.md | stale | b99ed7e36870 | EN changed (write_file live-name fix + live-run verification status); ZH-TW not hand-synced per frozen-translation policy, needs regeneration from EN |
-| docs/guides/Tools Practical Usage and Skills Panorama Guide.zh-tw.md | docs/guides/Tools Practical Usage and Skills Panorama Guide.md | in-sync | 00305df7d61e | Regenerated from EN (base main e9b32ab); MD012 extra blank line fixed; §2.3 pinned versions match EN |
+| docs/guides/Multi-Tool Deployment and Configuration Guide.zh-tw.md | docs/guides/Multi-Tool Deployment and Configuration Guide.md | stale | 849ec7008f74 | EN changed (Q3 title 40+ → 39+, dsh paragraph parenthetical now English); Q3 title synced to ZH-TW; ZH-TW not fully regenerated per frozen-translation policy, write_file live-name fix + live-run verification status still owed |
+| docs/guides/Tools Practical Usage and Skills Panorama Guide.zh-tw.md | docs/guides/Tools Practical Usage and Skills Panorama Guide.md | in-sync | 4f56582587b8 | EN TOC §2.4 aligned to body heading (Skill Loading and Optional CLI Setup); ZH-TW TOC already matched its body, no text change needed |
 | docs/guides/Skills Usage Guide.zh-tw.md | docs/guides/Skills Usage Guide.md | in-sync | d1297c2d3797 | Regenerated from EN (base main e9b32ab) |
 | templates/agents/Global AGENTS.zh-tw.md | templates/agents/Global AGENTS.md | in-sync | 0794aec75e66 | Checked against Global AGENTS.en.md (base main 5fd31c7); restored the dropped source-of-truth line, rest already faithful |
 | templates/agents/Project AGENTS.zh-tw.md | templates/agents/Project AGENTS.md | in-sync | fd6b35ddfd15 | Source and target last changed in the same commit (f3f3568, Phase 0-6) |

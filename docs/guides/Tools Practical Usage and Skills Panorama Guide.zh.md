@@ -15,7 +15,7 @@
    - 2.1 开箱即用 / 39 原生技能分类全景清单
    - 2.2 技能来源元数据与在线更新机制 (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
    - 2.3 Harness 核心工程扩展工具（按需选用）
-   - 2.4 平台安装与配置文件位置速查表
+   - 2.4 平台安装与规则记忆入口速查表
    - 2.5 技能底层运行机制与 Token 经济学（为什么装 39+ 技能不耗 Token？）
    - 2.6 工程技能与规则联动调度矩阵（实战唤醒表）
 3. [核心 Harness 工具与 Slash Commands 深度使用说明](#三-核心-harness-工具与-slash-commands-深度使用说明)

@@ -13,7 +13,7 @@ This guide provides a comprehensive handbook for software engineering and techni
    - 2.1 39 Integrated Native Skills Categorized
    - 2.2 Version Locking, Online Updates & Skill Sync (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
    - 2.3 Optional Harness CLI Tools
-   - 2.4 Token Economics of Skills (Why 39+ Skills Do NOT Blow Up Context)
+   - 2.4 Skill Loading and Optional CLI Setup
    - 2.5 Engineering Skills & Rules Dispatching Matrix
 3. [Deep Dive into Core Harness Tools & Slash Commands](#3-deep-dive-into-core-harness-tools--slash-commands)
    - 3.1 Comet: Versioned Workflow Entry Point
