@@ -138,3 +138,27 @@ jobs:
         run: |
           Invoke-ScriptAnalyzer -Path . -Recurse -Severity Warning, Information `
             | Format-Table -AutoSize | Out-String | Write-Host
+
+      # Execution smoke for the PowerShell deploy path (v0.4.1): until
+      # now the ps1 scripts were only analyzer- and review-verified,
+      # never actually executed on Windows in CI. This mirrors the
+      # ubuntu deploy smoke's core assertions for deploy-agents.ps1.
+      - name: Deploy smoke test (deploy-agents.ps1)
+        shell: pwsh
+        run: |
+          $smoke = Join-Path $env:RUNNER_TEMP "smoke-proj-ps1"
+          New-Item -ItemType Directory -Force $smoke | Out-Null
+          & ./deploy-agents.ps1 $smoke
+          if ($LASTEXITCODE -ne 0) { throw "deploy-agents.ps1 exited $LASTEXITCODE" }
+          foreach ($f in @("AGENTS.md", "CLAUDE.md",
+                           ".agents/rules/security-boundary.md",
+                           ".claude/settings.json",
+                           ".claude/hooks/guard.mjs",
+                           ".workbuddy/settings.json",
+                           ".dsh/agent-harness-gate.mjs",
+                           "skills-lock.json")) {
+            if (-not (Test-Path (Join-Path $smoke $f))) {
+              throw "ps1 deploy smoke missing: $f"
+            }
+          }
+          Write-Host "ps1 deploy smoke test passed"
