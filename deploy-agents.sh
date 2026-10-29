@@ -1433,6 +1433,61 @@ if [ -f "${ANTIGRAVITY_HOOKS_JSON}" ]; then
     fi
 fi
 
+# Dsh gate (DeepSeek Harness Cordis plugin: .dsh/agent-harness-gate.mjs)
+# NOTE: the Cordis contract here is unverified in this round (see .dsh/agent-harness-gate.ts header).
+# dsh has no hooks.json surface: the gate ships as a Cordis plugin file
+# plus a generated cordis.patch.yml row (absolute plugin path, filled
+# in at deploy time). The plugin translates dsh tool calls into the
+# Claude hook scripts, which are copied here too (into .dsh/hooks/,
+# falling back to .claude/hooks/) so dsh-only projects still gate.
+# Activation is NOT automatic: the user merges the generated row into
+# $DSH_HOME/profiles/<profile>/cordis.patch.yml (or the home patch) or
+# passes it per launch with `dsh --profile <profile> --patch
+# .dsh/cordis.patch.yml` — profiles live in $DSH_HOME and may not
+# exist yet when this script runs. Until a live dsh run confirms the
+# agent/turn-stopping steering path, dsh stop enforcement is
+# provisional; tools/pre-execute denial is the documented contract.
+# Existing target files are skipped (update mode backs up first, then
+# overwrites), matching the other deploy sections.
+DSH_PLUGIN_SOURCE="${SCRIPT_DIR}/.dsh/agent-harness-gate.mjs"
+DSH_PATCH_TEMPLATE="${SCRIPT_DIR}/.dsh/cordis.patch.template.yml"
+if [ -f "${DSH_PLUGIN_SOURCE}" ]; then
+    TARGET_DSH_DIR="${TARGET_PROJECT_DIR}/.dsh"
+    mkdir -p "${TARGET_DSH_DIR}"
+    TARGET_DSH_PLUGIN="${TARGET_DSH_DIR}/agent-harness-gate.mjs"
+    if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_DSH_PLUGIN}" ]; then
+        if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_DSH_PLUGIN}"; fi
+        cp -f "${DSH_PLUGIN_SOURCE}" "${TARGET_DSH_PLUGIN}"
+        echo -e "  ${GREEN}[√] 已部署 Dsh gate 插件: .dsh/agent-harness-gate.mjs${NC}"
+    else
+        echo "  [i] 目标项目已存在 .dsh/agent-harness-gate.mjs，跳过。"
+    fi
+    SOURCE_CLAUDE_HOOKS_DIR="${SCRIPT_DIR}/.claude/hooks"
+    if [ -d "${SOURCE_CLAUDE_HOOKS_DIR}" ]; then
+        TARGET_DSH_HOOKS_DIR="${TARGET_DSH_DIR}/hooks"
+        mkdir -p "${TARGET_DSH_HOOKS_DIR}"
+        for guard in guard.mjs guard-write.mjs guard-feature-list.mjs stop-gate.mjs session-start.mjs post-tool-use.mjs; do
+            if [ -f "${SOURCE_CLAUDE_HOOKS_DIR}/${guard}" ]; then
+                target_guard="${TARGET_DSH_HOOKS_DIR}/${guard}"
+                if [ "$DO_UPDATE" = true ] || [ ! -f "$target_guard" ]; then
+                    if [ "$DO_UPDATE" = true ]; then backup_path "$target_guard"; fi
+                    cp -f "${SOURCE_CLAUDE_HOOKS_DIR}/${guard}" "$target_guard"
+                fi
+            fi
+        done
+        echo -e "  ${GREEN}[√] 已部署 Dsh gate 钩子脚本: .dsh/hooks/${NC}"
+    fi
+    if [ -f "${DSH_PATCH_TEMPLATE}" ]; then
+        TARGET_DSH_PATCH="${TARGET_DSH_DIR}/cordis.patch.yml"
+        if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_DSH_PATCH}" ]; then
+            if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_DSH_PATCH}"; fi
+            sed "s|__PLUGIN_PATH__|${TARGET_DSH_PLUGIN}|g" "${DSH_PATCH_TEMPLATE}" > "${TARGET_DSH_PATCH}"
+            echo -e "  ${GREEN}[√] 已生成 Dsh gate 挂载行: .dsh/cordis.patch.yml（需并入 profile 或 home patch 后生效）${NC}"
+        else
+            echo "  [i] 目标项目已存在 .dsh/cordis.patch.yml，跳过。"
+        fi
+    fi
+fi
 # WorkBuddy hooks (.workbuddy/settings.json + .workbuddy/hooks/)
 # WorkBuddy (Tencent CodeBuddy successor) hooks ASSUME a Claude Code-
 # compatible protocol (UNVERIFIED: official WorkBuddy/CodeBuddy hook docs

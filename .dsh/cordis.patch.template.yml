@@ -1,0 +1,29 @@
+# agent-harness-gate — dsh Cordis patch row (template).
+#
+# The deploy scripts copy this file to the target project's
+# .dsh/cordis.patch.yml with the placeholder in the mount row below
+# replaced by the absolute path of the deployed plugin file. To activate the
+# gate, merge this row into ONE of:
+#   - a profile patch: $DSH_HOME/profiles/<profile>/cordis.patch.yml
+#     (that profile only; the profile must already exist — run
+#     `dsh --profile <profile>` once first if it does not), or
+#   - the home patch: $DSH_HOME/cordis.patch.yml (every profile), or
+# pass the project file per launch:
+#     dsh --profile <profile> --patch .dsh/cordis.patch.yml
+# Do NOT edit a generated cordis.yml: dsh rewrites it on every boot;
+# edit cordis.patch.yml instead. The `- insert:` wrapper is required:
+# a bare `- id: / name:` block without it is treated as an override
+# of an existing row and mounts nothing.
+#
+# The plugin file itself needs no npm install: it imports only
+# Node.js built-ins and delegates every decision to the Claude hook
+# scripts the deploy scripts also copy (target .dsh/hooks/, falling
+# back to .claude/hooks/). The TypeScript source is
+# .dsh/agent-harness-gate.ts; the deployed .mjs is its type-stripped
+# build artifact. Until a live dsh run confirms the plugin contract,
+# treat dsh stop enforcement as provisional (see the plugin header);
+# dsh 插件 API 未在官方文档/真机上核实 in this round, so no dsh
+# contract in this file should be read as verified.
+- insert:
+    - id: agent-harness-gate
+      name: '__PLUGIN_PATH__'
