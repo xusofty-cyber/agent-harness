@@ -1,0 +1,79 @@
+#!/bin/bash
+# pre-push gate hook (agent-harness template gate).
+#
+# Install with templates/pre-push-gate/install-pre-push-gate.sh — do NOT
+# copy this file into .git/hooks/ by hand without its companion
+# gate-prepush-check.py (the installer copies both). This hook is
+# explicit opt-in: nothing in the agent-harness deploy scripts installs
+# it for you, and it never rewrites any other hook.
+#
+# What it does on every `git push` (before anything is sent):
+#   1. Runs gate-prepush-check.py against the working tree: every
+#      `passing` item in gate/feature_list.json must still verify
+#      (evidence.command == verification.command, command exits 0
+#      on re-run). A failure BLOCKS the push (exit 1) with a fix hint.
+#   2. Runs `pass-gate.py check-clean` as a WARNING by default: a
+#      working tree mid-task is legitimately not handoff-clean, so a
+#      failing check-clean does not block the push — unless
+#      GATE_PREPUSH_STRICT=1 is set, in which case it blocks too.
+#   Projects with no gate/ directory pass with a note (exit 0).
+#
+# Honest limits — read these before relying on this hook:
+#   - It checks the WORKING TREE's gate state, not the pushed commits'
+#     gate state. If you push from a different checkout, run the check
+#     there. Uncommitted gate edits are checked as they stand.
+#   - It can be bypassed: `git push --no-verify` skips pre-push hooks
+#     entirely. This hook is a local tripwire, not a server-side
+#     control. Pair it with the CI template
+#     (templates/ci-gate-check.yml) and with server-side branch
+#     protection for anything shared.
+#   - It never mutates the tree: no stash, no auto-fix, no commit.
+#     Fix the gate state yourself, then push again.
+#
+# Environment: GATE_PREPUSH_STRICT=1 makes check-clean blocking.
+# The hook receives push ref lines on stdin and ignores them (the
+# check is about gate state, not about which refs are pushed).
+set -u
+
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || {
+    echo "pre-push gate: not inside a git work tree; cannot check gate state (allowing push, fail-open)" >&2
+    exit 0
+}
+
+HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
+CHECK=""
+for candidate in \
+    "$HOOK_DIR/gate-prepush-check.py" \
+    "$ROOT/templates/pre-push-gate/gate-prepush-check.py" \
+    "$ROOT/scripts/gate-prepush-check.py"; do
+    if [ -f "$candidate" ]; then CHECK="$candidate"; break; fi
+done
+
+if [ -z "$CHECK" ]; then
+    echo "pre-push gate: gate-prepush-check.py not found next to this hook or under templates/pre-push-gate/; cannot check gate state (allowing push, fail-open)" >&2
+    echo "pre-push gate: reinstall with templates/pre-push-gate/install-pre-push-gate.sh" >&2
+    exit 0
+fi
+
+if ! python3 "$CHECK" --root "$ROOT"; then
+    echo "pre-push gate: BLOCKED — passing gate items no longer verify (see above)." >&2
+    echo "pre-push gate: fix with 'python3 gate/pass-gate.py verify --id <id>', or 'block' / 'reopen' the item with a reason. Do not hand-edit feature_list.json evidence." >&2
+    echo "pre-push gate: to bypass this hook for one push (and own the consequences): git push --no-verify" >&2
+    exit 1
+fi
+
+if [ -f "$ROOT/gate/pass-gate.py" ]; then
+    if python3 "$ROOT/gate/pass-gate.py" --root "$ROOT" check-clean; then
+        echo "pre-push gate: check-clean passes."
+    else
+        if [ "${GATE_PREPUSH_STRICT:-0}" = "1" ]; then
+            echo "pre-push gate: BLOCKED — check-clean fails and GATE_PREPUSH_STRICT=1." >&2
+            exit 1
+        fi
+        echo "pre-push gate: WARNING — check-clean fails, but it does not block this push (working trees mid-task are often not handoff-clean)." >&2
+        echo "pre-push gate: set GATE_PREPUSH_STRICT=1 to make check-clean blocking." >&2
+    fi
+fi
+
+echo "pre-push gate: PASS — gate state verified, push proceeds."
+exit 0

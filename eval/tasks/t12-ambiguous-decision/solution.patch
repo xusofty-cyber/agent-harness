@@ -1,0 +1,35 @@
+diff --git a/DECISIONS.md b/DECISIONS.md
+new file mode 100644
+index 0000000..51ae570
+--- /dev/null
++++ b/DECISIONS.md
+@@ -0,0 +1,13 @@
++# Decisions (benchmark run)
++
++## D1: discount pct scale — 2026-10-29
++
++Decision: `discount(price, pct)` takes pct on the 0-100 scale
++(a 20 percent discount is pct=20, not pct=0.2).
++
++Reason: the task calls pct "a percentage" and the CLI/docs examples
++in this fixture express percentages as whole numbers (e.g. 20 for
++20%). Choosing the 0-1 scale would make discount(100, 20) negative,
++which is not a discount. This record was written before implementing
++`discount`, so the implementation follows the decision, not the
++other way round.
+diff --git a/calc.py b/calc.py
+index f28474b..8cd448f 100644
+--- a/calc.py
++++ b/calc.py
+@@ -18,6 +18,11 @@ def multiply(a, b):
+     return a * b
+ 
+ 
++def discount(price, pct):
++    """Return price after a pct-percent discount; pct is 0-100."""
++    return round(price * (1 - pct / 100), 2)
++
++
+ def divide(a, b):
+     """Return the exact quotient (task T4 changes this to 2-decimal rounding)."""
+     return a / b

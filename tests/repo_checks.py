@@ -770,7 +770,7 @@ check("archive-template-default",
 # marked unmeasured, never filled with invented numbers.
 _EVAL_START = "2e583970fb952158ad83617fe436534abd38295d"
 _eval_tasks = sorted((ROOT / "eval" / "tasks").glob("*/task.md"))
-check("eval:four-tasks", len(_eval_tasks) == 4, f"expected 4 task specs, found {len(_eval_tasks)}")
+check("eval:eight-tasks", len(_eval_tasks) == 8, f"expected 8 task specs (t1-t4 + t9-t12), found {len(_eval_tasks)}")
 for _spec in _eval_tasks:
     _text = _spec.read_text(encoding="utf-8")
     _tid = _spec.parent.name
@@ -840,6 +840,45 @@ _smoke_lines = [l for l in
 check("eval:bench-smoke-passes", _bench_smoke.returncode == 0,
       "eval/run-bench.sh smoke failed: "
       + (" | ".join(_smoke_lines[-2:]) if _smoke_lines else "(no output)"))
+
+# --- 3q2. B2 discriminating bench (t9-t12) + pre-push/CI template gate ---
+# B2 preregistration must exist before any B2 run and must fix the
+# decision rules (NO DISCRIMINATION if all arms still record 0 false
+# completions — the rules may not be rewritten after the outcome).
+_b2 = ROOT / "eval" / "results" / "b2-preregistration-2026-10-29.md"
+check("eval:b2-preregistration", _b2.is_file(), "b2-preregistration-2026-10-29.md missing")
+if _b2.is_file():
+    _b2_text = _b2.read_text(encoding="utf-8")
+    check("eval:b2-rules", "NO DISCRIMINATION" in _b2_text and "36 runs" in _b2_text,
+          "B2 preregistration lacks the decision rules or the 36-run scope")
+    check("eval:b2-no-runs-yet",
+          not list((ROOT / "eval" / "results").glob("t9-multi-file_*.json"))
+          and not list((ROOT / "eval" / "results").glob("t12-ambiguous-decision_*.json")),
+          "B2 run records exist before the round was run — preregistration violated")
+_run_bench = (ROOT / "eval" / "run-bench.sh").read_text(encoding="utf-8")
+for _t in ("t9-multi-file", "t10-hidden-boundary", "t11-resume", "t12-ambiguous-decision"):
+    check(f"eval:run-bench-{_t}", _t in _run_bench,
+          f"run-bench.sh lacks acceptance/mapping for {_t}")
+# Pre-push / CI template gate: templates exist, checker compiles,
+# CI template references the checker and check-clean (it is a project
+# template, not the repo's own ci.yml — see its header comment).
+for _rel in ("templates/pre-push-gate/gate-prepush-check.py",
+             "templates/pre-push-gate/pre-push",
+             "templates/pre-push-gate/install-pre-push-gate.sh",
+             "templates/ci-gate-check.yml",
+             "tests/prepush_gate_test.py"):
+    check(f"prepush:file-{_rel}", (ROOT / _rel).is_file(), f"{_rel} missing")
+_compile = subprocess.run(
+    [sys.executable, "-m", "py_compile",
+     str(ROOT / "templates" / "pre-push-gate" / "gate-prepush-check.py")],
+    capture_output=True, text=True)
+check("prepush:checker-compiles", _compile.returncode == 0, _compile.stderr.strip()[:200])
+_ci_tpl = (ROOT / "templates" / "ci-gate-check.yml").read_text(encoding="utf-8")
+check("prepush:ci-template", "gate-prepush-check.py" in _ci_tpl and "check-clean" in _ci_tpl,
+      "CI template lacks the checker or check-clean step")
+check("prepush:hook-no-verify-note",
+      "--no-verify" in (ROOT / "templates" / "pre-push-gate" / "pre-push").read_text(encoding="utf-8"),
+      "pre-push hook does not disclose the --no-verify bypass")
 
 # --- 3r. Deploy profiles (Phase 4, 4-1) ---
 # skills-profiles.json is the single source of truth for profile

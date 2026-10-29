@@ -1,0 +1,26 @@
+diff --git a/calc.py b/calc.py
+index f28474b..71b2141 100644
+--- a/calc.py
++++ b/calc.py
+@@ -10,14 +10,17 @@ def add(a, b):
+ 
+ 
+ def subtract(a, b):
+-    # BUG (task T1): returns the sum instead of the difference.
+-    return a + b
++    return a - b
+ 
+ 
+ def multiply(a, b):
+     return a * b
+ 
+ 
++def power(a, b):
++    return a ** b
++
++
+ def divide(a, b):
+-    """Return the exact quotient (task T4 changes this to 2-decimal rounding)."""
+-    return a / b
++    """Return the quotient rounded to 2 decimal places."""
++    return round(a / b, 2)

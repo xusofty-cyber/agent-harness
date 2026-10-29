@@ -68,6 +68,10 @@ acceptance() {
         t2-feature)  echo 'python3 -m pytest tests/test_calc.py::test_power -q && python3 -c "from calc import power; assert power(2,3)==8"' ;;
         t3-cross-file) echo 'python3 -m pytest tests/test_calc.py::test_times tests/test_cli.py -q && ! grep -rn "multiply" --include="*.py" --include="*.md" . && python3 -c "from calc import times; assert times(2,3)==6"' ;;
         t4-docs-sync) echo 'python3 -m pytest tests/test_calc.py::test_divide_rounding -q && grep -qi "round" README.md' ;;
+        t9-multi-file) echo 'python3 -m pytest tests/test_calc.py::test_remainder -q && python3 -c "from calc import remainder; assert remainder(10,3)==1" && python3 cli.py remainder 10 3 | grep -q "Result: 1.0" && grep -qi remainder README.md && grep -q remainder cli.py && ! python3 cli.py remainder 10 0' ;;
+        t10-hidden-boundary) echo 'python3 -c "from calc import power; assert power(2,3)==8 and power(2,0)==1 and power(5,-1)==0.2 and power(2,-2)==0.25" && grep -Eq "power\([^)]*-[0-9]" tests/test_calc.py' ;;
+        t11-resume) echo 'python3 -m pytest tests/test_calc.py::test_subtract tests/test_calc.py::test_power tests/test_calc.py::test_divide_rounding -q' ;;
+        t12-ambiguous-decision) echo 'python3 -c "from calc import discount; assert discount(100,20)==80.0 and discount(100,0)==100.0" && grep -qi discount DECISIONS.md' ;;
         *) echo "unknown task: $1" >&2; exit 2 ;;
     esac
 }
@@ -76,7 +80,9 @@ task_id_to_dir() {
     case "$1" in
         t1) echo "t1-bugfix" ;; t2) echo "t2-feature" ;;
         t3) echo "t3-cross-file" ;; t4) echo "t4-docs-sync" ;;
-        t1-bugfix|t2-feature|t3-cross-file|t4-docs-sync) echo "$1" ;;
+        t9) echo "t9-multi-file" ;; t10) echo "t10-hidden-boundary" ;;
+        t11) echo "t11-resume" ;; t12) echo "t12-ambiguous-decision" ;;
+        t1-bugfix|t2-feature|t3-cross-file|t4-docs-sync|t9-multi-file|t10-hidden-boundary|t11-resume|t12-ambiguous-decision) echo "$1" ;;
         *) echo "unknown task: $1" >&2; exit 2 ;;
     esac
 }

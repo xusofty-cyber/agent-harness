@@ -1,0 +1,54 @@
+# gate-check.yml — agent-harness CI template gate (project template).
+#
+# Copy this file to YOUR project's .github/workflows/gate-check.yml.
+# It is a TEMPLATE for projects that adopt the agent-harness gate; it
+# is NOT the agent-harness repository's own CI (that is
+# .github/workflows/ci.yml in the agent-harness repo itself, which
+# additionally runs repo_checks, hooks tests, markdownlint, shellcheck
+# and a deploy smoke test). Do not copy this file into the
+# agent-harness repo expecting it to replace that CI.
+#
+# Setup your project needs before this workflow can pass:
+#   1. Commit gate/pass-gate.py and gate/feature_list.json in your
+#      project (agent-harness gate layer, or at least a gate/
+#      directory in the same shape).
+#   2. Copy templates/pre-push-gate/gate-prepush-check.py from
+#      agent-harness into your project at scripts/gate-prepush-check.py
+#      (or adjust the path in the "Re-verify passing items" step).
+#      The checker is stdlib-only Python; it needs no agent host.
+#   3. If your project uses gate/clean-state.json, the check-clean
+#      step runs its build/test/start commands; dimensions with no
+#      command configured report SKIP, not PASS, and do not fail the
+#      step. A project with no clean-state.json still gets the
+#      passing-items re-verification from step 1.
+#
+# Why check-clean is blocking here but only a warning in the pre-push
+# hook: CI checks COMMITTED state, where temp-artefact and
+# SESSION_STATE checks are meaningful; a local working tree mid-task
+# is legitimately not handoff-clean. See templates/pre-push-gate/pre-push.
+#
+# Honest limits: this workflow re-runs verification commands from
+# feature_list.json in CI. A verification command that only passes on
+# a developer's machine will fail here — that is the point, not a bug.
+# It does not replace server-side branch protection or required
+# status checks; mark this workflow as required on your protected
+# branches if you want it to actually gate merges.
+name: gate-check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  gate-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Re-verify passing gate items (host-independent)
+        run: python3 scripts/gate-prepush-check.py --root .
+      - name: Gate check-clean (five dimensions)
+        run: python3 gate/pass-gate.py --root . check-clean
