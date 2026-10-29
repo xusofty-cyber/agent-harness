@@ -349,14 +349,6 @@
       "computedHash": "a6c67c1900064347c2a329990dd3c555657c51c3ec53b259a08aa01a2c26139a",
       "domain": "superpowers",
       "pinnedCommit": "8ca22dba9a94f28898bbce59f2537ff4d87c747d"
-    },
-    "writing-skills": {
-      "source": "obra/superpowers",
-      "sourceType": "github",
-      "skillPath": "skills/writing-skills/SKILL.md",
-      "computedHash": "bbdfe742f853562e643a3d40d64476359d47881e39cef80a189283fa26d11ab9",
-      "domain": "superpowers",
-      "pinnedCommit": "5bf4e78011075bcfc0dc295f0724994cd123ee71"
     }
   }
 }

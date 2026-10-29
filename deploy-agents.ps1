@@ -1213,6 +1213,10 @@ if (-not $isSelfRepo) {
 # Antigravity payloads into the Claude hook scripts, which are copied
 # here too so Antigravity-only projects (no .claude/hooks/) still gate.
 # Adapters fall back to .claude/hooks/ when the copy is absent.
+# Antigravity hooks cwd=.agents: commands in .agents/hooks.json are relative
+# to .agents/ (agy CLI 1.4.10 runs hooks with cwd=.agents/); do not re-prefix
+# them with .agents/hooks/ in the template, or agy resolves
+# .agents/.agents/hooks/... and rejects the tool call.
 if (-not $isSelfRepo) {
     $SourceAgentsHooksJson = Join-Path $ScriptDir ".agents\hooks.json"
     if (Test-Path $SourceAgentsHooksJson) {

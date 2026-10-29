@@ -1025,3 +1025,34 @@ still pending.
   profile, guide, lock, deploy-script, or PARITY change; no
   CHANGELOG user-facing entry, because nothing user-facing changed.
   The 2026-11 monthly ablation moves on to another component.
+
+## D65 — writing-skills DELETED (owner direct decision, 2026-10-29) — supersedes D64
+
+- **Decision:** `writing-skills` is deleted from this repository:
+  its `.agents/skills/writing-skills/` directory, its `full`-profile
+  entry in `skills-profiles.json`, its `skills-lock.json` entry, its
+  `THIRD-PARTY-LICENSES.md` row, and its catalog rows in the Skills
+  Usage Guide (EN/ZH) and the Panorama Guide (EN/ZH) are all removed
+  in the same change. `minimal` and `standard` never contained it and
+  are unchanged. Counts move from 40 skill directories / 42 lock
+  entries / full 38-by-default (40 with heavy) to 39 / 41 / full
+  37-by-default (39 with heavy); `tools/count-skills.py` EXPECTED
+  values and `tests/repo_checks.py` §3i/§3r are updated to match.
+- **Basis — stated exactly, not overstated:** this deletion rests on
+  the owner's direct decision on 2026-10-29 (21:59 Asia/Shanghai:
+  "no use, delete it"), which satisfies D64's re-review condition
+  (c) — an owner scope decision that skill-authoring guidance is out
+  of scope for this repository. It does NOT rest on bench proof that
+  the skill is useless: the 2026-10 ablation (12/12 pass, 0 false
+  completions without the skill) is bench-only, and no bench task
+  authors, edits, or verifies a skill, so those runs never exercised
+  this skill's own function. Per D20, no-regression remains necessary
+  but not sufficient evidence; the owner decision, not the bench
+  result, is what closes the question. D64's KEEP verdict is
+  superseded, not rewritten: the 2026-10 ablation report is retained
+  as a historical record with a supersession note appended.
+- **Scope of this entry:** deletion + count sync in the same change.
+  ZH-TW files are untouched per the frozen-translation policy; their
+  `writing-skills` rows and 40-skill counts go stale until the ZH-TW
+  regeneration branch lands (merge order set by the coordinator).
+  The 2026-11 monthly ablation moves on to another component.

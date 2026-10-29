@@ -45,6 +45,13 @@ for rel in [".claude/settings.json", ".agents/hooks.json", ".workbuddy/settings.
 # --- 1b. Antigravity hooks wiring ---
 # .agents/hooks.json must name the agent-harness-gate hook set, cover the
 # four gate events, and point only at adapter scripts that exist.
+# Hook-command cwd (observed, agy CLI 1.4.10 --print): agy runs the
+# commands with cwd = <project>/.agents, so every command must be
+# `node hooks/antigravity-*.mjs` (relative to .agents/). The old
+# `node .agents/hooks/...` form doubles to .agents/.agents/hooks/...
+# under that cwd and makes agy reject the tool call instead of failing
+# open. This check therefore asserts the .agents-cwd resolvability
+# explicitly and fails if any command re-introduces the .agents/ prefix.
 hooks_json_path = ROOT / ".agents" / "hooks.json"
 try:
     hooks_data = json.loads(hooks_json_path.read_text(encoding="utf-8-sig"))
@@ -53,16 +60,29 @@ try:
     for event in ["PreToolUse", "PostToolUse", "SessionStart", "Stop"]:
         check(f"antigravity-hooks:event:{event}", event in gate_hooks)
     adapter_files = set()
+    all_commands = []
     for event, entries in gate_hooks.items():
         if not isinstance(entries, list):
             continue
         for entry in entries:
             for h in entry.get("hooks", [entry]):
                 cmd = h.get("command", "") if isinstance(h, dict) else ""
-                if cmd.startswith("node .agents/hooks/antigravity-"):
+                if cmd:
+                    all_commands.append(cmd)
+                if cmd.startswith("node hooks/antigravity-"):
                     adapter_files.add(cmd.split()[1])
+    check("antigravity-hooks:four-commands", len(all_commands) == 4,
+          f"expected 4 hook commands, got {len(all_commands)}: {all_commands}")
+    check("antigravity-hooks:no-agents-prefix",
+          not any(".agents/hooks/" in c for c in all_commands),
+          f"hook command must not re-prefix .agents/hooks/: {all_commands}")
     for rel in sorted(adapter_files):
-        check(f"antigravity-hooks:adapter:{rel}", (ROOT / rel).exists())
+        # rel is relative to .agents/ (the hook cwd), not to the repo root.
+        check(f"antigravity-hooks:adapter:{rel}",
+              (ROOT / ".agents" / rel).exists())
+        check(f"antigravity-hooks:cwd-agents:{rel}",
+              (ROOT / ".agents" / rel).exists(),
+              f"{rel} must resolve with cwd=.agents/")
     check(
         "antigravity-hooks:common",
         (ROOT / ".agents" / "hooks" / "antigravity-common.mjs").exists(),
@@ -367,8 +387,8 @@ for tmpl_prefix in ("Global AGENTS", "Project AGENTS", "Directory AGENTS"):
               f"missing canonical template: {expected_tmpl}")
 
 # --- 3i. Skill counts: single source of truth (Phase 0, 0-1) ---
-# tools/count-skills.py owns the expected composition (40 dirs on disk,
-# 42 lock entries incl. 2 meta entries) and scans live docs for stale
+# tools/count-skills.py owns the expected composition (39 dirs on disk,
+# 41 lock entries incl. 2 meta entries) and scans live docs for stale
 # counts (44/43/42 in a skill context, openspec suite != 12). The script
 # is the single implementation; this check only asserts it passes.
 _count = subprocess.run(
@@ -980,8 +1000,8 @@ for _guide in ("docs/guides/Skills Usage Guide.md", "docs/guides/Skills Usage Gu
         check(f"profiles:guide-standard-{_guide}",
               _std_listed == set(_std) - set(_min),
               f"{_guide} standard subsection lists {_std_listed}, want {sorted(set(_std) - set(_min))}")
-        check(f"profiles:guide-full-{_guide}", "40" in _sec,
-              f"{_guide} tier section does not state the full profile has 40 skills")
+        check(f"profiles:guide-full-{_guide}", "39" in _sec,
+              f"{_guide} tier section does not state the full profile has 39 skills")
 
 # --- 3s. Loop layer (Phase 5, v3 §4.6) ---
 # tools/loop.py (stdlib only) + templates/loop/ (goal / loop-state / graph,
@@ -1192,6 +1212,7 @@ PARITY = [
     ("Antigravity rules adapter", "Antigravity rules adapter", "Antigravity .agents/rules frontmatter adapter"),
     ("Antigravity hooks", "Antigravity hooks", "Antigravity .agents/hooks.json gate hooks"),
     ("WorkBuddy hooks", "WorkBuddy hooks", "WorkBuddy .workbuddy/settings.json gate hooks"),
+    ("Antigravity hooks cwd=.agents", "Antigravity hooks cwd=.agents", "Antigravity hooks.json commands relative to .agents cwd"),
     ("PrepushGate", "prepush-gate", "template gate deployment (pre-push hook + checker + CI template)"),
     ("New-RuleDirBridge", "bridge_rule_dir", "rule-directory bridge helper"),
     (".windsurf/rules", ".windsurf/rules", "Windsurf bridge"),
