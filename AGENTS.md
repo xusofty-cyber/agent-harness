@@ -10,7 +10,7 @@
 
 Reusable AI coding-rule templates, a self-owned verification gate
 (`gate/pass-gate.py`, WIP=1, evidence-required passing, check-clean),
-Claude Code hooks, 40 native skill directories, loop/graph orchestration
+Claude Code hooks, 39 native skill directories, loop/graph orchestration
 on standard/full profiles, and one-click deployment scripts
 (`deploy-agents.ps1` / `.sh`) for Claude Code, Codex, Antigravity,
 Copilot and Zed. MIT licensed. EN/ZH docs are the sources of truth;
@@ -46,7 +46,7 @@ destructive parameters). Yunkai's guard work is cited as "云开 Guard
 ## Key paths
 
 - `.agents/rules/` — modular sub-rules (engineering, git, security, tokens)
-- `.agents/skills/` — 40 skill directories
+- `.agents/skills/` — 39 skill directories
 - `.claude/hooks/guard.mjs` — Claude Code PreToolUse Bash guard
 - `docs/internal/` — this repo's own dev notes (not deployed)
 

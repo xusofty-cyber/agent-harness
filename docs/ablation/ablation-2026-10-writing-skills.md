@@ -100,3 +100,17 @@ code, profile, guide, or lock file changes in this verdict.
   Until then the 2026-11 monthly ablation moves on to another
   component; this component is not re-proposed on the same t1–t4
   evidence.
+
+## Supersession — owner decision to delete (2026-10-29)
+
+The KEEP verdict above (night task 7, D64) is SUPERSEDED. On
+2026-10-29 at 21:59 Asia/Shanghai the owner directly decided to
+delete `writing-skills`, satisfying D64's re-review condition (c)
+(owner scope decision). The deletion itself is recorded in D65.
+This report is retained unchanged as the historical record of the
+2026-10 ablation run; nothing above is rewritten. For the avoidance
+of doubt: the bench result (12/12 pass, 0 false completions) was
+bench-only and never exercised this skill's own function
+(skill creation/editing/verification), so it is not cited as proof
+that the skill was useless — the deletion rests on the owner's
+decision, not on the bench evidence.

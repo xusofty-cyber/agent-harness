@@ -18,9 +18,12 @@ Single source of truth: `skills-profiles.json` at the repo root.
 |---|---|---|---|
 | `minimal` | 15 | 280,960 | **yes** (`--profile` unset) |
 | `standard` | 20 | 321,898 | no |
-| `full` | 40 | 1,960,329 | no |
+| `full` | 39 | 1,852,689 | no |
 
-`full` without `--include-heavy-skills` / `-IncludeHeavySkills` deploys 38
+> Full re-measured 2026-10-29 after the `writing-skills` removal
+> (D65): 1,960,329 − 107,640 = 1,852,689 skills-only bytes.
+
+`full` without `--include-heavy-skills` / `-IncludeHeavySkills` deploys 37
 skills (docx + brainstorming stay out; Phase 0, 0-9). Skills-only bytes
 count `.agents/skills/<name>/` on disk; the deployed project directory is
 larger (rules, templates, hooks) — Phase 3 `measure-load` reported the
@@ -102,13 +105,19 @@ The other 7 OpenSpec skills (`explore`, `continue-change`,
 `bulk-archive-change`) stay in `full` only: they extend the loop, they are
 not the loop.
 
-## Full — all 40
+## Full — all 39
 
 Everything on disk, including the OpenSpec remainder, the superpowers
 family (`using-superpowers`, `diagnosing-superpowers`), `engineering-docs`,
-`open-code-review`, `option-review`, `writing-skills`, `git-advanced`,
+`open-code-review`, `option-review`, `git-advanced`,
 `receiving-code-review`, `cross-tool-memory`, `caveman`, `ponytail`, `rtk`,
 `pdf`, and the two heavy skills (gated by the heavy flag).
+
+Removed 2026-10-29 (D65, owner direct decision): `writing-skills`
+(107,640 bytes, superpowers family, `full` only). Reason recorded
+in D65: the owner decided skill-authoring guidance is out of scope
+for this repository; the 2026-10 bench result is bench-only and was
+not used as proof that the skill is useless.
 
 ## How the reference counts were produced (reproducible)
 

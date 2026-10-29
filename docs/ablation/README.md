@@ -22,7 +22,7 @@ queue is a starting point, not a verdict):
 
 | # | Component | Bytes | Gate (2026-10-28) |
 |---|---|---|---|
-| 1 | `writing-skills` | 107,640 | CLEAR — first run, 2026-10 |
+| 1 | `writing-skills` | 107,640 | CLEAR — first run, 2026-10; skill REMOVED 2026-10-29 by owner decision (D65), no longer a candidate |
 | 2 | `diagnosing-superpowers` | 40,841 | CLEAR (guide-listed only) |
 | 3 | `executing-plans` | 23,060 | CLEAR (guide-listed only) |
 | 4 | `using-superpowers` | 20,630 | CLEAR (guide-listed only) |
@@ -34,7 +34,7 @@ the gate finds it referenced by `templates/agents/Project AGENTS.md` as a
 path, so it is BLOCKED, not CLEAR. The queue above was re-verified skill
 by skill with `ablation.py check`.)
 
-Skills referenced by a distributable template or hook (16 of 40, e.g.
+Skills referenced by a distributable template or hook (16 of 39, e.g.
 `systematic-debugging`, `ponytail`, `codegraph`) are NOT ablatable until
 their references are removed first — the gate blocks them, and the report
 says so. OpenSpec family skills are ablated as a family decision, not one
@@ -44,17 +44,17 @@ by one: removing a single loop step breaks the loop.
 
 ```sh
 # 1. Dependency gate
-python3 tools/ablation.py check --component writing-skills
+python3 tools/ablation.py check --component diagnosing-superpowers
 # 2. For each task (t1..t4) and rep (1..3): prepare a pack-arm run dir
 #    with the component removed, perform the task, record it.
-python3 tools/ablation.py prepare --component writing-skills --task t1 --rep 1
+python3 tools/ablation.py prepare --component diagnosing-superpowers --task t1 --rep 1
 #    ... perform the task in the printed directory ...
 bash eval/run-bench.sh record --task t1-bugfix --arm pack --rep 1 \
-  --dir /tmp/ablation/writing-skills/t1-bugfix/rep1 \
+  --dir /tmp/ablation/diagnosing-superpowers/t1-bugfix/rep1 \
   --started <epoch> --ended <epoch> --rounds <n> --verify-attempts <n> \
-  --outcome <pass|fail> --false-completion <0|1> --ablation writing-skills
+  --outcome <pass|fail> --false-completion <0|1> --ablation diagnosing-superpowers
 # 3. Report against the bare-arm thresholds
-python3 tools/ablation.py report --component writing-skills
+python3 tools/ablation.py report --component diagnosing-superpowers
 ```
 
 Records land in `eval/results/ablation/` with an `"ablation"` field; they
