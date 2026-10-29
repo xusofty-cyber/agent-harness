@@ -229,3 +229,28 @@
   `e0dc2e8`, plus this record commit). Remote main verified unchanged
   at `88c8b79` after the push. Local main untouched (still `52df27b`,
   stale, never pulled, never modified).
+
+## Epilogue (C3, 2026-10-29 walkthrough)
+
+- **CI green, then frozen text overtaken:** this record's body still
+  says CI had not gone green. That was true when the record was
+  written (first real run 40792827823 failed on pre-existing MD004
+  debt). After the 46-line MD004 fix (`ea828fb`), re-triggered run
+  **40793585930 on `ea828fb` went fully green** (lint-and-test
+  SUCCESS + ps-analyzer SUCCESS) — at that point HEAD was the
+  CI-green HEAD.
+- **Walkthrough commits after `ea828fb` (all local until this
+  epilogue):** D29 confirmed (`c31cf90`), D30 amended to 20
+  (`8c43d44`), D31 amended to minimal-15 (`c7e47ff`), D32 confirmed
+  (`3e6abf3`), D33 confirmed (`8d7d422`), D34 confirmed
+  (`a79b52d`), A4 rtk re-pinned to tip `7e92da00…` (`d70466b`,
+  DECISIONS D63), C4 hard-stop notice in bench README (`07b2ea8`),
+  C5 winget note clarified (`00a50b8`), C6 naming rule in AGENTS.md
+  (`a1a5f96`). The "rtk pin upstream recheck still owed" line above
+  is superseded by A4; the discriminating bench round (B1) is still
+  owed and is release evidence, not part of this record.
+- **Invariant restored by this epilogue:** the branch is pushed with
+  this record, and `workflow_dispatch` is re-triggered on the new
+  HEAD, so that HEAD is again a CI-green HEAD before any merge.
+  Remote main is verified unchanged at `88c8b79` after the push;
+  local main remains untouched.
