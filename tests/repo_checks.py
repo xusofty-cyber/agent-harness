@@ -34,13 +34,41 @@ def check(name: str, ok: bool, detail: str = "") -> None:
 
 
 # --- 1. JSON validity ---
-for rel in [".claude/settings.json", "skills-lock.json"]:
+for rel in [".claude/settings.json", ".agents/hooks.json", "skills-lock.json"]:
     p = ROOT / rel
     try:
         json.loads(p.read_text(encoding="utf-8-sig"))
         check(f"json:{rel}", True)
     except Exception as e:  # noqa: BLE001
         check(f"json:{rel}", False, str(e))
+
+# --- 1b. Antigravity hooks wiring ---
+# .agents/hooks.json must name the agent-harness-gate hook set, cover the
+# four gate events, and point only at adapter scripts that exist.
+hooks_json_path = ROOT / ".agents" / "hooks.json"
+try:
+    hooks_data = json.loads(hooks_json_path.read_text(encoding="utf-8-sig"))
+    gate_hooks = hooks_data.get("agent-harness-gate", {})
+    check("antigravity-hooks:gate-set", isinstance(gate_hooks, dict) and gate_hooks)
+    for event in ["PreToolUse", "PostToolUse", "SessionStart", "Stop"]:
+        check(f"antigravity-hooks:event:{event}", event in gate_hooks)
+    adapter_files = set()
+    for event, entries in gate_hooks.items():
+        if not isinstance(entries, list):
+            continue
+        for entry in entries:
+            for h in entry.get("hooks", [entry]):
+                cmd = h.get("command", "") if isinstance(h, dict) else ""
+                if cmd.startswith("node .agents/hooks/antigravity-"):
+                    adapter_files.add(cmd.split()[1])
+    for rel in sorted(adapter_files):
+        check(f"antigravity-hooks:adapter:{rel}", (ROOT / rel).exists())
+    check(
+        "antigravity-hooks:common",
+        (ROOT / ".agents" / "hooks" / "antigravity-common.mjs").exists(),
+    )
+except Exception as e:  # noqa: BLE001
+    check("antigravity-hooks:parse", False, str(e))
 
 # --- 2. TOML example validity (branch-aware: only on branches that have it) ---
 toml_example = ROOT / "templates" / "ai-memory.toml.example"
@@ -1086,6 +1114,7 @@ PARITY = [
     ("WorkBuddy", "WorkBuddy", "WorkBuddy rules bridge"),
     ("DSH_HOME", "DSH_HOME", "DeepSeek Harness global rules"),
     ("Antigravity rules adapter", "Antigravity rules adapter", "Antigravity .agents/rules frontmatter adapter"),
+    ("Antigravity hooks", "Antigravity hooks", "Antigravity .agents/hooks.json gate hooks"),
     ("New-RuleDirBridge", "bridge_rule_dir", "rule-directory bridge helper"),
     (".windsurf/rules", ".windsurf/rules", "Windsurf bridge"),
     (".clinerules", ".clinerules", "Cline bridge"),

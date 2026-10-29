@@ -76,7 +76,7 @@ graph TD
 | 工具 | 本仓库提供的配置/接线 | 执行档 | 状态 |
 |---|---|---|---|
 | Claude Code | `CLAUDE.md` 桥接、`.claude/skills/` 链接、`.claude/settings.json` Hook | 强制（钩子） | 脚本配置；Hook 仅在 Claude Code 客户端运行 |
-| Antigravity 2.0 / CLI / IDE 与扩展 | 项目规则/技能目录；`--global` 写入 `~/.gemini/AGENTS.md` 和 `GEMINI.md` 兼容指针 | 配置 | 当前表面支持两个全局文件名；较早 IDE 可跟随指针读取规范文件；CLI 专属规则另行配置。项目另部署 Antigravity 规则适配文件（`.agents/rules/agent-harness.md`，trigger: always_on），指向 `AGENTS.md` |
+| Antigravity 2.0 / CLI / IDE 与扩展 | 项目规则/技能目录；`--global` 写入 `~/.gemini/AGENTS.md` 和 `GEMINI.md` 兼容指针 | 钩子强制 | 当前表面支持两个全局文件名；较早 IDE 可跟随指针读取规范文件；CLI 专属规则另行配置。项目另部署 Antigravity 规则适配文件（`.agents/rules/agent-harness.md`，trigger: always_on），指向 `AGENTS.md`，以及门禁钩子集（`.agents/hooks.json`：PreToolUse/Stop/SessionStart/PostToolUse），把 Antigravity 负载翻译成 Claude 门禁钩子。构建环境无 `agy` 二进制，Antigravity CLI/IDE 真机运行未验证；协议级测试通过（`tests/antigravity-hooks.test.mjs`） |
 | Codex | 全局 `$CODEX_HOME/AGENTS.md`（默认 `~/.codex/AGENTS.md`）、项目 `AGENTS.md` 与 `.agents/skills/` | 配置 | `-Global` 初始化 Codex 全局文件；`-Global -Update` 备份后覆盖当前生效的全局规则 |
 | WorkBuddy | `.workbuddy/rules/agent-harness.md` 规则桥接 | 配置 | 仅桥接文件；本层不为 WorkBuddy 安装钩子；未在每个 WorkBuddy 版本上验证加载，请在已装版本上确认 |
 | DeepSeek Harness (dsh) | 全局 `${DSH_HOME:-~/.dsh}/AGENTS.md`（经 `--global` 部署）；项目 `AGENTS.md` 原生读取；技能走 `.agents/skills/` | 配置 | 不创建项目级桥接文件（`AGENTS.md` 原生读取）；经 `cordis.patch.yml` 的 MCP 接入与门禁强制不在本桥接层内 |

@@ -1,0 +1,43 @@
+{
+  "agent-harness-gate": {
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "node .agents/hooks/antigravity-post-tool-use.mjs",
+            "timeout": 10,
+            "type": "command"
+          }
+        ],
+        "matcher": "*"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "node .agents/hooks/antigravity-pre-tool-use.mjs",
+            "timeout": 30,
+            "type": "command"
+          }
+        ],
+        "matcher": "run_command|write_to_file|replace_file_content|multi_replace_file_content"
+      }
+    ],
+    "SessionStart": [
+      {
+        "command": "node .agents/hooks/antigravity-session-start.mjs",
+        "timeout": 10,
+        "type": "command"
+      }
+    ],
+    "Stop": [
+      {
+        "command": "node .agents/hooks/antigravity-stop.mjs",
+        "timeout": 10,
+        "type": "command"
+      }
+    ],
+    "enabled": true
+  }
+}

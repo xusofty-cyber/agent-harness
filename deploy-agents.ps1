@@ -1202,6 +1202,58 @@ if (-not $isSelfRepo) {
     }
 }
 
+# Antigravity hooks (.agents/hooks.json + .agents/hooks/)
+# Antigravity's native hooks protocol (PreToolUse / PostToolUse /
+# SessionStart / Stop, .agents/hooks.json). The adapters translate
+# Antigravity payloads into the Claude hook scripts, which are copied
+# here too so Antigravity-only projects (no .claude/hooks/) still gate.
+# Adapters fall back to .claude/hooks/ when the copy is absent.
+if (-not $isSelfRepo) {
+    $SourceAgentsHooksJson = Join-Path $ScriptDir ".agents\hooks.json"
+    if (Test-Path $SourceAgentsHooksJson) {
+        $TargetAgentsDir = Join-Path $ResolvedProjectPath ".agents"
+        if (-not (Test-Path $TargetAgentsDir)) {
+            New-Item -ItemType Directory -Path $TargetAgentsDir -Force | Out-Null
+        }
+        $TargetAgentsHooksJson = Join-Path $TargetAgentsDir "hooks.json"
+        if ($Update -or (-not (Test-Path $TargetAgentsHooksJson))) {
+            if ($Update) { Backup-ManagedPath $TargetAgentsHooksJson }
+            Copy-Item -Path $SourceAgentsHooksJson -Destination $TargetAgentsHooksJson -Force
+            Write-Host "  [OK] Deployed Antigravity hooks: .agents/hooks.json" -ForegroundColor Green
+        } else {
+            Write-Host "  [INFO] .agents/hooks.json already exists, keeping existing file." -ForegroundColor Gray
+        }
+        $SourceAgentsHooksDir = Join-Path $ScriptDir ".agents\hooks"
+        if (Test-Path $SourceAgentsHooksDir) {
+            $TargetAgentsHooksDir = Join-Path $TargetAgentsDir "hooks"
+            if (-not (Test-Path $TargetAgentsHooksDir)) {
+                New-Item -ItemType Directory -Path $TargetAgentsHooksDir -Force | Out-Null
+            }
+            Get-ChildItem -Path $SourceAgentsHooksDir -Filter "*.mjs" | ForEach-Object {
+                $targetHook = Join-Path $TargetAgentsHooksDir $_.Name
+                if ($Update -or (-not (Test-Path $targetHook))) {
+                    if ($Update) { Backup-ManagedPath $targetHook }
+                    Copy-Item -Path $_.FullName -Destination $targetHook -Force
+                }
+            }
+            $SourceClaudeHooksDir = Join-Path $ScriptDir ".claude\hooks"
+            if (Test-Path $SourceClaudeHooksDir) {
+                foreach ($guard in @("guard.mjs", "guard-write.mjs", "guard-feature-list.mjs", "stop-gate.mjs", "session-start.mjs", "post-tool-use.mjs")) {
+                    $srcGuard = Join-Path $SourceClaudeHooksDir $guard
+                    if (Test-Path $srcGuard) {
+                        $destGuard = Join-Path $TargetAgentsHooksDir $guard
+                        if ($Update -or (-not (Test-Path $destGuard))) {
+                            if ($Update) { Backup-ManagedPath $destGuard }
+                            Copy-Item -Path $srcGuard -Destination $destGuard -Force
+                        }
+                    }
+                }
+            }
+            Write-Host "  [OK] Deployed Antigravity hook scripts: .agents/hooks/" -ForegroundColor Green
+        }
+    }
+}
+
 # Deploy review-sensitive-paths.json
 if ((Test-Path $SourceReviewSensitivePaths) -and (-not $isSelfRepo)) {
     $TargetAgentsDir = Join-Path $ResolvedProjectPath ".agents"
