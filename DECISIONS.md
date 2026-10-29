@@ -843,6 +843,14 @@ still pending.
 - **Guard:** repo_checks `cost-gate:*` pins the tool, the enabled flag, and
   the ceilings; `tests/cost_test.py` covers OK / task-verification stop /
   task-duration stop / day stop / OFF-never-blocks.
+- **Implementation note (panel fix P1-3, 2026-10-29):** the enforcement
+  point is `eval/run-bench.sh setup`, which consults `cost.py check`
+  before a new bench run and refuses on exit 2 (smoke goes through
+  setup, so it is covered). `pass-gate.py verify` does NOT consult this
+  gate. The ledger is a plain local JSONL: emptying or renaming it
+  bypasses the stop, so the hard stop is a policy gate for agents that
+  follow the workflow (防君子不防篡改), not tamper-proof enforcement.
+  This note narrows the enforcement claim; it does not change the ruling.
 
 ## D58 — Graph/Loop ship only on standard/full profiles (user final ruling, 2026-10-29)
 

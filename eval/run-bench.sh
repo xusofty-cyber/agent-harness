@@ -26,6 +26,20 @@
 # The agent executing a run fills in rounds / verify-attempts / outcome
 # honestly after finishing; the runner never invents them.
 # Solution patches are NEVER copied into a run directory.
+#
+# Cost hard stop (D57, panel fix P1-3): `setup` consults
+# `eval/cost.py check` before starting a new run (a new verification
+# round) and refuses with exit 2 on BUDGET STOP — before any directory
+# is created or destroyed, and without touching an in-flight run. The
+# ledger paths default to eval/cost-ledger.jsonl / eval/cost-budget.json
+# and may be overridden with COST_LEDGER / COST_BUDGET (test seam; the
+# ledger itself is local-only and gitignored). Honest scope: this gate
+# binds bench runs started through this script (smoke uses setup, so it
+# is covered too). It does NOT bind `pass-gate.py verify` or any other
+# entry point, and the ledger is a plain local JSONL — emptying or
+# renaming it bypasses the stop. The hard stop is a policy gate for
+# agents that follow the workflow (防君子不防篡改), not tamper-proof
+# enforcement.
 set -u
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -67,6 +81,26 @@ task_id_to_dir() {
     esac
 }
 
+# Cost hard-stop gate (D57 / P1-3). Consulted before a new run starts;
+# exit 2 refuses the run. Any other non-zero exit from the gate itself
+# also refuses (fail closed: never start a run the gate could not vet).
+check_budget() {
+    local task="$1"
+    local ledger="${COST_LEDGER:-$ROOT/eval/cost-ledger.jsonl}"
+    local budget="${COST_BUDGET:-$ROOT/eval/cost-budget.json}"
+    local out rc
+    out="$(python3 "$ROOT/eval/cost.py" check --task "$task" --ledger "$ledger" --budget "$budget" 2>&1)"
+    rc=$?
+    echo "$out"
+    if [ "$rc" -eq 0 ]; then return 0; fi
+    if [ "$rc" -eq 2 ]; then
+        echo "setup: cost hard stop (D57) refuses this run — do not start a new verification round; record the task as blocked, not passing or failed." >&2
+        exit 2
+    fi
+    echo "setup: cost gate unavailable (exit $rc) — refusing to start a run the gate could not vet." >&2
+    exit 2
+}
+
 do_setup() {
     local task="" arm="" rep="" dest=""
     while [ $# -gt 0 ]; do
@@ -81,6 +115,8 @@ do_setup() {
     [ -n "$task" ] && [ -n "$arm" ] && [ -n "$rep" ] || { echo "setup: --task/--arm/--rep required" >&2; exit 2; }
     case "$arm" in bare|pack|gate) ;; *) echo "setup: arm must be bare|pack|gate" >&2; exit 2 ;; esac
     [ -d "$TASKS/$task" ] || { echo "setup: no such task $task" >&2; exit 2; }
+    # Gate BEFORE any destructive work (rm -rf dest) or deploy.
+    check_budget "$task"
     dest="${dest:-/tmp/bench/${task}/${arm}/rep${rep}}"
     rm -rf "$dest"
     mkdir -p "$dest"

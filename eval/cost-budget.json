@@ -12,5 +12,5 @@
   },
   "max_total_duration_ms": 3600000,
   "max_verifications": 1000,
-  "note": "Alert thresholds (max_total_duration_ms, max_verifications) are for report only. Hard-stop ceilings (hard_stop_task, hard_stop_day) are enforced by 'cost.py check' since yunyi D23 (2026-10-28), adopted in feat/merge-v3 by user final ruling 2026-10-29 (D57): exceeding one refuses starting a new verification run (exit 2), never kills an in-flight run. Ledger file eval/cost-ledger.jsonl is local and must not be committed."
+  "note": "Alert thresholds (max_total_duration_ms, max_verifications) are for report only. Hard-stop ceilings (hard_stop_task, hard_stop_day) are enforced by 'cost.py check' since yunyi D23 (2026-10-28), adopted in feat/merge-v3 by user final ruling 2026-10-29 (D57): exceeding one refuses starting a new verification run (exit 2), never kills an in-flight run. Enforcement point (panel fix P1-3, 2026-10-29): eval/run-bench.sh setup consults 'cost.py check' before a new bench run (smoke goes through setup, so it is covered); pass-gate.py verify does NOT consult this gate. Ledger file eval/cost-ledger.jsonl is local and must not be committed. The ledger is a plain local JSONL: emptying or renaming it bypasses the stop, so the hard stop is a policy gate for agents that follow the workflow (防君子不防篡改), not tamper-proof enforcement."
 }
