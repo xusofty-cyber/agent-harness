@@ -8,9 +8,13 @@
 
 ## What this repo is
 
-Reusable AI coding-rule templates, Claude Code hooks, 40 native skill
-directories, and one-click deployment scripts (`deploy-agents.ps1` / `.sh`)
-for Claude Code, Codex, Antigravity, Copilot and Zed. MIT licensed.
+Reusable AI coding-rule templates, a self-owned verification gate
+(`gate/pass-gate.py`, WIP=1, evidence-required passing, check-clean),
+Claude Code hooks, 40 native skill directories, loop/graph orchestration
+on standard/full profiles, and one-click deployment scripts
+(`deploy-agents.ps1` / `.sh`) for Claude Code, Codex, Antigravity,
+Copilot and Zed. MIT licensed. EN/ZH docs are the sources of truth;
+ZH-TW is stale/frozen per `docs/internal/i18n-status.md`.
 
 ## Working in this repo
 

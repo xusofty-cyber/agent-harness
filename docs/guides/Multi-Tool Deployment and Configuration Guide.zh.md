@@ -97,7 +97,7 @@
 
 ### 配置与实现
 
-部署脚本复制 [`.claude/settings.json`](../../.claude/settings.json) 并部署 [`.claude/hooks/guard.mjs`](../../.claude/hooks/guard.mjs) 与 [`guard-write.mjs`](../../.claude/hooks/guard-write.mjs)。请直接检查这些源文件；不要从旧版指南复制示例配置，因为钩子协议和实现会随版本变化。
+部署脚本复制 [`.claude/settings.json`](../../.claude/settings.json)（接线全部五类 Claude Code 钩子事件），并部署 [`.claude/hooks/`](../../.claude/hooks/) 全套钩子：[`guard.mjs`](../../.claude/hooks/guard.mjs)（PreToolUse Bash 守卫）、[`guard-write.mjs`](../../.claude/hooks/guard-write.mjs)（Write/Edit 警告）、[`guard-feature-list.mjs`](../../.claude/hooks/guard-feature-list.mjs)（拒绝直接改写 `feature_list.json`）、[`stop-gate.mjs`](../../.claude/hooks/stop-gate.mjs)（停止门禁）、[`session-start.mjs`](../../.claude/hooks/session-start.mjs)（会话恢复）、[`post-tool-use.mjs`](../../.claude/hooks/post-tool-use.mjs)（成本账本遥测）。请直接检查这些源文件；不要从旧版指南复制示例配置，因为钩子协议和实现会随版本变化。非 Claude 宿主上这些钩子均不运行，请手动跑 `gate/pass-gate.py verify` / `check-clean`，并依赖 [`gate/README.md`](../../gate/README.md) 所述的 CI 二次重跑。
 
 ### 其他工具的等效机制（扩展点）
 

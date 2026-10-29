@@ -2,14 +2,14 @@
 
 > **Language / 语言**: **English** | [简体中文](README.zh.md) | [繁體中文](README.zh-tw.md)
 
-> **Reusable AI coding-rule templates, Claude Code hooks, and multi-tool deployment scripts**
+> **Reusable AI coding-rule templates, a self-owned verification gate, Claude Code hooks, loop/graph orchestration, and multi-tool deployment scripts**
 
 > **⚡ 30-second start**: `git clone https://github.com/xusofty-cyber/agent-harness.git && cd agent-harness && ./run-pipeline.sh --all -y`
 > See [Quick Start](#quick-start) for details. New to the jargon? Check [Glossary](docs/glossary.md).
 
 This repository provides global, project, and directory rule templates, Claude Code PreToolUse hooks, skill files, and Windows/Linux/macOS deployment scripts. Rule loading and hook behavior vary by tool. Hooks are client-side mechanisms, not operating-system or server-side security boundaries.
 
-> **Positioning**: this repository is a config + skill distribution pack with a minimal gate scaffold (from Phase 1). It contains no agent runtime: the core gate is self-owned and host-agnostic, and Comet is an optional adapter, not the harness itself.
+> **Positioning (v0.3.0)**: this repository is a gated harness, not just a config + skill distribution pack. The core is a self-owned, stdlib-only verification gate (`gate/pass-gate.py`): a machine-readable feature list, WIP=1, evidence-required `passing`, a three-layer termination check, and a five-dimension clean-state check. It contains no agent runtime: Comet is an optional adapter, not the harness itself. Loop/graph orchestration ships only on the `standard`/`full` profiles (D58); the `minimal` profile ships the gate itself only.
 
 ## Prerequisites
 
@@ -48,12 +48,12 @@ graph TD
    - **Comet integration guide**: checks the installed version and project configuration; this skill does not implement Comet's state machine or phase guards;
    - **Living Documentation & Engineering Docs**: `living-documentation` (4-tier doc model: specs/architecture/reference/guides, frontmatter-based code-doc bidirectional traceability, L0/L1/L2 impact maintenance) and `engineering-docs` (15 bilingual phase-gate templates covering 31 R&D document types for cross-agent consistency);
    - **Spec-Driven Development (SDD)**: Full 12-skill `openspec` suite (proposal, apply changes, verify, sync specs, archive, explore);
-   - **Test-Driven Development (TDD)**: Full 15-skill `superpowers` suite (red-green cycle, systematic root-cause debugging, physical verification evidence gate, git worktrees);
+   - **Test-Driven Development (TDD)**: superpowers-derived workflow skills (red-green cycle, systematic root-cause debugging, physical verification evidence gate, git worktrees);
    - **Implementation and retrieval guidance**: `ponytail` (minimal-solution ladder) and `codegraph` (optional CodeGraph integration guide; CLI/MCP setup is separate);
    - **Output and communication guidance**: `rtk` (optional Rust Token Killer CLI guide; command-rewrite hooks require setup) and `caveman` (concise-response Skill);
    - **Pre-decision review and shared memory**: `option-review` (isolated 5-dimension candidate approach review matrix) and `cross-tool-memory` (project-scoped long-term memory navigation aid);
    - **Professional Document Processing**: `docx` (Word formatting & manipulation) and `pdf` (structured extraction & analysis). Note: `docx` ships its full OOXML validation toolchain (~1.3 MB, mostly XSD schemas), making it the largest skill in the repo — it is no longer deployed by default; pass `--include-heavy-skills` / `-IncludeHeavySkills` to include it (and `brainstorming`, which ships a local companion server `scripts/server.cjs`). Previously deployed copies are left in place; the flag only affects new copies.
-   - **Skills Usage & Trigger Guide**: For trigger modes (auto/explicit/hybrid), categorization, and project memory setup of all 40 skills, see [`Skills Usage Guide.md`](docs/guides/Skills%20Usage%20Guide.md) ([简体中文](docs/guides/Skills%20Usage%20Guide.zh.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md)). Deploy profiles (Phase 4, D58): by default only the 15 skills are deployed (`--profile minimal`: 10 gate core + 5 openspec core) plus the gate itself (no `gate/graph.py`, no loop layer); `--profile standard` deploys 20 skills plus gate + orchestration (graph + loop); `--profile full` deploys all 40 skills plus gate + orchestration (heavy skills still need `--include-heavy-skills`). Re-deploying an older minimal project with `minimal` removes its graph/loop files (backed up first); use `--profile standard` to keep them.
+   - **Skills Usage & Trigger Guide**: For trigger modes (auto/explicit/hybrid), categorization, and project memory setup of all 40 skills, see [`Skills Usage Guide.md`](docs/guides/Skills%20Usage%20Guide.md) ([简体中文](docs/guides/Skills%20Usage%20Guide.zh.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md)). Deploy profiles (Phase 4, D58; membership is the single source of truth in `skills-profiles.json`): by default only the 15 skills are deployed (`--profile minimal`: 10 gate core + 5 openspec core) plus the gate itself (no `gate/graph.py`, no loop layer); `--profile standard` deploys 20 skills plus gate + orchestration (graph + loop); `--profile full` deploys 38 skills by default plus gate + orchestration, or all 40 with `--include-heavy-skills`. Re-deploying an older minimal project with `minimal` removes its graph/loop files (backed up first); use `--profile standard` to keep them.
 
 4. **One-Click Deployment, Interactive Wizard & Unified Pipeline (`deploy-agents` & `run-pipeline`)**:
    - **Interactive Step-by-Step Terminal Wizard**: Running scripts without arguments (or with `--interactive` / `-Interactive`) launches a guided TUI wizard (arrow keys to move, spacebar to toggle, enter to confirm) to select template language (`en`, `zh`, `zh-tw`), deployment scope (`project`, `global`, `both`), target project path, and multi-select agent bridge files (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy) plus optional workflows, preventing CLI mistakes;
@@ -83,6 +83,14 @@ graph TD
 
 Use `-Initialize` / `--initialize` during deployment to create guidance with locally verifiable project facts and a checklist for unknowns. Add `-DirectoryPath` / `--directory` with an existing module path to generate its directory-level guidance too. The scripts only infer facts supported by local Git metadata, manifests, lockfiles, and CI files. For `package.json`, detected scripts and common framework/storage dependencies are marked as suggestions for review, not verified facts. Users or the active coding agent must confirm purpose, ownership, module responsibility, and boundaries. Existing `AGENTS.md` files are preserved; a review copy is written as `AGENTS.generated.md`. Run `-Check` / `--check` to find unresolved items.
 
+### Current status (v0.3.0) — read this before relying on the gate
+
+- **Enforcement is host-dependent.** Claude Code hooks enforce the gate in the client (see the table above). On every other host, the gate is a discipline plus a manual command: run `python3 gate/pass-gate.py verify` and `python3 gate/pass-gate.py check-clean` yourself. The host-independent backstop is CI, which re-runs every `passing` item's verification command (`tests/repo_checks.py` §3k). See [`gate/README.md`](gate/README.md) for the known bypasses, including direct edits through Bash and the plain-text cost ledger.
+- **Benchmark claim, stated honestly.** The pre-registered B1 round (t1–t8 × bare/pack/gate × 3 rounds = 72 runs) passed 72/72 with 0 false completions on every arm, so per its pre-registered rules the result is NO DISCRIMINATION. This release makes no claim that the gate reduces false completions; the only interception evidence is the Phase 1 dogfood (a planted fake pass caught by the hook and by CI).
+- **Evaluator is advisory-only (D28).** `eval/rubric.md` scores six dimensions, but `evaluate.py --gate` always refuses and a human always decides. The rubric's five calibration rounds used recorded phase outcomes, not a live second judge.
+- **Translations.** EN and ZH are the sources of truth. ZH-TW rows are stale/frozen per `docs/internal/i18n-status.md`; regenerate them from EN before the next release, do not hand-sync sentence by sentence.
+- **Windows.** CI runs PSScriptAnalyzer on the PowerShell scripts; the deploy smoke test in CI runs the Bash script. PowerShell deployment paths are review-verified, not execution-verified on Windows in CI.
+
 ---
 
 ## Directory Structure
@@ -97,12 +105,26 @@ agent-harness/
 │   │   └── token-discipline.md      # Read/fetch/speak gates, log truncation
 │   └── skills/                      # 40 Native engineering skills (Comet, OpenSpec, Superpowers...)
 ├── .claude/
-│   ├── settings.json                # Claude Code PreToolUse security interceptor config
-│   └── hooks/                       # Security hook scripts (Node.js, reads stdin JSON)
+│   ├── settings.json                # Claude Code hook config (all five hook events)
+│   └── hooks/                       # Hook scripts (Node.js, reads stdin JSON)
 │       ├── guard.mjs                # Bash tool guard (exit 2 for hard blocks)
-│       └── guard-write.mjs          # Write/Edit tool guard (warnings)
+│       ├── guard-write.mjs          # Write/Edit tool guard (warnings)
+│       ├── guard-feature-list.mjs   # Denies direct Write/Edit to feature_list.json
+│       ├── stop-gate.mjs            # Blocks stopping with an in_progress item
+│       ├── session-start.mjs        # Prints a session resume from gate state
+│       └── post-tool-use.mjs        # Appends cost-ledger telemetry
+├── gate/                            # Self-owned verification gate
+│   ├── pass-gate.py                 # Feature-list state machine + verify + check-clean
+│   ├── graph.py                     # Graph executor (standard/full only)
+│   ├── feature_list.schema.json     # Statuses, transitions, WIP=1, evidence rules
+│   └── init.template.sh             # Scaffold a project for the gate + one smoke run
+├── tools/
+│   ├── loop.py                      # Goal Loop / Maker-Checker runner (standard/full only)
+│   ├── sync-skills.py               # External skill synchronization & upstream update checker
+│   └── doc-impact.py                # Living documentation impact analysis & quality gate
+├── eval/                            # Self-built benchmark (t1–t8) + rubric (advisory-only)
 ├── templates/
-│   └── agents/                      # 15 Canonical rule templates (Global/Project/Directory x 5 langs)
+│   └── agents/                      # Canonical rule templates (Global/Project/Directory x en/zh/zh-tw)
 ├── run-pipeline.ps1                 # Windows PowerShell unified pipeline runner
 ├── run-pipeline.sh                  # Linux / macOS Bash unified pipeline runner
 ├── deploy-agents.ps1                # Windows PowerShell one-click deploy & update script
@@ -110,8 +132,6 @@ agent-harness/
 ├── setup-ai-memory.ps1              # Explicit ai-memory setup for one opted-in project/client
 ├── setup-ai-memory.sh               # Linux / macOS / WSL setup helper
 ├── tools/tui.py                     # Terminal UI single/multi select library
-├── tools/sync-skills.py             # External skill synchronization & upstream update checker
-├── tools/doc-impact.py              # Living documentation impact analysis & quality gate
 ├── .ai-memory.toml.example          # Safe-to-copy local opt-in marker example
 ├── skills-lock.json                 # Skill source and partial integrity metadata
 ├── README.md                        # Repository overview (English default)
@@ -155,7 +175,7 @@ Run all lifecycle stages in sequence via the unified OS pipeline runner (Deploy 
 
 - **Windows CLI (PowerShell)**:
   ```powershell
-  # Deploy to target project (English default, or choose -Language zh / zh-tw / fr / de)
+  # Deploy to target project (English default, or choose -Language zh / zh-tw)
   .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Global -Language en -Initialize -DirectoryPath "packages/core"
   .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Check -DirectoryPath "packages/core"
   ```
@@ -163,7 +183,7 @@ Run all lifecycle stages in sequence via the unified OS pipeline runner (Deploy 
 - **Linux / macOS CLI (Bash)**:
   ```bash
   chmod +x ./deploy-agents.sh
-  # Deploy with language selection (English default, or --lang zh / zh-tw / fr / de)
+  # Deploy with language selection (English default, or --lang zh / zh-tw)
   ./deploy-agents.sh /path/to/my-project --global --lang en --initialize --directory packages/core
   ./deploy-agents.sh /path/to/my-project --check --directory packages/core
   ```

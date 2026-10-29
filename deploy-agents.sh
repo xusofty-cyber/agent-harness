@@ -46,7 +46,7 @@ usage() {
     echo "  --check, -k       检查项目级规则中的初始化占位项；可搭配 --directory 检查模块规则。"
     echo "  --comet-init       若系统中已安装 comet CLI，自动在目标项目中运行 comet init。"
     echo "  --include-heavy-skills 部署可选重型技能 docx 与 brainstorming（默认跳过；docx 约 1.3 MB，brainstorming 含本地服务 server.cjs）。只影响本次新复制，不删除目标项目已有文件。"
-    echo "  --profile <minimal|standard|full> 部署分层（默认 minimal：15 个技能（10 个门禁核心 + 5 个 openspec 核心）+ 门禁本身（不含 graph.py 与循环层）；standard：20 个技能 + 门禁 + 编排（graph.py、loop.py 与模板）；full：全部 40 个技能 + 门禁 + 编排。技能成员见 skills-profiles.json）。"
+    echo "  --profile <minimal|standard|full> 部署分层（默认 minimal：15 个技能（10 个门禁核心 + 5 个 openspec 核心）+ 门禁本身（不含 graph.py 与循环层）；standard：20 个技能 + 门禁 + 编排（graph.py、loop.py 与模板）；full：默认 38 个技能 + 门禁 + 编排，加 --include-heavy-skills 才到全部 40 个。技能成员见 skills-profiles.json）。"
     echo "  --ai-memory-init, -m 初始化项目 .ai-memory.toml 并接入跨工具记忆 (ai-memory)。
   --pipeline         启动统一流水线 (Pipeline: 规则部署 + AI记忆 + 技能同步 + 文档质检)。"
     echo ""
@@ -1720,6 +1720,8 @@ echo -e "${GREEN} 部署完成！${NC}"
 echo -e "${CYAN} 目标项目: ${TARGET_PROJECT_DIR}${NC}"
 echo -e "${CYAN} 规则目录: ${TARGET_RULES_DIR}${NC}"
 echo -e "${CYAN} 技能目录: ${TARGET_SKILLS_DIR}${NC}"
+echo -e "${CYAN} 部署档位: ${PROFILE}（minimal 只有门禁本身，不含 graph.py 与循环层；standard/full 含编排）${NC}"
+echo -e "${CYAN} 门禁强制力: 仅 Claude Code 钩子在客户端强制执行；其他宿主请手动跑 gate/pass-gate.py verify 与 check-clean，CI 会二次重跑 passing 项。${NC}"
 if command -v comet >/dev/null 2>&1; then
     echo -e "\n${YELLOW}[TIP] 检测到 Comet CLI。请按当前版本文档为该项目选择并配置工作流。${NC}"
 elif command -v ai-memory >/dev/null 2>&1; then

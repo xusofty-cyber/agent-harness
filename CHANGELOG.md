@@ -6,6 +6,11 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+### Changed
+
+- Docs and deploy scripts synced to the v0.3.0 reality (no behaviour change to the gate itself): README EN/ZH positioning now describes the gated harness instead of a distribution pack with a minimal gate scaffold; the directory tree lists the full Claude Code hook set, `gate/`, `tools/loop.py` and `eval/`; template languages are en/zh/zh-tw only (FR/DE were removed in v0.3.0); the `full` profile is documented as 38 skills by default, 40 only with `--include-heavy-skills`; the unverified "15-skill superpowers suite" count is removed. A new "Current status (v0.3.0)" section states host-dependent enforcement, the B1 NO DISCRIMINATION result, the advisory-only evaluator (D28), stale/frozen ZH-TW, and Windows review-only verification. The Multi-Tool Deployment Guide EN/ZH now lists all six Claude Code hooks and the manual gate commands for non-Claude hosts. ZH-TW README receives only the two clearly wrong items (superpowers count, FR/DE language examples); its full regeneration from EN remains owed per `docs/internal/i18n-status.md`.
+- Deploy help and completion summaries synced to the same reality in both scripts (parity preserved): `--profile full` is documented as 38 skills by default, 40 only with the heavy-skills flag, and the completion summary now states the deployed profile, that minimal ships the gate only (no graph/loop), and that gate enforcement is Claude Code hooks only on other hosts (manual `pass-gate.py verify` / `check-clean` plus CI re-run).
+
 ## [0.3.0] - 2026-10-29
 ### Added
 - **A4 rtk 重钉尖端（2026-10-29，用户逐项过批准第 7 项，分支 `feat/merge-v3`，未合 main）**：rtk lock pin 由 `e05c7bdf…` 重钉到上游尖端 `7e92da00…`（`pinnedCommit` + `installerUrl` + `pinnedAt` 更新；`installerSha256` 不变——新旧两提交的安装脚本字节相同，下载实测 SHA256 一致）。24 个提交差量：tracking/savings bug 修复、依赖 bumps、discover 词法器内部重构、CI 文件，无安装脚本与接口改动。同步改动：deploy-agents.sh 的 rtk URL、Panorama 指南 EN/ZH 的 rtk URL；DECISIONS.md 新增 D63。**如实说明**：重钉不等于二进制 pin——rtk 安装器安装时解析 latest release（仅 `RTK_VERSION` 可覆盖），pin 定的是安装脚本版本而非二进制版本，旧 pin 同样如此；ps1 winget 通道无 pin 的 D13 缺口不受本次影响。

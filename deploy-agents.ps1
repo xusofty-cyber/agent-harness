@@ -1609,6 +1609,8 @@ Write-Host " Deployment completed successfully!" -ForegroundColor Green
 Write-Host " Target Project: $ResolvedProjectPath" -ForegroundColor Cyan
 Write-Host " Rules Directory: $TargetRulesDir" -ForegroundColor Cyan
 Write-Host " Skills Directory: $TargetSkillsDir" -ForegroundColor Cyan
+Write-Host " Profile: $SkillProfile (minimal ships the gate only, no graph.py or loop layer; standard/full add orchestration)" -ForegroundColor Cyan
+Write-Host " Gate enforcement: Claude Code hooks only, in the client. On other hosts, run gate/pass-gate.py verify and check-clean manually; CI re-runs passing items." -ForegroundColor Cyan
 if ($cometCli) {
     Write-Host "`n[TIP] Comet CLI is installed. Use its current documentation to configure a workflow for this project." -ForegroundColor Yellow
 } elseif ($aiMemoryCli) {

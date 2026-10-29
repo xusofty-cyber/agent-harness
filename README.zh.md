@@ -9,7 +9,7 @@
 
 本项目提供全局、项目和目录级规范模板、Claude Code PreToolUse 钩子、技能文件，以及 Windows/Linux/macOS 部署脚本。各工具的规则加载方式和钩子能力不同；请以支持矩阵和部署脚本实际行为为准。钩子属于客户端机制，不是操作系统或服务端安全边界。
 
-> **定位**：本仓库是配置 + 技能分发包，外加自 Phase 1 起的最小门禁脚手架；不包含任何 Agent 运行时。核心门禁自有且与宿主无关，Comet 只是可选适配器，不是本仓库本身。
+> **定位（v0.3.0）**：本仓库是一套带门禁的 harness，而不只是配置 + 技能分发包。核心是自有的纯标准库验证门禁（`gate/pass-gate.py`）：机器可读功能清单、WIP=1、passing 必须有证据、三层终止校验、五维 clean-state 检查。不包含任何 Agent 运行时；Comet 只是可选适配器，不是本仓库本身。循环 / 图编排只随 `standard` / `full` 档发货（D58），`minimal` 档只有门禁本身。
 
 ## 前置要求
 
@@ -49,12 +49,12 @@ graph TD
    - **Comet 集成说明**：引导检查已安装版本和项目配置；此技能本身不实现 Comet 状态机或阶段守卫。
    - **活体文档与工程文档规范**：`living-documentation`（六阶文档体系：specs/architecture/reference/guides，Frontmatter 代码双向追溯关联，L0/L1/L2 变更门禁与文档演进）与 `engineering-docs`（31 种研发文档类型，15 个中英双语门禁模板，确保各 Agent 阶段输出格式一致）。
    - **规范驱动开发（SDD）**：`openspec` 全套 12 个技能（提案、变更应用、验证、主文档同步、归档）。
-   - **测试驱动开发（TDD）**：`superpowers` 全套 15 个技能（TDD 红绿循环、系统性排障、完工验证证据门、工作区隔离）。
+   - **测试驱动开发（TDD）**：源自 superpowers 的工作流技能（TDD 红绿循环、系统性排障、完工验证证据门、工作区隔离）。
    - **实现与检索指导**：`ponytail`（最小实现决策阶梯）与 `codegraph`（CodeGraph 可选集成指引；CLI/MCP 需单独安装配置）。
    - **输出与表达指导**：`rtk`（Rust Token Killer 可选 CLI 指引；需配置命令重写 Hook）与 `caveman`（简明表达 Skill）。
    - **事前决策评审与共享记忆**：`option-review`（5 维度多候选方案事前独立评审与决策矩阵）与 `cross-tool-memory`（跨工具项目长期记忆导航与经验检索）。
    - **专业文档处理**：`docx`（Word 专业排版）、`pdf`（结构化抽取与分析）。注：`docx` 自带完整 OOXML 校验工具链（约 1.3 MB），是仓库内最大的 skill，默认不再部署；需要时加 `--include-heavy-skills` / `-IncludeHeavySkills`（同时包含带本地服务 `scripts/server.cjs` 的 `brainstorming`）；已部署的旧副本不受影响，该选项只影响本次新复制；
-   - **技能使用与触发时机指南**：各 skill 的触发机制（自动/显式/混合）、分类速查与项目记忆使用说明详见 [`Skills Usage Guide.zh.md`](docs/guides/Skills%20Usage%20Guide.zh.md)（[English](docs/guides/Skills%20Usage%20Guide.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md)）。部署分层（Phase 4，D58）：默认只部署 15 个技能（`--profile minimal`：10 个门禁核心 + 5 个 openspec 核心）加门禁本身（不含 `gate/graph.py` 与循环层）；`--profile standard` 部署 20 个技能加门禁 + 编排（graph + loop）；`--profile full` 部署全部 40 个技能加门禁 + 编排（重型技能仍需 `--include-heavy-skills`）。此前以 minimal 部署过、已带有 graph/loop 的项目，重新以 minimal 部署后这些文件会被移除（部署脚本会先备份）；如需保留请改用 `--profile standard`。
+   - **技能使用与触发时机指南**：各 skill 的触发机制（自动/显式/混合）、分类速查与项目记忆使用说明详见 [`Skills Usage Guide.zh.md`](docs/guides/Skills%20Usage%20Guide.zh.md)（[English](docs/guides/Skills%20Usage%20Guide.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md)）。部署分层（Phase 4，D58；成员以 `skills-profiles.json` 为唯一事实源）：默认只部署 15 个技能（`--profile minimal`：10 个门禁核心 + 5 个 openspec 核心）加门禁本身（不含 `gate/graph.py` 与循环层）；`--profile standard` 部署 20 个技能加门禁 + 编排（graph + loop）；`--profile full` 默认部署 38 个技能加门禁 + 编排，加 `--include-heavy-skills` 才到全部 40 个。此前以 minimal 部署过、已带有 graph/loop 的项目，重新以 minimal 部署后这些文件会被移除（部署脚本会先备份）；如需保留请改用 `--profile standard`。
    - **Agent 正确触发与常见问题排查指南 (FAQ)**：如何精准唤醒特定技能、避免角色扮演式脑补、正确配置 AI 记忆与状态机排障详见 [`Agent Triggering and FAQ Guide.zh.md`](docs/guides/Agent%20Triggering%20and%20FAQ%20Guide.zh.md)。
 
 4. **一键部署、交互向导与统一流水线（`deploy-agents` & `run-pipeline`）**：
@@ -97,12 +97,26 @@ agent-harness/
 │   │   └── token-discipline.md      # 读拿说三道闸门、上下文防漏与日志截断
 │   └── skills/                      # 40 个原生工程技能库（Comet, OpenSpec, Superpowers...）
 ├── .claude/
-│   ├── settings.json                # Claude Code PreToolUse 安全拦截配置
-│   └── hooks/                       # 安全钩子脚本（Node.js，读取 stdin JSON）
+│   ├── settings.json                # Claude Code 钩子配置（五类钩子事件全接线）
+│   └── hooks/                       # 钩子脚本（Node.js，读取 stdin JSON）
 │       ├── guard.mjs                # Bash 工具守卫（exit 2 硬阻断）
-│       └── guard-write.mjs          # Write/Edit 工具守卫（高危预警）
+│       ├── guard-write.mjs          # Write/Edit 工具守卫（高危预警）
+│       ├── guard-feature-list.mjs   # 拒绝直接 Write/Edit 功能清单
+│       ├── stop-gate.mjs            # 有 in_progress 项时拦截停止
+│       ├── session-start.mjs        # 从门禁状态打印会话恢复信息
+│       └── post-tool-use.mjs        # 追加成本账本遥测
+├── gate/                            # 自有验证门禁
+│   ├── pass-gate.py                 # 功能清单状态机 + 验证 + clean-state 检查
+│   ├── graph.py                     # 图执行器（仅 standard/full 档）
+│   ├── feature_list.schema.json     # 状态、迁移、WIP=1、证据规则
+│   └── init.template.sh             # 为项目搭建门禁 + 一次冒烟
+├── tools/
+│   ├── loop.py                      # Goal Loop / Maker-Checker 运行器（仅 standard/full 档）
+│   ├── sync-skills.py               # 外部依赖技能库同步与上游差异比对工具
+│   └── doc-impact.py                # 活体文档影响分析与质检门禁工具
+├── eval/                            # 自建基准（t1–t8）+ 评分表（仅咨询级）
 ├── templates/
-│   └── agents/                      # 15 个规范规则模板（全局/项目级/目录级 × 5 语言）
+│   └── agents/                      # 规范规则模板（全局/项目级/目录级 × en/zh/zh-tw）
 ├── run-pipeline.ps1                 # Windows PowerShell 统一流水线执行脚本
 ├── run-pipeline.sh                  # Linux / macOS Bash 统一流水线执行脚本
 ├── deploy-agents.ps1                # Windows 一键部署与在线更新自动化脚本
@@ -110,8 +124,6 @@ agent-harness/
 ├── setup-ai-memory.ps1              # 单项目/单客户端显式安装辅助脚本
 ├── setup-ai-memory.sh               # Linux / macOS / WSL 显式安装辅助脚本
 ├── tools/tui.py                     # 终端交互式单选/多选组件库
-├── tools/sync-skills.py             # 外部依赖技能库同步与上游差异比对工具
-├── tools/doc-impact.py              # 活体文档影响分析与质检门禁工具
 ├── .ai-memory.toml.example          # 本地显式加入标记示例
 ├── skills-lock.json                 # 技能来源及部分文件完整性元数据
 ├── README.md                        # 项目总览（English）
@@ -119,6 +131,14 @@ agent-harness/
 ```
 
 首次部署时可用 `-Initialize` / `--initialize` 生成带项目事实和待确认清单的规则；使用 `-DirectoryPath` / `--directory` 指定一个已存在的模块目录，同时生成目录级规则。脚本只自动填写可从本地 Git、清单/锁文件和 CI 配置核实的信息；检测到 `package.json` 时还会把存在的 scripts 命令、常见框架/存储依赖列为“建议确认”，不会当成已验证的事实。业务定位、维护者、模块职责和边界交由用户或当前编码 Agent 确认。已有 `AGENTS.md` 不会被覆盖，改为生成 `AGENTS.generated.md` 供审阅。完成后使用 `-Check` / `--check` 检查待确认项。
+
+### 当前状态（v0.3.0）——依赖门禁前请先读
+
+- **强制力取决于宿主。** Claude Code 钩子在客户端强制执行门禁（见上表）。其他宿主上，门禁是一套纪律加手动命令：自己跑 `python3 gate/pass-gate.py verify` 和 `python3 gate/pass-gate.py check-clean`。与宿主无关的兜底是 CI，它会重跑每个 `passing` 项的验证命令（`tests/repo_checks.py` §3k）。已知绕过方式见 [`gate/README.md`](gate/README.md)，包括经 Bash 直接改写、明文成本账本。
+- **基准结论如实表述。** 预注册 B1 轮（t1–t8 × bare/pack/gate × 3 轮 = 72 轮）72/72 通过、每臂 0 错误完成，按事前规则判为 NO DISCRIMINATION。本版本不宣称门禁降低了错误完成率；唯一的拦截证据是 Phase 1 dogfood（植入的假通过被钩子和 CI 抓住）。
+- **评分表仅咨询级（D28）。** `eval/rubric.md` 六维打分，但 `evaluate.py --gate` 恒拒绝，最终由人决定。5 轮校准用的是历史阶段结果，不是活人二审。
+- **翻译。** EN 与 ZH 为事实源。ZH-TW 行按 `docs/internal/i18n-status.md` 为 stale / 冻结状态，下个发布前从 EN 重新生成，不要逐句手工同步。
+- **Windows。** CI 对 PowerShell 脚本跑 PSScriptAnalyzer；CI 的部署冒烟跑的是 Bash 脚本。PowerShell 部署路径为评审验证，未在 CI 的 Windows 真机上执行验证。
 
 ---
 
@@ -157,7 +177,7 @@ agent-harness/
 
 - **Windows 命令行 (PowerShell)**:
   ```powershell
-  # 部署到指定项目（默认 en，或指定 -Language zh / zh-tw / fr / de）
+  # 部署到指定项目（默认 en，或指定 -Language zh / zh-tw）
   .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Global -Language zh -Initialize -DirectoryPath "packages/core"
   .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Check -DirectoryPath "packages/core"
   ```
@@ -165,7 +185,7 @@ agent-harness/
 - **Linux / macOS 命令行 (Bash)**:
   ```bash
   chmod +x ./deploy-agents.sh
-  # 支持多语言模板切换（默认 en，或 --lang zh / zh-tw / fr / de）
+  # 支持多语言模板切换（默认 en，或 --lang zh / zh-tw）
   ./deploy-agents.sh /path/to/my-project --global --lang zh --initialize --directory packages/core
   ./deploy-agents.sh /path/to/my-project --check --directory packages/core
   ```

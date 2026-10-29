@@ -90,7 +90,7 @@ The hooks in `.claude/settings.json` are Claude Code-specific and run only befor
 
 ### Configuration and implementation
 
-The installer copies [`.claude/settings.json`](../../.claude/settings.json) and deploys [`.claude/hooks/guard.mjs`](../../.claude/hooks/guard.mjs) plus [`guard-write.mjs`](../../.claude/hooks/guard-write.mjs). Inspect those source files directly; do not copy hook examples from older guide versions because the protocol and implementation can change.
+The installer copies [`.claude/settings.json`](../../.claude/settings.json), which wires all five Claude Code hook events, and deploys the full hook set in [`.claude/hooks/`](../../.claude/hooks/): [`guard.mjs`](../../.claude/hooks/guard.mjs) (PreToolUse Bash guard), [`guard-write.mjs`](../../.claude/hooks/guard-write.mjs) (Write/Edit warnings), [`guard-feature-list.mjs`](../../.claude/hooks/guard-feature-list.mjs) (denies direct edits to `feature_list.json`), [`stop-gate.mjs`](../../.claude/hooks/stop-gate.mjs) (Stop gate), [`session-start.mjs`](../../.claude/hooks/session-start.mjs) (SessionStart resume), and [`post-tool-use.mjs`](../../.claude/hooks/post-tool-use.mjs) (cost-ledger telemetry). Inspect those source files directly; do not copy hook examples from older guide versions because the protocol and implementation can change. On non-Claude hosts none of these hooks run; use `gate/pass-gate.py verify` / `check-clean` manually and rely on the CI re-run described in [`gate/README.md`](../../gate/README.md).
 
 ### Equivalents on other tools (extension point)
 
