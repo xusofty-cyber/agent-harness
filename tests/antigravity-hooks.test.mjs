@@ -185,6 +185,39 @@ test("Antigravity-only project (guard copies under .agents/hooks/) still denies"
   assert.equal(r.json.decision, "deny");
 });
 
+// Live agy CLI 1.4.10 calls the file-write tool "write_file" with a
+// Path argument, not "write_to_file" with TargetFile. A 2026-10-30
+// --print run proved a write_file overwrite of gate/feature_list.json
+// sailed past the old matcher and the old WRITE_TOOLS set (both listed
+// only write_to_file), so the write block never ran. These three tests
+// pin the live name and both argument spellings.
+test("write_file (live agy name, Path arg) direct write to feature_list.json is denied and logged", () => {
+  const dir = makeProject({ items: [] });
+  const r = preTool(dir, "write_file", {
+    Path: join(dir, "gate", "feature_list.json"),
+  });
+  assert.equal(r.json.decision, "deny");
+  assert.match(r.json.reason, /pass-gate\.py/);
+  const events = readFileSync(join(dir, "gate", "events.jsonl"), "utf-8");
+  assert.match(events, /direct_write_blocked/);
+});
+
+test("write_file on an ordinary file is allowed", () => {
+  const dir = makeProject();
+  const r = preTool(dir, "write_file", {
+    Path: join(dir, "README.md"),
+  });
+  assert.equal(r.json.decision, "allow");
+});
+
+test("write_file with a TargetFile argument is still denied (fallback mapping)", () => {
+  const dir = makeProject({ items: [] });
+  const r = preTool(dir, "write_file", {
+    TargetFile: join(dir, "gate", "feature_list.json"),
+  });
+  assert.equal(r.json.decision, "deny");
+});
+
 // --- Stop ---
 
 test("Stop with an in_progress item continues, second stop allows", () => {
