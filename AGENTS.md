@@ -33,6 +33,12 @@ only. On conflict between a retrieved memory and a repo file, the repo
 file wins. Decisions live in `DECISIONS.md`; session breakpoints live in
 `docs/internal/SESSION_STATE.md`.
 
+Decision-numbering hygiene (C6, 2026-10-29): `D27` refers ONLY to
+yunyi's resolver rule (refuse resolver-mediated execution with
+destructive parameters). Yunkai's guard work is cited as "云开 Guard
+合取式", never as D27. Cite documents by full title, never by a bare
+"方案 §x" — section numbers collide across documents.
+
 ## Key paths
 
 - `.agents/rules/` — modular sub-rules (engineering, git, security, tokens)
