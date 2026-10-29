@@ -1387,6 +1387,10 @@ fi
 # Antigravity payloads into the Claude hook scripts, which are copied
 # here too so Antigravity-only projects (no .claude/hooks/) still gate.
 # Adapters fall back to .claude/hooks/ when the copy is absent.
+# Antigravity hooks cwd=.agents: commands in .agents/hooks.json are relative
+# to .agents/ (agy CLI 1.4.10 runs hooks with cwd=.agents/); do not re-prefix
+# them with .agents/hooks/ in the template, or agy resolves
+# .agents/.agents/hooks/... and rejects the tool call.
 ANTIGRAVITY_HOOKS_JSON="${SCRIPT_DIR}/.agents/hooks.json"
 TARGET_AGENTS_DIR="${TARGET_PROJECT_DIR}/.agents"
 TARGET_AGENTS_HOOKS_DIR="${TARGET_AGENTS_DIR}/hooks"
