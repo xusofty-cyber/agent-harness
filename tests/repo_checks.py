@@ -1154,6 +1154,7 @@ PARITY = [
     ("DSH_HOME", "DSH_HOME", "DeepSeek Harness global rules"),
     ("Antigravity rules adapter", "Antigravity rules adapter", "Antigravity .agents/rules frontmatter adapter"),
     ("Antigravity hooks", "Antigravity hooks", "Antigravity .agents/hooks.json gate hooks"),
+    ("PrepushGate", "prepush-gate", "template gate deployment (pre-push hook + checker + CI template)"),
     ("New-RuleDirBridge", "bridge_rule_dir", "rule-directory bridge helper"),
     (".windsurf/rules", ".windsurf/rules", "Windsurf bridge"),
     (".clinerules", ".clinerules", "Cline bridge"),

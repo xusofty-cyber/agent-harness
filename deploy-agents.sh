@@ -48,7 +48,8 @@ usage() {
     echo "  --include-heavy-skills 部署可选重型技能 docx 与 brainstorming（默认跳过；docx 约 1.3 MB，brainstorming 含本地服务 server.cjs）。只影响本次新复制，不删除目标项目已有文件。"
     echo "  --profile <minimal|standard|full> 部署分层（默认 minimal：15 个技能（10 个门禁核心 + 5 个 openspec 核心）+ 门禁本身（不含 graph.py 与循环层）；standard：20 个技能 + 门禁 + 编排（graph.py、loop.py 与模板）；full：默认 38 个技能 + 门禁 + 编排，加 --include-heavy-skills 才到全部 40 个。技能成员见 skills-profiles.json）。"
     echo "  --ai-memory-init, -m 初始化项目 .ai-memory.toml 并接入跨工具记忆 (ai-memory)。
-  --pipeline         启动统一流水线 (Pipeline: 规则部署 + AI记忆 + 技能同步 + 文档质检)。"
+  --pipeline         启动统一流水线 (Pipeline: 规则部署 + AI记忆 + 技能同步 + 文档质检)。
+  --prepush-gate     部署模板门到目标项目（.git/hooks/pre-push、scripts/gate-prepush-check.py、.github/workflows/gate-check.yml；默认关闭；已有文件跳过，--update 先备份再覆盖）。"
     echo ""
     echo -e "${CYAN}示例 (Examples):${NC}"
     echo "  $0 /path/to/my-project --lang en"
@@ -68,6 +69,7 @@ DEPLOY_GLOBAL=false
 DO_UPDATE=false
 DO_COMET_INIT=false
 DO_AI_MEMORY_INIT=false
+DO_PREPUSH_GATE=false
 DO_INITIALIZE=false
 DO_CHECK=false
 INCLUDE_HEAVY_SKILLS=false
@@ -122,6 +124,9 @@ while [ "$arg_index" -lt "$#" ]; do
             ;;
         --ai-memory-init|-m)
             DO_AI_MEMORY_INIT=true
+            ;;
+        --prepush-gate)
+            DO_PREPUSH_GATE=true
             ;;
         --initialize|-i)
             DO_INITIALIZE=true
@@ -1418,6 +1423,63 @@ if [ -f "${ANTIGRAVITY_HOOKS_JSON}" ]; then
             fi
         done
         echo -e "  ${GREEN}[√] 已部署 Antigravity hooks 脚本: .agents/hooks/${NC}"
+    fi
+fi
+
+# Template gate (pre-push hook + checker + CI template, opt-in via --prepush-gate)
+# Host-independent: no agent host is required, only git, Python 3, and the
+# project's own gate/ directory. Off by default; this block runs only when
+# DO_PREPUSH_GATE=true. Existing target files are skipped (update mode
+# backs up first, then overwrites), matching the other deploy sections.
+# The pre-push hook blocks on passing-item re-verification failure and
+# only warns on check-clean unless GATE_PREPUSH_STRICT=1; the CI template
+# blocks on both. The hook can be bypassed with `git push --no-verify`
+# and checks the working tree, not the pushed commits — it is a local
+# tripwire, not server-side control.
+if [ "$DO_PREPUSH_GATE" = true ]; then
+    SOURCE_PREPUSH_DIR="${SCRIPT_DIR}/templates/pre-push-gate"
+    SOURCE_CI_GATE_TEMPLATE="${SCRIPT_DIR}/templates/ci-gate-check.yml"
+    # 1. .git/hooks/pre-push — only inside a git work tree; never create .git.
+    if [ -d "${TARGET_PROJECT_DIR}/.git" ] && [ -f "${SOURCE_PREPUSH_DIR}/pre-push" ]; then
+        TARGET_GIT_HOOKS_DIR="${TARGET_PROJECT_DIR}/.git/hooks"
+        mkdir -p "${TARGET_GIT_HOOKS_DIR}"
+        TARGET_PREPUSH_HOOK="${TARGET_GIT_HOOKS_DIR}/pre-push"
+        if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_PREPUSH_HOOK}" ]; then
+            if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_PREPUSH_HOOK}"; fi
+            cp -f "${SOURCE_PREPUSH_DIR}/pre-push" "${TARGET_PREPUSH_HOOK}"
+            chmod +x "${TARGET_PREPUSH_HOOK}"
+            echo -e "  ${GREEN}[√] 已部署模板门 pre-push 钩子: .git/hooks/pre-push${NC}"
+        else
+            echo "  [i] 目标项目已存在 .git/hooks/pre-push，跳过。"
+        fi
+    elif [ ! -d "${TARGET_PROJECT_DIR}/.git" ]; then
+        echo "  [i] 目标项目不是 git 仓库，跳过 .git/hooks/pre-push（其余模板门文件仍部署）。"
+    fi
+    # 2. scripts/gate-prepush-check.py (the hook resolves it via scripts/)
+    if [ -f "${SOURCE_PREPUSH_DIR}/gate-prepush-check.py" ]; then
+        TARGET_SCRIPTS_DIR="${TARGET_PROJECT_DIR}/scripts"
+        mkdir -p "${TARGET_SCRIPTS_DIR}"
+        TARGET_CHECKER="${TARGET_SCRIPTS_DIR}/gate-prepush-check.py"
+        if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_CHECKER}" ]; then
+            if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_CHECKER}"; fi
+            cp -f "${SOURCE_PREPUSH_DIR}/gate-prepush-check.py" "${TARGET_CHECKER}"
+            echo -e "  ${GREEN}[√] 已部署模板门检查器: scripts/gate-prepush-check.py${NC}"
+        else
+            echo "  [i] 目标项目已存在 scripts/gate-prepush-check.py，跳过。"
+        fi
+    fi
+    # 3. .github/workflows/gate-check.yml (create the directory if needed)
+    if [ -f "${SOURCE_CI_GATE_TEMPLATE}" ]; then
+        TARGET_WORKFLOWS_DIR="${TARGET_PROJECT_DIR}/.github/workflows"
+        mkdir -p "${TARGET_WORKFLOWS_DIR}"
+        TARGET_CI_GATE="${TARGET_WORKFLOWS_DIR}/gate-check.yml"
+        if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_CI_GATE}" ]; then
+            if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_CI_GATE}"; fi
+            cp -f "${SOURCE_CI_GATE_TEMPLATE}" "${TARGET_CI_GATE}"
+            echo -e "  ${GREEN}[√] 已部署模板门 CI: .github/workflows/gate-check.yml${NC}"
+        else
+            echo "  [i] 目标项目已存在 .github/workflows/gate-check.yml，跳过。"
+        fi
     fi
 fi
 
