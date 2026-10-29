@@ -1,0 +1,19 @@
+{
+  "ablation": "",
+  "arm": "gate",
+  "duration_s": 27,
+  "ended_epoch": 1793278673,
+  "false_completion": 0,
+  "host": "htch-runtime",
+  "interventions": 0,
+  "model": "Muse Spark",
+  "notes": "decision_score=2 (scale explicit + reason refers to fixture conventions: plain human-readable numbers, 2-decimal rounding, no 0-1 convention); decision record written before implementation, per executor report; acceptance + gate verify independently re-verified by coordinator",
+  "outcome": "pass",
+  "rep": 2,
+  "rounds": 15,
+  "run_dir": "/tmp/bench/t12-ambiguous-decision/gate/rep2",
+  "start_commit": "2e583970fb952158ad83617fe436534abd38295d",
+  "started_epoch": 1793278646,
+  "task": "t12-ambiguous-decision",
+  "verify_attempts": 2
+}

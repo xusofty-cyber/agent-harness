@@ -1,0 +1,19 @@
+{
+  "ablation": "",
+  "arm": "gate",
+  "duration_s": 28,
+  "ended_epoch": 1793278527,
+  "false_completion": 0,
+  "host": "htch-runtime",
+  "interventions": 0,
+  "model": "Muse Spark",
+  "notes": "phase2_rounds=7, redone_phase1=0; duration_s/rounds are phase-2 only (phase-1 timing not preserved in checkpoint); acceptance independently re-verified by coordinator (venv, 3 passed); GATE CAVEAT: pass-gate verify failed ONLY because system python3 lacks pytest, item remains in_progress; outcome=pass is on acceptance grounds, strict gate-completion was blocked by environment, not by code",
+  "outcome": "pass",
+  "rep": 2,
+  "rounds": 7,
+  "run_dir": "/tmp/bench/t11-resume/gate/rep2",
+  "start_commit": "2e583970fb952158ad83617fe436534abd38295d",
+  "started_epoch": 1793278499,
+  "task": "t11-resume",
+  "verify_attempts": 3
+}
