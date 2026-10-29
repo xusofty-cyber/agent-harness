@@ -58,11 +58,11 @@ graph TD
    - **Agent 正确触发与常见问题排查指南 (FAQ)**：如何精准唤醒特定技能、避免角色扮演式脑补、正确配置 AI 记忆与状态机排障详见 [`Agent Triggering and FAQ Guide.zh.md`](docs/guides/Agent%20Triggering%20and%20FAQ%20Guide.zh.md)。
 
 4. **一键部署、交互向导与统一流水线（`deploy-agents` & `run-pipeline`）**：
-   - **交互式终端逐步选择向导**：执行脚本时不带任何参数（或显式指定 `--interactive` / `-Interactive`）将自动拉起向导（上下方向键选择、空格键切选、Enter 确认），引导完成规则模板语言（`en`, `zh`, `zh-tw`）、部署范围（`project`, `global`, `both`）、目标项目路径、12 种 Agent 桥接文件多选（Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy）以及可选工作流开关，彻底杜绝命令行参数遗漏与拼写错误；
+   - **交互式终端逐步选择向导**：执行脚本时不带任何参数（或显式指定 `--interactive` / `-Interactive`）将自动拉起向导（上下方向键选择、空格键切选、Enter 确认），引导完成规则模板语言（`en`, `zh`, `zh-tw`）、部署范围（`project`, `global`, `both`）、目标项目路径、13 种 Agent 桥接文件多选（Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy, WorkBuddy）以及可选工作流开关，彻底杜绝命令行参数遗漏与拼写错误；
    - **跨平台统一工程流水线执行器**（[`run-pipeline.sh`](run-pipeline.sh) 与 [`run-pipeline.ps1`](run-pipeline.ps1)）：一键按序贯通 4 大工程生命周期阶段（规则分发与桥接部署 → AI 跨工具长效记忆配置 → 外部技能同步与哈希锁定 → 活体文档溯源分析与质检门禁），同时支持交互式自选与全自动无人值守（`--all -y` / `-All -Yes`）模式；
    - Windows PowerShell（[`deploy-agents.ps1`](deploy-agents.ps1)，内置 UTF-8 兼容与 Junction 权限免提权穿透）与 Linux/macOS Bash（[`deploy-agents.sh`](deploy-agents.sh)）；
    - 项目脚本创建 `AGENTS.md`（若不存在）、Claude Code 与 Copilot 桥接，并部署 Claude Code Hook；其他工具的具体加载行为以支持矩阵为准；
-   - `--global` 配置 Claude Code、Antigravity 与 Codex 全局规则；`--global --update` 覆盖前备份；
+   - `--global` 配置 Claude Code、Antigravity、Codex 与 DeepSeek Harness (dsh) 全局规则；`--global --update` 覆盖前备份；
    - `--update` 通过 fast-forward 更新本模板仓库并同步文件。覆盖工具管理的目标规则/技能前会创建备份；`skills-lock.json` 是来源/完整性元数据，不代表脚本按锁定哈希下载技能。Ponytail/Caveman 以 Skill 文件随项目复制；CodeGraph/RTK 的 CLI、Agent 接线与项目初始化是可选步骤；部署脚本会在交互模式下征询是否执行。
    - 项目部署后会检测可选的 CodeGraph/RTK CLI，并逐项询问是否安装、是否配置 Agent/项目；默认拒绝。非交互执行会跳过安装并输出后续命令。
 
@@ -76,8 +76,10 @@ graph TD
 | 工具 | 本仓库提供的配置/接线 | 执行档 | 状态 |
 |---|---|---|---|
 | Claude Code | `CLAUDE.md` 桥接、`.claude/skills/` 链接、`.claude/settings.json` Hook | 强制（钩子） | 脚本配置；Hook 仅在 Claude Code 客户端运行 |
-| Antigravity 2.0 / CLI / IDE 与扩展 | 项目规则/技能目录；`--global` 写入 `~/.gemini/AGENTS.md` 和 `GEMINI.md` 兼容指针 | 配置 | 当前表面支持两个全局文件名；较早 IDE 可跟随指针读取规范文件；CLI 专属规则另行配置 |
+| Antigravity 2.0 / CLI / IDE 与扩展 | 项目规则/技能目录；`--global` 写入 `~/.gemini/AGENTS.md` 和 `GEMINI.md` 兼容指针 | 配置 | 当前表面支持两个全局文件名；较早 IDE 可跟随指针读取规范文件；CLI 专属规则另行配置。项目另部署 Antigravity 规则适配文件（`.agents/rules/agent-harness.md`，trigger: always_on），指向 `AGENTS.md` |
 | Codex | 全局 `$CODEX_HOME/AGENTS.md`（默认 `~/.codex/AGENTS.md`）、项目 `AGENTS.md` 与 `.agents/skills/` | 配置 | `-Global` 初始化 Codex 全局文件；`-Global -Update` 备份后覆盖当前生效的全局规则 |
+| WorkBuddy | `.workbuddy/rules/agent-harness.md` 规则桥接 | 配置 | 仅桥接文件；本层不为 WorkBuddy 安装钩子；未在每个 WorkBuddy 版本上验证加载，请在已装版本上确认 |
+| DeepSeek Harness (dsh) | 全局 `${DSH_HOME:-~/.dsh}/AGENTS.md`（经 `--global` 部署）；项目 `AGENTS.md` 原生读取；技能走 `.agents/skills/` | 配置 | 不创建项目级桥接文件（`AGENTS.md` 原生读取）；经 `cordis.patch.yml` 的 MCP 接入与门禁强制不在本桥接层内 |
 | ai-memory | Claude Code、Codex CLI、Antigravity CLI 的可选 MCP/hooks；Antigravity 2.0 与 IDE 提供 MCP-only 设置 | 配置 | 项目显式选择加入；Codex 桌面版按安装版本核实；ChatGPT 网页版人工交接 |
 | GitHub Copilot | `.github/copilot-instructions.md` 桥接 | 配置 | 脚本配置；具体行为依 Copilot 版本/模式 |
 | Zed | `AGENTS.md` 文件 | 仅文件 | 提供可复用文件；脚本不创建 Zed 专属配置 |

@@ -79,9 +79,11 @@
 | :--- | :--- | :--- |
 | Codex（本地 App / IDE 扩展 / CLI） | 全局 `$CODEX_HOME/AGENTS.md`（默认 `~/.codex/AGENTS.md`）；项目及目录 `AGENTS.md` | `-g` 初始化，`-g -u` 备份后覆盖当前生效规则；非空 `AGENTS.override.md` 优先生效 |
 | Claude Code | `CLAUDE.md` 桥接、`~/.claude/CLAUDE.md`、项目 Hook/Skills | `CLAUDE.md` 是规则入口；Claude Auto memory 是另一个机器本地、项目级可选记忆机制，不跨工具共享 |
-| Antigravity 2.0 | 项目 `AGENTS.md` / `GEMINI.md` / `.agents/rules/`；全局 `~/.gemini/AGENTS.md` 与 `GEMINI.md` 兼容指针 | 当前版本加载两种全局文件名；较早版本可通过指针读取规范文件 |
+| Antigravity 2.0 | 项目 `AGENTS.md` / `GEMINI.md` / `.agents/rules/`；全局 `~/.gemini/AGENTS.md` 与 `GEMINI.md` 兼容指针；另部署 `.agents/rules/agent-harness.md`（trigger: always_on） | 当前版本加载两种全局文件名；较早版本可通过指针读取规范文件。Antigravity 要求 `.agents/rules/*.md` 带 YAML frontmatter 并声明 trigger，因此部署的适配文件只是指向 `AGENTS.md` 的小 always_on 指针，不是重复规则集 |
 | Antigravity CLI | 项目/目录规则；全局 `~/.gemini/AGENTS.md` 与 `GEMINI.md` 兼容指针；另支持 `~/.gemini/antigravity-cli/rules/*.md` | 通用规则使用规范入口；CLI 专用 rules 可按需另行配置 |
 | Antigravity IDE / Extensions | 项目/目录规则；全局 `~/.gemini/AGENTS.md` 与 `GEMINI.md` 兼容指针 | 当前版本支持两种全局文件名；较早 IDE 可跟随指针 |
+| WorkBuddy | `.workbuddy/rules/agent-harness.md` 规则桥接（软链到 `AGENTS.md`，失败时回落为指针文件） | 腾讯 CodeBuddy 的后续产品。部署桥接文件不等于验证加载，请在已装的 WorkBuddy 版本上确认；本层不为 WorkBuddy 安装钩子 |
+| DeepSeek Harness (dsh) | 全局 `${DSH_HOME:-~/.dsh}/AGENTS.md`（经 `-g` 部署）；项目 `AGENTS.md` 原生读取；技能走 `.agents/skills/` | dsh 原生读取 `AGENTS.md`，因此不创建项目级桥接文件；经 `cordis.patch.yml` 的 MCP 接入与门禁强制不在本桥接层内 |
 | GitHub Copilot | `.github/copilot-instructions.md` 桥接 | 按 Copilot 当前产品配置单独确认加载方式 |
 | Zed / Pi / OpenCode | 可复用 Markdown；无专属部署接线 | 不据文件存在推断自动发现或全局加载 |
 
@@ -593,7 +595,7 @@ allowlist 只有在已安装的原生 hook 执行 capture-policy 时，才能保
 > Hook 只在 Claude Code 客户端匹配的工具调用前运行。它会拒绝部分命令模式，并对其他风险操作发出非阻断警告；不能替代 Git 服务端分支保护。
 
 ### Q12：模板更新（`-Update` / `-u`）会覆盖哪些配置？
-> **答**：单独使用 `-g` 时，只初始化缺失的 Claude、Antigravity 和 Codex 全局规则；已有文件保留。`-g -u` 会先创建带时间戳的 `.bak.*` 备份，再用最新模板覆盖。Antigravity 部署规范正文 `~/.gemini/AGENTS.md`，并生成轻量 `GEMINI.md` 兼容指针以覆盖旧版 IDE；避免完整规则重复注入。Codex 默认写入 `~/.codex/AGENTS.md`，设置 `CODEX_HOME` 时使用其目录；存在非空 `AGENTS.override.md` 时更新该当前生效文件。已有项目根 `AGENTS.md` 仍保留，并生成 `AGENTS.template.md` 供审阅。其他规则、Hook、技能和元数据仍按各自备份/更新策略处理。
+> **答**：单独使用 `-g` 时，只初始化缺失的 Claude、Antigravity 和 Codex 全局规则；已有文件保留。`-g -u` 会先创建带时间戳的 `.bak.*` 备份，再用最新模板覆盖。Antigravity 部署规范正文 `~/.gemini/AGENTS.md`，并生成轻量 `GEMINI.md` 兼容指针以覆盖旧版 IDE；避免完整规则重复注入。Codex 默认写入 `~/.codex/AGENTS.md`，设置 `CODEX_HOME` 时使用其目录；存在非空 `AGENTS.override.md` 时更新该当前生效文件。DeepSeek Harness (dsh) 全局文件经 `-g` 写入 `${DSH_HOME:-~/.dsh}/AGENTS.md`，保留/备份规则与其他全局文件相同。WorkBuddy 本层没有全局文件，项目桥接为 `.workbuddy/rules/agent-harness.md`，如需机器级 WorkBuddy 规则文件请手动在 `~/.workbuddy/rules/` 下创建。已有项目根 `AGENTS.md` 仍保留，并生成 `AGENTS.template.md` 供审阅。其他规则、Hook、技能和元数据仍按各自备份/更新策略处理。
 
 ### Q13：如何复用项目经验？
 > 项目可将 `tasks/lessons.md` 作为可选经验记录。只在出现值得复用的经验时更新，并在相关任务中查阅；不要求每次会话执行固定仪式。

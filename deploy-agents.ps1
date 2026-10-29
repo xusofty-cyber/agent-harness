@@ -74,6 +74,7 @@ $ToolKiro = $true
 $ToolContinue = $true
 $ToolTrae = $true
 $ToolCodebuddy = $true
+$ToolWorkbuddy = $true
 # Native AGENTS.md readers — no bridge needed, always "supported":
 # Codex, Antigravity, Zed, OpenCode, Aider, Qoder, Pi
 
@@ -234,7 +235,7 @@ function Prompt-InteractiveWizard {
 
         Write-Host ""
         Write-Host "以下工具原生读取 AGENTS.md，无需桥接文件（自动支持）:" -ForegroundColor Cyan
-        Write-Host "  ✓ Codex · Antigravity · Zed · OpenCode · Aider · Qoder · Pi" -ForegroundColor Green
+        Write-Host "  ✓ Codex · Antigravity · Zed · OpenCode · Aider · Qoder · Pi · DeepSeek Harness (dsh)" -ForegroundColor Green
         Write-Host ""
 
         $toolOptions = @(
@@ -250,6 +251,7 @@ function Prompt-InteractiveWizard {
             @{ Label = "Continue.dev (.continue/rules/)"; Value = "continue"; Checked = $false },
             @{ Label = "Trae (.trae/rules/)"; Value = "trae"; Checked = $false },
             @{ Label = "CodeBuddy (CODEBUDDY.md)"; Value = "codebuddy"; Checked = $false }
+            @{ Label = "WorkBuddy (.workbuddy/rules/)"; Value = "workbuddy"; Checked = $false }
         )
         $selectedTools = Prompt-MultiSelect "[4/5] 选择要创建桥接文件的 Agent 工具 (Select tools for bridge files):" $toolOptions
 
@@ -265,6 +267,7 @@ function Prompt-InteractiveWizard {
         $script:ToolContinue = $selectedTools -contains "continue"
         $script:ToolTrae = $selectedTools -contains "trae"
         $script:ToolCodebuddy = $selectedTools -contains "codebuddy"
+        $script:ToolWorkbuddy = $selectedTools -contains "workbuddy"
     }
 
     $optOptions = @(
@@ -669,6 +672,11 @@ if ($Global) {
             Write-Host "  [INFO] Active Codex global override detected; updating that effective instruction file." -ForegroundColor Gray
         }
         Sync-GlobalRule $ResolvedGlobalTemplate $CodexGlobalFile "Codex" $Update
+
+        # D. DeepSeek Harness (dsh) (DSH_HOME or ~/.dsh); AGENTS.md is its global rules file.
+        $DshHomeDir = if ([string]::IsNullOrWhiteSpace($env:DSH_HOME)) { Join-Path $HOME ".dsh" } else { [Environment]::ExpandEnvironmentVariables($env:DSH_HOME) }
+        $DshGlobalFile = Join-Path $DshHomeDir "AGENTS.md"
+        Sync-GlobalRule $ResolvedGlobalTemplate $DshGlobalFile "DeepSeek Harness (dsh)" $Update
     }
 }
 
@@ -1114,7 +1122,10 @@ if ($ToolKiro) {
 if ($ToolContinue) { New-RuleDirBridge "Continue.dev" ".continue/rules" "agent-harness.md" }
 if ($ToolTrae) { New-RuleDirBridge "Trae" ".trae/rules" "agent-harness.md" }
 
-# Note: Codex, Antigravity, Zed, OpenCode, Aider, Qoder, Pi read AGENTS.md
+# WorkBuddy rules bridge (Tencent CodeBuddy successor; plain rule file, no frontmatter invented).
+if ($ToolWorkbuddy) { New-RuleDirBridge "WorkBuddy" ".workbuddy/rules" "agent-harness.md" }
+
+# Note: Codex, Antigravity, Zed, OpenCode, Aider, Qoder, Pi, DeepSeek Harness (dsh) read AGENTS.md
 # natively — no bridge files needed.
 
 # Deploy Claude Code PreToolUse Security Hooks (.claude/settings.json + .claude/hooks/)
@@ -1173,6 +1184,21 @@ if ((Test-Path $SourceRulesDir) -and (-not $isSelfRepo)) {
             Copy-Item -Path $_.FullName -Destination $dest -Force
             Write-Host "  [OK] Synced rule: .agents/rules/$($_.Name)" -ForegroundColor Green
         }
+    }
+}
+
+# Antigravity rules adapter (.agents/rules/agent-harness.md)
+# Antigravity requires YAML frontmatter with a trigger in .agents/rules/*.md;
+# the canonical rules stay in AGENTS.md + .agents/rules/*.md, so this file is
+# only a small always_on pointer, not a duplicate rule set.
+if (-not $isSelfRepo) {
+    if (-not (Test-Path $TargetRulesDir)) { New-Item -ItemType Directory -Path $TargetRulesDir -Force | Out-Null }
+    $AntigravityAdapter = Join-Path $TargetRulesDir "agent-harness.md"
+    if (-not (Test-Path $AntigravityAdapter)) {
+        "---`ntrigger: always_on`ndescription: \"Agent Harness canonical rules: follow AGENTS.md and .agents/rules/\"`n---`n`n@AGENTS.md`n" | Out-File -FilePath $AntigravityAdapter -Encoding utf8
+        Write-Host "  [OK] Deployed Antigravity rules adapter: .agents/rules/agent-harness.md (trigger: always_on)" -ForegroundColor Green
+    } else {
+        Write-Host "  [INFO] .agents/rules/agent-harness.md already exists, keeping existing file." -ForegroundColor Gray
     }
 }
 
