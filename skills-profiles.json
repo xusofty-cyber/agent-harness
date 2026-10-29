@@ -49,7 +49,7 @@
       ]
     },
     "full": {
-      "description": "All 40 skill directories. docx and brainstorming are heavy skills and are only copied when --include-heavy-skills / -IncludeHeavySkills is also passed (Phase 0, 0-9); without the flag, full deploys 38.",
+      "description": "All 39 skill directories. docx and brainstorming are heavy skills and are only copied when --include-heavy-skills / -IncludeHeavySkills is also passed (Phase 0, 0-9); without the flag, full deploys 37.",
       "skills": [
         "brainstorming",
         "caveman",
@@ -89,8 +89,7 @@
         "using-git-worktrees",
         "using-superpowers",
         "verification-before-completion",
-        "writing-plans",
-        "writing-skills"
+        "writing-plans"
       ],
       "heavy": [
         "brainstorming",

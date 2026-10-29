@@ -26,7 +26,7 @@ graph TD
     G[Global AGENTS.md<br/>cross-project constitution] --> P[Project AGENTS.md<br/>project template]
     P --> D[Directory AGENTS.md<br/>monorepo micro-boundaries]
     P --> R[.agents/rules/<br/>on-demand sub-rules]
-    R --> S[.agents/skills/<br/>40 on-demand skills]
+    R --> S[.agents/skills/<br/>39 on-demand skills]
     G --> H[.claude/hooks/<br/>PreToolUse guards]
     S --> T[tools/<br/>sync, tui, doc-impact]
 ```
@@ -44,7 +44,7 @@ graph TD
    - Some command patterns are hard-blocked while other cases emit non-blocking warnings;
    - Regex inspection cannot cover every command form and does not replace server-side branch protection.
 
-3. **40 Reusable Skill Directories ([`.agents/skills/`](.agents/skills/))**:
+3. **39 Reusable Skill Directories ([`.agents/skills/`](.agents/skills/))**:
    - **Comet integration guide**: checks the installed version and project configuration; this skill does not implement Comet's state machine or phase guards;
    - **Living Documentation & Engineering Docs**: `living-documentation` (4-tier doc model: specs/architecture/reference/guides, frontmatter-based code-doc bidirectional traceability, L0/L1/L2 impact maintenance) and `engineering-docs` (15 bilingual phase-gate templates covering 31 R&D document types for cross-agent consistency);
    - **Spec-Driven Development (SDD)**: Full 12-skill `openspec` suite (proposal, apply changes, verify, sync specs, archive, explore);
@@ -53,7 +53,7 @@ graph TD
    - **Output and communication guidance**: `rtk` (optional Rust Token Killer CLI guide; command-rewrite hooks require setup) and `caveman` (concise-response Skill);
    - **Pre-decision review and shared memory**: `option-review` (isolated 5-dimension candidate approach review matrix) and `cross-tool-memory` (project-scoped long-term memory navigation aid);
    - **Professional Document Processing**: `docx` (Word formatting & manipulation) and `pdf` (structured extraction & analysis). Note: `docx` ships its full OOXML validation toolchain (~1.3 MB, mostly XSD schemas), making it the largest skill in the repo — it is no longer deployed by default; pass `--include-heavy-skills` / `-IncludeHeavySkills` to include it (and `brainstorming`, which ships a local companion server `scripts/server.cjs`). Previously deployed copies are left in place; the flag only affects new copies.
-   - **Skills Usage & Trigger Guide**: For trigger modes (auto/explicit/hybrid), categorization, and project memory setup of all 40 skills, see [`Skills Usage Guide.md`](docs/guides/Skills%20Usage%20Guide.md) ([简体中文](docs/guides/Skills%20Usage%20Guide.zh.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md)). Deploy profiles (Phase 4, D58; membership is the single source of truth in `skills-profiles.json`): by default only the 15 skills are deployed (`--profile minimal`: 10 gate core + 5 openspec core) plus the gate itself (no `gate/graph.py`, no loop layer); `--profile standard` deploys 20 skills plus gate + orchestration (graph + loop); `--profile full` deploys 38 skills by default plus gate + orchestration, or all 40 with `--include-heavy-skills`. Re-deploying an older minimal project with `minimal` removes its graph/loop files (backed up first); use `--profile standard` to keep them.
+   - **Skills Usage & Trigger Guide**: For trigger modes (auto/explicit/hybrid), categorization, and project memory setup of all 39 skills, see [`Skills Usage Guide.md`](docs/guides/Skills%20Usage%20Guide.md) ([简体中文](docs/guides/Skills%20Usage%20Guide.zh.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md)). Deploy profiles (Phase 4, D58; membership is the single source of truth in `skills-profiles.json`): by default only the 15 skills are deployed (`--profile minimal`: 10 gate core + 5 openspec core) plus the gate itself (no `gate/graph.py`, no loop layer); `--profile standard` deploys 20 skills plus gate + orchestration (graph + loop); `--profile full` deploys 37 skills by default plus gate + orchestration, or all 39 with `--include-heavy-skills`. Re-deploying an older minimal project with `minimal` removes its graph/loop files (backed up first); use `--profile standard` to keep them.
 
 4. **One-Click Deployment, Interactive Wizard & Unified Pipeline (`deploy-agents` & `run-pipeline`)**:
    - **Interactive Step-by-Step Terminal Wizard**: Running scripts without arguments (or with `--interactive` / `-Interactive`) launches a guided TUI wizard (arrow keys to move, spacebar to toggle, enter to confirm) to select template language (`en`, `zh`, `zh-tw`), deployment scope (`project`, `global`, `both`), target project path, and multi-select agent bridge files (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy, WorkBuddy) plus optional workflows, preventing CLI mistakes;
@@ -107,7 +107,7 @@ agent-harness/
 │   │   ├── git-workflow.md          # Git authorization model, protected branch isolation
 │   │   ├── security-boundary.md     # 8 High-risk operations protection matrix
 │   │   └── token-discipline.md      # Read/fetch/speak gates, log truncation
-│   └── skills/                      # 40 Native engineering skills (Comet, OpenSpec, Superpowers...)
+│   └── skills/                      # 39 Native engineering skills (Comet, OpenSpec, Superpowers...)
 ├── .claude/
 │   ├── settings.json                # Claude Code hook config (all five hook events)
 │   └── hooks/                       # Hook scripts (Node.js, reads stdin JSON)

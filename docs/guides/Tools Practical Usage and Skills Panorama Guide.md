@@ -10,10 +10,10 @@ This guide provides a comprehensive handbook for software engineering and techni
 
 1. [Core Architecture & Tool Matrix (Who Manages What)](#1-core-architecture--tool-matrix-who-manages-what)
 2. [Skills & Ecosystem Tools Inventory](#2-skills--ecosystem-tools-inventory)
-   - 2.1 40 Integrated Native Skills Categorized
+   - 2.1 39 Integrated Native Skills Categorized
    - 2.2 Version Locking, Online Updates & Skill Sync (`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`)
    - 2.3 Optional Harness CLI Tools
-   - 2.4 Token Economics of Skills (Why 40+ Skills Do NOT Blow Up Context)
+   - 2.4 Token Economics of Skills (Why 39+ Skills Do NOT Blow Up Context)
    - 2.5 Engineering Skills & Rules Dispatching Matrix
 3. [Deep Dive into Core Harness Tools & Slash Commands](#3-deep-dive-into-core-harness-tools--slash-commands)
    - 3.1 Comet: Versioned Workflow Entry Point
@@ -93,7 +93,7 @@ The deployment scripts write paths; check each host's current documentation and 
 
 ## 2. Skills & Ecosystem Tools Inventory
 
-### 2.1 40 Integrated Native Skills Categorized
+### 2.1 39 Integrated Native Skills Categorized
 
 The installer copies the repository's skill directories into `.agents/skills/`; actual discovery depends on the host tool and its configuration.
 
@@ -134,7 +134,6 @@ The installer copies the repository's skill directories into `.agents/skills/`; 
 - **`requesting-code-review`**: Pre-merge review verification.
 - **`open-code-review`**: Deterministic code review — rule-first, line-anchored, coverage-mandated. Tier A via `ocr` CLI delegation, Tier B methodology without it.
 - **`receiving-code-review`**: Technical evaluation of human review comments.
-- **`writing-skills`**: Skill creator and validator.
 - **`diagnosing-superpowers`**: Audits session drift or cost.
 
 #### 4. Minimal Code & Syntax Graph

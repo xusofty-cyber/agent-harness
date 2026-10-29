@@ -2,7 +2,7 @@
 
 > **Language / 语言**: **English** | [简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md)
 
-How the 40 bundled skills actually work in practice: which ones trigger automatically,
+How the 39 bundled skills actually work in practice: which ones trigger automatically,
 which ones you invoke explicitly, and when to use each.
 
 ## How Skill Triggering Works
@@ -42,12 +42,12 @@ is defined in `skills-profiles.json`; the lists below must match it
 Minimal plus: `comet`, `openspec-continue-change`, `openspec-update-change`,
 `finishing-a-development-branch`, `dispatching-parallel-agents`
 
-### full (40 skills)
+### full (39 skills)
 
-All 40 skill directories in `.agents/skills/` (see the catalog below).
+All 39 skill directories in `.agents/skills/` (see the catalog below).
 `docx` and `brainstorming` are heavy skills and are only copied when
 `--include-heavy-skills` / `-IncludeHeavySkills` is also passed; without
-the flag, full deploys 38.
+the flag, full deploys 37.
 <!-- profiles:end -->
 
 ## Skill Catalog by Category
@@ -59,13 +59,13 @@ the flag, full deploys 38.
 > | Domain | Skills | Purpose |
 > |---|---|---|
 > | `openspec` | 17 | OpenSpec spec-driven workflow family |
-> | `superpowers` | 16 | obra/superpowers methodology family |
+> | `superpowers` | 15 | obra/superpowers methodology family |
 > | `local` | 6 | In-repo authored (engineering-docs, living-documentation, open-code-review, option-review, cross-tool-memory, git-advanced) |
 > | `document` | 2 | Document processing (docx, pdf) |
 > | `integration` | 2 | External tool integrations (comet, codegraph) |
 > | `utility` | 3 | Single-purpose utilities (caveman, ponytail, rtk) |
 >
-> **Note on counts**: `skills-lock.json` has 42 entries but this catalog lists 40 skills.
+> **Note on counts**: `skills-lock.json` has 41 entries but this catalog lists 39 skills.
 > The 2 extra entries (`openspec`, `superpowers`) are source-repo meta entries —
 > provenance placeholders for the upstream families, not installable skills.
 
@@ -135,7 +135,6 @@ the flag, full deploys 38.
 
 | Skill | Trigger | Slash | What It Does | When to Use |
 |---|---|---|---|---|
-| `writing-skills` | Auto | — | Guides skill creation/editing/verification. | When creating or modifying skills in `.agents/skills/`. |
 | `diagnosing-superpowers` | Auto | — | Diagnoses when a superpowers workflow went wrong. | When Claude ignored plans, repeated work, or seemed "off". Say "diagnose what went wrong". |
 
 ### 7. Engineering Documentation

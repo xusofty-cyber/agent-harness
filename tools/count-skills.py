@@ -15,7 +15,7 @@ Usage:
 
 --check verifies:
   1. Disk composition matches EXPECTED (total dirs, per-source dirs).
-  2. skills-lock.json has 42 entries: the 40 dirs + exactly the 2 known
+  2. skills-lock.json has 41 entries: the 39 dirs + exactly the 2 known
      source-repo meta entries (openspec, superpowers).
   3. No live doc states a stale skill count (42/43/44 in a skill context)
      or an openspec suite size other than 12. CHANGELOG.md and the dated
@@ -38,14 +38,14 @@ ROOT = Path(__file__).resolve().parent.parent
 # Expected composition. Update deliberately when skills are added/removed.
 # Values are counts of skill *directories on disk*, keyed by lock `source`.
 EXPECTED_DIRS = {
-    "obra/superpowers": 15,
+    "obra/superpowers": 14,
     "Fission-AI/OpenSpec": 12,
     "./agent-harness (authored in-repo)": 6,
     "anthropics/skills": 2,
     "other": 5,  # caveman, codegraph, comet, ponytail, rtk (one dir each)
 }
-EXPECTED_TOTAL_DIRS = 40
-EXPECTED_LOCK_ENTRIES = 42
+EXPECTED_TOTAL_DIRS = 39
+EXPECTED_LOCK_ENTRIES = 41
 # Suite-level pins, not deployable skills. The lock marks them with
 # "meta": true (Phase 2, 2-2c); the marker — not this name list — is the
 # rule. This set is only the expected value for --check.
@@ -100,7 +100,7 @@ def scan_live_docs():
         if not p.is_file():
             continue
         for lineno, line in enumerate(p.read_text(encoding="utf-8-sig").splitlines(), 1):
-            # Lines stating the lock's own entry count (42 by design: 40 dirs
+            # Lines stating the lock's own entry count (41 by design: 39 dirs
             # + 2 meta entries) are correct, not stale — skip them.
             if "skills-lock.json" in line:
                 continue

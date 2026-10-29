@@ -359,8 +359,8 @@ for tmpl_prefix in ("Global AGENTS", "Project AGENTS", "Directory AGENTS"):
               f"missing canonical template: {expected_tmpl}")
 
 # --- 3i. Skill counts: single source of truth (Phase 0, 0-1) ---
-# tools/count-skills.py owns the expected composition (40 dirs on disk,
-# 42 lock entries incl. 2 meta entries) and scans live docs for stale
+# tools/count-skills.py owns the expected composition (39 dirs on disk,
+# 41 lock entries incl. 2 meta entries) and scans live docs for stale
 # counts (44/43/42 in a skill context, openspec suite != 12). The script
 # is the single implementation; this check only asserts it passes.
 _count = subprocess.run(
@@ -972,8 +972,8 @@ for _guide in ("docs/guides/Skills Usage Guide.md", "docs/guides/Skills Usage Gu
         check(f"profiles:guide-standard-{_guide}",
               _std_listed == set(_std) - set(_min),
               f"{_guide} standard subsection lists {_std_listed}, want {sorted(set(_std) - set(_min))}")
-        check(f"profiles:guide-full-{_guide}", "40" in _sec,
-              f"{_guide} tier section does not state the full profile has 40 skills")
+        check(f"profiles:guide-full-{_guide}", "39" in _sec,
+              f"{_guide} tier section does not state the full profile has 39 skills")
 
 # --- 3s. Loop layer (Phase 5, v3 §4.6) ---
 # tools/loop.py (stdlib only) + templates/loop/ (goal / loop-state / graph,

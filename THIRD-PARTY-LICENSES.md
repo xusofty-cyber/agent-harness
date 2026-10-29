@@ -1,14 +1,14 @@
 # Third-Party Licenses — agent-harness
 
 > This file lists every vendored skill's source and license, 1:1 with
-> `skills-lock.json` (42 entries: 40 skill directories + 2 source-repo
+> `skills-lock.json` (41 entries: 39 skill directories + 2 source-repo
 > meta entries). License values are copied from each skill's `SKILL.md`
 > frontmatter `license:` field. Where the vendored copy declares no
 > license, the row says so explicitly — do not assume a license from
 > the upstream project's reputation; check the upstream repository.
 > Regenerate by hand when `skills-lock.json` changes; the row count
 > must stay equal to the lock entry count (enforced by
-> `tools/count-skills.py`, which reports 42).
+> `tools/count-skills.py`, which reports 41).
 
 ## Summary (2026-10-28)
 
@@ -18,7 +18,7 @@
   Both ship a `LICENSE.txt` with the complete terms; read it before
   redistributing or modifying them. `docx` is additionally opt-in
   only (see `--include-heavy-skills` in `deploy-agents.sh`).**
-- Not declared in vendored copy (see upstream): 23
+- Not declared in vendored copy (see upstream): 22
 
 ## Skills
 
@@ -65,7 +65,6 @@
 | `using-superpowers` | obra/superpowers | Not declared in vendored copy — see upstream |
 | `verification-before-completion` | obra/superpowers | Not declared in vendored copy — see upstream |
 | `writing-plans` | obra/superpowers | Not declared in vendored copy — see upstream |
-| `writing-skills` | obra/superpowers | Not declared in vendored copy — see upstream |
 
 ## Notes
 
