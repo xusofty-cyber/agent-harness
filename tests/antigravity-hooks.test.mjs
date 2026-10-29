@@ -263,3 +263,56 @@ test("PostToolUse prints {} and appends a cost-ledger line", () => {
   const ledger = readFileSync(join(dir, "gate", "cost-ledger.jsonl"), "utf-8");
   assert.match(ledger, /run_command/);
 });
+
+// --- hooks.json cwd regression (agy CLI 1.4.10 --print) ---
+// agy runs hook commands with cwd = <project>/.agents, so every command
+// in .agents/hooks.json must resolve from .agents/. The old
+// `node .agents/hooks/...` form doubled to .agents/.agents/hooks/...
+// and made agy reject the tool call instead of failing open.
+
+test("hooks.json commands resolve with cwd=.agents (no .agents/hooks prefix)", () => {
+  const hooksData = JSON.parse(
+    readFileSync(join(REPO_ROOT, ".agents", "hooks.json"), "utf-8"),
+  );
+  const gate = hooksData["agent-harness-gate"];
+  const commands = [];
+  for (const entries of Object.values(gate)) {
+    if (!Array.isArray(entries)) continue;
+    for (const entry of entries) {
+      for (const h of entry.hooks || [entry]) {
+        if (h.command) commands.push(h.command);
+      }
+    }
+  }
+  assert.equal(commands.length, 4);
+  for (const cmd of commands) {
+    assert.ok(cmd.startsWith("node hooks/antigravity-"), cmd);
+    assert.ok(!cmd.includes(".agents/hooks/"), cmd);
+    const rel = cmd.split(" ")[1];
+    assert.equal(existsSync(join(REPO_ROOT, ".agents", rel)), true, rel);
+  }
+});
+
+test("adapter with cwd=.agents and no workspacePaths still denies force push", () => {
+  const dir = makeProject({ branch: "main" });
+  const agentsDir = join(dir, ".agents");
+  const res = spawnSync(
+    "node",
+    [join(agentsDir, "hooks", "antigravity-pre-tool-use.mjs")],
+    {
+      input: JSON.stringify({
+        toolCall: {
+          name: "run_command",
+          args: { CommandLine: "git push --force origin main", Cwd: dir },
+        },
+        conversationId: "test-conversation",
+      }),
+      cwd: agentsDir,
+      env: { ...process.env },
+      encoding: "utf-8",
+    },
+  );
+  const json = JSON.parse(res.stdout || "{}");
+  assert.equal(json.decision, "deny");
+  assert.match(json.reason, /Force push/);
+});
