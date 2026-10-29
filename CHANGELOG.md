@@ -20,6 +20,7 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 ### Fixed
 
 - **CI deploy-smoke asserts for WorkBuddy restored**: the three `test -f` lines for `.workbuddy/settings.json`, `.workbuddy/hooks/workbuddy-pre-tool-use.mjs`, and `.workbuddy/hooks/guard.mjs` in the deploy smoke step of `.github/workflows/ci.yml` (dropped from PR #73 because the push token then lacked workflow scope; see PR #73 body) are re-added now that the token has workflow scope, after the existing `.claude/hooks` asserts.
+- **dsh CI wiring restored**: the `.github/workflows/ci.yml` additions held on local branch `dsh-gate-plugin-with-ci` (PR #75 body) are applied now that the token has workflow scope: `node --check .dsh/agent-harness-gate.mjs` in the syntax step, `node tests/dsh-gate.test.mjs` in the hook behavior tests, and deploy-smoke asserts for `.dsh/agent-harness-gate.mjs`, `.dsh/cordis.patch.yml`, and `.dsh/hooks/guard.mjs`. Applied as the ci.yml delta only onto current main (the old branch was based on pre-#69 main and also carried the already-merged plugin files, so it was not merged wholesale).
 
 ### Changed
 
