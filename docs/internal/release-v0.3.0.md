@@ -32,7 +32,9 @@ verified with measured numbers, not claims.
   pinned 0.5.1; codegraph/rtk installers hash-verified (curl|sh / irm|iex
   zeroed); ghost meta entries annotated `meta: true`, never deleted (D10);
   all five hook events wired; Guard expands indirect execution; cost ledger
-  - budget alerts (never auto-stop).
+  - budget alerts. (This is the skeleton's proxy ledger,
+  `tools/cost-ledger.py`, warn-only per D12 — it never auto-stops. The
+  branch-wide verification policy is the separate D57 hard stop below.)
 - **Phase 3 — self-built benchmark**: 4 tasks (fixed start commit),
   `eval/run-bench.sh`, six-dimension rubric (5 calibration rounds;
   standing advisory-only per D28, user final ruling 2026-10-29 — the
@@ -59,6 +61,22 @@ verified with measured numbers, not claims.
   scripts); docs show pinned installs only (EN+ZH Panorama Guide);
   `tools/check-release.py` release gate (VERSION/CHANGELOG/lock +
   deprecation policy); Loop templates + runner wired into deploy.
+- **Cost hard stop ON (D57, user final ruling 2026-10-29)**: the
+  verification-run budget gate is ON, not alert-only. `eval/cost.py
+  check` enforces per-task ceilings (10 verifications / 3600 s /
+  5 retries) and per-day ceilings (100 verifications / 28800 s); past
+  a ceiling it exits 2 (BUDGET STOP) and the run must not start — the
+  task is recorded as blocked, never as passing or failed, and resumes
+  only after a human raises the budget or a new day starts. Checking
+  never kills an in-flight run. Enforcement point (panel fix P1-3):
+  `eval/run-bench.sh setup` consults the gate before a new bench run
+  (smoke goes through setup); `pass-gate.py verify` does NOT consult
+  this gate. Honest limit: the ledger is a plain local JSONL
+  (`eval/cost-ledger.jsonl`, gitignored) — emptying or renaming it
+  bypasses the stop, so the hard stop is a policy gate for agents
+  that follow the workflow (防君子不防篡改), not tamper-proof
+  enforcement. This replaces the draft's earlier "never auto-stop"
+  wording, which described only the proxy ledger.
 
 ## Measured numbers (re-verify on release day)
 
