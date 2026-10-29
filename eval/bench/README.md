@@ -5,6 +5,22 @@ tasks t5–t8 and scores runs **objectively** — no agent self-report is
 involved in the verdict. Tasks t1–t4 live in `eval/tasks/` and are run
 by `eval/run-bench.sh` with `eval/check-results.py`.
 
+## Cost hard stop (D57)
+
+The verification-run budget gate is ON, not alert-only.
+`eval/cost.py check` enforces per-task ceilings (10 verifications /
+3600 s / 5 retries) and per-day ceilings (100 verifications /
+28800 s). `eval/run-bench.sh setup` consults the gate before a new
+bench run; past a ceiling it exits 2 (BUDGET STOP) and the run must
+not start — the task is recorded as blocked, never as passing or
+failed, and resumes only after a human raises the budget or a new
+day starts. Checking never kills an in-flight run.
+`gate/pass-gate.py verify` does NOT consult this gate. Honest limit:
+the ledger is a plain local JSONL (`eval/cost-ledger.jsonl`,
+gitignored) — emptying or renaming it bypasses the stop, so the
+hard stop is a policy gate for agents that follow the workflow, not
+tamper-proof enforcement.
+
 ## Tasks
 
 | Task | Name | What it measures |
