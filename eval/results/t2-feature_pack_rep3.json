@@ -1,0 +1,19 @@
+{
+  "ablation": "",
+  "arm": "pack",
+  "duration_s": 4,
+  "ended_epoch": 1793183798,
+  "false_completion": 0,
+  "host": "htch-runtime",
+  "interventions": 0,
+  "model": "Muse Spark",
+  "notes": "first-try pass; added power(a,b)=a**b",
+  "outcome": "pass",
+  "rep": 3,
+  "rounds": 3,
+  "run_dir": "/tmp/bench/t2-feature/pack/rep3",
+  "start_commit": "2e583970fb952158ad83617fe436534abd38295d",
+  "started_epoch": 1793183794,
+  "task": "t2-feature",
+  "verify_attempts": 1
+}

@@ -1,0 +1,14 @@
+diff --git a/calc.py b/calc.py
+index f28474b..d7d4032 100644
+--- a/calc.py
++++ b/calc.py
+@@ -10,8 +10,7 @@ def add(a, b):
+ 
+ 
+ def subtract(a, b):
+-    # BUG (task T1): returns the sum instead of the difference.
+-    return a + b
++    return a - b
+ 
+ 
+ def multiply(a, b):

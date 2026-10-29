@@ -61,6 +61,9 @@ param (
     [switch]$BriefProbe,
 
     [Parameter(Mandatory = $false)]
+    [switch]$Strict,
+
+    [Parameter(Mandatory = $false)]
     [Alias('I')]
     [switch]$Interactive,
 
@@ -97,6 +100,7 @@ if ($Help) {
     Write-Host "  -CheckOnly, -k         只读检查模式 (技能仅检查差异、文档仅分析影响)"
     Write-Host "  -ApplySkills           在技能同步阶段主动拉取并应用上游更新"
     Write-Host "  -BriefProbe            探针极简输出模式 (仅打印探针关键摘要前 15 项，适合 CI)"
+    Write-Host "  -Strict                严格模式：任一阶段失败记 FAIL、流水线退出 1；默认 advisory 模式：失败记 WARN、退出 0（但绝不记 PASS）"
     Write-Host "  -Yes, -y               非交互/无人值守执行 (直接使用推荐配置，不弹窗确认)"
     Write-Host "  -Interactive, -I       强制启用交互式逐步选择向导"
     Write-Host "  -Help, -h              显示本帮助信息`n"
@@ -693,6 +697,50 @@ Write-Host "  执行模式: $runDetailMode`n" -ForegroundColor Green
 
 Ensure-ProjectMemoryScaffold $targetAbs $Lang
 
+# Phase 2 (2-1): record a stage outcome honestly — never PASS on a non-zero
+# exit code. -Strict turns a failure into FAIL (pipeline exits 1); default
+# advisory mode records WARN (visible, exit 0). Deploy failures (stage 1)
+# do not use this helper: they are FAIL in every mode.
+function Add-StageStatus([int]$Rc, [string]$Label, [string]$PassDetail, [string]$FailDetail) {
+    if ($Rc -eq 0) {
+        Write-Host "`n✔ $Label 执行完成`n" -ForegroundColor Green
+        $script:summaryStatus += "PASS"
+        $script:summaryDetail += $PassDetail
+        Record-Ledger $Label "pass"
+    } elseif ($Strict.IsPresent) {
+        Write-Host "`n✖ $Label 出现错误 (退出码 $Rc, -Strict)`n" -ForegroundColor Red
+        $script:summaryStatus += "FAIL"
+        $script:summaryDetail += "$FailDetail (-Strict)"
+        Record-Ledger $Label "fail"
+    } else {
+        Write-Host "`n⚠ $Label 未完全成功 (退出码 $Rc), 记为 WARN (默认 advisory 模式; -Strict 会记为 FAIL)`n" -ForegroundColor Yellow
+        $script:summaryStatus += "WARN"
+        $script:summaryDetail += "$FailDetail (advisory)"
+        Record-Ledger $Label "warn"
+    }
+}
+# Phase 2 (2-5): one cost-ledger event per pipeline stage, keyed by run id.
+# Only when the target project has a gate/ directory, and only as advisory
+# telemetry: a ledger failure is reported but never fails the pipeline and
+# never changes the stage outcome.
+$script:runId = "$(Get-Date -Format 'yyyyMMddHHmmss')-$PID"
+$script:stageStartMs = 0
+function Record-Ledger([string]$Label, [string]$Status) {
+    $gateDir = Join-Path $targetAbs "gate"
+    if (-not (Test-Path $gateDir -PathType Container)) { return }
+    if (-not (Get-Command python3 -ErrorAction SilentlyContinue)) { return }
+    $dur = 0
+    if ($script:stageStartMs -gt 0) {
+        $dur = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds() - $script:stageStartMs
+    }
+    try {
+        $LASTEXITCODE = 0
+        & python3 "$PSScriptRoot/tools/cost-ledger.py" record --gate-dir $gateDir --kind stage --stage $Label --status $Status --duration-ms $dur --run-id $script:runId 2>$null
+        if ($LASTEXITCODE -ne 0) { Write-Host "  [!] cost ledger record failed (telemetry only, stage outcome unaffected)" -ForegroundColor Yellow }
+    } catch {
+        Write-Host "  [!] cost ledger record failed (telemetry only, stage outcome unaffected)" -ForegroundColor Yellow
+    }
+}
 $summaryNames = @()
 $summaryStatus = @()
 $summaryDetail = @()
@@ -710,6 +758,7 @@ $currentStage = 0
 # ==============================================================================
 if ($stageDeploy) {
     $currentStage++
+    $script:stageStartMs = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()  # Phase 2 (2-5): stage timing for the cost ledger
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
     Write-Host "[$currentStage/$totalStages] 阶段 1: 规则与 Agent 桥接部署 (deploy-agents)" -ForegroundColor Cyan
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
@@ -726,14 +775,27 @@ if ($stageDeploy) {
     }
 
     try {
+        # Phase 2 (2-1): $LASTEXITCODE is stale unless reset — a .ps1 that
+        # ends without exit leaves the previous value behind.
+        $LASTEXITCODE = 0
         & $deployScript @deployParams
-        Write-Host "`n✔ 阶段 1 执行完成`n" -ForegroundColor Green
-        $summaryStatus += "PASS"
-        $summaryDetail += "规则与桥接文件配置就绪"
+        $deployRc = $LASTEXITCODE
+        if ($deployRc -ne 0) {
+            Write-Host "`n✖ 阶段 1 出现错误: 部署脚本退出码 $deployRc`n" -ForegroundColor Red
+            $summaryStatus += "FAIL"
+            $summaryDetail += "部署脚本返回非零退出码 $deployRc"
+            Record-Ledger "阶段 1" "fail"
+        } else {
+            Write-Host "`n✔ 阶段 1 执行完成`n" -ForegroundColor Green
+            $summaryStatus += "PASS"
+            $summaryDetail += "规则与桥接文件配置就绪"
+            Record-Ledger "阶段 1" "pass"
+        }
     } catch {
         Write-Host "`n✖ 阶段 1 出现错误: $_`n" -ForegroundColor Red
         $summaryStatus += "FAIL"
         $summaryDetail += "部署脚本执行失败"
+        Record-Ledger "阶段 1" "fail"
     }
 }
 
@@ -742,6 +804,7 @@ if ($stageDeploy) {
 # ==============================================================================
 if ($stageMemory) {
     $currentStage++
+    $script:stageStartMs = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()  # Phase 2 (2-5): stage timing for the cost ledger
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
     Write-Host "[$currentStage/$totalStages] 阶段 2: 配置 AI-Memory 记忆服务 (setup-ai-memory)" -ForegroundColor Cyan
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
@@ -806,14 +869,16 @@ if ($stageMemory) {
             $setupScript = Join-Path $repoRoot "setup-ai-memory.ps1"
             Push-Location $targetAbs
             try {
+                # Phase 2 (2-1): capture the exit code — the old code recorded
+                # PASS even when setup-ai-memory.ps1 failed.
+                $LASTEXITCODE = 0
                 if ($runDetailMode -eq "detailed" -and -not [Console]::IsInputRedirected) {
                     & $setupScript
                 } else {
                     & $setupScript -Agent @("claude-code", "codex", "antigravity-ide")
                 }
-                Write-Host "`n✔ 阶段 2 执行完成`n" -ForegroundColor Green
-                $summaryStatus += "PASS"
-                $summaryDetail += "AI 记忆集成与 MCP 配置完成"
+                $setupRc = $LASTEXITCODE
+                Add-StageStatus $setupRc "阶段 2" "AI 记忆集成与 MCP 配置完成" "setup-ai-memory 返回非零退出码 $setupRc"
             } catch {
                 Write-Host "`n↷ 阶段 2 跳过或未完全成功: $_`n" -ForegroundColor Yellow
                 $summaryStatus += "SKIP"
@@ -830,6 +895,7 @@ if ($stageMemory) {
 # ==============================================================================
 if ($stageSkills) {
     $currentStage++
+    $script:stageStartMs = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()  # Phase 2 (2-5): stage timing for the cost ledger
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
     Write-Host "[$currentStage/$totalStages] 阶段 3: 校验/同步外部技能库 (sync-skills)" -ForegroundColor Cyan
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
@@ -848,8 +914,11 @@ if ($stageSkills) {
     } else {
         $syncScript = Join-Path $repoRoot "tools\sync-skills.py"
         try {
-            $syncArgs = @()
+            # Phase 2 (2-1): always --strict so findings are machine-detectable;
+            # Add-StageStatus decides FAIL (strict) vs WARN (advisory default).
+            $syncArgs = @("--strict")
             if ($CheckOnly.IsPresent) { $syncArgs += "--check-only" }
+            $LASTEXITCODE = 0
             if ($runDetailMode -eq "detailed" -and -not [Console]::IsInputRedirected) {
                 & $pythonCmd $syncScript @syncArgs
             } else {
@@ -860,9 +929,8 @@ if ($stageSkills) {
                 }
                 & $pythonCmd $syncScript @syncArgs
             }
-            Write-Host "`n✔ 阶段 3 检查完成`n" -ForegroundColor Green
-            $summaryStatus += "PASS"
-            $summaryDetail += "技能锁定与版本校验完成"
+            $syncRc = $LASTEXITCODE
+            Add-StageStatus $syncRc "阶段 3" "技能锁定与版本校验完成" "sync-skills.py 返回非零退出码 $syncRc"
         } catch {
             Write-Host "`n✖ 阶段 3 出现异常: $_`n" -ForegroundColor Red
             $summaryStatus += "FAIL"
@@ -876,6 +944,7 @@ if ($stageSkills) {
 # ==============================================================================
 if ($stageDocs) {
     $currentStage++
+    $script:stageStartMs = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()  # Phase 2 (2-5): stage timing for the cost ledger
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
     Write-Host "[$currentStage/$totalStages] 阶段 4: 活体文档影响分析与质检 (doc-impact)" -ForegroundColor Cyan
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
@@ -890,14 +959,16 @@ if ($stageDocs) {
     } else {
         $docScript = Join-Path $repoRoot "tools\doc-impact.py"
         try {
+            # Phase 2 (2-1): always --strict; must-update docs are FAIL in
+            # strict mode, WARN in advisory default.
+            $LASTEXITCODE = 0
             if ($runDetailMode -eq "detailed" -and -not [Console]::IsInputRedirected) {
-                & $pythonCmd $docScript --interactive
+                & $pythonCmd $docScript --interactive --strict
             } else {
-                & $pythonCmd $docScript --root $targetAbs
+                & $pythonCmd $docScript --root $targetAbs --strict
             }
-            Write-Host "`n✔ 阶段 4 质检完成`n" -ForegroundColor Green
-            $summaryStatus += "PASS"
-            $summaryDetail += "活体文档溯源关系与影响分析通过"
+            $docRc = $LASTEXITCODE
+            Add-StageStatus $docRc "阶段 4" "活体文档溯源关系与影响分析通过" "doc-impact.py 返回非零退出码 $docRc (有文档 must-update)"
         } catch {
             Write-Host "`n✖ 阶段 4 出现异常: $_`n" -ForegroundColor Red
             $summaryStatus += "FAIL"
@@ -965,6 +1036,10 @@ for ($i = 0; $i -lt $summaryNames.Count; $i++) {
         }
         "SKIP" {
             Write-Host " [↷ SKIP]  $paddedName : $dt" -ForegroundColor Yellow
+        }
+        "WARN" {
+            # Phase 2 (2-1): advisory failure — visible, not a pass, not fatal.
+            Write-Host " [! WARN]  $paddedName : $dt" -ForegroundColor Yellow
         }
         "FAIL" {
             Write-Host " [✖ FAIL]  $paddedName : $dt" -ForegroundColor Red

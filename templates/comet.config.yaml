@@ -51,7 +51,7 @@ native:
   # 需求澄清模式 (batch: 批量集中确认; sequential: 逐题递进确认)
   clarification_mode: batch
   # 归档确认机制 (automatic: 检查通过后自动归档; required: 需显式确认)
-  archive_confirmation: automatic
+  archive_confirmation: required
   # 验证失败最大允许重试次数
   max_verify_failures: 5
   # 文档写入策略 (allow: 允许在各阶段写入文档而不被打回 Build; revert: 严格拦截)
