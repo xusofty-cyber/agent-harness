@@ -103,7 +103,9 @@ verified with measured numbers, not claims.
 - **Vendored comet skill** (`.agents/skills/comet/SKILL.md:84`) still shows
   an unversioned comet install in upstream text — editing it would break
   the lock; recorded in D22, not fixed.
-- **RTK winget has no version pin** (D13 known gap).
+- **RTK winget has no version pin** (D13 known gap): on Windows,
+  `winget install rtk-ai.rtk` installs the latest rtk, not the
+  lock-pinned version.
 - **ZH-TW rows are `stale`** (5 rows per `docs/internal/i18n-status.md`:
   README, three guides, Global AGENTS; Panorama Guide ZH-TW still shows
   curl|sh and unversioned npm install — EN §2.3 pinned instructions
