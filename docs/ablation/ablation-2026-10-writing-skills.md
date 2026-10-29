@@ -73,4 +73,30 @@ profile, skills-only).
 
 ## Human decision
 
-PENDING — owner. Removal requires the owner to fill in this line (remove / keep + reason + date). The script never removes anything itself.
+KEEP — decided 2026-10-29 (night task 7, writing-skills deletion
+verdict). The component stays in the `full` profile only; no skill
+code, profile, guide, or lock file changes in this verdict.
+
+- **Reason:** the ablation evidence does not support deletion. The
+  12/12 pass / 0 false completions result is real (re-verified from
+  `eval/results/ablation/*_pack-no-writing-skills_rep*.json`), but
+  this report itself limits it to bench-only: no bench task authors,
+  edits, or verifies a skill, so the runs cannot speak to
+  `writing-skills`' own function (skill creation/editing/verification,
+  per the Skills Usage Guide catalog). Per D20, no-regression is
+  necessary but not sufficient for removal, and removing on bench data
+  alone was explicitly rejected. The dependency gate being CLEAR
+  (re-run 2026-10-29: no template/hook references) shows removal
+  would be technically safe, not that the skill is valueless.
+  "Rarely used" is UNPROVEN: there is no usage telemetry (profiles
+  note this), so it is not used as an argument either way. Deleting
+  would remove the only skill-authoring guidance from the `full`
+  profile on evidence that never exercised it.
+- **Re-review conditions (any one, plus owner sign-off, reopens the
+  question):** (a) a bench task that actually authors/edits/verifies
+  a skill, ablated with and without `writing-skills`; (b) usage
+  telemetry showing non-use; (c) an owner scope decision that
+  skill-authoring guidance is out of scope for this repository.
+  Until then the 2026-11 monthly ablation moves on to another
+  component; this component is not re-proposed on the same t1–t4
+  evidence.

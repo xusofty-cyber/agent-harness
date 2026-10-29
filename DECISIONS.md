@@ -993,3 +993,35 @@ still pending.
 - **Verification:** installer downloaded from the new URL and SHA256
   matched the lock value; repo_checks installer-pin checks pass
   (lock URL + SHA agree with deploy-agents.sh).
+
+## D64 — writing-skills deletion verdict: KEEP (night task 7, 2026-10-29)
+
+- **Decision:** `writing-skills` is NOT deleted. It stays in the
+  `full` profile only (it is in neither `minimal` nor `standard`,
+  so those profiles are unaffected either way). This closes the
+  PENDING human-decision line in
+  `docs/ablation/ablation-2026-10-writing-skills.md`, which now
+  records KEEP with the same reasons and re-review conditions.
+- **Reason:** the 2026-10 ablation (12/12 pass, 0 false completions
+  on t1–t4 pack-arm runs without the skill, re-verified from the raw
+  records) proves no regression on general coding tasks, but the
+  ablation report itself limits that result to bench-only: no bench
+  task authors, edits, or verifies a skill, so the runs never
+  exercised this skill's own function. Per D20, no-regression is
+  necessary but not sufficient for removal, and removing on bench
+  data alone was explicitly rejected. The dependency gate being
+  CLEAR (re-run 2026-10-29) shows removal would be technically safe,
+  not that the skill is valueless. No usage telemetry exists, so
+  "rarely used" is unproven and is not used as an argument.
+  Deleting on this evidence alone would remove the only
+  skill-authoring guidance from the `full` profile for a benefit
+  measured only as 107,640 bytes on disk.
+- **Re-review conditions (any one, plus owner sign-off, reopens the
+  question):** (a) a skill-authoring bench task ablated with and
+  without the skill; (b) usage telemetry showing non-use; (c) an
+  owner scope decision that skill-authoring guidance is out of scope
+  for this repository.
+- **Scope of this entry:** verdict record only. No skill code,
+  profile, guide, lock, deploy-script, or PARITY change; no
+  CHANGELOG user-facing entry, because nothing user-facing changed.
+  The 2026-11 monthly ablation moves on to another component.
