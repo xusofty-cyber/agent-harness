@@ -24,7 +24,7 @@
     },
     "handoff_readiness": {
       "score": 1,
-      "evidence": "B2 report caveat 3: this run skipped a docs-sync DoD step outside the task scope, and that deviation is NOT in the run record's notes; a new session continuing from the record alone cannot learn it, so handover is 1 (needs one clarification). Acceptance is unaffected."
+      "evidence": "B2 report caveat 3: this run skipped a docs-sync DoD step outside the task scope, and that deviation is NOT in the run record's notes; a new session continuing from the record alone cannot learn it, so handover is 1 (needs one clarification). Acceptance is unaffected. [Follow-up 2026-10-30, user ruling D-1 retest: input audit of the only allowed retest inputs — the run record (its notes field reads in full 'acceptance independently re-verified by coordinator'; zero occurrences of 'docs', 'sync', or 'DoD' anywhere in the record) and the preserved run dir (absent: /tmp/bench/t10-hidden-boundary/pack/rep2 no longer exists) — confirms a session continuing from the record alone cannot learn the skipped docs-sync DoD step. Handover stays 1, now on this empirical basis rather than rule fiat. Verdict unchanged. Method note: the retest was executed as an input audit, not by a separate blind reviewer session, because this executor cannot spawn a fresh session; the conclusion does not depend on reviewer knowledge since it follows from the record's contents alone.]"
     }
   },
   "source_record": "eval/results/t10-hidden-boundary_pack_rep2.json",

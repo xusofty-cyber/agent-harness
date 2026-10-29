@@ -429,3 +429,60 @@ What this second pass did NOT do: it did not re-score all 36 runs
 from scratch, did not run a live second-judge round, and did not
 apply rubric suggestions S1–S3. Those remain open for the user
 (§7).
+
+## 10. Follow-up — user rulings 2026-10-30 (appended, original sections unchanged)
+
+On 2026-10-30 05:00 the user ruled on all five §7 items. The
+sections above are the historical 2026-10-29 record and are not
+rewritten; this section records only what changed after the
+rulings, and every scorecard change below keeps its original value
+in its evidence sentence. All 36 verdicts remain Accept; no
+verdict moved.
+
+1. **V-1 — option B (venv interpreter ruled fully equivalent).**
+   The 18 t9/t11 scorecards (all t9-multi-file and t11-resume
+   runs) had verification changed 1 → 2, each evidence sentence
+   appended with the ruling citation and the original score 1.
+   Their totals move 11 → 12.
+2. **D-1 — retest (not maintain-by-fiat, not direct re-judge).**
+   The user ordered an empirical retest: a fresh session given
+   only the t10 pack rep2 run record and working tree, to see
+   whether the skipped docs-sync DoD step is discoverable from
+   the record alone. Method and limitation, stated plainly: the
+   retest was executed as an input audit, not by a separate
+   blind reviewer session, because this executor cannot spawn a
+   fresh session; the conclusion does not depend on reviewer
+   knowledge since it follows from the record's contents alone.
+   Audit result: the run record's notes field reads in full
+   "acceptance independently re-verified by coordinator", and
+   the record contains zero occurrences of "docs", "sync", or
+   "DoD" anywhere; the preserved run dir
+   `/tmp/bench/t10-hidden-boundary/pack/rep2` no longer exists.
+   A session continuing from the record alone therefore cannot
+   learn the deviation. **Handover stays 1**, now on this
+   empirical basis rather than rule fiat; the retest note is
+   appended to that scorecard's handover evidence, total stays
+   11, verdict stays Accept.
+3. **Attribution — option B (unattributable, stays
+   unattributed).** No arm/rep is asserted in any scorecard.
+   This section is the record: the user ruled the t10
+   AGENTS.md read unattributable, and it remains unattributed.
+4. **S1–S3 — all three accepted.** The three anchor sentences
+   from §5 are now in `eval/rubric.md` under "Anchor notes
+   (user-accepted 2026-10-30, advisory-only)". S1 is the default
+   anchor; the V-1 ruling is recorded there as a case-specific
+   exception for the 2026-10-29 t9/t11 runs, not a repeal of S1.
+   The rubric stays advisory-only; `evaluate.py --gate` still
+   refuses (re-verified on a 12/12 Accept card: exit 2, GATE
+   REFUSED).
+5. **Scope — option A (confirmed).** The user confirms this
+   calibration does NOT advance any `stable` / auto-approval
+   claim; the standing advisory-only status is unchanged.
+
+**Post-ruling sample (recomputed from the 36 scorecards):**
+totals 35 × 12/12 and 1 × 11/12 (t10 pack rep2 only);
+dimension distribution verification 36 × 2, handover
+35 × 2 / 1 × 1, all other dimensions unchanged; 215 dimension
+scores of 2 and 1 score of 1; verdicts 36 × Accept. The
+pre-ruling numbers in §§1–4 (17 × 12, 19 × 11) remain the
+historical record of the 2026-10-29 calibration.

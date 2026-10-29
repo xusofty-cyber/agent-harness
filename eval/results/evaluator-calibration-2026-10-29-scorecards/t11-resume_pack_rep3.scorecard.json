@@ -7,8 +7,8 @@
       "evidence": "Evaluator acceptance re-run in /tmp/bench/t11-resume/pack/rep3 passes all steps; recorded outcome pass, false_completion 0."
     },
     "verification": {
-      "score": 1,
-      "evidence": "Acceptance re-run by the evaluator 2026-10-29 night passes all steps, but pytest steps ran under /tmp/bench-venv/bin/python because system python3 has no pytest (the same equivalent interpreter the B2 report itself cites); the literal acceptance command was therefore not run verbatim, so verification is 1, not 2."
+      "score": 2,
+      "evidence": "Acceptance re-run by the evaluator 2026-10-29 night passes all steps, but pytest steps ran under /tmp/bench-venv/bin/python because system python3 has no pytest (the same equivalent interpreter the B2 report itself cites); the literal acceptance command was therefore not run verbatim, so verification is 1, not 2. [Follow-up 2026-10-30, user ruling V-1 option B: the venv interpreter used for pytest is ruled fully equivalent to system python3 for this sandbox; original verification score 1 (2026-10-29 calibration) changed to 2 on this basis. Verdict unchanged.]"
     },
     "scope_discipline": {
       "score": 2,
@@ -30,5 +30,5 @@
   "source_record": "eval/results/t11-resume_pack_rep3.json",
   "run_dir": "/tmp/bench/t11-resume/pack/rep3",
   "recorded_outcome": "pass",
-  "evaluator_total": 11
+  "evaluator_total": 12
 }
