@@ -63,13 +63,53 @@ def cmd_record(args) -> int:
     return proc.returncode
 
 
+def _num(v) -> float:
+    """Numeric ledger field, or 0 for missing / non-numeric values.
+
+    budget_stop lines carry no counters, and a hand-edited ledger may
+    carry strings; neither may crash a sum (panel P1-4).
+    """
+    return v if isinstance(v, (int, float)) and not isinstance(v, bool) else 0
+
+
+def read_ledger(path: Path) -> tuple[list, int]:
+    """Parse a JSONL ledger tolerantly (panel P1-4).
+
+    Returns (records, bad_lines). Blank lines are skipped silently;
+    non-JSON lines and non-object lines are counted, warned about on
+    stderr (with line number and a short preview), and skipped — never
+    a traceback, never a dropped gate decision. Callers that sum
+    counters must still use _num/.get: budget_stop lines have no
+    counter fields by design (check now also writes them as 0).
+    """
+    records: list = []
+    bad = 0
+    if not path.exists():
+        return records, bad
+    for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
+            rec = json.loads(line)
+        except json.JSONDecodeError:
+            print(f"cost: warning: ledger line {lineno} is not valid JSON, skipped: {line.strip()[:80]}", file=sys.stderr)
+            bad += 1
+            continue
+        if not isinstance(rec, dict):
+            print(f"cost: warning: ledger line {lineno} is not a JSON object, skipped: {line.strip()[:80]}", file=sys.stderr)
+            bad += 1
+            continue
+        records.append(rec)
+    return records, bad
+
+
 def cmd_report(args) -> int:
     budget = json.loads(Path(args.budget).read_text(encoding="utf-8")) if Path(args.budget).exists() else {}
-    records = []
-    if LEDGER.exists():
-        records = [json.loads(line) for line in LEDGER.read_text(encoding="utf-8").strip().splitlines() if line.strip()]
-    total_duration = sum(r["duration_ms"] for r in records)
-    total_verifications = sum(r["verifications"] for r in records)
+    records, bad = read_ledger(LEDGER)
+    if bad:
+        print(f"cost: warning: {bad} bad ledger line(s) skipped (see stderr)", file=sys.stderr)
+    total_duration = sum(_num(r.get("duration_ms", 0)) for r in records)
+    total_verifications = sum(_num(r.get("verifications", 0)) for r in records)
     print(f"records={len(records)} total_duration_ms={total_duration} total_verifications={total_verifications}")
     alerted = False
     if "max_total_duration_ms" in budget and total_duration > budget["max_total_duration_ms"]:
@@ -89,17 +129,17 @@ def cmd_check(args) -> int:
         print("hard stop OFF (alert only): new verification run may start")
         return 0
     ledger_path = Path(args.ledger)
-    records = []
-    if ledger_path.exists():
-        records = [json.loads(line) for line in ledger_path.read_text(encoding="utf-8").strip().splitlines() if line.strip()]
+    records, bad = read_ledger(ledger_path)
+    if bad:
+        print(f"cost: warning: {bad} bad ledger line(s) skipped (see stderr)", file=sys.stderr)
     today = args.day or datetime.now(timezone.utc).strftime("%Y-%m-%d")
     task_recs = [r for r in records if r.get("task") == args.task and r.get("event") != "budget_stop"]
     day_recs = [r for r in records if r.get("date") == today and r.get("event") != "budget_stop"]
-    task_v = sum(r.get("verifications", 0) for r in task_recs)
-    task_s = sum(r.get("duration_ms", 0) for r in task_recs) / 1000
-    task_r = sum(r.get("retries", 0) for r in task_recs)
-    day_v = sum(r.get("verifications", 0) for r in day_recs)
-    day_s = sum(r.get("duration_ms", 0) for r in day_recs) / 1000
+    task_v = sum(_num(r.get("verifications", 0)) for r in task_recs)
+    task_s = sum(_num(r.get("duration_ms", 0)) for r in task_recs) / 1000
+    task_r = sum(_num(r.get("retries", 0)) for r in task_recs)
+    day_v = sum(_num(r.get("verifications", 0)) for r in day_recs)
+    day_s = sum(_num(r.get("duration_ms", 0)) for r in day_recs) / 1000
     task_cap = budget.get("hard_stop_task", {})
     day_cap = budget.get("hard_stop_day", {})
     breach = None
@@ -118,7 +158,9 @@ def cmd_check(args) -> int:
         return 0
     ledger_path.parent.mkdir(parents=True, exist_ok=True)
     with ledger_path.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps({"event": "budget_stop", "task": args.task, "date": today, "reason": breach}, ensure_ascii=False) + "\n")
+        # Counter fields written as 0 so even a strict reader summing
+        # duration_ms/verifications never KeyErrors on a stop line (P1-4).
+        fh.write(json.dumps({"event": "budget_stop", "task": args.task, "date": today, "reason": breach, "duration_ms": 0, "verifications": 0, "retries": 0}, ensure_ascii=False) + "\n")
     print("问题：预算已耗尽，新的验证轮次不得开始。")
     print(f"原因：{breach}。")
     print("修法：不要再开新验证；把任务记为 blocked（不是 passing，也不是 failed）；等人工在 DECISIONS.md 里调高预算，或等新的一天开始后再恢复。")
