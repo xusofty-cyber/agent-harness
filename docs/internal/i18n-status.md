@@ -31,7 +31,7 @@ behind is tracked debt, not a CI failure.
 
 | Target | Source | Status | Source SHA (last synced) | Note |
 |---|---|---|---|---|
-| README.zh-tw.md | README.md | in-sync | 3446767a288d | Regenerated from EN (B2 paragraph + eval tree + enforcement bullet synced) |
+| README.zh-tw.md | README.md | in-sync | 59c9fba1f1e2 | Version labels 0.3.0 → 0.4.0 in EN/ZH/ZH-TW headings (release v0.4.0); body otherwise unchanged |
 | docs/guides/Multi-Tool Deployment and Configuration Guide.zh-tw.md | docs/guides/Multi-Tool Deployment and Configuration Guide.md | stale | 849ec7008f74 | EN changed (Q3 title 40+ → 39+, dsh paragraph parenthetical now English); Q3 title synced to ZH-TW; ZH-TW not fully regenerated per frozen-translation policy, write_file live-name fix + live-run verification status still owed |
 | docs/guides/Tools Practical Usage and Skills Panorama Guide.zh-tw.md | docs/guides/Tools Practical Usage and Skills Panorama Guide.md | in-sync | 4f56582587b8 | EN TOC §2.4 aligned to body heading (Skill Loading and Optional CLI Setup); ZH-TW TOC already matched its body, no text change needed |
 | docs/guides/Skills Usage Guide.zh-tw.md | docs/guides/Skills Usage Guide.md | in-sync | d1297c2d3797 | Regenerated from EN (base main e9b32ab) |

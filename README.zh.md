@@ -9,7 +9,7 @@
 
 本项目提供全局、项目和目录级规范模板、Claude Code PreToolUse 钩子、技能文件，以及 Windows/Linux/macOS 部署脚本。各工具的规则加载方式和钩子能力不同；请以支持矩阵和部署脚本实际行为为准。钩子属于客户端机制，不是操作系统或服务端安全边界。
 
-> **定位（v0.3.0）**：本仓库是一套带门禁的 harness，而不只是配置 + 技能分发包。核心是自有的纯标准库验证门禁（`gate/pass-gate.py`）：机器可读功能清单、WIP=1、passing 必须有证据、三层终止校验、五维 clean-state 检查。不包含任何 Agent 运行时；Comet 只是可选适配器，不是本仓库本身。循环 / 图编排只随 `standard` / `full` 档发货（D58），`minimal` 档只有门禁本身。
+> **定位（v0.4.0）**：本仓库是一套带门禁的 harness，而不只是配置 + 技能分发包。核心是自有的纯标准库验证门禁（`gate/pass-gate.py`）：机器可读功能清单、WIP=1、passing 必须有证据、三层终止校验、五维 clean-state 检查。不包含任何 Agent 运行时；Comet 只是可选适配器，不是本仓库本身。循环 / 图编排只随 `standard` / `full` 档发货（D58），`minimal` 档只有门禁本身。
 
 ## 前置要求
 
@@ -134,7 +134,7 @@ agent-harness/
 
 首次部署时可用 `-Initialize` / `--initialize` 生成带项目事实和待确认清单的规则；使用 `-DirectoryPath` / `--directory` 指定一个已存在的模块目录，同时生成目录级规则。脚本只自动填写可从本地 Git、清单/锁文件和 CI 配置核实的信息；检测到 `package.json` 时还会把存在的 scripts 命令、常见框架/存储依赖列为“建议确认”，不会当成已验证的事实。业务定位、维护者、模块职责和边界交由用户或当前编码 Agent 确认。已有 `AGENTS.md` 不会被覆盖，改为生成 `AGENTS.generated.md` 供审阅。完成后使用 `-Check` / `--check` 检查待确认项。
 
-### 当前状态（v0.3.0）——依赖门禁前请先读
+### 当前状态（v0.4.0）——依赖门禁前请先读
 
 - **强制力取决于宿主。** Claude Code 钩子在客户端强制执行门禁（见上表）。Antigravity 钩子、WorkBuddy 门禁钩子与 dsh 门禁插件虽已部署，但其真机强制执行均未验证（见上表）。其他宿主上，门禁是一套纪律加手动命令：自己跑 `python3 gate/pass-gate.py verify` 和 `python3 gate/pass-gate.py check-clean`。与宿主无关的兜底是 CI，它会重跑每个 `passing` 项的验证命令（`tests/repo_checks.py` §3k）。已知绕过方式见 [`gate/README.md`](gate/README.md)，包括经 Bash 直接改写、明文成本账本。
 - **基准结论如实表述。** 预注册 B1 轮（t1–t8 × bare/pack/gate × 3 轮 = 72 轮）72/72 通过、每臂 0 错误完成，按事前规则判为 NO DISCRIMINATION。本版本不宣称门禁降低了错误完成率；唯一的拦截证据是 Phase 1 dogfood（植入的假通过被钩子和 CI 抓住）。
