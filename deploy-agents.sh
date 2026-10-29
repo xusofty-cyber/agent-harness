@@ -37,7 +37,7 @@ usage() {
     echo ""
     echo -e "${CYAN}参数说明 (Parameters):${NC}"
     echo "  <项目根目录路径>   目标项目所在的相对路径或绝对路径。"
-    echo "  --global, -g       初始化 Claude、Antigravity 2.0/CLI/IDE、Codex 用户全局规则。"
+    echo "  --global, -g       初始化 Claude、Antigravity 2.0/CLI/IDE、Codex、DeepSeek Harness (dsh) 用户全局规则。"
     echo "  --update, -u       更新模板仓库；与 --global 一起使用时，先备份再覆盖全局规则。"
     echo "  --lang, -l         指定模板语言 (en, zh, zh-tw；默认 en)。"
     echo "  --interactive, -I  启动逐步交互式选择向导（单选语言/范围、多选 Agent 工具与选项）。"
@@ -91,6 +91,7 @@ TOOL_KIRO=true
 TOOL_CONTINUE=true
 TOOL_TRAE=true
 TOOL_CODEBUDDY=true
+TOOL_WORKBUDDY=true
 # Native AGENTS.md readers — no bridge needed, always "supported":
 # Codex, Antigravity, Zed, OpenCode, Aider, Qoder, Pi
 
@@ -382,7 +383,7 @@ prompt_interactive_wizard() {
         TARGET_PROJECT_ARG="${input_path:-.}"
 
         echo -e "\n${CYAN}以下工具原生读取 AGENTS.md，无需桥接文件（自动支持）:${NC}"
-        echo -e "  ${GREEN}✓${NC} Codex · Antigravity · Zed · OpenCode · Aider · Qoder · Pi"
+        echo -e "  ${GREEN}✓${NC} Codex · Antigravity · Zed · OpenCode · Aider · Qoder · Pi · DeepSeek Harness (dsh)"
 
         prompt_multiselect "[4/5] 选择要创建桥接文件的 Agent 工具 (Select tools for bridge files):" \
             "Claude Code (CLAUDE.md 桥接 + 安全钩子)" "claude" 1 \
@@ -396,7 +397,8 @@ prompt_interactive_wizard() {
             "Kiro (.kiro/steering/)" "kiro" 0 \
             "Continue.dev (.continue/rules/)" "continue" 0 \
             "Trae (.trae/rules/)" "trae" 0 \
-            "CodeBuddy (CODEBUDDY.md)" "codebuddy" 0
+            "CodeBuddy (CODEBUDDY.md)" "codebuddy" 0 \
+            "WorkBuddy (.workbuddy/rules/)" "workbuddy" 0
 
         TOOL_CLAUDE=false
         TOOL_COPILOT=false
@@ -410,6 +412,7 @@ prompt_interactive_wizard() {
         TOOL_CONTINUE=false
         TOOL_TRAE=false
         TOOL_CODEBUDDY=false
+        TOOL_WORKBUDDY=false
 
         for t in "${SELECTED_VALUES[@]}"; do
             case "$t" in
@@ -425,6 +428,7 @@ prompt_interactive_wizard() {
                 continue) TOOL_CONTINUE=true ;;
                 trae) TOOL_TRAE=true ;;
                 codebuddy) TOOL_CODEBUDDY=true ;;
+                workbuddy) TOOL_WORKBUDDY=true ;;
             esac
         done
     fi
@@ -1025,6 +1029,10 @@ if [ "$DEPLOY_GLOBAL" = true ]; then
             CODEX_GLOBAL_FILE="${CODEX_HOME_DIR}/AGENTS.md"
         fi
         deploy_global_rule "Codex" "$CODEX_GLOBAL_FILE"
+
+        # D. DeepSeek Harness (dsh) (DSH_HOME or ~/.dsh); AGENTS.md is its global rules file.
+        DSH_HOME_DIR="${DSH_HOME:-${HOME}/.dsh}"
+        deploy_global_rule "DeepSeek Harness (dsh)" "${DSH_HOME_DIR}/AGENTS.md"
     fi
 fi
 
@@ -1299,7 +1307,12 @@ if [ "$TOOL_TRAE" = true ]; then
     bridge_rule_dir "Trae" ".trae/rules" "agent-harness.md"
 fi
 
-# Note: Codex, Antigravity, Zed, OpenCode, Aider, Qoder, Pi read AGENTS.md
+# WorkBuddy rules bridge (Tencent CodeBuddy successor; plain rule file, no frontmatter invented).
+if [ "$TOOL_WORKBUDDY" = true ]; then
+    bridge_rule_dir "WorkBuddy" ".workbuddy/rules" "agent-harness.md"
+fi
+
+# Note: Codex, Antigravity, Zed, OpenCode, Aider, Qoder, Pi, DeepSeek Harness (dsh) read AGENTS.md
 # natively — no bridge files needed.
 
 # Claude Code PreToolUse Security Hooks (.claude/settings.json + .claude/hooks/)
@@ -1345,6 +1358,19 @@ if [ -d "${SOURCE_RULES_DIR}" ]; then
             fi
         fi
     done
+fi
+
+# Antigravity rules adapter (.agents/rules/agent-harness.md)
+# Antigravity requires YAML frontmatter with a trigger in .agents/rules/*.md;
+# the canonical rules stay in AGENTS.md + .agents/rules/*.md, so this file is
+# only a small always_on pointer, not a duplicate rule set.
+mkdir -p "${TARGET_RULES_DIR}"
+ANTIGRAVITY_ADAPTER="${TARGET_RULES_DIR}/agent-harness.md"
+if [ ! -e "${ANTIGRAVITY_ADAPTER}" ]; then
+    printf -- '---\ntrigger: always_on\ndescription: "Agent Harness canonical rules: follow AGENTS.md and .agents/rules/"\n---\n\n@AGENTS.md\n' > "${ANTIGRAVITY_ADAPTER}"
+    echo -e "  ${GREEN}[√] 已建立 Antigravity rules adapter: .agents/rules/agent-harness.md (trigger: always_on)${NC}"
+else
+    echo "  [i] 目标项目已存在 .agents/rules/agent-harness.md，跳过。"
 fi
 
 # Review sensitive paths config (.agents/review-sensitive-paths.json)

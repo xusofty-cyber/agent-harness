@@ -5,6 +5,8 @@ All notable changes to this project are documented here. Format follows
 Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
+### Added
+- **Multi-tool bridge layer: Antigravity hardening + WorkBuddy + DeepSeek Harness (dsh)** (branch `bridge-antigravity-workbuddy-dsh`, not merged, no PR): deploy-agents.sh/.ps1 stay in sync (PARITY extended) — Antigravity project deploys `.agents/rules/agent-harness.md` with YAML frontmatter (`trigger: always_on`) pointing at `AGENTS.md`, because Antigravity requires a trigger in `.agents/rules/*.md` and the canonical rules stay in `AGENTS.md` + `.agents/rules/*.md`; WorkBuddy gains a wizard option and a project rule bridge at `.workbuddy/rules/agent-harness.md` (symlink to `AGENTS.md`, pointer fallback, skip-if-exists, CodeBuddy bridge unchanged); DeepSeek Harness (dsh) is added to the native `AGENTS.md` list and `--global` now also writes `${DSH_HOME:-~/.dsh}/AGENTS.md` under the same preserve/backup rules. Honest limits, also stated in the guides and README: no hooks are installed for WorkBuddy or dsh in this layer, dsh MCP via `cordis.patch.yml` and gate enforcement are out of scope, WorkBuddy rules loading is not verified on every installed version, and Antigravity global skills are documented (IDE `~/.gemini/config/skills/`, CLI `~/.gemini/antigravity-cli/skills/`) but not copied globally to avoid duplication/drift. Guides EN/ZH and README EN/ZH updated in the same change; ZH-TW left untouched per the frozen-translation policy.
 
 ## [0.3.0] - 2026-10-29
 ### Added
