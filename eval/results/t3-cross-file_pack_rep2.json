@@ -1,0 +1,19 @@
+{
+  "ablation": "",
+  "arm": "pack",
+  "duration_s": 8,
+  "ended_epoch": 1793183854,
+  "false_completion": 0,
+  "host": "htch-runtime",
+  "interventions": 0,
+  "model": "Muse Spark",
+  "notes": "first-try pass; batched grep+sed+docstring fix into one call (rounds 2 vs rep1 4 \u2014 batching, not less work); cli times 2 3 prints Result: 6.0",
+  "outcome": "pass",
+  "rep": 2,
+  "rounds": 2,
+  "run_dir": "/tmp/bench/t3-cross-file/pack/rep2",
+  "start_commit": "2e583970fb952158ad83617fe436534abd38295d",
+  "started_epoch": 1793183846,
+  "task": "t3-cross-file",
+  "verify_attempts": 1
+}

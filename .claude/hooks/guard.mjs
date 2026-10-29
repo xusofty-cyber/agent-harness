@@ -17,7 +17,10 @@ let data;
 try {
   data = JSON.parse(input);
 } catch {
-  // If stdin is not valid JSON, allow (don't block on parse errors)
+  // Phase 2 (2-4): parse failure stays fail-open (exit 0 — a hook must never
+  // wedge the session on malformed input), but it is no longer silent: the
+  // failure is logged to stderr so a broken pipe is visible, not invisible.
+  process.stderr.write("[SECURITY-HOOK] stdin JSON parse failed; allowing (fail-open by design)\n");
   process.exit(0);
 }
 
@@ -98,10 +101,111 @@ function isProtectedBranch(branch) {
 // Attackers evade string matching via:
 //   - quotes/escapes: "git" push, 'git' push, g\it push, gi''t push
 //   - global options between git and subcommand: git -c x=y push, git -C dir push
-//   NOTE: command substitution $(...) is NOT recursively parsed — $(which git)
-//   style bypasses are a known limitation (fail-open by design for usability).
+//   - command substitution resolving to git: $(which git) push, `which git` push
+//   - indirection: eval "...", sh -c "...", bash -c "..."
+// Phase 2 (2-4): substitutions and indirections are expanded recursively
+// (depth-limited; beyond the limit we warn and stop expanding — graded,
+// fail-open, never a blanket deny). A substitution inside single quotes is
+// literal text, not a substitution, and is left alone. Known remaining gap:
+// xargs/find -exec indirection is not expanded (out of scope for 2-4).
 // We normalize the command into argv tokens before matching.
 // ============================================================
+
+// === Command substitution + indirection expansion (Phase 2, 2-4) ===
+// Maximum recursion depth for substitution/indirection expansion.
+const MAX_EXPAND_DEPTH = 3;
+// Sentinel token standing in for a substitution that resolves to the git binary.
+const GIT_TOKEN = "\x00GIT\x00";
+
+// Find $(...) and `...` spans in cmd, respecting quotes: a substitution
+// inside single quotes is literal text; inside double quotes it is live.
+// Returns [{ start, end, inner }] with start/end covering the whole span.
+function findSubstitutions(cmd) {
+  const spans = [];
+  let i = 0;
+  let inSingle = false;
+  let inDouble = false;
+  while (i < cmd.length) {
+    const c = cmd[i];
+    if (inSingle) {
+      if (c === "'") inSingle = false;
+      i++;
+      continue;
+    }
+    if (c === "\\" && i + 1 < cmd.length) { i += 2; continue; }
+    if (c === "'" && !inDouble) { inSingle = true; i++; continue; }
+    if (c === '"') { inDouble = !inDouble; i++; continue; }
+    if (c === "$" && cmd[i + 1] === "(") {
+      // $(...) — balanced parens, quote-aware inside.
+      let depth = 1;
+      let j = i + 2;
+      let s1 = false;
+      let s2 = false;
+      while (j < cmd.length && depth > 0) {
+        const d = cmd[j];
+        if (s1) { if (d === "'") s1 = false; }
+        else if (d === "'") s1 = true;
+        else if (d === '"') s2 = !s2;
+        else if (!s2 && d === "\\") { j++; }
+        else if (!s2 && d === "(") depth++;
+        else if (!s2 && d === ")") depth--;
+        j++;
+      }
+      spans.push({ start: i, end: j, inner: cmd.slice(i + 2, j - 1) });
+      i = j;
+      continue;
+    }
+    if (c === "`") {
+      let j = i + 1;
+      while (j < cmd.length && cmd[j] !== "`") {
+        if (cmd[j] === "\\" && j + 1 < cmd.length) j++;
+        j++;
+      }
+      spans.push({ start: i, end: j + 1, inner: cmd.slice(i + 1, j) });
+      i = j + 1;
+      continue;
+    }
+    i++;
+  }
+  return spans;
+}
+
+// Does this substitution evaluate to the git binary?
+// Covered forms: $(which git), $(command -v git), $(type git),
+// $(type -p git), $(git), $(/usr/bin/git) — and the backtick equivalents.
+// Anything else is opaque: the inner text is still analyzed recursively (it
+// may itself contain a git call), but the outer segment gains no git argv[0].
+function substitutionResolvesToGit(inner) {
+  const t = inner.trim();
+  return /^(which|command\s+-v|type(?:\s+-[pP])?)\s+git$/.test(t)
+    || /(?:^|\/)git$/.test(t);
+}
+
+// Rewrite cmd: a git-resolving substitution becomes GIT_TOKEN, any other
+// substitution becomes a space. Returns { rewritten, innerCommands } — the
+// inner texts are analyzed recursively by findGitInvocations.
+// Exception: a substitution that is the VALUE of a leading VAR= assignment
+// (x=$(which git) ...) is opaque even if it resolves to git — in shell that
+// position is an environment value for the following command, not argv[0],
+// so treating it as git would be a false positive.
+function rewriteSubstitutions(cmd) {
+  const spans = findSubstitutions(cmd);
+  if (spans.length === 0) return { rewritten: cmd, innerCommands: [] };
+  let out = "";
+  let last = 0;
+  const innerCommands = [];
+  for (const s of spans) {
+    const before = cmd.slice(0, s.start);
+    const tail = before.split(/\s+/).pop();
+    const inAssignment = /^[A-Za-z_][A-Za-z0-9_]*=$/.test(tail);
+    out += cmd.slice(last, s.start);
+    out += !inAssignment && substitutionResolvesToGit(s.inner) ? ` ${GIT_TOKEN} ` : " ";
+    innerCommands.push(s.inner);
+    last = s.end;
+  }
+  out += cmd.slice(last);
+  return { rewritten: out, innerCommands };
+}
 
 // Minimal shell word splitter: handles single/double quotes and backslash
 // escapes well enough for security matching (not a full POSIX parser).
@@ -169,25 +273,31 @@ const GIT_GLOBAL_OPTS_WITH_VALUE = new Set([
   "--git-dir", "--work-tree", "--namespace", "--super-prefix",
 ]);
 
-// Normalize one segment: if it invokes git, return { subcommand, args, gitDir }
-// or null if not a git invocation.
-function parseGitInvocation(tokens) {
-  if (!tokens.length) return null;
-  // Resolve argv[0]: strip path, handle env/command prefixes.
+// Resolve argv[0] of a token list: strip path, leading VAR=value assignments,
+// and env/command/sudo wrappers. Returns { prog, idx } or null.
+function resolveProg(tokens) {
   let idx = 0;
-  let prog = tokens[0].split("/").pop();
-  // Strip leading VAR=value assignments (e.g. FOO=bar git push --force)
   while (idx < tokens.length && /^[A-Za-z_][A-Za-z0-9_]*=/.test(tokens[idx])) idx++;
   if (idx >= tokens.length) return null;
-  prog = tokens[idx].split("/").pop();
-  // Skip "env VAR=x" style prefixes and "command"/"sudo" wrappers.
+  let prog = tokens[idx].split("/").pop();
   while ((prog === "env" || prog === "command" || prog === "sudo") && idx + 1 < tokens.length) {
     idx++;
-    // skip VAR=value assignments after env
     while (idx < tokens.length && /^[A-Za-z_][A-Za-z0-9_]*=/.test(tokens[idx])) idx++;
     if (idx >= tokens.length) return null;
     prog = tokens[idx].split("/").pop();
   }
+  return { prog, idx };
+}
+
+// Normalize one segment: if it invokes git, return { subcommand, args, gitDir }
+// or null if not a git invocation.
+function parseGitInvocation(tokens) {
+  if (!tokens.length) return null;
+  const resolved = resolveProg(tokens);
+  if (!resolved) return null;
+  let { prog } = resolved;
+  let idx = resolved.idx;
+  if (prog === GIT_TOKEN) prog = "git"; // $(which git) / `which git` resolved to git
   if (prog !== "git") return null;
   idx++;
   // SECURITY: Detect inline alias definitions (git -c alias.x=y) - these can
@@ -231,11 +341,36 @@ function parseGitInvocation(tokens) {
 }
 
 // Check all segments; return list of git invocations.
-function findGitInvocations(cmd) {
+// Phase 2 (2-4): expands command substitutions and eval/sh -c indirection
+// recursively (depth-limited). Beyond MAX_EXPAND_DEPTH we warn and stop —
+// graded fail-open, never a blanket deny.
+function findGitInvocations(cmd, depth = 0) {
+  if (depth > MAX_EXPAND_DEPTH) {
+    warn(`Deeply nested command indirection (depth > ${MAX_EXPAND_DEPTH}) — manual review recommended. / 命令嵌套过深，建议人工复核。`);
+    return [];
+  }
   const out = [];
-  for (const seg of commandSegments(cmd)) {
+  const { rewritten, innerCommands } = rewriteSubstitutions(cmd);
+  for (const inner of innerCommands) {
+    out.push(...findGitInvocations(inner, depth + 1));
+  }
+  for (const seg of commandSegments(rewritten)) {
     const inv = parseGitInvocation(seg);
-    if (inv) out.push(inv);
+    if (inv) { out.push(inv); continue; }
+    // Indirection: eval "..." / sh|bash|zsh|dash -c "..." — analyze the
+    // argument as a command of its own.
+    const resolved = resolveProg(seg);
+    if (!resolved) continue;
+    const { prog } = resolved;
+    const rest = seg.slice(resolved.idx + 1);
+    if (prog === "eval") {
+      out.push(...findGitInvocations(rest.join(" "), depth + 1));
+    } else if (["sh", "bash", "zsh", "dash"].includes(prog)) {
+      const cIdx = rest.indexOf("-c");
+      if (cIdx !== -1 && rest[cIdx + 1] !== undefined) {
+        out.push(...findGitInvocations(rest[cIdx + 1], depth + 1));
+      }
+    }
   }
   return out;
 }

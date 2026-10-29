@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "default": "minimal",
+  "note": "Single source of truth for deploy profiles (Phase 4, 4-1). deploy-agents.sh/.ps1 read this file; tests/repo_checks.py section 3r asserts it. Do not edit profile membership in the deploy scripts or guides \u2014 edit here, then update docs/internal/skill-tiers.md with the reason.",
+  "profiles": {
+    "minimal": {
+      "description": "Default. The load-bearing disciplines only: verify, debug, test, living docs, plans, worktrees, sub-agents, review, codegraph. Provisional (no usage telemetry, U1); re-select after the 36-run bench matrix, review 2026-11-28.",
+      "skills": [
+        "verification-before-completion",
+        "systematic-debugging",
+        "test-driven-development",
+        "living-documentation",
+        "writing-plans",
+        "executing-plans",
+        "using-git-worktrees",
+        "subagent-driven-development",
+        "requesting-code-review",
+        "codegraph"
+      ]
+    },
+    "standard": {
+      "description": "Minimal plus the Comet adapter and the OpenSpec change loop (new/propose/apply/verify/archive), branch completion, and parallel-agent dispatch.",
+      "skills": [
+        "verification-before-completion",
+        "systematic-debugging",
+        "test-driven-development",
+        "living-documentation",
+        "writing-plans",
+        "executing-plans",
+        "using-git-worktrees",
+        "subagent-driven-development",
+        "requesting-code-review",
+        "codegraph",
+        "comet",
+        "openspec-new-change",
+        "openspec-propose",
+        "openspec-apply-change",
+        "openspec-verify-change",
+        "openspec-archive-change",
+        "finishing-a-development-branch",
+        "dispatching-parallel-agents"
+      ]
+    },
+    "full": {
+      "description": "All 40 skill directories. docx and brainstorming are heavy skills and are only copied when --include-heavy-skills / -IncludeHeavySkills is also passed (Phase 0, 0-9); without the flag, full deploys 38.",
+      "skills": [
+        "brainstorming",
+        "caveman",
+        "codegraph",
+        "comet",
+        "cross-tool-memory",
+        "diagnosing-superpowers",
+        "dispatching-parallel-agents",
+        "docx",
+        "engineering-docs",
+        "executing-plans",
+        "finishing-a-development-branch",
+        "git-advanced",
+        "living-documentation",
+        "open-code-review",
+        "openspec-apply-change",
+        "openspec-archive-change",
+        "openspec-bulk-archive-change",
+        "openspec-continue-change",
+        "openspec-explore",
+        "openspec-ff-change",
+        "openspec-new-change",
+        "openspec-onboard",
+        "openspec-propose",
+        "openspec-sync-specs",
+        "openspec-update-change",
+        "openspec-verify-change",
+        "option-review",
+        "pdf",
+        "ponytail",
+        "receiving-code-review",
+        "requesting-code-review",
+        "rtk",
+        "subagent-driven-development",
+        "systematic-debugging",
+        "test-driven-development",
+        "using-git-worktrees",
+        "using-superpowers",
+        "verification-before-completion",
+        "writing-plans",
+        "writing-skills"
+      ],
+      "heavy": [
+        "brainstorming",
+        "docx"
+      ]
+    }
+  }
+}

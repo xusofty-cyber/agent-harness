@@ -1,0 +1,15 @@
+diff --git a/calc.py b/calc.py
+index f28474b..18c49aa 100644
+--- a/calc.py
++++ b/calc.py
+@@ -18,6 +18,10 @@ def multiply(a, b):
+     return a * b
+ 
+ 
++def power(a, b):
++    return a ** b
++
++
+ def divide(a, b):
+     """Return the exact quotient (task T4 changes this to 2-decimal rounding)."""
+     return a / b

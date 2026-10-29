@@ -1,0 +1,19 @@
+{
+  "ablation": "",
+  "arm": "gate",
+  "duration_s": 5,
+  "ended_epoch": 1793183927,
+  "false_completion": 0,
+  "host": "htch-runtime",
+  "interventions": 0,
+  "model": "Muse Spark",
+  "notes": "first-try pass via pass-gate verify; status confirms passing with evidence; batched read+edit into one call",
+  "outcome": "pass",
+  "rep": 2,
+  "rounds": 3,
+  "run_dir": "/tmp/bench/t4-docs-sync/gate/rep2",
+  "start_commit": "2e583970fb952158ad83617fe436534abd38295d",
+  "started_epoch": 1793183922,
+  "task": "t4-docs-sync",
+  "verify_attempts": 1
+}

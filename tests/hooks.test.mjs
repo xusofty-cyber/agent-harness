@@ -342,6 +342,82 @@ test("denies env var prefix bypass", () => {
   assert.equal(r.exitCode, 2);
 });
 
+// --- Phase 2 (2-4): command substitution + indirection bypasses ---
+test("denies $(git push --force) substitution", () => {
+  const r = runHook("$(git push --force origin main)");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies $(which git) push --force", () => {
+  const r = runHook("$(which git) push --force origin main");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies `which git` push --force (backticks)", () => {
+  const r = runHook("`which git` push --force origin main");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies $(command -v git) push --force", () => {
+  const r = runHook("$(command -v git) push --force origin main");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies sudo $(which git) push --force", () => {
+  const r = runHook("sudo $(which git) push --force origin main");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies eval \"git push --force\"", () => {
+  const r = runHook("eval \"git push --force origin main\"");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies sh -c 'git push --force'", () => {
+  const r = runHook("sh -c 'git push --force origin main'");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies bash -c \"git push --force\"", () => {
+  const r = runHook("bash -c \"git push --force origin main\"");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies assignment-prefixed git push --force after benign substitution", () => {
+  const r = runHook("FOO=$(git rev-parse HEAD) git push --force origin main");
+  assert.equal(r.exitCode, 2);
+});
+
+test("allows echo $(git rev-parse HEAD) (benign inner command)", () => {
+  const r = runHook("echo $(git rev-parse HEAD)");
+  assert.equal(r.exitCode, 0);
+});
+
+test("allows echo $(which git) push --force (git path is an echo argument)", () => {
+  const r = runHook("echo $(which git) push --force origin main");
+  assert.equal(r.exitCode, 0);
+});
+
+test("allows x=$(which git) push --force (substitution is an assignment value)", () => {
+  const r = runHook("x=$(which git) push --force origin main");
+  assert.equal(r.exitCode, 0);
+});
+
+test("allows single-quoted '$(which git)' literal", () => {
+  const r = runHook("echo '$(which git) push --force origin main'");
+  assert.equal(r.exitCode, 0);
+});
+
+test("malformed stdin is fail-open but logs the parse failure", () => {
+  const res = spawnSync("node", [GUARD], {
+    input: "this is not json",
+    cwd: REPO_ROOT,
+    encoding: "utf-8",
+  });
+  assert.equal(res.status, 0);
+  assert.match(res.stderr || "", /parse failed/i);
+});
+
 test("warns on inline git alias", () => {
   const r = runHook("git -c alias.p=push p --force origin main");
   assert.match(r.stderr, /alias/i);

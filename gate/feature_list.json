@@ -1,0 +1,66 @@
+{
+  "items": [
+    {
+      "area": "docs",
+      "evidence": {
+        "command": "python3 -c \"import pathlib; t=pathlib.Path('docs/internal/SESSION_STATE.md').read_text(); assert len(t.splitlines())<=60, len(t.splitlines()); assert 'p1-dogfood-session-state' in t; assert all(h in t for h in ['## Goal','## In progress','## Next','## Blocked','## Last verification'])\"",
+        "exit_code": 0,
+        "ran_at": "2026-10-28T09:20:05Z",
+        "output_tail": "",
+        "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "id": "p1-dogfood-session-state",
+      "notes": "Real change, not a fixture: the repo's own SESSION_STATE.md (docs/internal/) is a long achievement log; migrate it to the new breakpoint template.",
+      "priority": "p0",
+      "status": "passing",
+      "title": "Migrate this repo's SESSION_STATE.md to breakpoint format",
+      "user_visible_behavior": "docs/internal/SESSION_STATE.md is at most 60 lines, has the five breakpoint sections, and names this item id.",
+      "verification": {
+        "command": "python3 -c \"import pathlib; t=pathlib.Path('docs/internal/SESSION_STATE.md').read_text(); assert len(t.splitlines())<=60, len(t.splitlines()); assert 'p1-dogfood-session-state' in t; assert all(h in t for h in ['## Goal','## In progress','## Next','## Blocked','## Last verification'])\"",
+        "timeout_seconds": 60
+      }
+    },
+    {
+      "area": "gate",
+      "evidence": {
+        "command": "test -f gate/README.md && test -f docs/internal/phase1-dogfood.md && grep -q 'defence in depth' gate/README.md && grep -q 'p1-dogfood-session-state' docs/internal/phase1-dogfood.md",
+        "exit_code": 0,
+        "ran_at": "2026-10-28T09:21:51Z",
+        "output_tail": "",
+        "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "id": "p1-dogfood-gate-readme",
+      "notes": "Verifies the gate is documented, including its limits.",
+      "priority": "p1",
+      "status": "passing",
+      "title": "gate/README.md documents the gate and its limits",
+      "user_visible_behavior": "gate/README.md exists, states the anti-tamper limits honestly, and docs/internal/phase1-dogfood.md records the dogfood run.",
+      "verification": {
+        "command": "test -f gate/README.md && test -f docs/internal/phase1-dogfood.md && grep -q 'defence in depth' gate/README.md && grep -q 'p1-dogfood-session-state' docs/internal/phase1-dogfood.md",
+        "timeout_seconds": 60
+      }
+    },
+    {
+      "area": "gate",
+      "evidence": {
+        "command": "node tests/hooks-gate.test.mjs",
+        "exit_code": 0,
+        "ran_at": "2026-10-28T09:21:52Z",
+        "output_tail": "✔ denies Write to gate/feature_list.json (exit 2, deny decision) (134.941983ms)\n✔ denies Edit to a nested feature_list.json path (86.907106ms)\n✔ allows Write to any other file (87.577753ms)\n✔ fail-open on malformed stdin (matches guard.mjs convention) (118.581389ms)\n✔ Stop hook allows stopping when no gate state exists (102.421748ms)\n✔ Stop hook blocks stopping with an in_progress item (106.851869ms)\n✔ Stop hook allows stopping when everything is passing (90.077807ms)\n✔ Stop hook override channel works and is logged (84.566603ms)\n✔ Stop hook override without a reason does not override (98.847503ms)\n✔ Stop hook fail-open on unreadable feature list (127.729134ms)\nℹ tests 10\nℹ suites 0\nℹ pass 10\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1052.345537\n",
+        "output_sha256": "989e8c68e49217c7334a5a7f3e06aa49b4c2060691bf42a0ec4db7a7cf0ded47"
+      },
+      "id": "p1-dogfood-hooks-tests",
+      "notes": "The gate hook tests must pass on this machine, not just in CI.",
+      "priority": "p1",
+      "status": "passing",
+      "title": "Gate hook tests pass",
+      "user_visible_behavior": "node tests/hooks-gate.test.mjs reports 10 pass / 0 fail.",
+      "verification": {
+        "command": "node tests/hooks-gate.test.mjs",
+        "timeout_seconds": 120
+      }
+    }
+  ],
+  "project": "agent-harness",
+  "version": 1
+}

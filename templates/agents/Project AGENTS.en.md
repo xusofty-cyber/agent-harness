@@ -68,7 +68,7 @@ This project enforces a tightly-knit engineering closed loop across all phases. 
 | **3. Implementation**| 💻 **Developer** | Production code, unit tests, clean refactoring | `test-driven-development`, `ponytail`, `writing-plans` | Test-first (red-green loop); minimal clean implementation |
 | **4. Code Review** | 🔍 **Reviewer** | Deterministic review reports, security audit, remediation list | `open-code-review`, `requesting-code-review` | Line-anchored findings; zero Critical/High defects |
 | **5. Verification** | 🧪 **QA (Test Engineer)** | Test case design, boundary testing, bug retests, test report | `verification-before-completion`, `systematic-debugging` | Full test suite passing with authentic terminal evidence |
-| **6. Delivery** | 📦 **Release Team** | Living doc & code traceability sync, release tagging, archiving | `living-documentation`, `finishing-a-development-branch`, `comet-archive` | Bidirectional living doc and code traceability verified |
+| **6. Delivery** | 📦 **Release Team** | Living doc & code traceability sync, release tagging, archiving | `living-documentation`, `finishing-a-development-branch` | Bidirectional living doc and code traceability verified |
 
 > See Global AGENTS.md "Mandatory Expert Panel" section for the review protocol.
 

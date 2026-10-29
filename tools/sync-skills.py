@@ -21,7 +21,14 @@ are rate-limited to 60/hour; the tool degrades gracefully.
 Hash scheme: SHA256 of file bytes (LF-normalized). The legacy computedHash
 values in skills-lock.json predate this scheme and are refreshed on --apply.
 
-Exit codes: 0 always (advisory tool, never blocks). Parse output for gating.
+Exit codes (Phase 2, 2-1):
+- 0: clean (or advisory default: findings reported, never blocks).
+- 1 (--strict only): drift found — outdated, tampered, tampered-local,
+  missing-hash, or missing-local.
+- 2 (--strict only): could not verify — upstream fetch failed for at least
+  one skill, or --skill named an unknown skill.
+Without --strict the tool always exits 0 (advisory); callers that need a
+real gate must pass --strict (run-pipeline.sh/.ps1 do).
 """
 from __future__ import annotations
 
@@ -123,6 +130,8 @@ def external_skills(lock: dict, only: str | None = None) -> list[tuple[str, dict
     for name, meta in lock.get("skills", {}).items():
         if only and name != only:
             continue
+        if meta.get("meta"):
+            continue  # suite-level pin, not a deployable skill (Phase 2, 2-2c)
         if meta.get("sourceType") != "github":
             continue
         if "package" in meta:
@@ -251,6 +260,22 @@ def prompt_interactive_wizard(lock: dict, check_only: bool = False) -> tuple[boo
     return do_apply, target_skill, is_json
 
 
+def strict_exit_code(summary: dict) -> int:
+    """Exit code for --strict mode, pure function (unit-tested).
+
+    2 = could not verify (fetch failed for at least one skill);
+    1 = drift found (outdated / tampered / tampered-local / missing-hash /
+    missing-local); 0 = everything in sync.
+    """
+    if summary.get("fetch-failed"):
+        return 2
+    if summary.get("outdated") or summary.get("tampered") or \
+            summary.get("tampered-local") or summary.get("missing-hash") or \
+            summary.get("missing-local"):
+        return 1
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="sync external skills with upstream")
     ap.add_argument("--check", action="store_true", help="report only (default)")
@@ -259,6 +284,9 @@ def main() -> int:
     ap.add_argument("--json", action="store_true", help="JSON output")
     ap.add_argument("--interactive", "-i", action="store_true", help="launch interactive step wizard")
     ap.add_argument("--check-only", action="store_true", help="read-only: never apply upstream changes")
+    ap.add_argument("--strict", action="store_true",
+                    help="exit non-zero on drift (1) or unverifiable upstream (2); "
+                         "without it the tool is advisory and always exits 0")
     args = ap.parse_args()
 
     lock = load_lock()
@@ -291,7 +319,7 @@ def main() -> int:
 
     if args.skill and not results:
         print(f"Unknown skill: {args.skill}", file=sys.stderr)
-        return 0
+        return 2 if args.strict else 0
 
     summary = {}
     for r in results:
@@ -317,6 +345,8 @@ def main() -> int:
             print(f"\nUpdated {summary['updated']} skill(s); "
                   f"skills-lock.json hashes refreshed. Review the diff "
                   f"before committing.")
+    if args.strict:
+        return strict_exit_code(summary)
     return 0
 
 

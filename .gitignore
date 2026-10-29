@@ -1,7 +1,6 @@
 # Claude & Comet local runtime generated artifacts
 .claude/skills/
 .comet/*
-!.comet/config.yaml
 
 # Machine-specific agent hook configurations (comet init / local IDE hooks with absolute paths)
 .codex/hooks.json
@@ -22,6 +21,10 @@ Desktop.ini
 # Temporary logs & scratch
 *.log
 scratch/
+# Cost ledger telemetry (Phase 2, 2-3/2-5): one line per tool call, high-churn
+# local telemetry — unlike gate/feature_list.json + events.jsonl (reviewable
+# evidence, committed per D8), the ledger is never committed.
+gate/cost-ledger.jsonl
 
 # Local ai-memory project opt-in; never commit a machine/project marker by default
 /.ai-memory.toml

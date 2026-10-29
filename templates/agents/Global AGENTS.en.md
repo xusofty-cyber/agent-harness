@@ -4,6 +4,7 @@
 
 - This document is a cross-project global engineering standard template. Automatic loading depends on each tool's global configuration; deployment scripts configure only explicitly supported entry points.
 - Precedence: System/Safety hard constraints > User's current explicit instructions > Directory-level rules > Project-level rules > This global default.
+- Source of truth: the repository's files are the source of truth; ai-memory is a recall adapter only. On any conflict between a retrieved memory and a repo file, the repo file wins.
 - This file maintains generic Markdown format. Global rules retain only cross-project, long-term stable behavioral baselines, context throttling standards, and collaboration governance logic.
 - This is a shareable generic template; it does not record specific user private preferences, project facts, credentials, or personal information. Only personal preferences explicitly requested by the user may be written to user-controlled machine-local global files.
 

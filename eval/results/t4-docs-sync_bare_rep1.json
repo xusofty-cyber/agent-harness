@@ -1,0 +1,18 @@
+{
+  "arm": "bare",
+  "duration_s": 32,
+  "ended_epoch": 1793182048,
+  "false_completion": 0,
+  "host": "htch-runtime",
+  "interventions": 0,
+  "model": "Muse Spark",
+  "notes": "first-try pass",
+  "outcome": "pass",
+  "rep": 1,
+  "rounds": 6,
+  "run_dir": "/tmp/bench/t4-docs-sync/bare/rep1",
+  "start_commit": "2e583970fb952158ad83617fe436534abd38295d",
+  "started_epoch": 1793182016,
+  "task": "t4-docs-sync",
+  "verify_attempts": 1
+}

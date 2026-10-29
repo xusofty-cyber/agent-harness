@@ -9,6 +9,8 @@
 
 This repository provides global, project, and directory rule templates, Claude Code PreToolUse hooks, skill files, and Windows/Linux/macOS deployment scripts. Rule loading and hook behavior vary by tool. Hooks are client-side mechanisms, not operating-system or server-side security boundaries.
 
+> **Positioning**: this repository is a config + skill distribution pack with a minimal gate scaffold (from Phase 1). It contains no agent runtime: the core gate is self-owned and host-agnostic, and Comet is an optional adapter, not the harness itself.
+
 ## Prerequisites
 
 - **Linux/macOS**: `bash`, `git`, `python3` (pre-installed on most systems)
@@ -24,7 +26,7 @@ graph TD
     G[Global AGENTS.md<br/>cross-project constitution] --> P[Project AGENTS.md<br/>project template]
     P --> D[Directory AGENTS.md<br/>monorepo micro-boundaries]
     P --> R[.agents/rules/<br/>on-demand sub-rules]
-    R --> S[.agents/skills/<br/>44 on-demand skills]
+    R --> S[.agents/skills/<br/>40 on-demand skills]
     G --> H[.claude/hooks/<br/>PreToolUse guards]
     S --> T[tools/<br/>sync, tui, doc-impact]
 ```
@@ -42,16 +44,16 @@ graph TD
    - Some command patterns are hard-blocked while other cases emit non-blocking warnings;
    - Regex inspection cannot cover every command form and does not replace server-side branch protection.
 
-3. **44 Reusable Skill Directories ([`.agents/skills/`](.agents/skills/))**:
+3. **40 Reusable Skill Directories ([`.agents/skills/`](.agents/skills/))**:
    - **Comet integration guide**: checks the installed version and project configuration; this skill does not implement Comet's state machine or phase guards;
    - **Living Documentation & Engineering Docs**: `living-documentation` (4-tier doc model: specs/architecture/reference/guides, frontmatter-based code-doc bidirectional traceability, L0/L1/L2 impact maintenance) and `engineering-docs` (15 bilingual phase-gate templates covering 31 R&D document types for cross-agent consistency);
-   - **Spec-Driven Development (SDD)**: Full 16-skill `openspec` suite (proposal, apply changes, verify, sync specs, archive, explore);
+   - **Spec-Driven Development (SDD)**: Full 12-skill `openspec` suite (proposal, apply changes, verify, sync specs, archive, explore);
    - **Test-Driven Development (TDD)**: Full 15-skill `superpowers` suite (red-green cycle, systematic root-cause debugging, physical verification evidence gate, git worktrees);
    - **Implementation and retrieval guidance**: `ponytail` (minimal-solution ladder) and `codegraph` (optional CodeGraph integration guide; CLI/MCP setup is separate);
    - **Output and communication guidance**: `rtk` (optional Rust Token Killer CLI guide; command-rewrite hooks require setup) and `caveman` (concise-response Skill);
    - **Pre-decision review and shared memory**: `option-review` (isolated 5-dimension candidate approach review matrix) and `cross-tool-memory` (project-scoped long-term memory navigation aid);
-   - **Professional Document Processing**: `docx` (Word formatting & manipulation) and `pdf` (structured extraction & analysis). Note: `docx` ships its full OOXML validation toolchain (~1.3 MB, mostly XSD schemas), making it the largest skill in the repo — delete the directory from your target project if you never process Word files;
-   - **Skills Usage & Trigger Guide**: For trigger modes (auto/explicit/hybrid), categorization, and project memory setup of all 44 skills, see [`Skills Usage Guide.md`](docs/guides/Skills%20Usage%20Guide.md) ([简体中文](docs/guides/Skills%20Usage%20Guide.zh.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md) | [Français](docs/guides/Skills%20Usage%20Guide.fr.md) | [Deutsch](docs/guides/Skills%20Usage%20Guide.de.md)).
+   - **Professional Document Processing**: `docx` (Word formatting & manipulation) and `pdf` (structured extraction & analysis). Note: `docx` ships its full OOXML validation toolchain (~1.3 MB, mostly XSD schemas), making it the largest skill in the repo — it is no longer deployed by default; pass `--include-heavy-skills` / `-IncludeHeavySkills` to include it (and `brainstorming`, which ships a local companion server `scripts/server.cjs`). Previously deployed copies are left in place; the flag only affects new copies.
+   - **Skills Usage & Trigger Guide**: For trigger modes (auto/explicit/hybrid), categorization, and project memory setup of all 40 skills, see [`Skills Usage Guide.md`](docs/guides/Skills%20Usage%20Guide.md) ([简体中文](docs/guides/Skills%20Usage%20Guide.zh.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md) | [Français](docs/guides/Skills%20Usage%20Guide.fr.md) | [Deutsch](docs/guides/Skills%20Usage%20Guide.de.md)). Deploy profiles (Phase 4): by default only the 10 core skills are deployed (`--profile minimal`); `--profile standard` deploys 18, `--profile full` deploys all 40 (heavy skills still need `--include-heavy-skills`).
 
 4. **One-Click Deployment, Interactive Wizard & Unified Pipeline (`deploy-agents` & `run-pipeline`)**:
    - **Interactive Step-by-Step Terminal Wizard**: Running scripts without arguments (or with `--interactive` / `-Interactive`) launches a guided TUI wizard (arrow keys to move, spacebar to toggle, enter to confirm) to select template language (`en`, `zh`, `zh-tw`, `fr`, `de`), deployment scope (`project`, `global`, `both`), target project path, and multi-select agent bridge files (Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy) plus optional workflows, preventing CLI mistakes;
@@ -69,15 +71,15 @@ graph TD
 
 ### Support scope
 
-| Tool | Configuration provided here | Status |
-|---|---|---|
-| Claude Code | `CLAUDE.md` bridge, `.claude/skills/` links, `.claude/settings.json` hooks | Configured by script; hooks run only in the Claude Code client |
-| Antigravity 2.0 / CLI / IDE & extensions | Project rules/skills; `--global` writes `~/.gemini/AGENTS.md` plus a `GEMINI.md` compatibility pointer | Current surfaces load both global names; older IDE releases can follow the pointer. CLI-only rules remain separate |
-| Codex | Global `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`), project `AGENTS.md`, and `.agents/skills/` | `-Global` initializes the Codex global file; `-Global -Update` backs up and replaces the active global instructions |
-| ai-memory | Optional MCP/hooks for Claude Code, Codex CLI, and Antigravity CLI; MCP-only setup for Antigravity 2.0 and IDE | Explicit per-project opt-in; Codex desktop must be checked against its installed version; ChatGPT web uses manual handoff |
-| GitHub Copilot | `.github/copilot-instructions.md` bridge | Configured by script; behavior depends on Copilot version/mode |
-| Zed | `AGENTS.md` | Reusable files only; no Zed-specific setup by script |
-| Pi / OpenCode | No dedicated entry point or script validation | Not adapted; automatic loading is not implied |
+| Tool | Configuration provided here | Enforcement | Status |
+|---|---|---|---|
+| Claude Code | `CLAUDE.md` bridge, `.claude/skills/` links, `.claude/settings.json` hooks | Enforced (hooks) | Configured by script; hooks run only in the Claude Code client |
+| Antigravity 2.0 / CLI / IDE & extensions | Project rules/skills; `--global` writes `~/.gemini/AGENTS.md` plus a `GEMINI.md` compatibility pointer | Config only | Current surfaces load both global names; older IDE releases can follow the pointer. CLI-only rules remain separate |
+| Codex | Global `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`), project `AGENTS.md`, and `.agents/skills/` | Config only | `-Global` initializes the Codex global file; `-Global -Update` backs up and replaces the active global instructions |
+| ai-memory | Optional MCP/hooks for Claude Code, Codex CLI, and Antigravity CLI; MCP-only setup for Antigravity 2.0 and IDE | Config only | Explicit per-project opt-in; Codex desktop must be checked against its installed version; ChatGPT web uses manual handoff |
+| GitHub Copilot | `.github/copilot-instructions.md` bridge | Config only | Configured by script; behavior depends on Copilot version/mode |
+| Zed | `AGENTS.md` | Files only | Reusable files only; no Zed-specific setup by script |
+| Pi / OpenCode | No dedicated entry point or script validation | Files only | Not adapted; automatic loading is not implied |
 
 Use `-Initialize` / `--initialize` during deployment to create guidance with locally verifiable project facts and a checklist for unknowns. Add `-DirectoryPath` / `--directory` with an existing module path to generate its directory-level guidance too. The scripts only infer facts supported by local Git metadata, manifests, lockfiles, and CI files. For `package.json`, detected scripts and common framework/storage dependencies are marked as suggestions for review, not verified facts. Users or the active coding agent must confirm purpose, ownership, module responsibility, and boundaries. Existing `AGENTS.md` files are preserved; a review copy is written as `AGENTS.generated.md`. Run `-Check` / `--check` to find unresolved items.
 
@@ -93,7 +95,7 @@ agent-harness/
 │   │   ├── git-workflow.md          # Git authorization model, protected branch isolation
 │   │   ├── security-boundary.md     # 8 High-risk operations protection matrix
 │   │   └── token-discipline.md      # Read/fetch/speak gates, log truncation
-│   └── skills/                      # 44 Native engineering skills (Comet, OpenSpec, Superpowers...)
+│   └── skills/                      # 40 Native engineering skills (Comet, OpenSpec, Superpowers...)
 ├── .claude/
 │   ├── settings.json                # Claude Code PreToolUse security interceptor config
 │   └── hooks/                       # Security hook scripts (Node.js, reads stdin JSON)
