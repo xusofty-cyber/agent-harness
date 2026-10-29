@@ -712,7 +712,7 @@ plan's attribution is corrected here, not silently repeated.
   root-level files in deployed projects and split state from engine.
 - **Confirmed:** 用户 2026-10-29 逐项过批准时通过（第 4 项），不再暂定。
 
-## D33 — C8: DECISIONS.md lives at the root, skeleton numbering is the base (merge ruling, provisional)
+## D33 — C8: DECISIONS.md lives at the root, skeleton numbering is the base (merge ruling, confirmed by user 2026-10-29)
 
 - **Decision:** this file stays at the repo root with the skeleton's
   numbering (D1–D25) as the base. Yunkai's `docs/internal/
@@ -721,7 +721,7 @@ plan's attribution is corrected here, not silently repeated.
 - **Reason:** one decision log, one numbering, one place to look.
   Two files with overlapping numbers (D1 vs D-001) would make every
   future "per D7" reference ambiguous.
-- **Provisional:** 合并执行时暂定，用户复核时可改。
+- **Confirmed:** 用户 2026-10-29 逐项过批准时通过（第 5 项），不再暂定。
 
 ## D34 — C9: Loop/Graph enter v0.3.0; release notes state the L14 gap honestly (merge ruling, provisional)
 
