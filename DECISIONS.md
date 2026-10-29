@@ -723,7 +723,7 @@ plan's attribution is corrected here, not silently repeated.
   future "per D7" reference ambiguous.
 - **Confirmed:** 用户 2026-10-29 逐项过批准时通过（第 5 项），不再暂定。
 
-## D34 — C9: Loop/Graph enter v0.3.0; release notes state the L14 gap honestly (merge ruling, provisional)
+## D34 — C9: Loop/Graph enter v0.3.0; release notes state the L14 gap honestly (merge ruling, confirmed by user 2026-10-29)
 
 - **Decision:** Loop (skeleton Phase 5) and Graph (yunyi) ship in
   v0.3.0. The release notes must state honestly that the L14 criteria
@@ -734,7 +734,9 @@ plan's attribution is corrected here, not silently repeated.
   19:48) and the Graph executor is built and tested; withholding both
   from the release would discard finished work. But the entry gates
   were never fully met, so the release must not over-claim.
-- **Provisional:** 合并执行时暂定，用户复核时可改。
+  Per D58 (user final ruling), Loop/Graph ship on standard+ tiers
+  only; minimal does not carry graph.py/loop.py.
+- **Confirmed:** 用户 2026-10-29 逐项过批准时通过（第 6 项），不再暂定。
 
 ## D35 — C10: version is v0.3.0, but VERSION stays 0.2.1 in this branch (merge ruling, provisional)
 
