@@ -14,10 +14,10 @@ Single source of truth: `skills-profiles.json` at the repo root.
 `deploy-agents.sh` / `deploy-agents.ps1` read it; `tests/repo_checks.py`
 §3r asserts it. Edit membership there, never in the scripts or guides.
 
-| Profile | Skills | Skills-only bytes (measured 2026-10-28) | Default? |
+| Profile | Skills | Skills-only bytes (measured 2026-10-28; standard re-measured 2026-10-29) | Default? |
 |---|---|---|---|
 | `minimal` | 10 | 212,777 | **yes** (`--profile` unset) |
-| `standard` | 18 | 301,118 | no |
+| `standard` | 20 | 321,898 | no |
 | `full` | 40 | 1,960,329 | no |
 
 `full` without `--include-heavy-skills` / `-IncludeHeavySkills` deploys 38

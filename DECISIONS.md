@@ -365,7 +365,8 @@ Phase 0 decision meeting.
 ## D18 — Skill tiers: minimal (10) is the default; the core list is provisional (Phase 4, 4-1)
 
 - **Decision:** deploy profiles `minimal` (10 skills, default) /
-  `standard` (18) / `full` (40) as defined in `skills-profiles.json`
+  `standard` (20, amended by D30 2026-10-29; merge-time value was 18) /
+  `full` (40) as defined in `skills-profiles.json`
   (single source of truth; CI §3r asserts it). Default deploys minimal.
   Bench pack/gate arms pin `--profile full` so the Phase 3 comparison
   keeps its meaning.
@@ -663,17 +664,22 @@ plan's attribution is corrected here, not silently repeated.
   deployment.
 - **Confirmed:** 用户 2026-10-29 逐项过批准时通过（第 1 项），不再暂定。
 
-## D30 — C5: standard profile is 18 skills (merge ruling, provisional)
+## D30 — C5: standard profile is 20 skills (merge ruling amended by user 2026-10-29)
 
-- **Decision:** the standard profile stays 18 skills (skeleton D18,
-  `skills-profiles.json`). Yunyi's D29 (standard = 22) is NOT
-  adopted.
-- **Reason:** the skeleton's profile membership is the single source
-  of truth already guarded by CI; yunyi's 22 counts a different
-  membership (openspec added wholesale) that was never bench-attributed
-  to any outcome. Changing the count would move the default
-  distribution without evidence.
-- **Provisional:** 合并执行时暂定，用户复核时可改。
+- **Decision:** the standard profile is 20 skills: the skeleton's 18
+  plus `openspec-continue-change` and `openspec-update-change`
+  (user walkthrough 2026-10-29, item 2). Yunyi's D29 (standard = 22,
+  minimal + the whole openspec family) is still NOT adopted.
+- **Reason:** the 18 covered only the linear openspec loop
+  (propose → new → apply → verify → archive). Real multi-step work
+  also needs to continue an in-progress change and to revise a change's
+  plan when requirements shift; without those two skills a standard
+  deploy leaves the loop unclosed, and the absence is silent (no
+  pointer to `--profile full`). The other 5 openspec skills
+  (explore, onboard, sync-specs, bulk-archive, ff-change) stay in
+  full only. The count part of D18 is amended accordingly.
+- **Amends:** merge-time D30 (standard = 18); the conflict-table line
+  "Merge kept 18" below is superseded by this entry.
 
 ## D31 — C6: default profile is minimal (merge ruling, provisional)
 
@@ -821,7 +827,8 @@ still pending.
     bug fix. Do not rewrite this bullet to claim the pins live only in
     scripts/guides — that would be false.
 - **yunyi D29 — skill tiers standard = 22.** Conflicts with D30/C5
-  (standard = 18). Merge kept 18.
+  (standard = 18 at merge time). Merge kept 18; amended to 20 by user
+  2026-10-29, see D30.
 - **yunyi D16/D21 — rubric `stable` claimed after confirmation round
   4.** Conflicts with skeleton D15 and D28/C3 (not stable, no live
   second-judge round). Merge did NOT carry the stable claim over;

@@ -33,10 +33,11 @@ Claude Code 通过两种方式决定加载 skill：
 `executing-plans`, `using-git-worktrees`, `subagent-driven-development`,
 `requesting-code-review`, `codegraph`
 
-### standard (18 skills)
+### standard (20 skills)
 
 Minimal plus: `comet`, `openspec-new-change`, `openspec-propose`,
 `openspec-apply-change`, `openspec-verify-change`, `openspec-archive-change`,
+`openspec-continue-change`, `openspec-update-change`,
 `finishing-a-development-branch`, `dispatching-parallel-agents`
 
 ### full (40 skills)

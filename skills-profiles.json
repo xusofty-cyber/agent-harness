@@ -37,6 +37,8 @@
         "openspec-apply-change",
         "openspec-verify-change",
         "openspec-archive-change",
+        "openspec-continue-change",
+        "openspec-update-change",
         "finishing-a-development-branch",
         "dispatching-parallel-agents"
       ]
