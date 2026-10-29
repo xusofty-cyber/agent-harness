@@ -18,6 +18,12 @@ verification caught it.)
 | 5 | Maintainability | The change follows the repo's existing conventions and is readable by the next session | Works but ignores a convention, or needs a comment it lacks | Introduces a pattern the repo forbids, or is unreadable without the author |
 | 6 | Handover readiness | A new session can continue from SESSION_STATE / the run record alone, within the 5-minute budget | Continuable, but needs one clarification or one re-read of the diff | A new session cannot tell what was done, what is next, or what is blocked |
 
+## Anchor notes (user-accepted 2026-10-30, advisory-only)
+
+- **S1 — Verification, equivalent interpreters.** When the sandbox lacks a required interpreter, re-running under a named equivalent interpreter is verification 1 (not 2), and the interpreter must be named in the evidence. Exception (user ruling V-1, 2026-10-30): where the equivalent interpreter is ruled fully equivalent to the required interpreter for that sandbox, the re-run counts as verification 2; the 18 t9/t11 runs of the 2026-10-29 calibration were rescored on this basis. S1 remains the default anchor; V-1 is a case-specific ruling for those runs, not a repeal of S1.
+- **S2 — Handover, record omissions.** A run record that omits a known deviation — even one that does not change acceptance — caps handover at 1.
+- **S3 — Reliability, single re-run honesty.** A single matching re-run is weak determinism evidence; a reliability 2 from one re-run should be read as "no flakiness observed", not "proven deterministic".
+
 ## Verdict
 
 - **Block** — any dimension scores 0.
