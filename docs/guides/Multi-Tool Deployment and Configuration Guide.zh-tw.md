@@ -392,7 +392,7 @@ ai-memory 的 allowlist 模式僅在已安裝的原生鉤子強制執行擷取�
 ### Q2：線上更新（`-Update`）如何保護自訂的專案配置？
 > **答**：現有的專案 `AGENTS.md` 會被保留，並產生一份 `AGENTS.template.md` 供審查。`-Global` 會在保留現有檔案的同時，初始化缺失的 Claude Code、Antigravity 與 Codex 全域指示。組合使用 `-Global -Update` 會建立時間戳記備份，並以當前範本取代這些全域檔案；Codex 作用中的非空 `AGENTS.override.md` 會就地更新，取代 `AGENTS.md`。
 
-### Q3：40+ 個 skills 如何避免撐爆上下文視窗？
+### Q3：39+ 個 skills 如何避免撐爆上下文視窗？
 > **答**：取決於宿主如何探索和載入 Skills。不要假設固定的中繼資料成本或快取折扣；僅保持有用的 Skills 啟用，並在目標宿主中驗證行為。
 
 ### Q4：什麼是 8 項高風險操作保護矩陣？
