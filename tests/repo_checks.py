@@ -851,10 +851,19 @@ if _b2.is_file():
     _b2_text = _b2.read_text(encoding="utf-8")
     check("eval:b2-rules", "NO DISCRIMINATION" in _b2_text and "36 runs" in _b2_text,
           "B2 preregistration lacks the decision rules or the 36-run scope")
-    check("eval:b2-no-runs-yet",
-          not list((ROOT / "eval" / "results").glob("t9-multi-file_*.json"))
-          and not list((ROOT / "eval" / "results").glob("t12-ambiguous-decision_*.json")),
-          "B2 run records exist before the round was run — preregistration violated")
+    # B2 records: before the rounds are run there must be no records.
+    # Once the rounds are run, records are allowed only together with the
+    # final report and the full 36-file set (4 tasks x 3 arms x 3 reps),
+    # so a partial dump without a report still fails and the
+    # preregistration guard keeps its teeth after the run.
+    _b2_tasks = ("t9-multi-file", "t10-hidden-boundary", "t11-resume", "t12-ambiguous-decision")
+    _b2_records = [p for _t in _b2_tasks for _a in ("bare", "pack", "gate")
+                   for p in (ROOT / "eval" / "results").glob(f"{_t}_{_a}_rep*.json")]
+    check("eval:b2-records-consistent",
+          not _b2_records or (
+              (ROOT / "eval" / "results" / "b2-2026-10-29.md").is_file()
+              and len(_b2_records) == 36),
+          "B2 run records exist without the final report or the full 36-file set — preregistration violated")
 _run_bench = (ROOT / "eval" / "run-bench.sh").read_text(encoding="utf-8")
 for _t in ("t9-multi-file", "t10-hidden-boundary", "t11-resume", "t12-ambiguous-decision"):
     check(f"eval:run-bench-{_t}", _t in _run_bench,
