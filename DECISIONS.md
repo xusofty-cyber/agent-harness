@@ -362,9 +362,9 @@ Phase 0 decision meeting.
   does not silently lapse.
 - **Date:** 2026-10-28.
 
-## D18 — Skill tiers: minimal (10) is the default; the core list is provisional (Phase 4, 4-1)
+## D18 — Skill tiers: minimal is the default; the core list is provisional (Phase 4, 4-1; minimal count amended by D31 2026-10-29: now 15)
 
-- **Decision:** deploy profiles `minimal` (10 skills, default) /
+- **Decision:** deploy profiles `minimal` (15 skills, default; amended by D31 2026-10-29, merge-time value was 10) /
   `standard` (20, amended by D30 2026-10-29; merge-time value was 18) /
   `full` (40) as defined in `skills-profiles.json`
   (single source of truth; CI §3r asserts it). Default deploys minimal.
@@ -681,16 +681,24 @@ plan's attribution is corrected here, not silently repeated.
 - **Amends:** merge-time D30 (standard = 18); the conflict-table line
   "Merge kept 18" below is superseded by this entry.
 
-## D31 — C6: default profile is minimal (merge ruling, provisional)
+## D31 — C6: default profile is minimal, now carrying the openspec core (merge ruling amended by user 2026-10-29)
 
-- **Decision:** the default deploy profile stays `minimal` (10
-  skills, skeleton D18). Yunkai's `--tier` default (`full`) is NOT
-  adopted.
-- **Reason:** v3 Phase 4 settled minimal as the default on the
-  subtraction principle (ship the smallest proven set); yunkai's
-  full-by-default would ship 40 skills — including the unproven bulk
-  the quality scorecard scores 5/10 — to every new project.
-- **Provisional:** 合并执行时暂定，用户复核时可改。
+- **Decision:** the default deploy profile stays `minimal`, but
+  minimal is now 15 skills: the skeleton's 10 gate-core skills plus
+  the 5 openspec core skills (`openspec-new-change`,
+  `openspec-propose`, `openspec-apply-change`,
+  `openspec-verify-change`, `openspec-archive-change`)
+  (user walkthrough 2026-10-29, item 3). Yunkai's `--tier` default
+  (`full`) is still NOT adopted. Minimal still ships gate only
+  (no graph.py, no loop layer — D58 unchanged).
+- **Reason:** a default deploy with zero openspec skills leaves the
+  spec-driven loop out of the default experience entirely; the 5 core
+  skills close the propose → new → apply → verify → archive loop
+  for every new project. The repo_checks §3r cap on minimal size is
+  raised 10 → 15 to match (the cap follows the decision, not vice
+  versa). The other 7 openspec skills stay in full only (standard
+  carries continue + update per D30).
+- **Amends:** merge-time D31 (minimal = 10) and the D18 count.
 
 ## D32 — C7: gate state files live inside `gate/` (merge ruling, provisional)
 

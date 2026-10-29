@@ -14,9 +14,9 @@ Single source of truth: `skills-profiles.json` at the repo root.
 `deploy-agents.sh` / `deploy-agents.ps1` read it; `tests/repo_checks.py`
 §3r asserts it. Edit membership there, never in the scripts or guides.
 
-| Profile | Skills | Skills-only bytes (measured 2026-10-28; standard re-measured 2026-10-29) | Default? |
+| Profile | Skills | Skills-only bytes (measured 2026-10-28; standard and minimal re-measured 2026-10-29) | Default? |
 |---|---|---|---|
-| `minimal` | 10 | 212,777 | **yes** (`--profile` unset) |
+| `minimal` | 15 | 280,960 | **yes** (`--profile` unset) |
 | `standard` | 20 | 321,898 | no |
 | `full` | 40 | 1,960,329 | no |
 
@@ -53,7 +53,7 @@ host exposes a programmatic token API (see
 `docs/internal/token-adapters.md`). If a future measurement shows a token
 difference, it will be recorded with its method, not asserted from bytes.
 
-## Minimal (default) — 10 skills
+## Minimal (default) — 15 skills (10 gate core + 5 openspec core, D31 amendment 2026-10-29)
 
 Basis tags: `[measured]` = a real run or a real wiring in this repo;
 `[dependency]` = the skill is referenced by a distributable rule template
@@ -72,6 +72,11 @@ Basis tags: `[measured]` = a real run or a real wiring in this repo;
 | `subagent-driven-development` | 59,739 | [provisional] Sub-agents are one of the L13 six primitives; the largest single SKILL.md in the repo (32,577 B) — kept despite its size, flagged for the first ablation review. Guide-listed only. |
 | `requesting-code-review` | 9,423 | [dependency] Project AGENTS template + FAQ guide. |
 | `codegraph` | 1,388 | [measured] Hook integration: `.claude/settings.json` runs `codegraph prompt-hook`. [dependency] Project AGENTS template. |
+| `openspec-new-change` | 5,870 | [provisional] D31 amendment 2026-10-29: openspec core loop step — create the change proposal. No usage telemetry yet. |
+| `openspec-propose` | 16,239 | [provisional] D31 amendment 2026-10-29: openspec core loop step — draft the proposal. No usage telemetry yet. |
+| `openspec-apply-change` | 11,159 | [provisional] D31 amendment 2026-10-29: openspec core loop step — implement the change. No usage telemetry yet. |
+| `openspec-verify-change` | 18,345 | [provisional] D31 amendment 2026-10-29: openspec core loop step — verify the change. No usage telemetry yet. |
+| `openspec-archive-change` | 16,570 | [provisional] D31 amendment 2026-10-29: openspec core loop step — archive the completed change. No usage telemetry yet. |
 
 What minimal deliberately leaves out: the whole OpenSpec family (12 skills,
 a complete workflow, not a core discipline), the Comet adapter (the gate is

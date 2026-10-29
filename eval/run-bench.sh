@@ -131,7 +131,7 @@ do_setup() {
     if [ "$arm" = "pack" ] || [ "$arm" = "gate" ]; then
         # Phase 4 (4-1): pack/gate arms deploy --profile full — the
         # distribution pack as shipped before Phase 4 (38 skills). The
-        # default profile is minimal (10); using it here would make the
+        # default profile is minimal (15); using it here would make the
         # pack arm a different comparison than Phase 3 designed. The
         # pack arm was never measured before this change (0/12), so no
         # measured data is redefined by pinning it now.

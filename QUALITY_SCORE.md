@@ -10,7 +10,7 @@ skeleton's baseline numbers are kept as an appendix below.
 | Module | Score | Evidence |
 |---|---|---|
 | Gate layer (`gate/`) | 8 | 43 unit tests (pass-gate 17 + terminate 14 + graph 7 + comet_adapter 5) + repo_checks §3k gate validation (672 PASS total); dogfooded on this repo (3/3 feature_list items passing with gate evidence, Phase 1); bench gate arm left verifiable evidence in 24/24 runs across rounds 3–5; terminate/handoff/run, Graph executor, and comet_adapter all landed in this merge. Not 10: graph/comet-adapter paths are still young (7 and 5 tests); the gate's real-world soak time is still short. |
-| Pipeline & deploy | 7 | Strict gates real since Phase 2 (drift fixtures prove exit codes); comet pinned 0.5.1 + state backup verified end-to-end (this merge); deploy dir creation tested; three profiles measured (minimal 10 skills / 212,777 B, standard 20 / 321,898 B, full 38 / 757,688 B); slim Project template ships with minimal/standard (D-009, this merge). Not higher: ps1 paths are review-verified, not execution-verified on Windows. |
+| Pipeline & deploy | 7 | Strict gates real since Phase 2 (drift fixtures prove exit codes); comet pinned 0.5.1 + state backup verified end-to-end (this merge); deploy dir creation tested; three profiles measured (minimal 15 skills / 280,960 B, standard 20 / 321,898 B, full 38 / 757,688 B); slim Project template ships with minimal/standard (D-009, this merge). Not higher: ps1 paths are review-verified, not execution-verified on Windows. |
 | Hooks & guard | 7 | 125 hook tests green (hooks 90 + write 12 + gate 11 + lifecycle 12) + 5 server tests; guard expands substitutions recursively, enforces the D27 resolver conjunction (13 tests), logs parse failures to guard-alerts.jsonl and still fails open; yunkai's nested-substitution hardening tests added in this merge; the P1-2 closure (wrapper options, alias deny, xargs/find, same-command variables) added 17 more. Not higher: guard remains a guardrail, not a sandbox (documented); Stop hook has no soak time yet. |
 | Distribution (templates + 40 skills) | 5 | Counts machine-guarded (skills-lock: 36 github entries pinned, CI `--check --strict`); licensing inventoried; template-size ablation done — slim Project template adopted for minimal/standard tiers (D-009). Still: ~99K tokens of SKILL.md for 40 skills with zero per-skill usage evidence and known overlaps (e.g. two debugging skills); the skill catalog is the ablation cadence's next target. |
 | Numbers & claims hygiene | 6 | Repo's own stale figures fixed in Phase 0 and now CI-guarded (repo_checks 672 PASS); upstream figures (comet skill) dispositioned in the 2026-10-28 bench baseline; this merge's numbers are all re-measured (see verification record). Not higher: the upstream text still ships un-annotated in the synced skill (cannot edit without breaking sync). |
@@ -80,8 +80,9 @@ demonstrated in Phase 1 dogfood, not by this matrix. Pack-vs-gate
   whether the gate reduces false completions.
 - **Skill-load cost (measured, v2 3-4; re-measured per profile in Phase
   4):** `eval/run-bench.sh measure-load` now reports all three profiles
-  (2026-10-28). `minimal` (default): **10 skill dirs, 212,777 skills
-  bytes, 700,569 deployed-total bytes**. `standard`: **20 dirs, 321,898
+  (2026-10-28). `minimal` (default): **15 skill dirs, 280,960 skills
+  bytes, 789,323 deployed-total bytes** (re-measured 2026-10-29
+  after the D31 adjustment). `standard`: **20 dirs, 321,898
   skills bytes, 912,560 deployed-total bytes** (re-measured 2026-10-29
   after the D30 adjustment). `full`: **38 dirs (heavy
   skills gated), 757,688 skills bytes, 1,790,382 deployed-total bytes**

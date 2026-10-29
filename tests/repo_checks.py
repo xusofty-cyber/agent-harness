@@ -843,7 +843,7 @@ for _pname in ("minimal", "standard", "full"):
 _min = _profiles.get("minimal", {}).get("skills", [])
 _std = _profiles.get("standard", {}).get("skills", [])
 _full = _profiles.get("full", {}).get("skills", [])
-check("profiles:minimal-le-10", len(_min) <= 10, f"minimal has {len(_min)} skills, must be <= 10")
+check("profiles:minimal-le-15", len(_min) <= 15, f"minimal has {len(_min)} skills, must be <= 15 (D31 amendment 2026-10-29: gate core 10 + openspec core 5)")
 check("profiles:standard-superset-minimal", set(_min) < set(_std),
       "standard must be a strict superset of minimal")
 check("profiles:full-is-all", set(_full) == _disk_skills,

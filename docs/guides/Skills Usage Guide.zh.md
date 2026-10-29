@@ -21,23 +21,23 @@ Claude Code 通过两种方式决定加载 skill：
 ## 部署分层
 
 `deploy-agents.sh` / `deploy-agents.ps1` 按分层部署技能（Phase 4）。默认分层
-为 `minimal`（10 个技能）。用 `--profile minimal | standard | full` 选择分层
+为 `minimal`（15 个技能）。用 `--profile minimal | standard | full` 选择分层
 （PowerShell：`-Profile`）。成员定义在 `skills-profiles.json` 中，下表必须与之
 一致（CI §3r 检查）。入选依据与每个技能的证据见
 `docs/internal/skill-tiers.md`。
 
-### minimal (default — 10 skills)
+### minimal (default — 15 skills)
 
 `verification-before-completion`, `systematic-debugging`,
 `test-driven-development`, `living-documentation`, `writing-plans`,
 `executing-plans`, `using-git-worktrees`, `subagent-driven-development`,
-`requesting-code-review`, `codegraph`
+`requesting-code-review`, `codegraph`, `openspec-new-change`,
+`openspec-propose`, `openspec-apply-change`, `openspec-verify-change`,
+`openspec-archive-change`
 
 ### standard (20 skills)
 
-Minimal plus: `comet`, `openspec-new-change`, `openspec-propose`,
-`openspec-apply-change`, `openspec-verify-change`, `openspec-archive-change`,
-`openspec-continue-change`, `openspec-update-change`,
+Minimal plus: `comet`, `openspec-continue-change`, `openspec-update-change`,
 `finishing-a-development-branch`, `dispatching-parallel-agents`
 
 ### full (40 skills)

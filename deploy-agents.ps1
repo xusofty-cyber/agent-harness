@@ -39,7 +39,7 @@ param (
 
     [switch]$IncludeHeavySkills,
 
-    # Phase 4 (4-1): deployment profile. Default minimal (10 core skills);
+    # Phase 4 (4-1): deployment profile. Default minimal (15 skills: 10 gate core + 5 openspec core);
     # membership lives in skills-profiles.json. D58 (user final ruling
     # 2026-10-29): minimal ships the gate itself only (no graph.py, no
     # loop layer); standard/full add orchestration. NOTE: $Profile is a

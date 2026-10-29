@@ -40,8 +40,8 @@ verified with measured numbers, not claims.
   standing advisory-only per D28, user final ruling 2026-10-29 — the
   rubric provides advisory opinions only and never auto-approves), eval
   regression CI, first `QUALITY_SCORE.md`.
-- **Phase 4 — slimming**: deploy profiles minimal (default, 10 skills,
-  212,777 bytes) / standard (20) / full (38 gated, 40 with heavy;
+- **Phase 4 — slimming**: deploy profiles minimal (default, 15 skills,
+  280,960 bytes) / standard (20) / full (38 gated, 40 with heavy;
   1,790,382 bytes); EN/ZH as source of truth (i18n-check + status file);
   D17 sh/ps1 convergence (sh-first, re-review 2027-04-28); monthly ablation
   tooling, first run on writing-skills (12/12 pass, CANDIDATE FOR REMOVAL).

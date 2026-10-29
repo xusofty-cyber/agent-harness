@@ -22,24 +22,24 @@ If Claude doesn't pick up a skill when you expect it, just name it explicitly.
 ## Deployment profiles
 
 `deploy-agents.sh` / `deploy-agents.ps1` deploy skills in tiers (Phase 4).
-The default tier is `minimal` (10 skills). Pick a tier with
+The default tier is `minimal` (15 skills). Pick a tier with
 `--profile minimal | standard | full` (PowerShell: `-Profile`). Membership
 is defined in `skills-profiles.json`; the lists below must match it
 (CI §3r checks this). Rationale and per-skill evidence:
 `docs/internal/skill-tiers.md`.
 
-### minimal (default — 10 skills)
+### minimal (default — 15 skills)
 
 `verification-before-completion`, `systematic-debugging`,
 `test-driven-development`, `living-documentation`, `writing-plans`,
 `executing-plans`, `using-git-worktrees`, `subagent-driven-development`,
-`requesting-code-review`, `codegraph`
+`requesting-code-review`, `codegraph`, `openspec-new-change`,
+`openspec-propose`, `openspec-apply-change`, `openspec-verify-change`,
+`openspec-archive-change`
 
 ### standard (20 skills)
 
-Minimal plus: `comet`, `openspec-new-change`, `openspec-propose`,
-`openspec-apply-change`, `openspec-verify-change`, `openspec-archive-change`,
-`openspec-continue-change`, `openspec-update-change`,
+Minimal plus: `comet`, `openspec-continue-change`, `openspec-update-change`,
 `finishing-a-development-branch`, `dispatching-parallel-agents`
 
 ### full (40 skills)
