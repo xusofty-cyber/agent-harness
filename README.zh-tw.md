@@ -44,7 +44,7 @@ graph TD
    - **Comet 整合指引**：引導檢查已安裝版本與專案配置；此技能本身不實作 Comet 狀態機或階段守衛。
    - **活體文件與工程文件規範**：`living-documentation`（四階文件體系：specs/architecture/reference/guides，Frontmatter 雙向追溯關聯，L0/L1/L2 變更門禁與文件演進）與 `engineering-docs`（31 種研發文件類型，15 個中英雙語門禁範本，確保各 Agent 階段輸出格式一致）。
    - **規範驅動開發（SDD）**：`openspec` 全套 12 個技能（提案、變更應用、驗證、主規格同步、歸檔）。
-   - **測試驅動開發（TDD）**：`superpowers` 全套 15 個技能（TDD 紅綠循環、系統性排障、完工驗證證據門、工作區隔離）。
+   - **測試驅動開發（TDD）**：源自 superpowers 的工作流技能（TDD 紅綠循環、系統性排障、完工驗證證據門、工作區隔離）。
    - **實現與檢索指引**：`ponytail`（極簡實作決策階梯）與 `codegraph`（CodeGraph 可選整合指引；CLI/MCP 需單獨安裝配置）。
    - **輸出與表達指引**：`rtk`（Rust Token Killer 可選 CLI 指引；需配置命令重寫 Hook）與 `caveman`（精簡表達 Skill）。
    - **事前決策評審與共享記憶**：`option-review`（5 維度多候選方案事前獨立評審與決策矩陣）與 `cross-tool-memory`（跨工具專案長期記憶導航與經驗檢索）。
@@ -157,7 +157,7 @@ agent-harness/
 
 - **Windows 命令列 (PowerShell)**:
   ```powershell
-  # 部署到指定專案（預設 en，可指定 -Language zh-tw / zh / fr / de）
+  # 部署到指定專案（預設 en，可指定 -Language zh-tw / zh）
   .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Global -Language zh-tw -Initialize -DirectoryPath "packages/core"
   .\deploy-agents.ps1 -ProjectPath "D:\Projects\my-project" -Check -DirectoryPath "packages/core"
   ```
@@ -165,7 +165,7 @@ agent-harness/
 - **Linux / macOS 命令列 (Bash)**:
   ```bash
   chmod +x ./deploy-agents.sh
-  # 支援多語言範本切換（預設 en，可選 --lang zh-tw / zh / fr / de）
+  # 支援多語言範本切換（預設 en，可選 --lang zh-tw / zh）
   ./deploy-agents.sh /path/to/my-project --global --lang zh-tw --initialize --directory packages/core
   ./deploy-agents.sh /path/to/my-project --check --directory packages/core
   ```
