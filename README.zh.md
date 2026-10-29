@@ -116,7 +116,7 @@ agent-harness/
 │   ├── loop.py                      # Goal Loop / Maker-Checker 运行器（仅 standard/full 档）
 │   ├── sync-skills.py               # 外部依赖技能库同步与上游差异比对工具
 │   └── doc-impact.py                # 活体文档影响分析与质检门禁工具
-├── eval/                            # 自建基准（t1–t8）+ 评分表（仅咨询级）
+├── eval/                            # 自建基准（t1–t12）+ 评分表（仅咨询级）
 ├── templates/
 │   └── agents/                      # 规范规则模板（全局/项目级/目录级 × en/zh/zh-tw）
 ├── run-pipeline.ps1                 # Windows PowerShell 统一流水线执行脚本
@@ -136,9 +136,9 @@ agent-harness/
 
 ### 当前状态（v0.3.0）——依赖门禁前请先读
 
-- **强制力取决于宿主。** Claude Code 钩子在客户端强制执行门禁（见上表）。Antigravity 钩子与 dsh 门禁插件虽已部署，但其真机强制执行均未验证（见上表）。其他宿主上，门禁是一套纪律加手动命令：自己跑 `python3 gate/pass-gate.py verify` 和 `python3 gate/pass-gate.py check-clean`。与宿主无关的兜底是 CI，它会重跑每个 `passing` 项的验证命令（`tests/repo_checks.py` §3k）。已知绕过方式见 [`gate/README.md`](gate/README.md)，包括经 Bash 直接改写、明文成本账本。
+- **强制力取决于宿主。** Claude Code 钩子在客户端强制执行门禁（见上表）。Antigravity 钩子、WorkBuddy 门禁钩子与 dsh 门禁插件虽已部署，但其真机强制执行均未验证（见上表）。其他宿主上，门禁是一套纪律加手动命令：自己跑 `python3 gate/pass-gate.py verify` 和 `python3 gate/pass-gate.py check-clean`。与宿主无关的兜底是 CI，它会重跑每个 `passing` 项的验证命令（`tests/repo_checks.py` §3k）。已知绕过方式见 [`gate/README.md`](gate/README.md)，包括经 Bash 直接改写、明文成本账本。
 - **基准结论如实表述。** 预注册 B1 轮（t1–t8 × bare/pack/gate × 3 轮 = 72 轮）72/72 通过、每臂 0 错误完成，按事前规则判为 NO DISCRIMINATION。本版本不宣称门禁降低了错误完成率；唯一的拦截证据是 Phase 1 dogfood（植入的假通过被钩子和 CI 抓住）。
-- **B2 更难基准，已预注册、尚未跑。** `eval/results/b2-preregistration-2026-10-29.md` 预注册了 t9–t12（多文件 + 文档同步、隐藏边界用例、断点续跑、歧义需求先写决策记录）× bare/pack/gate × 3 轮 = 36 轮，沿用 B1 的判定规则：只有 gate 比 bare 少至少 2 次错误完成才算 DISCRIMINATION，各臂仍为 0 还是 NO DISCRIMINATION，不是成功。B2 目前没有任何轮次记录；任务与参考解已验证（setup + solution + acceptance 走通），但还没有任何一臂被实测。
+- **B2 更难基准，已跑完并记录。** `eval/results/b2-2026-10-29.md` 记录了预注册的 t9–t12 轮（多文件 + 文档同步、隐藏边界用例、断点续跑、歧义需求先写决策记录）× bare/pack/gate × 3 轮 = 36 轮，沿用 B1 的判定规则：36/36 通过、每臂 0 错误完成（bare 12/12、pack 12/12、gate 12/12），按事前规则判为 NO DISCRIMINATION，与 B1 结论相同，不是成功。本版本不宣称门禁降低了错误完成率。
 - **宿主无关的第二道门（pre-push + CI 模板）。** `templates/pre-push-gate/`（钩子模板、检查器、opt-in 安装器）与 `templates/ci-gate-check.yml` 给没有运行时钩子的项目一道不依赖任何宿主的门：检查器重跑每个 `passing` 项的验证并拒绝过期证据，与 §3k 对齐。安装有两种形式：独立安装器仍是显式 opt-in；部署脚本则默认就装齐三件文件（传 `--no-prepush-gate` / `-NoPrepushGate` 可跳过，`--prepush-gate` / `-PrepushGate` 保留兼容），按跳过已有 / 更新先备份的规矩。边界见指南：pre-push 钩子检查的是工作区，不是被推送的提交；`git push --no-verify` 可绕过——要配 CI 模板和服务端分支保护一起用。
 - **评分表仅咨询级（D28）。** `eval/rubric.md` 六维打分，但 `evaluate.py --gate` 恒拒绝，最终由人决定。5 轮校准用的是历史阶段结果，不是活人二审。
 - **翻译。** EN 与 ZH 为事实源。ZH-TW 行按 `docs/internal/i18n-status.md` 为 stale / 冻结状态，下个发布前从 EN 重新生成，不要逐句手工同步。
