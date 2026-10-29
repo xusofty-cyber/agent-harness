@@ -94,6 +94,9 @@ jobs:
           test -f /tmp/smoke-proj/.claude/hooks/guard.mjs
           test -f /tmp/smoke-proj/.claude/hooks/session-start.mjs
           test -f /tmp/smoke-proj/.claude/hooks/post-tool-use.mjs
+          test -f /tmp/smoke-proj/.workbuddy/settings.json
+          test -f /tmp/smoke-proj/.workbuddy/hooks/workbuddy-pre-tool-use.mjs
+          test -f /tmp/smoke-proj/.workbuddy/hooks/guard.mjs
           test -f /tmp/smoke-proj/skills-lock.json
           test -d /tmp/smoke-proj/.agents/skills
           test -d /tmp/smoke-proj/docs/specs
