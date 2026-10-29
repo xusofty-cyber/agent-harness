@@ -46,7 +46,7 @@ usage() {
     echo "  --check, -k       检查项目级规则中的初始化占位项；可搭配 --directory 检查模块规则。"
     echo "  --comet-init       若系统中已安装 comet CLI，自动在目标项目中运行 comet init。"
     echo "  --include-heavy-skills 部署可选重型技能 docx 与 brainstorming（默认跳过；docx 约 1.3 MB，brainstorming 含本地服务 server.cjs）。只影响本次新复制，不删除目标项目已有文件。"
-    echo "  --profile <minimal|standard|full> 部署分层（默认 minimal：15 个技能（10 个门禁核心 + 5 个 openspec 核心）+ 门禁本身（不含 graph.py 与循环层）；standard：20 个技能 + 门禁 + 编排（graph.py、loop.py 与模板）；full：默认 38 个技能 + 门禁 + 编排，加 --include-heavy-skills 才到全部 40 个。技能成员见 skills-profiles.json）。"
+    echo "  --profile <minimal|standard|full> 部署分层（默认 minimal：15 个技能（10 个门禁核心 + 5 个 openspec 核心）+ 门禁本身（不含 graph.py 与循环层）；standard：20 个技能 + 门禁 + 编排（graph.py、loop.py 与模板）；full：默认 37 个技能 + 门禁 + 编排，加 --include-heavy-skills 才到全部 39 个。技能成员见 skills-profiles.json）。"
     echo "  --ai-memory-init, -m 初始化项目 .ai-memory.toml 并接入跨工具记忆 (ai-memory)。
   --pipeline         启动统一流水线 (Pipeline: 规则部署 + AI记忆 + 技能同步 + 文档质检)。
   --prepush-gate / --no-prepush-gate  部署模板门到目标项目（.git/hooks/pre-push、scripts/gate-prepush-check.py、.github/workflows/gate-check.yml；默认开启，--no-prepush-gate 关闭；已有文件跳过，--update 先备份再覆盖）。"
@@ -1387,6 +1387,10 @@ fi
 # Antigravity payloads into the Claude hook scripts, which are copied
 # here too so Antigravity-only projects (no .claude/hooks/) still gate.
 # Adapters fall back to .claude/hooks/ when the copy is absent.
+# Antigravity hooks cwd=.agents: commands in .agents/hooks.json are relative
+# to .agents/ (agy CLI 1.4.10 runs hooks with cwd=.agents/); do not re-prefix
+# them with .agents/hooks/ in the template, or agy resolves
+# .agents/.agents/hooks/... and rejects the tool call.
 ANTIGRAVITY_HOOKS_JSON="${SCRIPT_DIR}/.agents/hooks.json"
 TARGET_AGENTS_DIR="${TARGET_PROJECT_DIR}/.agents"
 TARGET_AGENTS_HOOKS_DIR="${TARGET_AGENTS_DIR}/hooks"
@@ -1481,6 +1485,69 @@ if [ -f "${DSH_PLUGIN_SOURCE}" ]; then
             echo -e "  ${GREEN}[√] 已生成 Dsh gate 挂载行: .dsh/cordis.patch.yml（需并入 profile 或 home patch 后生效）${NC}"
         else
             echo "  [i] 目标项目已存在 .dsh/cordis.patch.yml，跳过。"
+        fi
+    fi
+fi
+# WorkBuddy hooks (.workbuddy/settings.json + .workbuddy/hooks/)
+# WorkBuddy (Tencent CodeBuddy successor) hooks ASSUME a Claude Code-
+# compatible protocol (UNVERIFIED: official WorkBuddy/CodeBuddy hook docs
+# were not fetched in this run and no installed WorkBuddy build was
+# available; confirm on an installed build before calling this enforced):
+# settings.json
+# declares {hooks: {PreToolUse/Stop/SessionStart/PostToolUse}} with
+# {type: command} entries, stdin is {tool_name, tool_input, cwd, ...},
+# PreToolUse denies with exit 2 / hookSpecificOutput permissionDecision,
+# Stop blocks with {"continue": false, "reason": ...} and SessionStart
+# injects hookSpecificOutput.additionalContext. The adapters forward the
+# Claude-shaped payload unchanged to the Claude hook scripts, which are
+# copied here too so WorkBuddy-only projects (no .claude/hooks/) still
+# gate. Adapters fall back to .claude/hooks/ when the copy is absent.
+# Settings-file location caveat: the legacy CodeBuddy path cited by a
+# prior draft is .codebuddy/settings.json (unverified here); this
+# repository deploys the WorkBuddy build's
+# settings to .workbuddy/settings.json (the directory already used for
+# the WorkBuddy rules bridge). If an installed WorkBuddy build still reads
+# the legacy path, copy the deployed settings file there — the hook
+# commands are project-root-relative and need no change. Not verified on
+# an installed WorkBuddy build (none in this environment).
+if [ "$TOOL_WORKBUDDY" = true ]; then
+    WORKBUDDY_SETTINGS_SRC="${SCRIPT_DIR}/.workbuddy/settings.json"
+    if [ -f "${WORKBUDDY_SETTINGS_SRC}" ]; then
+        mkdir -p "${TARGET_PROJECT_DIR}/.workbuddy"
+        TARGET_WORKBUDDY_SETTINGS="${TARGET_PROJECT_DIR}/.workbuddy/settings.json"
+        if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_WORKBUDDY_SETTINGS}" ]; then
+            if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_WORKBUDDY_SETTINGS}"; fi
+            cp -f "${WORKBUDDY_SETTINGS_SRC}" "${TARGET_WORKBUDDY_SETTINGS}"
+            echo -e "  ${GREEN}[√] 已部署 WorkBuddy hooks: .workbuddy/settings.json${NC}"
+        else
+            echo "  [i] 目标项目已存在 .workbuddy/settings.json，跳过。"
+        fi
+        SOURCE_WORKBUDDY_HOOKS_DIR="${SCRIPT_DIR}/.workbuddy/hooks"
+        if [ -d "${SOURCE_WORKBUDDY_HOOKS_DIR}" ]; then
+            mkdir -p "${TARGET_PROJECT_DIR}/.workbuddy/hooks"
+            for hook in "${SOURCE_WORKBUDDY_HOOKS_DIR}"/*.mjs; do
+                [ -f "$hook" ] || continue
+                hook_name=$(basename "$hook")
+                target_hook="${TARGET_PROJECT_DIR}/.workbuddy/hooks/${hook_name}"
+                if [ "$DO_UPDATE" = true ] || [ ! -f "$target_hook" ]; then
+                    if [ "$DO_UPDATE" = true ]; then backup_path "$target_hook"; fi
+                    cp -f "$hook" "$target_hook"
+                fi
+            done
+        fi
+        SOURCE_CLAUDE_HOOKS_DIR="${SCRIPT_DIR}/.claude/hooks"
+        if [ -d "${SOURCE_CLAUDE_HOOKS_DIR}" ]; then
+            mkdir -p "${TARGET_PROJECT_DIR}/.workbuddy/hooks"
+            for guard in guard.mjs guard-write.mjs guard-feature-list.mjs stop-gate.mjs session-start.mjs post-tool-use.mjs; do
+                if [ -f "${SOURCE_CLAUDE_HOOKS_DIR}/${guard}" ]; then
+                    target_guard="${TARGET_PROJECT_DIR}/.workbuddy/hooks/${guard}"
+                    if [ "$DO_UPDATE" = true ] || [ ! -f "$target_guard" ]; then
+                        if [ "$DO_UPDATE" = true ]; then backup_path "$target_guard"; fi
+                        cp -f "${SOURCE_CLAUDE_HOOKS_DIR}/${guard}" "$target_guard"
+                    fi
+                fi
+            done
+            echo -e "  ${GREEN}[√] 已部署 WorkBuddy hooks 脚本: .workbuddy/hooks/${NC}"
         fi
     fi
 fi
@@ -1917,7 +1984,7 @@ echo -e "${CYAN} 目标项目: ${TARGET_PROJECT_DIR}${NC}"
 echo -e "${CYAN} 规则目录: ${TARGET_RULES_DIR}${NC}"
 echo -e "${CYAN} 技能目录: ${TARGET_SKILLS_DIR}${NC}"
 echo -e "${CYAN} 部署档位: ${PROFILE}（minimal 只有门禁本身，不含 graph.py 与循环层；standard/full 含编排）${NC}"
-echo -e "${CYAN} 门禁强制力: Claude Code 与 Antigravity 钩子在客户端强制执行；其他宿主请手动跑 gate/pass-gate.py verify 与 check-clean，CI 会二次重跑 passing 项。${NC}"
+echo -e "${CYAN} 门禁强制力: Claude Code、Antigravity 与 WorkBuddy 钩子在客户端强制执行；其他宿主请手动跑 gate/pass-gate.py verify 与 check-clean，CI 会二次重跑 passing 项。${NC}"
 if command -v comet >/dev/null 2>&1; then
     echo -e "\n${YELLOW}[TIP] 检测到 Comet CLI。请按当前版本文档为该项目选择并配置工作流。${NC}"
 elif command -v ai-memory >/dev/null 2>&1; then

@@ -4,7 +4,7 @@
       {
         "hooks": [
           {
-            "command": "node .agents/hooks/antigravity-post-tool-use.mjs",
+            "command": "node hooks/antigravity-post-tool-use.mjs",
             "timeout": 10,
             "type": "command"
           }
@@ -16,7 +16,7 @@
       {
         "hooks": [
           {
-            "command": "node .agents/hooks/antigravity-pre-tool-use.mjs",
+            "command": "node hooks/antigravity-pre-tool-use.mjs",
             "timeout": 30,
             "type": "command"
           }
@@ -26,14 +26,14 @@
     ],
     "SessionStart": [
       {
-        "command": "node .agents/hooks/antigravity-session-start.mjs",
+        "command": "node hooks/antigravity-session-start.mjs",
         "timeout": 10,
         "type": "command"
       }
     ],
     "Stop": [
       {
-        "command": "node .agents/hooks/antigravity-stop.mjs",
+        "command": "node hooks/antigravity-stop.mjs",
         "timeout": 10,
         "type": "command"
       }

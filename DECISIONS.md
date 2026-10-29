@@ -993,3 +993,66 @@ still pending.
 - **Verification:** installer downloaded from the new URL and SHA256
   matched the lock value; repo_checks installer-pin checks pass
   (lock URL + SHA agree with deploy-agents.sh).
+
+## D64 — writing-skills deletion verdict: KEEP (night task 7, 2026-10-29)
+
+- **Decision:** `writing-skills` is NOT deleted. It stays in the
+  `full` profile only (it is in neither `minimal` nor `standard`,
+  so those profiles are unaffected either way). This closes the
+  PENDING human-decision line in
+  `docs/ablation/ablation-2026-10-writing-skills.md`, which now
+  records KEEP with the same reasons and re-review conditions.
+- **Reason:** the 2026-10 ablation (12/12 pass, 0 false completions
+  on t1–t4 pack-arm runs without the skill, re-verified from the raw
+  records) proves no regression on general coding tasks, but the
+  ablation report itself limits that result to bench-only: no bench
+  task authors, edits, or verifies a skill, so the runs never
+  exercised this skill's own function. Per D20, no-regression is
+  necessary but not sufficient for removal, and removing on bench
+  data alone was explicitly rejected. The dependency gate being
+  CLEAR (re-run 2026-10-29) shows removal would be technically safe,
+  not that the skill is valueless. No usage telemetry exists, so
+  "rarely used" is unproven and is not used as an argument.
+  Deleting on this evidence alone would remove the only
+  skill-authoring guidance from the `full` profile for a benefit
+  measured only as 107,640 bytes on disk.
+- **Re-review conditions (any one, plus owner sign-off, reopens the
+  question):** (a) a skill-authoring bench task ablated with and
+  without the skill; (b) usage telemetry showing non-use; (c) an
+  owner scope decision that skill-authoring guidance is out of scope
+  for this repository.
+- **Scope of this entry:** verdict record only. No skill code,
+  profile, guide, lock, deploy-script, or PARITY change; no
+  CHANGELOG user-facing entry, because nothing user-facing changed.
+  The 2026-11 monthly ablation moves on to another component.
+
+## D65 — writing-skills DELETED (owner direct decision, 2026-10-29) — supersedes D64
+
+- **Decision:** `writing-skills` is deleted from this repository:
+  its `.agents/skills/writing-skills/` directory, its `full`-profile
+  entry in `skills-profiles.json`, its `skills-lock.json` entry, its
+  `THIRD-PARTY-LICENSES.md` row, and its catalog rows in the Skills
+  Usage Guide (EN/ZH) and the Panorama Guide (EN/ZH) are all removed
+  in the same change. `minimal` and `standard` never contained it and
+  are unchanged. Counts move from 40 skill directories / 42 lock
+  entries / full 38-by-default (40 with heavy) to 39 / 41 / full
+  37-by-default (39 with heavy); `tools/count-skills.py` EXPECTED
+  values and `tests/repo_checks.py` §3i/§3r are updated to match.
+- **Basis — stated exactly, not overstated:** this deletion rests on
+  the owner's direct decision on 2026-10-29 (21:59 Asia/Shanghai:
+  "no use, delete it"), which satisfies D64's re-review condition
+  (c) — an owner scope decision that skill-authoring guidance is out
+  of scope for this repository. It does NOT rest on bench proof that
+  the skill is useless: the 2026-10 ablation (12/12 pass, 0 false
+  completions without the skill) is bench-only, and no bench task
+  authors, edits, or verifies a skill, so those runs never exercised
+  this skill's own function. Per D20, no-regression remains necessary
+  but not sufficient evidence; the owner decision, not the bench
+  result, is what closes the question. D64's KEEP verdict is
+  superseded, not rewritten: the 2026-10 ablation report is retained
+  as a historical record with a supersession note appended.
+- **Scope of this entry:** deletion + count sync in the same change.
+  ZH-TW files are untouched per the frozen-translation policy; their
+  `writing-skills` rows and 40-skill counts go stale until the ZH-TW
+  regeneration branch lands (merge order set by the coordinator).
+  The 2026-11 monthly ablation moves on to another component.
