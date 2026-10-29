@@ -738,17 +738,20 @@ plan's attribution is corrected here, not silently repeated.
   only; minimal does not carry graph.py/loop.py.
 - **Confirmed:** 用户 2026-10-29 逐项过批准时通过（第 6 项），不再暂定。
 
-## D35 — C10: version is v0.3.0, but VERSION stays 0.2.1 in this branch (merge ruling, provisional)
+## D35 — C10: version is v0.3.0; VERSION switched on release day 2026-10-29 (merge ruling, executed in release)
 
-- **Decision:** the release version is v0.3.0, but `VERSION` stays
-  `0.2.1` in the merge branch — no bump, no tag here. The bump + tag
-  happen in the release flow after merging to main (which needs
-  separate user approval; main is frozen).
+- **Decision:** the release version is v0.3.0. `VERSION` stayed
+  `0.2.1` in the merge branch until release day, then switched to
+  `0.3.0` on `feat/merge-v3` pre-merge as part of the user-approved
+  release action 2026-10-29 (which also covers the merge to main,
+  the tag, and the GitHub Release). The tag `v0.3.0` is created on
+  main after the merge, never from the branch.
 - **Reason:** the merge branch is not a release; tagging from it
   would publish a version whose contents were never approved for
   main. `tools/check-release.py` enforces VERSION/CHANGELOG/lock
   consistency, and a premature bump would break that gate.
-- **Provisional:** 合并执行时暂定，用户复核时可改。
+- **Executed:** 2026-10-29 release action (user approval "批准合
+  main并发版"); the provisional form of this ruling is superseded.
 
 ## Donor decisions (from D36)
 

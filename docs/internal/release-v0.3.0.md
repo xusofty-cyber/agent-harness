@@ -1,13 +1,18 @@
-# Release v0.3.0 — draft notes (Phase 6, 6-4)
+# Release v0.3.0 — release notes
 
-> **DRAFT — do not publish.** Prepared 2026-10-28 on branch `feat/phase0-v3`.
-> Cutting this release needs the user's explicit approval (tag `v0.3.0` is
-> NOT created here; `VERSION` stays `0.2.1` until release day). See
-> `docs/internal/release-checklist.md` for the procedure.
+> Cut 2026-10-29 from `feat/merge-v3`, merged to main per user
+> approval 2026-10-29 ("批准合 main并发版"). `VERSION` 0.3.0; tag
+> `v0.3.0` on main. Baseline: main was `88c8b79` (post-revert
+> freeze, tagged `v0.2.2` by yunkai); the revert of PR #61's revert
+> was applied first so the merge restores the reverted phase0
+> content, then `feat/merge-v3` was merged.
 >
-> This draft covers the whole v3 revamp (Phases 0–6). Final numbers must be
-> re-verified on release day (`python3 tests/repo_checks.py`,
-> `python3 tools/check-release.py`, deploy smoke).
+> This note covers the whole v3 revamp (Phases 0–6) plus the merge,
+> panel-fix, walkthrough, and B1 rounds. Numbers below were
+> re-verified on release day 2026-10-29 (`python3
+> tests/repo_checks.py`, hook tests, pytest, three-tier deploy
+> smoke, `python3 tools/check-release.py`, CI on the release
+> commit).
 
 ## What v0.3.0 is
 
@@ -49,7 +54,11 @@ verified with measured numbers, not claims.
   3 repeats × 3 arms). Ceiling effect: tasks too easy to distinguish arms;
   gate arm costs ~+1 s / +1 round vs pack (verify overhead itself).
   Thresholds re-derived from pooled runs (T1 11 s / T2 25 s / T3 56 s /
-  T4 59 s; rounds 6/6/6/8) — still provisional.
+  T4 59 s; rounds 6/6/6/8) — still provisional. Superseded as release
+  evidence by B1 (2026-10-29, pre-registered): 72 runs (t1–t8 ×
+  bare/pack/gate × 3 rounds, fresh executors), 72 pass, 0 false
+  completions on every arm — NO DISCRIMINATION per the pre-registered
+  rules; see Measured numbers.
 - **Phase 5 — Loop**: `tools/loop.py` (stdlib-only Goal Loop +
   Maker-Checker, enforced stop conditions, timeout, budget, human
   approval) + 6 loop templates. Real demos: fixed `pass-gate.py status`
@@ -78,17 +87,23 @@ verified with measured numbers, not claims.
   enforcement. This replaces the draft's earlier "never auto-stop"
   wording, which described only the proxy ledger.
 
-## Measured numbers (re-verify on release day)
+## Measured numbers (verified on release day 2026-10-29)
 
-- `tests/repo_checks.py`: 672 checks passing (final verification of the
-  2026-10-29 panel-fix round; re-verify on release day).
+- `tests/repo_checks.py`: 672 checks passing (re-verified on release
+  day on the branch HEAD; CI green on the release commit).
 - Hook tests: 90 + 12 + 11 + 12 = 125 passing (+ 5 server tests).
 - pytest: 109 passed (gate tests 43: pass-gate 17 + terminate 14 +
   graph 7 + comet_adapter 5).
 - Deploy smoke: `deploy-agents.sh` to an empty directory exits 0 for
   all three profiles (minimal correctly ships no graph/loop per D58).
 - `sync-skills.py --check --strict`: all skills in-sync vs pins (~34 s).
-- Bench: 36/36 pass, 0 false completions; thresholds provisional.
+- Bench B1 (pre-registered 2026-10-29, `eval/results/b1-preregistration-2026-10-29.md`):
+  72/72 pass, 0 false completions on every arm (t1–t8 × bare/pack/gate ×
+  3 rounds, fresh executors; medians bare 44.5 s / pack 47.5 s /
+  gate 48.0 s, descriptive only). Branch per the pre-registered rules:
+  NO DISCRIMINATION — this release makes NO claim that the gate
+  reduces false completions. Earlier 36-run baseline: same conclusion
+  (ceiling effect); thresholds provisional.
 
 ## What was NOT done (known gaps, honest list)
 
@@ -97,9 +112,11 @@ verified with measured numbers, not claims.
   a real project the user knows well, when conditions mature (Phase
   3/4/5 carry-over, settled by user final ruling 2026-10-29).
 - **Core-10 list provisional**: no usage data; re-review 2026-11-28.
-- **Bench ceiling effect**: tasks too easy; the matrix does not prove the
-  gate reduces false completions (the proof remains Phase 1 dogfood's
-  planted interceptions).
+- **Bench does not discriminate arms (B1)**: the pre-registered 72-run
+  round found 0 false completions on every arm, including the hard
+  t5–t8 tasks; this release makes NO claim that the gate reduces
+  false completions (the only interception evidence remains Phase 1
+  dogfood's planted interceptions).
 - **Vendored comet skill** (`.agents/skills/comet/SKILL.md:84`) still shows
   an unversioned comet install in upstream text — editing it would break
   the lock; recorded in D22, not fixed.
@@ -128,4 +145,6 @@ verified with measured numbers, not claims.
   `minimal` (each file is backed up with a timestamped `.bak.` copy
   first); to keep them, re-deploy with `--profile standard`.
 - `skills-lock.json` format version stays `2`; entries are unchanged in
-  meaning, only hardened (pins now enforced in CI).
+  meaning, only hardened (pins now enforced in CI); rtk pin moved to
+  upstream tip `7e92da00…` (D63, installer script byte-identical to
+  the old pin).

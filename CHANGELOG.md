@@ -5,6 +5,8 @@ All notable changes to this project are documented here. Format follows
 Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
+
+## [0.3.0] - 2026-10-29
 ### Added
 - **A4 rtk 重钉尖端（2026-10-29，用户逐项过批准第 7 项，分支 `feat/merge-v3`，未合 main）**：rtk lock pin 由 `e05c7bdf…` 重钉到上游尖端 `7e92da00…`（`pinnedCommit` + `installerUrl` + `pinnedAt` 更新；`installerSha256` 不变——新旧两提交的安装脚本字节相同，下载实测 SHA256 一致）。24 个提交差量：tracking/savings bug 修复、依赖 bumps、discover 词法器内部重构、CI 文件，无安装脚本与接口改动。同步改动：deploy-agents.sh 的 rtk URL、Panorama 指南 EN/ZH 的 rtk URL；DECISIONS.md 新增 D63。**如实说明**：重钉不等于二进制 pin——rtk 安装器安装时解析 latest release（仅 `RTK_VERSION` 可覆盖），pin 定的是安装脚本版本而非二进制版本，旧 pin 同样如此；ps1 winget 通道无 pin 的 D13 缺口不受本次影响。
 - **D31 调整（2026-10-29，用户逐项过批准第 3 项，分支 `feat/merge-v3`，未合 main）**：默认档位仍为 minimal，但 minimal 由 10 个技能改为 15 个，补 5 个 openspec 核心技能（propose、new-change、apply-change、verify-change、archive-change）；其余 7 个 openspec 技能仍只在 full 档（standard 按 D30 另有 continue + update）；云开的 full 默认仍不采纳；minimal 仍只发门禁本身（不含 graph/loop，D58 不变）。理由：默认部署零 openspec 等于把规格驱动流程排除在默认体验之外。同步改动：`skills-profiles.json`、repo_checks §3r 的 minimal 上限 10→15（上限跟随决策）、EN/ZH 指南 minimal 小节、双部署脚本帮助与注释、README EN/ZH、发布草稿与 skill-tiers 表（含重测字节数：skills-only 280,960，部署总计 789,323）与 QUALITY_SCORE；DECISIONS.md D31 改为终裁并注明修订 D18 计数。
