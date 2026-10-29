@@ -2,7 +2,7 @@
 
 > **版本说明**：本文档为中文扩展版，包含英文原版之外的补充内容（实战案例、本地化说明）。核心规范以英文版为准，扩展内容仅供参考。
 
-> **Language / 语言**: [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | **简体中文** | [繁體中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Français](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
+> **Language / 语言**: [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | **简体中文** | [繁體中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md)
 
 > 本指南针对日常“以软件研发为主、兼顾专业文档处理”的实际工程场景，系统解答：**需要安装哪些技能（Skills）与 Harness 工具、底层加载与 Token 经济学原理、各工具如何配置与接线、核心命令（如 `/comet`、`/plan`、`/opsx`、`codegraph` 等）在何时以及如何使用**，并提供端到端的实战流转演示与避坑自检指南。
 
@@ -202,7 +202,8 @@
 - **安装与初始化**：
   ```bash
   # 全局安装 CLI（单台机器仅需安装一次，需 Node.js >= 22）
-  npm install -g @rpamis/comet
+  # 版本已固定（2026-10-28 实测），须与 skills-lock.json 的 comet.npmVersion 一致
+  npm install -g @rpamis/comet@0.5.1
 
   # 如需配置 Comet 项目，再按当前版本文档初始化
   cd /path/to/your-project
@@ -211,17 +212,30 @@
 
 #### 2. CodeGraph CLI（可选）
 - **本仓库已提供**：Skill 使用说明，不包含 CodeGraph CLI 或 MCP 服务。
-- **安装**：macOS/Linux 可用 `curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.sh | sh`；Windows PowerShell 可用 `irm https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.ps1 | iex`；也可按官方文档使用 `npm i -g @colbymchenry/codegraph`。
+- **安装**：切勿把安装脚本直接管道给 shell。macOS/Linux 先下载 `skills-lock.json` 里固定的安装脚本（`codegraph.installerUrl`，commit `01e0ac3a…`），校验 SHA256 后再运行；也可按官方文档使用带版本号的 npm 安装：
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/01e0ac3aa7419a7ab75583963e8a95359f3af1d3/install.sh -o /tmp/codegraph-install.sh
+  echo "e8bbcc694584d5c88fa7c25103fc0f9c238d63a86c1494ca03448b680dbcc86e  /tmp/codegraph-install.sh" | sha256sum -c -
+  sh /tmp/codegraph-install.sh
+  # 或：npm install -g @colbymchenry/codegraph@1.6.2
+  ```
+  Windows PowerShell 下载固定的 `install.ps1`（`codegraph.installerUrlPs1`），校验 SHA256（`024091f428cac6eaa217bae8f840a9572a91daab974a8354085ba72f86f6aee1`）后再运行，或用上面带版本号的 npm 安装。
 - **接线与索引**：运行 `codegraph install` 配置 Agent MCP，然后在项目根目录运行 `codegraph init` 创建本地索引。CLI 安装本身不会完成这两步。项目部署脚本会先检测 CLI；缺失时询问是否安装，配置和索引步骤另行询问。Agent 通过已配置的 MCP 工具查询，不要假设存在 `codegraph explore` 命令。
 
 #### 3. RTK CLI（可选）
 - **本仓库已提供**：Skill 使用说明，不包含 RTK CLI，也不会自动拦截或重写命令。
-- **安装**：macOS/Linux 可使用官方安装命令 `curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh`；Windows 可用 `winget install rtk-ai.rtk`。
+- **安装**：切勿把安装脚本直接管道给 shell。macOS/Linux 先下载 `skills-lock.json` 里固定的安装脚本（`rtk.installerUrl`，commit `7e92da00…`），校验 SHA256 后再运行：
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/7e92da00a5cf737dc87850505aa3dea603454613/install.sh -o /tmp/rtk-install.sh
+  echo "7ca3997314f631b8ad267e5add9af4b7a2f0351bdab0b1c5a9b7ed4008d0434a  /tmp/rtk-install.sh" | sha256sum -c -
+  sh /tmp/rtk-install.sh
+  ```
+  Windows 可用 `winget install rtk-ai.rtk`（winget 无法固定版本，已知缺口，见 D13）。
 - **验证与接线**：运行 `rtk gain` 确认安装的是 Rust Token Killer（存在同名的其他工具）；再在项目根目录运行 `rtk init` 配置支持的 Agent Hook。项目部署脚本会先检测 CLI；缺失时询问是否安装，Hook 初始化单独询问。`rtk init --global` 会改全局配置，需按需单独选择。
 
 #### 4. Open Code Review CLI（可选）
 - **本仓库已提供**：`open-code-review` 技能内置 Tier B 确定性代码评审方法论（`group-diff.py` + 本地规则库），无需 CLI 即可离线运行。
-- **安装**：全局执行 `npm install -g @alibaba-group/open-code-review`。
+- **安装**：全局执行带版本号的安装（版本已固定，2026-10-28 实测，须与 `skills-lock.json` 的 `open-code-review.npmVersion` 一致）：`npm install -g @alibaba-group/open-code-review@1.13.3`。
 - **作用**：安装后激活 Tier A 委托评审模式，利用上游确定性分片与规则匹配，由当前 Host Agent 直接推理，无需单独配置大模型 API Key。部署脚本会自动检测其可用性。
 
 ---

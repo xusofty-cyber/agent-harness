@@ -1,6 +1,6 @@
 # Agent Harness
 
-> **Language / 语言**: [English](README.md) | **简体中文** | [繁體中文](README.zh-tw.md) | [Français](README.fr.md) | [Deutsch](README.de.md)
+> **Language / 语言**: [English](README.md) | **简体中文** | [繁體中文](README.zh-tw.md)
 
 > **可复用的 AI 编程规范模板、Claude Code 安全钩子与多工具部署脚本**
 
@@ -54,11 +54,11 @@ graph TD
    - **输出与表达指导**：`rtk`（Rust Token Killer 可选 CLI 指引；需配置命令重写 Hook）与 `caveman`（简明表达 Skill）。
    - **事前决策评审与共享记忆**：`option-review`（5 维度多候选方案事前独立评审与决策矩阵）与 `cross-tool-memory`（跨工具项目长期记忆导航与经验检索）。
    - **专业文档处理**：`docx`（Word 专业排版）、`pdf`（结构化抽取与分析）。注：`docx` 自带完整 OOXML 校验工具链（约 1.3 MB），是仓库内最大的 skill，默认不再部署；需要时加 `--include-heavy-skills` / `-IncludeHeavySkills`（同时包含带本地服务 `scripts/server.cjs` 的 `brainstorming`）；已部署的旧副本不受影响，该选项只影响本次新复制；
-   - **技能使用与触发时机指南**：各 skill 的触发机制（自动/显式/混合）、分类速查与项目记忆使用说明详见 [`Skills Usage Guide.zh.md`](docs/guides/Skills%20Usage%20Guide.zh.md)（[English](docs/guides/Skills%20Usage%20Guide.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md) | [Français](docs/guides/Skills%20Usage%20Guide.fr.md) | [Deutsch](docs/guides/Skills%20Usage%20Guide.de.md)）。部署分层（Phase 4）：默认只部署 10 个核心技能（`--profile minimal`）；`--profile standard` 部署 18 个，`--profile full` 部署全部 40 个（重型技能仍需 `--include-heavy-skills`）。
+   - **技能使用与触发时机指南**：各 skill 的触发机制（自动/显式/混合）、分类速查与项目记忆使用说明详见 [`Skills Usage Guide.zh.md`](docs/guides/Skills%20Usage%20Guide.zh.md)（[English](docs/guides/Skills%20Usage%20Guide.md) | [繁體中文](docs/guides/Skills%20Usage%20Guide.zh-tw.md)）。部署分层（Phase 4，D58）：默认只部署 15 个技能（`--profile minimal`：10 个门禁核心 + 5 个 openspec 核心）加门禁本身（不含 `gate/graph.py` 与循环层）；`--profile standard` 部署 20 个技能加门禁 + 编排（graph + loop）；`--profile full` 部署全部 40 个技能加门禁 + 编排（重型技能仍需 `--include-heavy-skills`）。此前以 minimal 部署过、已带有 graph/loop 的项目，重新以 minimal 部署后这些文件会被移除（部署脚本会先备份）；如需保留请改用 `--profile standard`。
    - **Agent 正确触发与常见问题排查指南 (FAQ)**：如何精准唤醒特定技能、避免角色扮演式脑补、正确配置 AI 记忆与状态机排障详见 [`Agent Triggering and FAQ Guide.zh.md`](docs/guides/Agent%20Triggering%20and%20FAQ%20Guide.zh.md)。
 
 4. **一键部署、交互向导与统一流水线（`deploy-agents` & `run-pipeline`）**：
-   - **交互式终端逐步选择向导**：执行脚本时不带任何参数（或显式指定 `--interactive` / `-Interactive`）将自动拉起向导（上下方向键选择、空格键切选、Enter 确认），引导完成规则模板语言（`en`, `zh`, `zh-tw`, `fr`, `de`）、部署范围（`project`, `global`, `both`）、目标项目路径、12 种 Agent 桥接文件多选（Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy）以及可选工作流开关，彻底杜绝命令行参数遗漏与拼写错误；
+   - **交互式终端逐步选择向导**：执行脚本时不带任何参数（或显式指定 `--interactive` / `-Interactive`）将自动拉起向导（上下方向键选择、空格键切选、Enter 确认），引导完成规则模板语言（`en`, `zh`, `zh-tw`）、部署范围（`project`, `global`, `both`）、目标项目路径、12 种 Agent 桥接文件多选（Claude, Copilot, Cursor, Gemini, Windsurf, Cline, Roo, Qwen, Kiro, Continue, Trae, CodeBuddy）以及可选工作流开关，彻底杜绝命令行参数遗漏与拼写错误；
    - **跨平台统一工程流水线执行器**（[`run-pipeline.sh`](run-pipeline.sh) 与 [`run-pipeline.ps1`](run-pipeline.ps1)）：一键按序贯通 4 大工程生命周期阶段（规则分发与桥接部署 → AI 跨工具长效记忆配置 → 外部技能同步与哈希锁定 → 活体文档溯源分析与质检门禁），同时支持交互式自选与全自动无人值守（`--all -y` / `-All -Yes`）模式；
    - Windows PowerShell（[`deploy-agents.ps1`](deploy-agents.ps1)，内置 UTF-8 兼容与 Junction 权限免提权穿透）与 Linux/macOS Bash（[`deploy-agents.sh`](deploy-agents.sh)）；
    - 项目脚本创建 `AGENTS.md`（若不存在）、Claude Code 与 Copilot 桥接，并部署 Claude Code Hook；其他工具的具体加载行为以支持矩阵为准；
@@ -264,13 +264,13 @@ ai-memory 采用安全优先的 Fail-closed 门禁，必须显式声明才激活
 ## 文档索引
 
 - 📖 **部署与配置指南**：
-  - [简体中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [English](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [繁體中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [Français](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [Deutsch](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.de.md)
+  - [简体中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [English](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [繁體中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md)
 - 📖 **实战使用与技能全景**：
-  - [简体中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [English](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [繁體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [Français](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
+  - [简体中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [English](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [繁體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md)
 - 📜 **三级规则架构**：
-  - **全局宪法**：[`Global AGENTS.md`](templates/agents/Global%20AGENTS.md)（简体中文）| [`English`](templates/agents/Global%20AGENTS.en.md) | [`繁體中文`](templates/agents/Global%20AGENTS.zh-tw.md) | [`Français`](templates/agents/Global%20AGENTS.fr.md) | [`Deutsch`](templates/agents/Global%20AGENTS.de.md)
-  - **项目规范**：[`Project AGENTS.md`](templates/agents/Project%20AGENTS.md)（简体中文）| [`English`](templates/agents/Project%20AGENTS.en.md) | [`繁體中文`](templates/agents/Project%20AGENTS.zh-tw.md) | [`Français`](templates/agents/Project%20AGENTS.fr.md) | [`Deutsch`](templates/agents/Project%20AGENTS.de.md)
-  - **目录规则**：[`Directory AGENTS.md`](templates/agents/Directory%20AGENTS.md)（简体中文）| [`English`](templates/agents/Directory%20AGENTS.en.md) | [`繁體中文`](templates/agents/Directory%20AGENTS.zh-tw.md) | [`Français`](templates/agents/Directory%20AGENTS.fr.md) | [`Deutsch`](templates/agents/Directory%20AGENTS.de.md)
+  - **全局宪法**：[`Global AGENTS.md`](templates/agents/Global%20AGENTS.md)（简体中文）| [`English`](templates/agents/Global%20AGENTS.en.md) | [`繁體中文`](templates/agents/Global%20AGENTS.zh-tw.md)
+  - **项目规范**：[`Project AGENTS.md`](templates/agents/Project%20AGENTS.md)（简体中文）| [`English`](templates/agents/Project%20AGENTS.en.md) | [`繁體中文`](templates/agents/Project%20AGENTS.zh-tw.md)
+  - **目录规则**：[`Directory AGENTS.md`](templates/agents/Directory%20AGENTS.md)（简体中文）| [`English`](templates/agents/Directory%20AGENTS.en.md) | [`繁體中文`](templates/agents/Directory%20AGENTS.zh-tw.md)
 
 ---
 

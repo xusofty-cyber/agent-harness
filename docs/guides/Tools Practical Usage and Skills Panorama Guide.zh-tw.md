@@ -1,6 +1,6 @@
 # AI 工具與技能全景實戰指南（Claude Code / Codex / Antigravity IDE / Zed IDE）
 
-> **Language / 語言**: [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [简体中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | **繁體中文** | [Français](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.fr.md) | [Deutsch](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.de.md)
+> **Language / 語言**: [English](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [简体中文](Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | **繁體中文**
 
 本指南為使用 AI 代理進行軟體工程與技術文件撰寫提供全面的手冊：**應安裝哪些 skills 和 Harness 工具、底層的 token 經濟學、工具配置與接線、何時以及如何呼叫核心斜線命令（例如 `/comet`、`/plan`、`/opsx`、`codegraph`），以及端到端的實戰演練。**
 

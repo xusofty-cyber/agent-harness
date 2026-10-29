@@ -11,6 +11,12 @@
 // and the hook appends a stop_override event to gate/events.jsonl and
 // lets the session stop. An override without a reason is not an override.
 //
+// Deadlock guard (merge, from v3-yunyi/v3-yunkai): Claude Code sets
+// stop_hook_active when this hook already blocked the same stop once.
+// Blocking again would loop forever, so a second attempt is allowed —
+// but the allowance is logged to gate/events.jsonl
+// (stop_allowed_hook_active) so the unfinished items stay visible.
+//
 // Limits: Claude Code only (other hosts have no Stop hook). If there is
 // no gate/feature_list.json in the working directory the gate is not in
 // use and the hook exits 0. stdin parse failure is fail-open (exit 0),
@@ -58,18 +64,77 @@ if (inProgress.length === 0) {
   process.exit(0);
 }
 
-const override = process.env.GATE_ALLOW_STOP === "1";
-const reason = (process.env.GATE_STOP_REASON || "").trim();
-if (override && reason) {
+// Deadlock guard: this hook already blocked this stop once
+// (stop_hook_active). The agent saw the guidance above and is choosing
+// to stop anyway; blocking again would loop forever. Allow, and log the
+// allowance so the unfinished items stay visible.
+if (data.stop_hook_active === true) {
   try {
     const eventsPath = join(cwd, "gate", "events.jsonl");
+    // Max integer seq across the whole log + 1 (not the last line's):
+    // a foreign writer may append a seq-less event, and reusing the
+    // last line's seq would duplicate an earlier seq (§3k flags that).
+    // Unparseable lines are skipped here — the hook must never block
+    // the stop; §3k flags the bad line separately.
     let seq = 1;
     if (existsSync(eventsPath)) {
       const lines = readFileSync(eventsPath, "utf-8")
         .split("\n")
         .filter(Boolean);
-      if (lines.length > 0) {
-        seq = (JSON.parse(lines[lines.length - 1]).seq || 0) + 1;
+      for (const line of lines) {
+        try {
+          const s = JSON.parse(line).seq;
+          if (Number.isInteger(s) && s >= seq) seq = s + 1;
+        } catch {
+          // skip; flagged by §3k, not by this hook
+        }
+      }
+    }
+    appendFileSync(
+      eventsPath,
+      JSON.stringify({
+        seq,
+        ts: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+        actor: "stop-gate",
+        event: "stop_allowed_hook_active",
+        item_id: inProgress.map((i) => i.id).join(","),
+        detail:
+          "stop allowed on second attempt (stop_hook_active); items still in_progress",
+      }) + "\n"
+    );
+  } catch {
+    // Logging must never block the stop itself.
+  }
+  process.stderr.write(
+    `[GATE-HOOK] Stop allowed: hook already blocked this stop once (stop_hook_active); ` +
+      `${inProgress.length} item(s) still in_progress (${inProgress.map((i) => i.id).join(", ")}). ` +
+      "Allowance logged to gate/events.jsonl (stop_allowed_hook_active).\n"
+  );
+  process.exit(0);
+}
+
+const override = process.env.GATE_ALLOW_STOP === "1";
+const reason = (process.env.GATE_STOP_REASON || "").trim();
+if (override && reason) {
+  try {
+    const eventsPath = join(cwd, "gate", "events.jsonl");
+    // Max integer seq across the whole log + 1 (not the last line's):
+    // a foreign writer may append a seq-less event, and reusing the
+    // last line's seq would duplicate an earlier seq (§3k flags that).
+    // Unparseable lines are skipped here — the hook must never block
+    // the stop; §3k flags the bad line separately.
+    let seq = 1;
+    if (existsSync(eventsPath)) {
+      const lines = readFileSync(eventsPath, "utf-8")
+        .split("\n")
+        .filter(Boolean);
+      for (const line of lines) {
+        try {
+          const s = JSON.parse(line).seq;
+          if (Number.isInteger(s) && s >= seq) seq = s + 1;
+        } catch {
+          // skip; flagged by §3k, not by this hook
+        }
       }
     }
     appendFileSync(

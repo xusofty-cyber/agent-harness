@@ -94,7 +94,7 @@ if ($Help) {
     Write-Host "  -Docs                  执行阶段 4: 活体文档影响分析与质检 (doc-impact)`n"
     Write-Host "配置选项 (Configuration):" -ForegroundColor Cyan
     Write-Host "  -Project, -p <路径>    目标项目根目录 (默认: 当前目录 .)"
-    Write-Host "  -Lang, -l <语言>       规则模板语言 (en, zh, zh-tw, fr, de；默认: zh)"
+    Write-Host "  -Lang, -l <语言>       规则模板语言 (en, zh, zh-tw；默认: zh)"
     Write-Host "  -Global, -g            部署/更新本机各工具全局规则 (~/.gemini, ~/.codex, ~/.claude)"
     Write-Host "  -Update, -u            覆盖更新已有全局规则并备份；同时更新外部 skills"
     Write-Host "  -CheckOnly, -k         只读检查模式 (技能仅检查差异、文档仅分析影响)"
@@ -282,8 +282,6 @@ function Get-LangSuffix([string]$lang) {
     switch ($lang.ToLower()) {
         { $_ -in "zh", "zh-cn", "cn" } { return "" }
         { $_ -in "zh-tw", "tw" }       { return ".zh-tw" }
-        { $_ -in "fr", "fr-fr" }       { return ".fr" }
-        { $_ -in "de", "de-de" }       { return ".de" }
         default                         { return ".en" }
     }
 }
@@ -445,9 +443,7 @@ if (-not $explicit -and -not $Yes.IsPresent -and (-not [Console]::IsInputRedirec
     $Lang = Prompt-Select "[1/6] 选择规则与文档语言 (Select Language):" @(
         @{ Label = "简体中文 (Simplified Chinese, zh)"; Value = "zh" },
         @{ Label = "English (en)"; Value = "en" },
-        @{ Label = "繁體中文 (Traditional Chinese, zh-tw)"; Value = "zh-tw" },
-        @{ Label = "Français (French, fr)"; Value = "fr" },
-        @{ Label = "Deutsch (German, de)"; Value = "de" }
+        @{ Label = "繁體中文 (Traditional Chinese, zh-tw)"; Value = "zh-tw" }
     )
 
     $globalChoice = Prompt-Select "[2/6] 是否全局更新各工具的 agents (Global Agents Rules):" @(
@@ -591,8 +587,6 @@ function Ensure-ProjectMemoryScaffold([string]$targetDir, [string]$langOpt) {
     $langSuffix = switch -Regex ($langOpt) {
         '^(zh|zh-cn|zh-hans)$' { '.zh' }
         '^(zh-tw|zh-hk|zh-hant)$' { '.zh-tw' }
-        '^(fr|fr-fr)$' { '.fr' }
-        '^(de|de-de)$' { '.de' }
         Default { '' }
     }
 

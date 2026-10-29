@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "kind": "goal",
+  "goal_id": "budget-demo",
+  "goal_file": "/home/hatch/workspace/agent-harness-phase0/docs/internal/phase5/goal-budget.md",
+  "status": "budget-exceeded",
+  "round": 1,
+  "consecutive_passes": 1,
+  "max_rounds": 5,
+  "consecutive_passes_required": 1,
+  "timeout_s": 60,
+  "max_seconds": 1,
+  "require_approval": false,
+  "started_epoch": 1793188969,
+  "ended_epoch": 1793188974,
+  "rounds": [
+    {
+      "round": 1,
+      "phase": "maker",
+      "command": "sleep 5",
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 5.008
+    },
+    {
+      "round": 1,
+      "phase": "verify",
+      "command": "true",
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.002,
+      "outcome": "pass"
+    }
+  ]
+}

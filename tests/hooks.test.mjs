@@ -9,7 +9,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { mkdtempSync, writeFileSync, existsSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -146,6 +146,73 @@ test("denies rebase on protected branches", () => {
 test("allows on malformed stdin (fail-open)", () => {
   const res = spawnSync("node", [GUARD], { input: "not json", encoding: "utf-8" });
   assert.equal(res.status, 0);
+});
+
+// --- Graded parse failure (merged from v3-yunyi, Phase 2.5): log + alert, not silent, not fail-closed ---
+test("logs and alerts on malformed stdin (graded policy)", () => {
+  const dir = mkdtempSync(join(tmpdir(), "hook-parse-"));
+  const res = spawnSync("node", [GUARD], { input: "not json", cwd: dir, encoding: "utf-8" });
+  assert.equal(res.status, 0);
+  assert.match(res.stderr, /guard-alerts\.jsonl/);
+  const logPath = join(dir, ".claude", "hooks", "guard-alerts.jsonl");
+  assert.equal(existsSync(logPath), true);
+  const line = readFileSync(logPath, "utf-8");
+  assert.match(line, /stdin_parse_failed/);
+  assert.doesNotMatch(line, /not json/); // raw stdin must never be logged
+});
+
+// --- Indirect git via resolver substitution (merged from v3-yunyi, D27) ---
+// Conjunctive rule: resolver + dangerous arg in the SAME segment denies.
+// The double-quoted cases are the regression the merge closes: the
+// sentinel rewrite collapses "$(which git)" into one token, so the
+// normalized path never sees a git argv[0] — only this raw-text check
+// catches them.
+test("denies resolver indirection + force push", () => {
+  assert.equal(runHook("$(which git) push --force origin main").exitCode, 2);
+});
+
+test("denies resolver indirection in backticks + force push", () => {
+  assert.equal(runHook("`which git` push --force origin main").exitCode, 2);
+});
+
+test("denies resolver indirection + clean -df", () => {
+  assert.equal(runHook("$(which git) clean -df").exitCode, 2);
+});
+
+test("denies alternate resolver (command -v) + force-with-lease", () => {
+  assert.equal(runHook("$(command -v git) push --force-with-lease").exitCode, 2);
+});
+
+test("allows benign resolver indirection (rev-parse)", () => {
+  assert.equal(runHook("$(which git) rev-parse HEAD").exitCode, 0);
+});
+
+test("allows resolver alone", () => {
+  assert.equal(runHook("echo $(which git)").exitCode, 0);
+});
+
+test("allows resolver indirection without a dangerous arg", () => {
+  assert.equal(runHook("$(which git) push origin main").exitCode, 0);
+});
+
+test("allows dangerous token in a different segment than the resolver", () => {
+  assert.equal(runHook("echo --force; $(which git) status").exitCode, 0);
+});
+
+test("allows single-quoted resolver text (literal, not executed)", () => {
+  assert.equal(runHook("echo 'use $(which git) push --force'").exitCode, 0);
+});
+
+test("denies double-quoted resolver indirection + force push", () => {
+  assert.equal(runHook('"$(which git)" push --force origin main').exitCode, 2);
+});
+
+test("denies resolver indirection + protected-ref delete", () => {
+  assert.equal(runHook("$(which git) push --delete main").exitCode, 2);
+});
+
+test("allows benign subcommand via resolver indirection", () => {
+  assert.equal(runHook("$(which git) stash list").exitCode, 0);
 });
 
 test("ignores non-Bash tools", () => {
@@ -408,6 +475,31 @@ test("allows single-quoted '$(which git)' literal", () => {
   assert.equal(r.exitCode, 0);
 });
 
+// --- Guard hardening (merged from v3-yunkai, tests/guard_hardening.test.mjs) ---
+// Yunkai's 5th test (unparseable stdin is logged to guard.log) is NOT
+// ported: this branch logs parse failures to guard-alerts.jsonl instead
+// (yunyi's mechanism), and that is already covered by the "malformed
+// stdin is fail-open but logs the parse failure" test below.
+test("denies force push hidden in $() inside echo (yunkai)", () => {
+  const r = runHook("echo $(git push --force origin main)");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies force push hidden in backticks inside echo (yunkai)", () => {
+  const r = runHook("echo `git push -f`");
+  assert.equal(r.exitCode, 2);
+});
+
+test("denies nested substitution at depth 2 (yunkai)", () => {
+  const r = runHook("echo $(echo $(git push --force))");
+  assert.equal(r.exitCode, 2);
+});
+
+test("allows benign substitution $(git --version) (yunkai)", () => {
+  const r = runHook("echo $(git --version)");
+  assert.equal(r.exitCode, 0);
+});
+
 test("malformed stdin is fail-open but logs the parse failure", () => {
   const res = spawnSync("node", [GUARD], {
     input: "this is not json",
@@ -418,7 +510,45 @@ test("malformed stdin is fail-open but logs the parse failure", () => {
   assert.match(res.stderr || "", /parse failed/i);
 });
 
-test("warns on inline git alias", () => {
+test("denies inline git alias", () => {
+  // P1-2: previously warn-only; an alias definition hides the real
+  // subcommand, so a -c alias.p=push + p --force line must deny.
   const r = runHook("git -c alias.p=push p --force origin main");
-  assert.match(r.stderr, /alias/i);
+  assert.equal(r.exitCode, 2);
+  assert.match(r.stdout, /alias/i);
 });
+
+// --- P1-2 guard bypass closures (each was ALLOW before the fix) ---
+for (const cmd of [
+  "sudo -u root git push --force origin main",
+  "env -i git push --force origin main",
+  "timeout 5 git push --force origin main",
+  "nice git push --force origin main",
+  "nice -n 5 git push --force origin main",
+  "git -c alias.p=push p origin main",
+  "G=$(which git); $G push --force origin main",
+  "$(echo $(which git)) push --force origin main",
+  "x=\"git push --force origin main\"; eval $x",
+  "xargs git push --force origin main",
+  "find . -exec git push --force origin main \\;",
+]) {
+  test(`denies guard bypass: ${cmd}`, () => {
+    const r = runHook(cmd);
+    assert.equal(r.exitCode, 2, `expected deny for: ${cmd}\n${r.stdout}\n${r.stderr}`);
+  });
+}
+
+// And the harmless forms must stay allowed.
+for (const cmd of [
+  "git push origin main",
+  "echo $(git rev-parse HEAD)",
+  "git rev-parse HEAD",
+  "x=$(which git)",
+  "sudo -l",
+  "command -v git",
+]) {
+  test(`still allows harmless: ${cmd}`, () => {
+    const r = runHook(cmd);
+    assert.equal(r.exitCode, 0, `expected allow for: ${cmd}\n${r.stdout}\n${r.stderr}`);
+  });
+}

@@ -14,9 +14,22 @@ let data;
 try {
   data = JSON.parse(input);
 } catch {
-  // Phase 2 (2-4): parse failure stays fail-open (exit 0), but it is logged
-  // to stderr instead of silently allowed.
-  process.stderr.write("[GUARD-WRITE] stdin JSON parse failed; allowing (fail-open by design)\n");
+  // Graded policy (merged from v3-yunyi, Phase 2.5), same as guard.mjs:
+  // log + alert, allow. Raw stdin is never logged (it could contain file
+  // content/secrets).
+  try {
+    const { appendFileSync, mkdirSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const dir = join(process.cwd(), ".claude", "hooks");
+    mkdirSync(dir, { recursive: true });
+    appendFileSync(join(dir, "guard-alerts.jsonl"),
+      JSON.stringify({ ts: new Date().toISOString(), event: "stdin_parse_failed",
+        source: "guard-write.mjs",
+        detail: "stdin JSON parse failed; allowed per graded policy (log+alert, not fail-closed)" }) + "\n");
+  } catch {
+    // Logging failure must not change the allow decision.
+  }
+  process.stderr.write("[SECURITY-HOOK] Guard-write stdin parse failed — logged to .claude/hooks/guard-alerts.jsonl; call allowed per graded policy.\n");
   process.exit(0);
 }
 

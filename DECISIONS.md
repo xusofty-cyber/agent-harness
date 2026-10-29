@@ -301,6 +301,10 @@ Phase 0 decision meeting.
   `eval/calibration.md`. The rubric stays **provisional, not `stable`**:
   all four rounds used recorded outcomes as the "human" side; a live
   second-person calibration round is still owed.
+  [Superseded by D28 (user final ruling, 2026-10-29): the live second
+  review is DEFERRED, not owed — it runs only when conditions mature,
+  and then on a real project the user knows well (bench toy tasks do
+  not count). The rubric stands advisory-only; panel fix P1-10.]
 - **Rationale:** a rubric nobody calibrated is an opinion with a table.
   The negative control (retrospective Block of the pre-Phase-0 pack)
   shows the rubric can say no.
@@ -358,10 +362,11 @@ Phase 0 decision meeting.
   does not silently lapse.
 - **Date:** 2026-10-28.
 
-## D18 — Skill tiers: minimal (10) is the default; the core list is provisional (Phase 4, 4-1)
+## D18 — Skill tiers: minimal is the default; the core list is provisional (Phase 4, 4-1; minimal count amended by D31 2026-10-29: now 15)
 
-- **Decision:** deploy profiles `minimal` (10 skills, default) /
-  `standard` (18) / `full` (40) as defined in `skills-profiles.json`
+- **Decision:** deploy profiles `minimal` (15 skills, default; amended by D31 2026-10-29, merge-time value was 10) /
+  `standard` (20, amended by D30 2026-10-29; merge-time value was 18) /
+  `full` (40) as defined in `skills-profiles.json`
   (single source of truth; CI §3r asserts it). Default deploys minimal.
   Bench pack/gate arms pin `--profile full` so the Phase 3 comparison
   keeps its meaning.
@@ -410,3 +415,581 @@ Phase 0 decision meeting.
 - **Rejected:** removing on bench data alone; ablating single OpenSpec
   loop steps (the family is decided as a whole).
 - **Date:** 2026-10-28.
+
+## D21 — Loop is built and dogfooded; its need is still unproven (Phase 5)
+
+- **Decision:** the Loop layer ships as `tools/loop.py` (stdlib-only
+  runner: Goal Loop + Maker-Checker, enforced stop conditions,
+  per-command timeout, wall-clock budget, human approval) with
+  `templates/loop/` (goal / loop-state / graph, EN+ZH) and a worked
+  example graph (`docs/internal/phase5-graph.md`). Loop templates are
+  NOT wired into `deploy-agents.sh` / `.ps1` yet — they ship with the
+  repo; deploy integration is deferred to Phase 6 (release), with the
+  rationale that the runner is repo tooling and the templates are
+  opt-in project files, not part of the default distribution.
+- **L14 five criteria, item by item (honest, not padded):**
+  - 可独立拆分 — met: Goal Loop and Maker-Checker ran as separate
+    loops in separate worktrees.
+  - 有分支或回退 — partially met: reopen/block exist in the gate and
+    the loop returns to the maker on failure; no real rollback was ever
+    exercised in the bench.
+  - 中间状态值得保存 — partially met: loop-state.json + loop-events.jsonl
+    exist and were the audit trail for both demo runs; but the demo
+    tasks' intermediate state was trivial.
+  - 结果可验收 — met: every round's verdict came from a re-run verify /
+    checker command, never from the maker's word.
+  - 协作收益大于协调成本 — NOT met: no multi-agent parallelism need
+    was ever measured; the two worktrees ran sequentially in practice.
+  - Total: 2 met, 2 partial, 1 not met — the "at least 3" bar is met
+    only if partials count, and two of the met items are properties of
+    the gate layer, not evidence that Loop is needed.
+- **Four questions:**
+  - Who owns the goal: the repo owner (user).
+  - Who can veto / roll back: the user, via `loop.py approve` (veto by
+    refusing approval) and git revert (rollback).
+  - Which metrics may move: round counts, verify attempts, durations —
+    all recorded per round; thresholds stay provisional.
+  - Which must freeze: the stop conditions in the goal file (max rounds,
+    timeout, budget) — the runner enforces them; changing them mid-loop
+    requires a new loop, not an edit.
+- **Measured verdict:** Goal Loop took ~1.5× the manual baseline
+  (2052 ms vs 1364 ms) on a 1-line fix; Maker-Checker needed 5 rounds
+  with a genuinely shrinking failure list. Demonstrated benefits are
+  process assurance (enforced verification, consecutive-pass rule,
+  audit trail) — not speed and not false-completion reduction. The
+  entry assessment's warning stands: no measured loop need exists yet.
+  Harder benchmark tasks remain the missing evidence.
+- **Rejected:** claiming Loop is needed because it exists; wiring loop
+  templates into deploy before Phase 6; auto-approving loops (approval
+  is always human, recorded).
+- **Date:** 2026-10-28.
+
+## D22 — The lock is a true lock; ghost meta entries stay annotated, never deleted (Phase 6, 6-1)
+
+- **Decision:** `skills-lock.json` is enforced as a real lock, in two layers.
+  Offline (`tests/repo_checks.py` §5/§5b/§5c): every github-source entry
+  must carry a 40-hex `pinnedCommit`; every meta entry must carry a
+  `pinnedCommit` + a non-empty `note`; a hash-only lock edit with no
+  corresponding file change fails. Online (CI step
+  `python3 tools/sync-skills.py --check --strict`): every vendored skill's
+  local content is verified against the content at its pinnedCommit
+  upstream; drift, tampering, or an unresolvable pin fails the build
+  (measured locally: 34 s, all in-sync).
+- **Continuation of D10:** v2 §6-1 originally said "delete the ghost
+  entries". D10 already ruled the opposite — annotate (`meta: true` +
+  note), never delete — because the entries pin suite repos that are the
+  provenance of the vendored skills. Phase 6 keeps D10: the true-lock
+  checks apply to real entries, and meta entries are checked for
+  pin+note, not deleted. Deleting one would destroy the provenance trail
+  the lock exists to preserve.
+- **Update process:** upstream updates go through a reviewed PR
+  (`sync-skills.py --apply` on a branch, never on main; never hand-edit
+  `computedHash`); re-pinning updates `pinnedCommit` + `pinnedAt` (+
+  `pinnedFrom`). Documented in CONTRIBUTING.md "Updating vendored skills".
+- **Date:** 2026-10-28.
+
+## D23 — Supply-chain close-out: every install is pinned or a recorded gap (Phase 6, 6-2)
+
+- **Decision:** no unpinned install vector may remain in the repo's own
+  instructions or deploy scripts. Closed in Phase 6: OCR CLI pinned
+  1.13.3 (lock `npmVersion`/`pinnedAt`/`pinnedFrom` + `OCR_NPM_VERSION` /
+  `$script:OcrNpmVersion` in both deploy scripts + `ocr-pin` guards);
+  EN+ZH Panorama Guide show pinned installs only — versioned npm
+  (`comet@0.5.1`, `codegraph@1.6.2`, `open-code-review@1.13.3`) and
+  download-then-SHA256-verify flows for the codegraph/rtk installers
+  (hashes taken from `skills-lock.json`, the record) — guarded by
+  `docs-pin` checks in `tests/repo_checks.py` §3m1b.
+- **Known gaps, recorded not hidden:**
+  - The vendored comet skill (`.agents/skills/comet/SKILL.md:84`) still
+    shows an unversioned comet install in upstream text. Editing a
+    vendored skill would break the lock (§5 hash check and pin check),
+    so it is left as-is and recorded here. It is upstream's text, not
+    this repo's instruction.
+  - RTK winget (`winget install rtk-ai.rtk`) has no version pin (D13
+    known gap, unchanged).
+  - FR/DE/ZH-TW Panorama Guide rows are `stale` in
+    `docs/internal/i18n-status.md` (they still show curl|sh and
+    unversioned npm install); translation is tracked debt, not a CI
+    failure (D19).
+- **Date:** 2026-10-28.
+
+## D24 — Version and deprecation policy (Phase 6, 6-3)
+
+- **Decision:** `tools/check-release.py` (stdlib-only) is the release
+  gate, wired into `tests/repo_checks.py` §3c2: VERSION must be semver
+  and equal the newest `## [x.y.z]` in CHANGELOG.md; every released
+  heading must carry a `- YYYY-MM-DD` date; the lock must be
+  release-ready (github entries: pin + hash; local entries: version +
+  hash; meta entries: pin + note). A release can never be cut with an
+  unpinned skill.
+- **Deprecation:** a template breaking change must be recorded as a
+  `**Breaking**` bullet (or under `### Deprecated`) in CHANGELOG
+  `[Unreleased]` **with a `Migration:` note** — the tool fails the build
+  if the note is missing (negative-tested). The old form stays available
+  for **one full version cycle** (kept deprecated in the release that
+  introduces the replacement, removable only in the release after that);
+  removal is itself a `**Breaking**` entry with a `Migration:` note and
+  needs owner sign-off.
+- **Release notes:** v0.3.0 draft prepared in
+  `docs/internal/release-v0.3.0.md` (what was done / not done / measured
+  numbers); procedure in `docs/internal/release-checklist.md`. VERSION
+  stays 0.2.1 and no tag is created in Phase 6 — tagging needs separate
+  user approval.
+- **Date:** 2026-10-28.
+
+## D25 — Loop layer ships with deploy (Phase 6, 6-5; closes D21 leftover)
+
+- **Decision:** the Loop layer is now part of the distribution, not just
+  repo tooling. Both deploy scripts ship `templates/loop/` (all six
+  templates: goal / loop-state / graph × EN+ZH) to
+  `${TARGET}/templates/loop/` and the stdlib-only runner to
+  `${TARGET}/tools/loop.py`, mirroring the gate precedent (ship code +
+  templates; per-project state — `loop-state.json` /
+  `loop-events.jsonl` — is created by runs, never copied). Skipped on
+  self-deploy. PARITY row `LoopDeploy`/`loop-deploy` added; `tests/
+  repo_checks.py` §3t deploys to an empty temp dir and verifies all six
+  templates + the runner land and the deployed runner executes.
+- **Unchanged from D21:** Loop's need is still unproven (2 met + 2
+  partial + 1 not met on the L14 criteria); shipping it in deploy does
+  not claim otherwise. Approval stays human, always.
+- **Tier qualifier (panel fix P1-9, 2026-10-29):** the "both deploy
+  scripts ship" sentence above is qualified by D58 (user final ruling,
+  2026-10-29): graph/loop ship only on the standard and full profiles.
+  Minimal deployments do NOT ship `gate/graph.py`, `tools/loop.py`, or
+  `templates/loop/` — minimal is the gate only. The D25 text is
+  otherwise unchanged.
+- **Date:** 2026-10-28.
+
+---
+
+## Merge decisions (2026-10-28, branch `feat/merge-v3`)
+
+Three branches were merged per
+`agent-harness-三分支对比与合并优化方案-2026-10-28.md`: the skeleton
+`feat/phase0-v3` (this file's D1–D25) plus `v3-yunyi` and `v3-yunkai`.
+The user was asleep during the merge and could not rule on the ten
+open items (C1–C10); each ruling below was marked **合并执行时暂定，
+用户复核时可改** (provisional at merge time, user may change on
+review). D26, D27, and D28 have since been replaced by user final
+rulings on 2026-10-29 (see those entries); D29–D35 remain provisional.
+
+## Numbering note (deviation from the plan's §6.5 suggestion)
+
+The plan suggested donor-branch decisions continue from D26. They do
+not: D26–D35 are reserved for the ten C1–C10 rulings below, and donor
+decisions continue from **D36**. The numbering is explicit here so no
+one has to guess which D-number came from where.
+
+## Correction: D27 belongs to yunyi, not yunkai
+
+The merge plan's §6.3 attributed "D27 Guard conjunction + 13 tests"
+to `v3-yunkai`. That attribution is wrong, verified against the
+branches: D27 (Guard `$(which git)` indirection) lives at
+`origin/v3-yunyi:DECISIONS.md:53` and its 13 tests at
+`origin/v3-yunyi:tests/hooks.test.mjs:185-235`. Yunkai's actual Guard
+work is recursive substitution parsing plus 5 hardening tests (see
+D36–D56 table). The merge took D27 from yunyi (correct source); the
+plan's attribution is corrected here, not silently repeated.
+
+## D26 — C1: `archive_confirmation` defaults to `automatic` (user final ruling, 2026-10-29)
+
+- **Decision:** the template default is `automatic` (yunkai D-004 adopted).
+  Skeleton D4 / v3 D4 (`required`) is superseded for the template going
+  forward; D4 remains as Phase 0 history. Deployed projects' own
+  `.comet/config.yaml` files are untouched (deploy only copies the template
+  when the target lacks one). This repo carries no `.comet/config.yaml` of
+  its own (removed in Phase 0 dedup), so no in-tree own-config change
+  applies; a project that wants the stricter behavior sets `required` in
+  its own config.
+- **Reason:** user final ruling 2026-10-29, adopting yunkai D-004's
+  downstream-convenience default. Per-project override stays cheap.
+
+## D27 — C2: FR/DE templates deleted (user final ruling, 2026-10-29)
+
+- **Decision:** the 18 FR/DE files are deleted (yunkai D-006 adopted):
+  README.fr/de, three guides × fr/de, PROJECT_CONTEXT/SESSION_STATE
+  templates × fr/de, Global/Project/Directory AGENTS × fr/de. References
+  cleaned in the same change: repo_checks §3h (3 types × 3 languages),
+  link-check roots, i18n-check GENERATED set (ZH-TW only), i18n-status
+  rows, README/guide language switchers, deploy language menus + mappings
+  (fr/de inputs now fall back to EN), CONTRIBUTING language table.
+  Skeleton D3/D19's freeze is superseded for FR/DE; ZH-TW stays frozen.
+- **Reason:** user final ruling 2026-10-29, adopting yunkai D-006. FR/DE
+  were stale, unmaintained translations; deleting them removes a standing
+  regeneration debt and the false impression of five-language support.
+  EN/ZH/ZH-TW remain.
+
+## D28 — C3: rubric is standing advisory-only, never auto-approves (user final ruling, 2026-10-29)
+
+- **Decision:** the rubric (yunyi's `eval/evaluate.py` + gate) is
+  standing advisory-only: `eval/rubric-status.json` status
+  `advisory-only`, `auto_approve_allowed: false`; `--gate` always
+  refuses (exit 2) and there is no auto-approve path. A human always
+  decides. Yunyi's all-2 (12/12) Accept rule is NOT adopted — the
+  verdict rule follows the skeleton's `eval/rubric.md` (Accept =
+  total ≥ 9 and no 0; Block = any 0). This ruling aligns with yunkai
+  D-011 and supersedes the merge's provisional wording (which held
+  the rubric "provisional until a live second-reviewer round marks it
+  stable").
+- **Reason:** yunyi's own D16 refused a stable claim until a
+  confirmation round ran with fixed wording; the skeleton's D15
+  likewise keeps the rubric un-stable for lack of a live second-judge
+  round. Auto-approval on an un-stable rubric would let a gate pass
+  work no human reviewed. The user ruling settles the direction:
+  advisory is the standing state, not a waiting room.
+- **Future trigger (deferred, NOT owed):** a live second review is
+  not cancelled, but it is not outstanding homework either. It runs
+  only when conditions mature, and it must run on a real project the
+  user knows well — bench toy tasks do not count, because a second
+  review on toy tasks cannot measure discrimination. Only if such a
+  round actually runs and consistency meets the bar may `stable` and
+  auto-approval be reconsidered. Until then, nothing is owed on this
+  item.
+- **Guard:** repo_checks `eval:rubric-advisory-only` pins status
+  `advisory-only` with auto-approve off.
+
+## D29 — C4: the skeleton's schema is the standard (merge ruling, confirmed by user 2026-10-29)
+
+- **Decision:** `gate/feature_list.schema.json` keeps the skeleton's
+  shape (top-level `items`, verification as an object
+  `{command, timeout_seconds}`, `additionalProperties: false`). The
+  yunkai shape (`features`, verification as a command array) is NOT
+  adopted; yunkai's bench/comet_adapter/hooks were rewritten to the
+  skeleton shape on port. A cross-branch migration/conversion script
+  is a post-merge todo, not done in this merge.
+- **Reason:** the skeleton's schema is the one `pass-gate.py`
+  `validate()` and repo_checks §3k enforce, and it is the stricter of
+  the two (closed object, required evidence rules). Adopting the
+  looser yunkai schema would have weakened the gate for every existing
+  deployment.
+- **Confirmed:** 用户 2026-10-29 逐项过批准时通过（第 1 项），不再暂定。
+
+## D30 — C5: standard profile is 20 skills (merge ruling amended by user 2026-10-29)
+
+- **Decision:** the standard profile is 20 skills: the skeleton's 18
+  plus `openspec-continue-change` and `openspec-update-change`
+  (user walkthrough 2026-10-29, item 2). Yunyi's D29 (standard = 22,
+  minimal + the whole openspec family) is still NOT adopted.
+- **Reason:** the 18 covered only the linear openspec loop
+  (propose → new → apply → verify → archive). Real multi-step work
+  also needs to continue an in-progress change and to revise a change's
+  plan when requirements shift; without those two skills a standard
+  deploy leaves the loop unclosed, and the absence is silent (no
+  pointer to `--profile full`). The other 5 openspec skills
+  (explore, onboard, sync-specs, bulk-archive, ff-change) stay in
+  full only. The count part of D18 is amended accordingly.
+- **Amends:** merge-time D30 (standard = 18); the conflict-table line
+  "Merge kept 18" below is superseded by this entry.
+
+## D31 — C6: default profile is minimal, now carrying the openspec core (merge ruling amended by user 2026-10-29)
+
+- **Decision:** the default deploy profile stays `minimal`, but
+  minimal is now 15 skills: the skeleton's 10 gate-core skills plus
+  the 5 openspec core skills (`openspec-new-change`,
+  `openspec-propose`, `openspec-apply-change`,
+  `openspec-verify-change`, `openspec-archive-change`)
+  (user walkthrough 2026-10-29, item 3). Yunkai's `--tier` default
+  (`full`) is still NOT adopted. Minimal still ships gate only
+  (no graph.py, no loop layer — D58 unchanged).
+- **Reason:** a default deploy with zero openspec skills leaves the
+  spec-driven loop out of the default experience entirely; the 5 core
+  skills close the propose → new → apply → verify → archive loop
+  for every new project. The repo_checks §3r cap on minimal size is
+  raised 10 → 15 to match (the cap follows the decision, not vice
+  versa). The other 7 openspec skills stay in full only (standard
+  carries continue + update per D30).
+- **Amends:** merge-time D31 (minimal = 10) and the D18 count.
+
+## D32 — C7: gate state files live inside `gate/` (merge ruling, confirmed by user 2026-10-29)
+
+- **Decision:** `feature_list.json` / `events.jsonl` live in `gate/`
+  (skeleton layout). Yunkai's root-level state files are NOT adopted;
+  every ported yunkai path (bench gate arm, comet_adapter, t8 setup)
+  was rewritten to `gate/`.
+- **Reason:** the skeleton's layout keeps per-project state next to
+  the engine that owns it, and the deploy scripts ship `gate/` as one
+  unit. Root-level state files would collide with the repo's own
+  root-level files in deployed projects and split state from engine.
+- **Confirmed:** 用户 2026-10-29 逐项过批准时通过（第 4 项），不再暂定。
+
+## D33 — C8: DECISIONS.md lives at the root, skeleton numbering is the base (merge ruling, confirmed by user 2026-10-29)
+
+- **Decision:** this file stays at the repo root with the skeleton's
+  numbering (D1–D25) as the base. Yunkai's `docs/internal/
+  DECISIONS.md` (D-001–D-011) is folded in from D36 below, not kept
+  as a second file.
+- **Reason:** one decision log, one numbering, one place to look.
+  Two files with overlapping numbers (D1 vs D-001) would make every
+  future "per D7" reference ambiguous.
+- **Confirmed:** 用户 2026-10-29 逐项过批准时通过（第 5 项），不再暂定。
+
+## D34 — C9: Loop/Graph enter v0.3.0; release notes state the L14 gap honestly (merge ruling, confirmed by user 2026-10-29)
+
+- **Decision:** Loop (skeleton Phase 5) and Graph (yunyi) ship in
+  v0.3.0. The release notes must state honestly that the L14 criteria
+  are not fully met (2 met + 2 partial + 1 not met, D21) — no claim
+  that Loop/Graph are proven efficiency wins. Yunkai's D-008 (defer
+  Loop/Graph) is recorded below, not adopted.
+- **Reason:** the user explicitly chose to continue Loop (2026-10-28
+  19:48) and the Graph executor is built and tested; withholding both
+  from the release would discard finished work. But the entry gates
+  were never fully met, so the release must not over-claim.
+  Per D58 (user final ruling), Loop/Graph ship on standard+ tiers
+  only; minimal does not carry graph.py/loop.py.
+- **Confirmed:** 用户 2026-10-29 逐项过批准时通过（第 6 项），不再暂定。
+
+## D35 — C10: version is v0.3.0; VERSION switched on release day 2026-10-29 (merge ruling, executed in release)
+
+- **Decision:** the release version is v0.3.0. `VERSION` stayed
+  `0.2.1` in the merge branch until release day, then switched to
+  `0.3.0` on `feat/merge-v3` pre-merge as part of the user-approved
+  release action 2026-10-29 (which also covers the merge to main,
+  the tag, and the GitHub Release). The tag `v0.3.0` is created on
+  main after the merge, never from the branch.
+- **Reason:** the merge branch is not a release; tagging from it
+  would publish a version whose contents were never approved for
+  main. `tools/check-release.py` enforces VERSION/CHANGELOG/lock
+  consistency, and a premature bump would break that gate.
+- **Executed:** 2026-10-29 release action (user approval "批准合
+  main并发版"); the provisional form of this ruling is superseded.
+
+## Donor decisions (from D36)
+
+Each donor decision is recorded once, with its source number and
+what the merge did with it. "Adopted" means the substance landed in
+this branch; "record" means it is preserved here for the history but
+changed nothing in the merge; "not adopted" means the merge
+deliberately did not take it (reason given).
+
+| # | Source | Decision (one line) | Merge status |
+|---|---|---|---|
+| D36 | yunyi D27 | Guard `$(which git)` indirection: deny iff one segment has both a git-resolver substitution and an already-hard-blocked pattern; 13 tests | Adopted (merged, with the resolver-must-be-argv[0] refinement) |
+| D37 | yunyi D32 | Brainstorming server loopback probe: HTTP+WS gap closed by live probe; server stays opt-in | Adopted (safety doc + 5 server tests) |
+| D38 | yunyi D18 | brainstorming/server.cjs kept as opt-in skill asset, tests + safety note; not deleted, not promoted | Adopted (D37 is its evidence) |
+| D39 | yunyi D8/D19 | Guard parse failure graded: log to guard-alerts.jsonl + stderr alert, allow (exit 0); raw stdin never logged | Adopted |
+| D40 | yunyi D12 | Harness run never auto-merges; reports check-clean, leaves the worktree for manual merge | Adopted (`pass-gate run --branch`, no merge) |
+| D41 | yunyi D26 | Phase 5 Graph entry met: parallel need concrete (T1–T4 ran 3 parallel subagents); merge rule ALL, fallback by layer, approval node | Adopted (gate/graph.py) |
+| D42 | yunyi D2 | Second pilot SET: muse-ai-Desktop (draft releases, pilot branch cannot reach users); webhookBox NOT chosen (live relay) | Record (pilot not run in this merge) |
+| D43 | yunkai D-009 | Slim Project template for minimal/standard tiers (ablation #2: outcome-neutral, −31% apparatus context) | Adopted |
+| D44 | yunkai D-005 | Second pilot executed on webhookBox: gate ran on a real project, 2 features passed with evidence; kit not adopted there by owner decision | Record (experience only, no code; pilot branch discarded) |
+| D45 | yunkai D-010 | v3-yunkai is not merged to main; main stays as the owner directs | Record (honoured: this merge touches no main) |
+| D46 | yunyi D11 | Gate logic in `gate/harness.py`, `gate/pass-gate.py` a thin shim | Not adopted — skeleton has no harness.py; pass-gate.py is the implementation |
+| D47 | yunyi D15 | check-clean FAILs when SESSION_STATE still has template placeholders | Superseded by D59 — ADOPTED in the 2026-10-29 optimisation round (check-clean dimension 3c) |
+| D48 | yunyi D24 | repo_checks no longer fails fresh clones for gitignored local-only files | Superseded by D60 — ADOPTED IN EFFECT in the 2026-10-29 optimisation round (no code change; no check requires a gitignored file) |
+| D49 | yunkai D-008 | Loop/Graph engineering deferred, with triggers (manual re-mention ≥5×, workflow inexpressible in feature list, host missing a primitive) | Not adopted — merge ships Loop + Graph per C9/D34; triggers kept as the revisit signal |
+| D50 | yunyi D14 | SESSION_STATE history archived to `docs/internal/SESSION_STATE.archive-2026-10-28.md` | Record (yunyi-internal housekeeping) |
+| D51 | yunyi D25 | Phase 4 proceeds despite unmet gates 4–5, by explicit user instruction, deviation recorded | Record (yunyi-internal process) |
+| D52 | yunyi D33 | Phase 6 leftovers closeout (SESSION_STATE de/fr/zh-tw rewritten, core review keeps minimal 10) | Record (yunyi-internal) |
+| D53 | yunyi D20 | Support-matrix tiers: 真强制 / 仅配置 / 仅文件; tier upgrades need a repo test | Record (framing only) |
+| D54 | yunyi D30 | Multilingual + lint: EN↔ZH pairs hard, others warn-only; harness lint-rules in CI | Partially adopted — EN/ZH hard covered by D19; superseded in part by D62 — harness lint-rules ported in the 2026-10-29 optimisation round (tools/lint-rules.py) |
+| D55 | yunyi D13 | Comet template archive `required`; repo's own `.comet/config.yaml` stays `automatic` | Covered by D4 in substance; record |
+| D56 | yunyi D6 | `docx` and `brainstorming/server.cjs` default OPTIONAL, not deleted; confirm usage first | Covered in substance by the skeleton's heavy-skill gating; record |
+
+Covered by skeleton decisions and not listed above: yunyi D1 (≈D1),
+D3 (≈D3), D4 (≈D4), D5/D17/D22 (hard stop OFF — see pending ruling),
+D7 (skill counts, disk is truth), D9 (≈D8), D10 (branch isolation);
+yunkai D-001 (≈D1), D-002 (≈D3/D19), D-003 (repo files are the source
+of truth), D-007 (≈D12 + D15).
+
+## Pending ruling (conflicts the merge did not settle)
+
+These donor decisions conflict with the skeleton or with the merge
+rulings above. They are recorded here, not silently absorbed, and
+need a user ruling. Until then, the merge ruling (or skeleton
+decision) stands. Settled since: yunkai D-004, yunkai D-006, yunkai
+D-011, yunyi D23, and yunyi D16/D21 were decided by user final rulings
+on 2026-10-29 (see D26, D27, D28, D57); the remaining items below are
+still pending.
+
+- **yunkai D-004 — `archive_confirmation` stays `automatic`.**
+  SETTLED by user final ruling 2026-10-29 (see D26): the template default
+  is `automatic`; D4's `required` is superseded for the template.
+- **yunkai D-006 — delete the FR/DE rule templates (18 files).**
+  SETTLED by user final ruling 2026-10-29 (see D27): the 18 files are
+  deleted and references cleaned; D3/D19's freeze is superseded for FR/DE.
+- **yunkai D-011 — human rubric calibration not run; rubric stays
+  advisory-only.** SETTLED by user final ruling 2026-10-29 (see
+  D28): the rubric is standing advisory-only, aligned with D-011.
+  The live second review is deferred, not owed — it runs only when
+  conditions mature, on a real project the user knows well.
+- **yunyi D23 — cost hard stop ENABLED (user chose the ceilings).**
+  SETTLED by user final ruling 2026-10-29 (see D57): hard stop is ON in
+  this branch. `eval/cost.py` + `eval/cost-budget.json` are ported from
+  yunyi with the D23 ceilings (task 10 verifications / 3600 s / 5 retries;
+  day 100 verifications / 28800 s); `cost.py check` refuses new verification
+  runs past a ceiling (exit 2) and never kills an in-flight run. The
+  skeleton D12 proxy ledger (`tools/cost-ledger.py`) keeps its own
+  warn-only property — two ledgers, two roles — so D12 is narrowed, not
+  contradicted, and yunkai D-007's warn-only stance is superseded for
+  verification runs by the same ruling.
+- **yunyi D31 — lock pins with PIN_EXEMPT = {codegraph, comet, rtk}.**
+  Conflicts with skeleton D22 (true lock, no exemptions). Merge kept
+  the true lock — all three are pinned in `skills-lock.json` — and
+  did not take the exemption.
+  - **Pin-surface precision (review 2026-10-29):** the sentence above is
+    literally true — codegraph, comet, and rtk each carry a pin in the
+    42-entry lock (codegraph `pinnedCommit` + `installerSha256`, comet
+    `npmVersion` 0.5.1 + `pinnedCommit`, rtk `pinnedCommit` +
+    `installerSha256`) — but the lock entry is not the only pin surface.
+    The deploy scripts enforce the same pins at install time (installer
+    SHA checks agree with the lock), and the guides document the pinned
+    installs. What the lock does NOT cover: rtk's PowerShell winget
+    channel remains unpinned (skeleton D13, known gap). A lock pin that
+    differs from the upstream tip is by design (pins are dated
+    2026-10-28), not drift; re-pinning is a supply-chain decision, not a
+    bug fix. Do not rewrite this bullet to claim the pins live only in
+    scripts/guides — that would be false.
+- **yunyi D29 — skill tiers standard = 22.** Conflicts with D30/C5
+  (standard = 18 at merge time). Merge kept 18; amended to 20 by user
+  2026-10-29, see D30.
+- **yunyi D16/D21 — rubric `stable` claimed after confirmation round
+  4.** Conflicts with skeleton D15 and D28/C3 (not stable, no live
+  second-judge round). Merge did NOT carry the stable claim over;
+  `eval/rubric-status.json` was provisional with auto-approve off.
+  Settled by user final ruling 2026-10-29 (see D28): the rubric is
+  standing advisory-only; a live second-person round is deferred, not
+  owed, and must run on a real project the user knows well.
+
+## D57 — Cost hard stop ON (user final ruling, 2026-10-29)
+
+- **Decision:** the cost hard-stop gate is ON in this branch. `eval/cost.py`
+  (ported from yunyi, D23) + `eval/cost-budget.json` carry the D23 ceilings:
+  per task max 10 verifications / 3600 s / 5 retries; per day max 100
+  verifications / 28800 s. `cost.py check` must be consulted before starting
+  a new verification run; past a ceiling it exits 2 (BUDGET STOP), logs the
+  stop to `eval/cost-ledger.jsonl` (local-only, gitignored), and the task is
+  recorded as blocked (not passing, not failed). A stopped task resumes only
+  after a human raises the budget or a new day starts. Checking never kills
+  an in-flight run.
+- **Supersedes:** the merge's provisional OFF (the pending-ruling entry for
+  yunyi D23) and the merge's do-not-take list entry for the hard-stop gate.
+- **Conflict resolved:** skeleton D12 (proxy ledger warns, never auto-stops)
+  and yunkai D-007 (budgets warn, rubrics advise) described the skeleton's
+  proxy ledger and yunkai's line, respectively. This ruling does not change
+  `tools/cost-ledger.py` (it stays warn-only; repo_checks
+  `cost-ledger:no-auto-stop` still holds for that tool). The hard stop lives
+  in a separate gate over a separate task/day ledger, so D12/D-007 stand for
+  their own tools while the branch-wide policy for verification runs is ON.
+- **Guard:** repo_checks `cost-gate:*` pins the tool, the enabled flag, and
+  the ceilings; `tests/cost_test.py` covers OK / task-verification stop /
+  task-duration stop / day stop / OFF-never-blocks.
+- **Implementation note (panel fix P1-3, 2026-10-29):** the enforcement
+  point is `eval/run-bench.sh setup`, which consults `cost.py check`
+  before a new bench run and refuses on exit 2 (smoke goes through
+  setup, so it is covered). `pass-gate.py verify` does NOT consult this
+  gate. The ledger is a plain local JSONL: emptying or renaming it
+  bypasses the stop, so the hard stop is a policy gate for agents that
+  follow the workflow (防君子不防篡改), not tamper-proof enforcement.
+  This note narrows the enforcement claim; it does not change the ruling.
+
+## D58 — Graph/Loop ship only on standard/full profiles (user final ruling, 2026-10-29)
+
+- **Decision:** minimal deployments no longer ship `gate/graph.py`,
+  `tools/loop.py`, or `templates/loop/` (6 templates). Standard and full
+  keep them. Tier narrative: minimal = the gate itself (`pass-gate.py`,
+  `comet_adapter.py`, schema, init template); standard = gate +
+  orchestration (graph executor + loop runner/templates); full =
+  everything.
+- **Migration:** a project previously deployed with minimal that already
+  has graph/loop files will have those files REMOVED on re-deploy with
+  minimal (each file is backed up with a timestamped `.bak.` copy by the
+  deploy scripts first). To keep them, re-deploy with `--profile standard`
+  (`-SkillProfile standard`). This sentence is also in
+  `docs/internal/skill-tiers.md`, the README profile paragraph (EN+ZH),
+  and `docs/internal/release-v0.3.0.md` upgrade notes.
+- **Scope:** distribution only. The loop/graph implementations are
+  untouched; only the deploy scripts' tier gating changed.
+- **Guard:** repo_checks §3t asserts the per-tier file sets (minimal
+  absent, standard present + runners execute); PARITY row
+  `TierGateGraphLoop` keeps the sh/ps1 gating in sync.
+
+## D59 — D47: check-clean FAILs on unfilled SESSION_STATE placeholders (review ruling, 2026-10-29)
+
+- **Decision:** ADOPT yunyi D15. `gate/pass-gate.py` `check-clean` gains
+  dimension 3c "progress/no placeholders": FAIL if SESSION_STATE
+  contains `<YYYY-MM-DD>`, `<PROJECT_NAME>`, the phrase "What this
+  session is trying to ship", or `<TODO|TBD|XXX|PLACEHOLDER>` markers.
+  Any FAIL dimension keeps the overall exit 1; other dimensions SKIP
+  when unconfigured, as before. No SESSION_STATE file at all is SKIP
+  for 3c (3a already FAILs when an item is in_progress without one).
+- **Skeleton adaptation:** yunyi's check lived in `gate/harness.py`
+  (which the skeleton does not have) and detected `<` plus "what this
+  session" / "本会话要完成". The ported markers are the skeleton
+  template's own unfilled markers, not yunyi's strings.
+- **Guard:** `tests/check_clean_test.py` (placeholder → FAIL, generic
+  `<TODO>` → FAIL, clean → PASS, missing file → SKIP).
+
+## D60 — D48: fresh-clone check relaxation ADOPTED IN EFFECT, no code change (review ruling, 2026-10-29)
+
+- **Decision:** yunyi D24 (fresh-clone checks must not require
+  gitignored local-only files) is ADOPTED IN EFFECT. No code change:
+  the merge branch's repo_checks contains no check requiring a
+  gitignored file — the only gitignore-related checks assert the
+  scaffold itself (patterns present), never the presence of an ignored
+  artifact. To be confirmed by the fresh-clone run in the review
+  verification round (docs/internal/merge-review-optimization-2026-10-29.md).
+
+## D61 — SESSION_STATE template format: skeleton 31-line format is final (review ruling, 2026-10-29)
+
+- **Decision:** the skeleton's 31-line EN SESSION_STATE template is the
+  final format (consistent with D29 skeleton schema). Yunyi's 11-line
+  breakpoint format is NOT adopted — switching formats would churn
+  every downstream SESSION_STATE without a measured benefit.
+- **Drift:** ZH is 27 lines (within the >5-line tolerance, no warning);
+  ZH-TW is 46 lines (old format, flagged by the i18n-check [drift]
+  warning until regenerated). FR/DE variants were deleted per D27.
+- **Guard:** `tools/i18n-check.py` template-drift check (warning only,
+  never fails the build; same >5-line tolerance as yunyi's lint LINT-006).
+
+## D62 — Lint-rules ported (yunyi 6 rules, skeleton-adapted) (review ruling, 2026-10-29)
+
+- **Decision:** yunyi's 6 lint rules are ported to `tools/lint-rules.py`
+  - repo_checks `lint-rules:exit-0` (CI runs repo_checks, so CI is
+  covered). Rule-by-rule reconciliation (full table in
+  docs/internal/merge-review-optimization-2026-10-29.md):
+  LINT-001 entry presence — NEW coverage, ENTRY_FILES adapted to
+  skeleton reality (yunyi's `gate/harness.py` and
+  `templates/feature_list.template.json` do not exist here and are
+  dropped); LINT-002 hook wiring — overlaps the skeleton's five-event
+  settings check, extended to the six hook files; LINT-003 schema
+  parse — adapted to `gate/feature_list.schema.json` (a JSON Schema
+  document: version const 1, items array) plus non-empty state
+  templates, NEW coverage; LINT-004 placeholder residue — NEW scope
+  (the skeleton's placeholder check covers only docs/internal/*.md
+  with angle-bracket markers); LINT-005 dead refs — equivalent coverage
+  already exists in repo_checks Phase 0, port kept for defense in
+  depth; LINT-006 translation drift — NEW alert, overlaps the
+  i18n-check drift warning by design (linter view vs
+  translation-tracker view).
+- **Porting notes:** the first LINT-003 draft wrongly required a
+  feature_list instance shape (top-level version + items list) and
+  failed on the real schema; fixed to read properties.version.const
+  and properties.items.type. The first run also caught LINT-004
+  residue in the new 3c code itself (D59 literals); the 3c pattern is
+  now assembled from parts, the same trick lint-rules uses.
+
+## D63 — rtk pin re-pinned to upstream tip (user walkthrough 2026-10-29, item 7)
+
+- **Decision:** the rtk lock pin moves from `e05c7bdf…` to upstream
+  tip `7e92da00…` (user walkthrough 2026-10-29, item 7). Lock
+  `pinnedCommit` + `installerUrl` + `pinnedAt` (2026-10-29) updated;
+  `installerSha256` is UNCHANGED: the installer script is
+  byte-identical between the two commits (verified by download +
+  SHA256), so the deploy script's hash stays
+  `7ca39973…`. Panorama Guide EN/ZH installer URLs updated to match.
+- **Reason:** the 24 commits between pin and tip are tracking/savings
+  bug fixes (savings-figure inflation, token-estimate capping,
+  windowed-baseline leaks), routine dependency bumps, one internal
+  discover-lexer refactor, and CI-only changes; no installer or
+  interface changes. The old pin carried known tracking-figure bugs.
+- **Limit, stated plainly:** re-pinning is NOT binary pinning. The
+  rtk installer resolves the LATEST release at install time
+  (`get_latest_version`, overridable only via `RTK_VERSION`), so the
+  pin pins the installer script version, not the installed binary
+  version — that was already true of the old pin (identical script).
+  The re-pin keeps the lock truthful and records the reviewed tip;
+  it does not change which binary a fresh install gets. The D13 gap
+  (ps1 winget channel unpinned) is unchanged by this entry.
+- **Verification:** installer downloaded from the new URL and SHA256
+  matched the lock value; repo_checks installer-pin checks pass
+  (lock URL + SHA agree with deploy-agents.sh).

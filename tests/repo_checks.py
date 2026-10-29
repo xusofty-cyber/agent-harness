@@ -10,12 +10,15 @@ Checks:
   4. deploy-agents.ps1 / deploy-agents.sh feature-parity markers
 """
 
+import ast
 import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 import tomllib
 from pathlib import Path
 
@@ -110,6 +113,18 @@ check("version:file-exists", bool(version_file), "VERSION is empty")
 check("version:matches-changelog",
       bool(cl_headings) and version_file == cl_headings[0],
       f"VERSION={version_file!r} vs CHANGELOG newest={cl_headings[0] if cl_headings else None!r}")
+
+# --- 3c2. Release gate (Phase 6, 6-3) ---
+# tools/check-release.py is the standalone release gate (VERSION/CHANGELOG/
+# skills-lock consistency + deprecation policy); CI runs it here so a
+# release can never be cut with an unpinned skill or an un-noted breaking
+# change. It is fast and offline.
+_rel = subprocess.run(
+    [sys.executable, str(ROOT / "tools" / "check-release.py")],
+    capture_output=True, text=True, cwd=str(ROOT), timeout=60)
+check("release:check-release-passes", _rel.returncode == 0,
+      (_rel.stdout.strip().splitlines() or [""])[-1])
+print(_rel.stdout, end="")
 
 # --- 3d. Living-doc frontmatter ---
 # docs/{specs,architecture,reference,guides,adr}/ .md files must declare
@@ -287,9 +302,10 @@ else:
     print("  [warn] comet-cfg: PyYAML not installed, validation skipped (pip install pyyaml)")
 
 # --- 3h. templates/agents canonical templates completeness ---
-# All 15 canonical templates (3 types x 5 languages) must exist under templates/agents/
+# All 9 canonical templates (3 types x 3 languages: base ZH, EN, ZH-TW;
+# FR/DE deleted by user final ruling 2026-10-29, D27) must exist under templates/agents/
 for tmpl_prefix in ("Global AGENTS", "Project AGENTS", "Directory AGENTS"):
-    for lang_suf in ("", ".en", ".zh-tw", ".fr", ".de"):
+    for lang_suf in ("", ".en", ".zh-tw"):
         expected_tmpl = ROOT / "templates" / "agents" / f"{tmpl_prefix}{lang_suf}.md"
         check(f"template-exists:{tmpl_prefix}{lang_suf}", expected_tmpl.is_file(),
               f"missing canonical template: {expected_tmpl}")
@@ -359,7 +375,7 @@ check("docs:no-unfilled-placeholders", not _placeholder_bad,
 # Recursion guard: a verification command may itself be repo_checks.py;
 # re-runs set GATE_CI_RECURSION=1 and a nested run skips this section.
 _GATE_REQUIRED = ["pass-gate.py", "feature_list.schema.json",
-                  "init.template.sh"]
+                  "init.template.sh", "comet_adapter.py"]
 _gate_missing = [f for f in _GATE_REQUIRED if not (ROOT / "gate" / f).exists()]
 check("gate:files-present", not _gate_missing,
       f"missing gate files: {', '.join(_gate_missing)}")
@@ -528,6 +544,53 @@ except Exception as _cc_exc:  # noqa: BLE001
 check("comet-pin:check-tool-passes", _cc_ok,
       "tools/check-comet.py does not pass on this repo")
 
+# --- 3m1. OCR CLI pin (Phase 6, 6-2) ---
+# Mirrors comet-pin: the open-code-review *skill* is authored in-repo
+# (local), but the optional OCR *CLI* it can delegate to is pinned by
+# version in the lock entry (npmVersion + pinnedAt) and in both deploy
+# scripts (OCR_NPM_VERSION / $script:OcrNpmVersion). No bare (unversioned)
+# `npm install -g @alibaba-group/open-code-review` may remain.
+_ocr_meta = _comet_lock.get("skills", {}).get("open-code-review", {})
+_ocr_pin = _ocr_meta.get("npmVersion", "")
+check("ocr-pin:lock",
+      bool(_ocr_pin) and bool(_ocr_meta.get("pinnedAt"))
+      and bool(_ocr_meta.get("pinnedFrom")),
+      f"open-code-review lock entry lacks npmVersion/pinnedAt/pinnedFrom: {_ocr_meta}")
+_sh_ocr = _re3.search(r'OCR_NPM_VERSION="([^"]+)"', _deploy_sh_txt)
+_ps1_ocr = _re3.search(r'\$script:OcrNpmVersion = "([^"]+)"', _deploy_ps1_txt)
+check("ocr-pin:scripts-agree-with-lock",
+      bool(_sh_ocr) and bool(_ps1_ocr)
+      and _sh_ocr.group(1) == _ocr_pin and _ps1_ocr.group(1) == _ocr_pin,
+      f"deploy pin mismatch: sh={_sh_ocr.group(1) if _sh_ocr else None} "
+      f"ps1={_ps1_ocr.group(1) if _ps1_ocr else None} lock={_ocr_pin}")
+check("ocr-pin:no-bare-install",
+      _re3.search(r"install -g @alibaba-group/open-code-review(?!@)", _deploy_sh_txt) is None
+      and _re3.search(r"install -g @alibaba-group/open-code-review(?!@)", _deploy_ps1_txt) is None,
+      "bare `npm install -g @alibaba-group/open-code-review` (unversioned) still present")
+
+# --- 3m1b. Docs pin guard (Phase 6, 6-2) ---
+# The EN+ZH Panorama Guides are repo-authored install instructions: they
+# must show only pinned installs — versioned npm packages and
+# download-then-verify installer flows. No bare `npm install -g <pkg>`
+# (unversioned) and no piped `curl | sh` / `irm | iex` install may appear.
+# ZH-TW is a translation: tracked stale in docs/internal/i18n-status.md,
+# not hard-failed here (Phase 4, 4-2). The vendored comet skill
+# (.agents/skills/comet/SKILL.md) still shows an unversioned comet install
+# in upstream text — editing it would break the lock (§5); recorded as a
+# known gap in D22, not scanned here.
+_GUIDE_EN = (ROOT / "docs" / "guides" / "Tools Practical Usage and Skills Panorama Guide.md").read_text(encoding="utf-8")
+_GUIDE_ZH = (ROOT / "docs" / "guides" / "Tools Practical Usage and Skills Panorama Guide.zh.md").read_text(encoding="utf-8")
+for _gname, _gtxt in (("EN", _GUIDE_EN), ("ZH", _GUIDE_ZH)):
+    check(f"docs-pin:{_gname}-no-bare-npm",
+          _re3.search(r"install -g @rpamis/comet(?!@)", _gtxt) is None
+          and _re3.search(r"install -g @alibaba-group/open-code-review(?!@)", _gtxt) is None
+          and _re3.search(r"i -g @colbymchenry/codegraph(?!@)", _gtxt) is None
+          and _re3.search(r"install -g @colbymchenry/codegraph(?!@)", _gtxt) is None,
+          f"{_gname} Panorama Guide still shows a bare (unversioned) npm install")
+    check(f"docs-pin:{_gname}-no-piped-install",
+          "install.sh | sh" not in _gtxt and "install.ps1 | iex" not in _gtxt,
+          f"{_gname} Panorama Guide still shows a piped curl|sh / irm|iex install")
+
 # --- 3m2. Pinned installer scripts (Phase 2, 2-2) ---
 # codegraph/rtk installers are pinned by upstream commit + SHA256 of the
 # installer at that commit (measured 2026-10-28). The lock is the record;
@@ -630,6 +693,48 @@ check("cost-ledger:own-budget",
       (ROOT / "gate" / "cost-budget.json").is_file(),
       "this repo's own gate/cost-budget.json missing (dogfood init-budget)")
 
+# --- 3p2. Hard-stop gate (yunyi D23, merge D57: user final ruling 2026-10-29) ---
+# eval/cost.py check refuses new verification runs past the ceilings (exit 2);
+# it never kills an in-flight run. This guard pins the ruling so the gate
+# cannot silently regress to alert-only. The proxy ledger above (3p) keeps
+# its own no-auto-stop property: two ledgers, two roles.
+_cost_budget = {}
+try:
+    _cost_budget = json.loads((ROOT / "eval" / "cost-budget.json").read_text(encoding="utf-8"))
+except Exception:
+    _cost_budget = {}
+check("cost-gate:tool-exists",
+      (ROOT / "eval" / "cost.py").is_file(),
+      "eval/cost.py hard-stop gate missing")
+check("cost-gate:enabled",
+      _cost_budget.get("hard_stop_enabled") is True,
+      "eval/cost-budget.json must set hard_stop_enabled=true (D57)")
+check("cost-gate:ceilings",
+      _cost_budget.get("hard_stop_task") == {"max_duration_s": 3600,
+                                             "max_retries": 5,
+                                             "max_verifications": 10}
+      and _cost_budget.get("hard_stop_day") == {"max_duration_s": 28800,
+                                                "max_verifications": 100},
+      "eval/cost-budget.json ceilings must match yunyi D23 (task 10/3600s/5, day 100/28800s)")
+check("cost-gate:ledger-gitignored",
+      "eval/cost-ledger.jsonl" in (ROOT / ".gitignore").read_text(encoding="utf-8"),
+      "eval/cost-ledger.jsonl must be gitignored (local-only ledger)")
+
+# --- D26 guard (panel P1-12): the comet template default must stay
+# `automatic` (user final ruling 2026-10-29, superseding D4's
+# `required`). Like the rubric/cost guards above, this pins a ruling
+# in a check so a quiet template edit turns red instead of drifting.
+# Only the TEMPLATE is pinned: a project's own .comet/config.yaml may
+# legitimately choose `required`.
+_archive_lines = [ln.strip() for ln in
+                  (ROOT / "templates" / "comet.config.yaml").read_text(encoding="utf-8").splitlines()]
+_archive_values = [ln.split(":", 1)[1].strip() for ln in _archive_lines
+                   if ln.startswith("archive_confirmation:")]
+check("archive-template-default",
+      _archive_values == ["automatic"],
+      "templates/comet.config.yaml archive_confirmation must be "
+      "'automatic' (D26, user final ruling 2026-10-29)")
+
 # --- 3q. Benchmarks & evaluation (Phase 3, v3 §4.5) ---
 # Framework first, then measured runs: 4 tasks (fixed start commit,
 # acceptance, budget), rubric (six dimensions), calibration (3+ rounds),
@@ -655,6 +760,13 @@ check("eval:rubric-six-dimensions",
       "eval/rubric.md lacks one of the six dimensions")
 check("eval:rubric-rerun-rule", "re-running" in _rubric,
       "eval/rubric.md does not require re-running acceptance")
+_rubric_status = json.loads(
+    (ROOT / "eval" / "rubric-status.json").read_text(encoding="utf-8"))
+check("eval:rubric-advisory-only",
+      _rubric_status.get("status") == "advisory-only"
+      and _rubric_status.get("auto_approve_allowed") is False,
+      "rubric-status.json must stay advisory-only with auto-approve "
+      "off (D28, user final ruling 2026-10-29)")
 _calib = (ROOT / "eval" / "calibration.md").read_text(encoding="utf-8")
 check("eval:calibration-rounds", _calib.count("## Round ") >= 3,
       "eval/calibration.md has fewer than 3 recorded rounds")
@@ -694,8 +806,12 @@ check("eval:check-results-passes", _check_results.returncode == 0,
 _bench_smoke = subprocess.run(
     ["bash", str(ROOT / "eval" / "run-bench.sh"), "smoke"],
     capture_output=True, text=True, cwd=ROOT)
+_smoke_lines = [l for l in
+                (_bench_smoke.stdout + _bench_smoke.stderr).strip().splitlines()
+                if l.strip()]
 check("eval:bench-smoke-passes", _bench_smoke.returncode == 0,
-      "eval/run-bench.sh smoke failed")
+      "eval/run-bench.sh smoke failed: "
+      + (" | ".join(_smoke_lines[-2:]) if _smoke_lines else "(no output)"))
 
 # --- 3r. Deploy profiles (Phase 4, 4-1) ---
 # skills-profiles.json is the single source of truth for profile
@@ -727,7 +843,7 @@ for _pname in ("minimal", "standard", "full"):
 _min = _profiles.get("minimal", {}).get("skills", [])
 _std = _profiles.get("standard", {}).get("skills", [])
 _full = _profiles.get("full", {}).get("skills", [])
-check("profiles:minimal-le-10", len(_min) <= 10, f"minimal has {len(_min)} skills, must be <= 10")
+check("profiles:minimal-le-15", len(_min) <= 15, f"minimal has {len(_min)} skills, must be <= 15 (D31 amendment 2026-10-29: gate core 10 + openspec core 5)")
 check("profiles:standard-superset-minimal", set(_min) < set(_std),
       "standard must be a strict superset of minimal")
 check("profiles:full-is-all", set(_full) == _disk_skills,
@@ -763,6 +879,178 @@ for _guide in ("docs/guides/Skills Usage Guide.md", "docs/guides/Skills Usage Gu
         check(f"profiles:guide-full-{_guide}", "40" in _sec,
               f"{_guide} tier section does not state the full profile has 40 skills")
 
+# --- 3s. Loop layer (Phase 5, v3 §4.6) ---
+# tools/loop.py (stdlib only) + templates/loop/ (goal / loop-state / graph,
+# EN+ZH) + worked example graph + run records. The graph template carries
+# defaults (60 s timeout), so graph-validate must pass on it as well as on
+# the worked example. The smoke runs a real goal loop and a real timeout.
+_LOOP_TEMPLATES = {
+    "goal.template.md": ("## Goal", "## Verification", "## Stop conditions"),
+    "goal.template.zh.md": ("## 目标", "## 验证方式", "## 停止条件"),
+    "loop-state.template.md": ("## Rounds", "## Approval"),
+    "loop-state.template.zh.md": ("## 各轮", "## 批准"),
+    "graph.template.md": ("## Nodes", "## Edges", "## Approval", "## Timeout",
+                          "## Fan-out"),
+    "graph.template.zh.md": ("## 节点", "## 边", "## 批准", "## 超时",
+                             "## 并行展开"),
+}
+for _lt, _sections in _LOOP_TEMPLATES.items():
+    _lp = ROOT / "templates" / "loop" / _lt
+    check(f"loop:template-{_lt}-exists", _lp.is_file(), f"templates/loop/{_lt} missing")
+    if _lp.is_file():
+        _ltext = _lp.read_text(encoding="utf-8")
+        check(f"loop:template-{_lt}-sections",
+              all(s in _ltext for s in _sections),
+              f"templates/loop/{_lt} lacks a required section")
+_LOOP_ALLOWED_IMPORTS = {"argparse", "json", "os", "re", "shutil",
+                         "subprocess", "sys", "time", "datetime"}
+_loop_tree = ast.parse((ROOT / "tools" / "loop.py").read_text(encoding="utf-8"))
+_loop_imports = set()
+for _node in ast.walk(_loop_tree):
+    if isinstance(_node, ast.Import):
+        _loop_imports.update(a.name.split(".")[0] for a in _node.names)
+    elif isinstance(_node, ast.ImportFrom):
+        _loop_imports.add((_node.module or "").split(".")[0])
+check("loop:stdlib-only", _loop_imports <= _LOOP_ALLOWED_IMPORTS,
+      f"tools/loop.py imports non-stdlib: {sorted(_loop_imports - _LOOP_ALLOWED_IMPORTS)}")
+_loop_help = subprocess.run([sys.executable, str(ROOT / "tools" / "loop.py"), "--help"],
+                            capture_output=True, text=True)
+check("loop:help-exits-0", _loop_help.returncode == 0, "loop.py --help failed")
+for _g in ("templates/loop/graph.template.md", "docs/internal/phase5-graph.md"):
+    _gv = subprocess.run([sys.executable, str(ROOT / "tools" / "loop.py"),
+                          "graph-validate", "--graph", str(ROOT / _g)],
+                         capture_output=True, text=True)
+    check(f"loop:graph-validate-{Path(_g).name}", _gv.returncode == 0,
+          f"graph-validate failed on {_g}")
+_loop_tmp = tempfile.mkdtemp(prefix="loop-smoke-")
+_loop_goal = os.path.join(_loop_tmp, "goal.md")
+Path(_loop_goal).write_text("# Goal\n", encoding="utf-8")
+_loop_init = subprocess.run(
+    [sys.executable, str(ROOT / "tools" / "loop.py"), "init",
+     "--root", os.path.join(_loop_tmp, "run"), "--goal-file", _loop_goal,
+     "--kind", "goal", "--max-rounds", "3", "--consecutive-passes", "2",
+     "--timeout", "5"],
+    capture_output=True, text=True)
+_loop_run = subprocess.run(
+    [sys.executable, str(ROOT / "tools" / "loop.py"), "goal-loop",
+     "--root", os.path.join(_loop_tmp, "run"), "--maker", "true", "--verify", "true"],
+    capture_output=True, text=True)
+check("loop:smoke-goal-loop",
+      _loop_init.returncode == 0 and _loop_run.returncode == 0,
+      "loop.py goal-loop smoke (true/true) failed")
+_loop_to_init = subprocess.run(
+    [sys.executable, str(ROOT / "tools" / "loop.py"), "init",
+     "--root", os.path.join(_loop_tmp, "run3"), "--goal-file", _loop_goal,
+     "--kind", "goal", "--max-rounds", "1", "--consecutive-passes", "1",
+     "--timeout", "1"],
+    capture_output=True, text=True)
+_loop_to_run = subprocess.run(
+    [sys.executable, str(ROOT / "tools" / "loop.py"), "goal-loop",
+     "--root", os.path.join(_loop_tmp, "run3"), "--maker", "true", "--verify", "sleep 30"],
+    capture_output=True, text=True, timeout=30)
+_to_events = Path(_loop_tmp, "run3", "loop-events.jsonl").read_text(encoding="utf-8") \
+    if Path(_loop_tmp, "run3", "loop-events.jsonl").is_file() else ""
+check("loop:smoke-timeout-enforced",
+      _loop_to_init.returncode == 0 and _loop_to_run.returncode != 0
+      and '"timeout"' in _to_events,
+      "loop.py did not record a timeout for a verify past its timeout")
+_decisions = (ROOT / "DECISIONS.md").read_text(encoding="utf-8")
+check("loop:d21-present", "## D21" in _decisions,
+      "DECISIONS.md lacks D21 (Phase 5 L14 + four questions)")
+_record = (ROOT / "docs" / "internal" / "phase5-loops.md").read_text(encoding="utf-8")
+check("loop:record-sections",
+      all(s in _record for s in ("## Goal Loop", "## Maker-Checker Loop",
+                                 "## Timeout rule", "## Verdict")),
+      "docs/internal/phase5-loops.md lacks a required section")
+_pass_gate_test = subprocess.run(
+    [sys.executable, str(ROOT / "tests" / "pass_gate_test.py")],
+    capture_output=True, text=True)
+check("loop:pass-gate-test-passes", _pass_gate_test.returncode == 0,
+      "tests/pass_gate_test.py failed")
+
+# --- 3t. Tiered gate/loop deploy smoke (Phase 6, 6-5; D58) ---
+# minimal (default) ships the gate itself only: pass-gate.py, comet_adapter,
+# schema, init — but NOT gate/graph.py, tools/loop.py, templates/loop/.
+# standard ships gate + orchestration (graph + loop). Deploy both profiles
+# to empty temp dirs (non-interactive, stdin closed — same shape as the CI
+# smoke test) and assert the per-tier file sets; the standard deploy must
+# also execute the shipped runners (--help exits 0) and the comet_adapter
+# map must work.
+def _deploy_tmp(profile_args):
+    tmp = tempfile.mkdtemp(prefix="tier-deploy-")
+    proc = subprocess.run(
+        ["bash", str(ROOT / "deploy-agents.sh")] + profile_args + [tmp],
+        stdin=subprocess.DEVNULL, capture_output=True, text=True,
+        cwd=str(ROOT), timeout=180)
+    return tmp, proc
+
+_min_tmp, _min_deploy = _deploy_tmp([])
+try:
+    check("tier-deploy:minimal-exit-0", _min_deploy.returncode == 0,
+          f"minimal deploy exited {_min_deploy.returncode}: "
+          f"{_min_deploy.stderr.strip()[-200:]}")
+    for _gf in ("pass-gate.py", "comet_adapter.py", "feature_list.schema.json",
+                "init.template.sh"):
+        check(f"tier-deploy:minimal-gate-{_gf}",
+              Path(_min_tmp, "gate", _gf).is_file(),
+              f"gate/{_gf} missing after minimal deploy")
+    check("tier-deploy:minimal-no-graph",
+          not Path(_min_tmp, "gate", "graph.py").exists(),
+          "gate/graph.py must NOT ship on minimal")
+    check("tier-deploy:minimal-no-loop-runner",
+          not Path(_min_tmp, "tools", "loop.py").exists(),
+          "tools/loop.py must NOT ship on minimal")
+    check("tier-deploy:minimal-no-loop-templates",
+          not Path(_min_tmp, "templates", "loop").exists()
+          or not any(Path(_min_tmp, "templates", "loop").iterdir()),
+          "templates/loop/ must NOT ship on minimal")
+finally:
+    shutil.rmtree(_min_tmp, ignore_errors=True)
+
+_std_tmp, _std_deploy = _deploy_tmp(["--profile", "standard"])
+try:
+    check("tier-deploy:standard-exit-0", _std_deploy.returncode == 0,
+          f"standard deploy exited {_std_deploy.returncode}: "
+          f"{_std_deploy.stderr.strip()[-200:]}")
+    for _lf in ("goal.template.md", "goal.template.zh.md",
+                "loop-state.template.md", "loop-state.template.zh.md",
+                "graph.template.md", "graph.template.zh.md"):
+        check(f"loop-deploy:template-{_lf}",
+              Path(_std_tmp, "templates", "loop", _lf).is_file(),
+              f"templates/loop/{_lf} missing after standard deploy")
+    _deployed_loop = Path(_std_tmp, "tools", "loop.py")
+    check("loop-deploy:runner-present", _deployed_loop.is_file(),
+          "tools/loop.py missing after standard deploy")
+    if _deployed_loop.is_file():
+        _deployed_help = subprocess.run(
+            [sys.executable, str(_deployed_loop), "--help"],
+            capture_output=True, text=True, timeout=30)
+        check("loop-deploy:runner-runs", _deployed_help.returncode == 0,
+              "deployed tools/loop.py --help failed")
+    _deployed_graph = Path(_std_tmp, "gate", "graph.py")
+    check("graph-deploy:present", _deployed_graph.is_file(),
+          "gate/graph.py missing after standard deploy")
+    if _deployed_graph.is_file():
+        _deployed_graph_help = subprocess.run(
+            [sys.executable, str(_deployed_graph), "--help"],
+            capture_output=True, text=True, timeout=30)
+        check("graph-deploy:runs", _deployed_graph_help.returncode == 0,
+              "deployed gate/graph.py --help failed")
+    _deployed_adapter = Path(_std_tmp, "gate", "comet_adapter.py")
+    check("comet-adapter-deploy:present", _deployed_adapter.is_file(),
+          "gate/comet_adapter.py missing after standard deploy")
+    if _deployed_adapter.is_file():
+        _deployed_adapter_map = subprocess.run(
+            [sys.executable, str(_deployed_adapter), "map",
+             "--root", _std_tmp],
+            capture_output=True, text=True, timeout=30)
+        check("comet-adapter-deploy:runs",
+              _deployed_adapter_map.returncode == 0
+              and "no comet change directories" in _deployed_adapter_map.stdout,
+              "deployed gate/comet_adapter.py map failed")
+finally:
+    shutil.rmtree(_std_tmp, ignore_errors=True)
+
 # --- 4. deploy script parity ---
 # Parity = no unilateral features: if a feature marker exists in one script,
 # its counterpart marker must exist in the other. Markers that exist in
@@ -779,6 +1067,8 @@ PARITY = [
     ("skills-lock.json", "skills-lock.json", "skills lock metadata"),
     (".claude", ".claude", "Claude Code hooks deployment"),
     ("CometInit", "comet-init", "optional Comet init flag"),
+    ("Backup-CometState", "backup_comet_state", "timestamped Comet state backup before init"),
+    ("TIER_SLIM_TEMPLATE", "TIER_SLIM_TEMPLATE", "slim Project template for minimal/standard tiers (D-009)"),
     ("comet.config.yaml", "comet.config.yaml", "Comet config template sync"),
     ("AiMemoryInit", "ai-memory-init", "optional ai-memory init flag"),
     ("templates/ai-memory.toml.example", ".ai-memory.toml.example", "ai-memory config template sync"),
@@ -806,7 +1096,10 @@ PARITY = [
     ("target-auto-create", "target-auto-create", "auto-create missing target directory"),
     ("IncludeHeavySkills", "include-heavy-skills", "opt-in heavy skills (docx, brainstorming)"),
     ("GateDeploy", "gate-deploy", "gate layer deployment (pass-gate.py + schema + init template)"),
+    ("GraphDeploy", "graph-deploy", "graph executor deployment (gate/graph.py)"),
     ("SkillProfile", "--profile", "deployment profiles minimal/standard/full"),
+    ("LoopDeploy", "loop-deploy", "loop layer deployment (loop.py + templates)"),
+    ("TierGateGraphLoop", "tier-gate-graph-loop", "graph/loop ship only on standard/full profiles (D58)"),
 ]
 ps1 = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
 sh = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")
@@ -964,9 +1257,29 @@ if _lock_base:
 else:
     print("  [warn] lock-history: no base ref found, check skipped")
 
+# --- 5c. True lock: every pin must resolve (Phase 6, 6-1) ---
+# A lock is only a lock if every pinned entry is actually pinned. Offline
+# part (no network): every github-source entry carries a 40-hex
+# pinnedCommit, and every meta entry carries a pinnedCommit + a note
+# explaining what it pins (D10: ghost meta entries are annotated, never
+# deleted). The online part — local content == content at pinnedCommit —
+# is enforced by the `sync-skills.py --check --strict` CI step (see
+# .github/workflows/ci.yml), which fetches each pin from upstream.
+for _name, _meta in sorted(lock_data.get("skills", {}).items()):
+    if _meta.get("sourceType") == "github":
+        check(f"lock-pin:{_name}",
+              bool(_HEX40.match(_meta.get("pinnedCommit", ""))),
+              f"github skill {_name} lacks a 40-hex pinnedCommit: "
+              f"{_meta.get('pinnedCommit')!r}")
+    if _meta.get("meta") is True:
+        check(f"lock-pin:meta-{_name}",
+              bool(_HEX40.match(_meta.get("pinnedCommit", "")))
+              and bool((_meta.get("note") or "").strip()),
+              f"meta entry {_name} lacks pinnedCommit and/or note")
+
 # --- 6. Multilingual docs: EN/ZH parity + i18n status (Phase 4, 4-2) ---
 # EN/ZH are the sources of truth: their ## counts must match (hard check).
-# FR/DE/ZH-TW are generated products: tools/i18n-check.py enforces the
+# ZH-TW is a generated product: tools/i18n-check.py enforces the
 # status file (docs/internal/i18n-status.md) — an "in-sync" row must match
 # its source sha, a "stale"/"frozen" row passes with a printed reminder.
 # The old 16-pair symmetric H2 hard check was removed here: a translation
@@ -977,6 +1290,16 @@ _i18n = subprocess.run(
 _i18n_tail = (_i18n.stdout.strip().splitlines() or [""])[-1]
 check("i18n:status-check", _i18n.returncode == 0, _i18n_tail)
 print(_i18n.stdout, end="")
+
+# Lint-rules (ported from v3-yunyi, skeleton-adapted, D62): the entry
+# linter must exit 0 on this tree (warnings allowed — LINT-006 drift is
+# a warning, not a failure). CI runs repo_checks, so this covers CI too.
+_lint = subprocess.run(
+    [sys.executable, str(ROOT / "tools" / "lint-rules.py")],
+    capture_output=True, text=True, cwd=str(ROOT), timeout=60)
+_lint_tail = (_lint.stdout.strip().splitlines() or [""])[-1]
+check("lint-rules:exit-0", _lint.returncode == 0, _lint_tail)
+print(_lint.stdout, end="")
 
 # --- 7. Executable bit on entry-point scripts ---
 # The GitHub contents API resets the exec bit to 100644 on every content push,
@@ -1002,8 +1325,8 @@ for script in EXEC_SCRIPTS:
 import urllib.parse
 LINK_RE = re.compile(r'\[([^\]]*)\]\(([^)]+)\)')
 # Only check these user-facing docs (not .agents/skills which are vendored)
-LINK_CHECK_ROOTS = ["README.md", "README.zh.md", "README.zh-tw.md", "README.de.md",
-                    "README.fr.md", "CONTRIBUTING.md", "docs/guides"]
+LINK_CHECK_ROOTS = ["README.md", "README.zh.md", "README.zh-tw.md",
+                    "CONTRIBUTING.md", "docs/guides"]
 checked_links = 0
 broken_links = []
 for root in LINK_CHECK_ROOTS:

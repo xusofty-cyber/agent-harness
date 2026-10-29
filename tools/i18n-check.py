@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """i18n status check (Phase 4, 4-2).
 
-EN/ZH are the sources of truth. FR/DE/ZH-TW are generated products, not
+EN/ZH are the sources of truth. ZH-TW is a generated product, not
 hand-synced copies: the old symmetric H2 hard check (repo_checks section 6
 before Phase 4) is gone. What this script enforces instead:
 
 1. EN/ZH structural parity is still a HARD check: the four EN/ZH pairs
    (README + three guides) must have equal `##` counts.
-2. Every FR/DE/ZH-TW target must have a row in
+2. Every ZH-TW target must have a row in
    docs/internal/i18n-status.md with a status and a source sha.
 3. A row marked `in-sync` must match the current sha256 of its EN source
    (first 12 hex chars); if the source moved, the check FAILS and the row
@@ -17,6 +17,12 @@ before Phase 4) is gone. What this script enforces instead:
    release. Nothing here fails the build for a translation being behind —
    that is the point of the change (v2 4-2): a stale translation is a
    tracked debt, not a CI failure.
+5. Template-variant line drift is a WARNING only, never a failure
+   (D61, review 2026-10-29): a SESSION_STATE/PROJECT_CONTEXT template
+   variant that differs from its base by more than 5 lines prints a
+   [drift] reminder. The skeleton 31-line SESSION_STATE format is final;
+   the ZH-TW variant still carries the old 46-line format and is flagged
+   here until regenerated.
 
 Usage:
     i18n-check.py [--spot-check [N]] [--seed N]
@@ -34,33 +40,23 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 STATUS_FILE = ROOT / "docs" / "internal" / "i18n-status.md"
 
-# (EN source, FR/DE/ZH-TW targets) — the generated set.
+# (EN source, ZH-TW targets) — the generated set.
+# FR/DE targets were removed by user final ruling 2026-10-29 (D27);
+# only ZH-TW remains as a generated translation.
 GENERATED = [
-    ("README.md", ["README.zh-tw.md", "README.fr.md", "README.de.md"]),
+    ("README.md", ["README.zh-tw.md"]),
     ("docs/guides/Multi-Tool Deployment and Configuration Guide.md", [
-        "docs/guides/Multi-Tool Deployment and Configuration Guide.zh-tw.md",
-        "docs/guides/Multi-Tool Deployment and Configuration Guide.fr.md",
-        "docs/guides/Multi-Tool Deployment and Configuration Guide.de.md"]),
+        "docs/guides/Multi-Tool Deployment and Configuration Guide.zh-tw.md"]),
     ("docs/guides/Tools Practical Usage and Skills Panorama Guide.md", [
-        "docs/guides/Tools Practical Usage and Skills Panorama Guide.zh-tw.md",
-        "docs/guides/Tools Practical Usage and Skills Panorama Guide.fr.md",
-        "docs/guides/Tools Practical Usage and Skills Panorama Guide.de.md"]),
+        "docs/guides/Tools Practical Usage and Skills Panorama Guide.zh-tw.md"]),
     ("docs/guides/Skills Usage Guide.md", [
-        "docs/guides/Skills Usage Guide.zh-tw.md",
-        "docs/guides/Skills Usage Guide.fr.md",
-        "docs/guides/Skills Usage Guide.de.md"]),
+        "docs/guides/Skills Usage Guide.zh-tw.md"]),
     ("templates/agents/Global AGENTS.md", [
-        "templates/agents/Global AGENTS.zh-tw.md",
-        "templates/agents/Global AGENTS.fr.md",
-        "templates/agents/Global AGENTS.de.md"]),
+        "templates/agents/Global AGENTS.zh-tw.md"]),
     ("templates/agents/Project AGENTS.md", [
-        "templates/agents/Project AGENTS.zh-tw.md",
-        "templates/agents/Project AGENTS.fr.md",
-        "templates/agents/Project AGENTS.de.md"]),
+        "templates/agents/Project AGENTS.zh-tw.md"]),
     ("templates/agents/Directory AGENTS.md", [
-        "templates/agents/Directory AGENTS.zh-tw.md",
-        "templates/agents/Directory AGENTS.fr.md",
-        "templates/agents/Directory AGENTS.de.md"]),
+        "templates/agents/Directory AGENTS.zh-tw.md"]),
 ]
 
 # EN/ZH pairs that must stay in structural sync (hard check).
@@ -162,6 +158,25 @@ def main(argv):
                     f"(last synced {sha}) — regenerate before release")
             else:
                 failures.append(f"{tgt}: unknown status {status!r}")
+
+    # 5. Template-variant line drift (warning only, D61).
+    for base in ("templates/SESSION_STATE.template.md",
+                 "templates/PROJECT_CONTEXT.template.md"):
+        base_path = ROOT / base
+        if not base_path.is_file():
+            continue
+        base_lines = len(base_path.read_text(encoding="utf-8").splitlines())
+        stem = base[:-len(".md")]
+        for suffix in (".zh.md", ".zh-tw.md"):
+            var = ROOT / (stem + suffix)
+            if not var.is_file():
+                continue
+            var_lines = len(var.read_text(encoding="utf-8").splitlines())
+            if abs(var_lines - base_lines) > 5:
+                reminders.append(
+                    f"[drift] {stem + suffix} is {var_lines} lines vs "
+                    f"base {base} {base_lines} lines — regenerate from "
+                    f"the base format (D61)")
 
     for r in reminders:
         print(r)

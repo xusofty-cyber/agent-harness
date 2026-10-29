@@ -14,10 +14,10 @@ Single source of truth: `skills-profiles.json` at the repo root.
 `deploy-agents.sh` / `deploy-agents.ps1` read it; `tests/repo_checks.py`
 §3r asserts it. Edit membership there, never in the scripts or guides.
 
-| Profile | Skills | Skills-only bytes (measured 2026-10-28) | Default? |
+| Profile | Skills | Skills-only bytes (measured 2026-10-28; standard and minimal re-measured 2026-10-29) | Default? |
 |---|---|---|---|
-| `minimal` | 10 | 212,777 | **yes** (`--profile` unset) |
-| `standard` | 18 | 301,118 | no |
+| `minimal` | 15 | 280,960 | **yes** (`--profile` unset) |
+| `standard` | 20 | 321,898 | no |
 | `full` | 40 | 1,960,329 | no |
 
 `full` without `--include-heavy-skills` / `-IncludeHeavySkills` deploys 38
@@ -27,12 +27,33 @@ larger (rules, templates, hooks) — Phase 3 `measure-load` reported the
 deployed directory at 1,790,367 bytes for the old 38-skill default. Do not
 compare the two numbers as if they measured the same thing.
 
+## What each tier ships beyond skills (D58, user final ruling 2026-10-29)
+
+Skills are only half the deploy. The gate/loop layers follow the same tiers:
+
+| Profile | Gate itself | Orchestration (graph + loop) |
+|---|---|---|
+| `minimal` (default) | yes — `pass-gate.py`, `comet_adapter.py`, schema, init template | **no** — `gate/graph.py`, `tools/loop.py`, `templates/loop/` are not shipped |
+| `standard` | yes | yes |
+| `full` | yes | yes |
+
+In short: minimal = the gate itself; standard = the gate + orchestration;
+full = everything. This is distribution only — the loop/graph
+implementations are untouched. Guarded by `tests/repo_checks.py` §3t
+(per-tier file-set assertions) and the `TierGateGraphLoop` PARITY row.
+
+**Migration:** a project previously deployed with `minimal` that already
+has graph/loop files will have those files **removed** on re-deploy with
+`minimal` (each file is backed up with a timestamped `.bak.` copy by the
+deploy scripts first). To keep them, re-deploy with `--profile standard`
+(`-SkillProfile standard`).
+
 **No token-saving claim is made here.** Bytes are bytes, not tokens; no
 host exposes a programmatic token API (see
 `docs/internal/token-adapters.md`). If a future measurement shows a token
 difference, it will be recorded with its method, not asserted from bytes.
 
-## Minimal (default) — 10 skills
+## Minimal (default) — 15 skills (10 gate core + 5 openspec core, D31 amendment 2026-10-29)
 
 Basis tags: `[measured]` = a real run or a real wiring in this repo;
 `[dependency]` = the skill is referenced by a distributable rule template
@@ -51,6 +72,11 @@ Basis tags: `[measured]` = a real run or a real wiring in this repo;
 | `subagent-driven-development` | 59,739 | [provisional] Sub-agents are one of the L13 six primitives; the largest single SKILL.md in the repo (32,577 B) — kept despite its size, flagged for the first ablation review. Guide-listed only. |
 | `requesting-code-review` | 9,423 | [dependency] Project AGENTS template + FAQ guide. |
 | `codegraph` | 1,388 | [measured] Hook integration: `.claude/settings.json` runs `codegraph prompt-hook`. [dependency] Project AGENTS template. |
+| `openspec-new-change` | 5,870 | [provisional] D31 amendment 2026-10-29: openspec core loop step — create the change proposal. No usage telemetry yet. |
+| `openspec-propose` | 16,239 | [provisional] D31 amendment 2026-10-29: openspec core loop step — draft the proposal. No usage telemetry yet. |
+| `openspec-apply-change` | 11,159 | [provisional] D31 amendment 2026-10-29: openspec core loop step — implement the change. No usage telemetry yet. |
+| `openspec-verify-change` | 18,345 | [provisional] D31 amendment 2026-10-29: openspec core loop step — verify the change. No usage telemetry yet. |
+| `openspec-archive-change` | 16,570 | [provisional] D31 amendment 2026-10-29: openspec core loop step — archive the completed change. No usage telemetry yet. |
 
 What minimal deliberately leaves out: the whole OpenSpec family (12 skills,
 a complete workflow, not a core discipline), the Comet adapter (the gate is

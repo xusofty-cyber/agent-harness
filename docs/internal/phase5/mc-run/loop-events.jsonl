@@ -1,0 +1,13 @@
+{"seq": 0, "ts": "2026-10-28T12:01:17Z", "type": "init", "detail": {"kind": "maker-checker", "goal_id": "mc-graph-template", "max_rounds": 5, "consecutive_passes_required": 2, "timeout_s": 60, "max_seconds": 600, "require_approval": true}}
+{"seq": 1, "ts": "2026-10-28T12:01:17Z", "type": "artifacts_copied", "detail": {"round": 1, "artifacts": ["graph.template.md"]}}
+{"seq": 2, "ts": "2026-10-28T12:01:17Z", "type": "round", "detail": {"round": 1, "outcome": "fail", "consecutive_passes": 0}}
+{"seq": 3, "ts": "2026-10-28T12:01:17Z", "type": "artifacts_copied", "detail": {"round": 2, "artifacts": ["graph.template.md"]}}
+{"seq": 4, "ts": "2026-10-28T12:01:17Z", "type": "round", "detail": {"round": 2, "outcome": "fail", "consecutive_passes": 0}}
+{"seq": 5, "ts": "2026-10-28T12:01:17Z", "type": "artifacts_copied", "detail": {"round": 3, "artifacts": ["graph.template.md"]}}
+{"seq": 6, "ts": "2026-10-28T12:01:18Z", "type": "round", "detail": {"round": 3, "outcome": "fail", "consecutive_passes": 0}}
+{"seq": 7, "ts": "2026-10-28T12:01:18Z", "type": "artifacts_copied", "detail": {"round": 4, "artifacts": ["graph.template.md"]}}
+{"seq": 8, "ts": "2026-10-28T12:01:18Z", "type": "round", "detail": {"round": 4, "outcome": "pass", "consecutive_passes": 1}}
+{"seq": 9, "ts": "2026-10-28T12:01:18Z", "type": "artifacts_copied", "detail": {"round": 5, "artifacts": ["graph.template.md"]}}
+{"seq": 10, "ts": "2026-10-28T12:01:18Z", "type": "round", "detail": {"round": 5, "outcome": "pass", "consecutive_passes": 2}}
+{"seq": 11, "ts": "2026-10-28T12:01:18Z", "type": "approval_requested", "detail": {"round": 5, "reason": "pass condition met"}}
+{"seq": 12, "ts": "2026-10-28T12:01:32Z", "type": "approved", "detail": {"by": "owner", "note": "graph template adopted: 5 rounds, checker clean twice, adopting into templates/loop/", "round": 5}}

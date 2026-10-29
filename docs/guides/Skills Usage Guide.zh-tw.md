@@ -1,6 +1,6 @@
 # Skills 使用指南
 
-> **Language / 语言**: [English](Skills%20Usage%20Guide.md) | [简体中文](Skills%20Usage%20Guide.zh.md) | **繁體中文** | [Français](Skills%20Usage%20Guide.fr.md) | [Deutsch](Skills%20Usage%20Guide.de.md)
+> **Language / 语言**: [English](Skills%20Usage%20Guide.md) | [简体中文](Skills%20Usage%20Guide.zh.md) | **繁體中文**
 
 40 個內建 skill 在實戰中如何運作：哪些自動觸發、哪些需要顯式調用，以及各自的使用時機。
 

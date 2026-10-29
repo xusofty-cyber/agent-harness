@@ -1,6 +1,6 @@
 # Skills 使用指南
 
-> **Language / 语言**: [English](Skills%20Usage%20Guide.md) | **简体中文** | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Français](Skills%20Usage%20Guide.fr.md) | [Deutsch](Skills%20Usage%20Guide.de.md)
+> **Language / 语言**: [English](Skills%20Usage%20Guide.md) | **简体中文** | [繁體中文](Skills%20Usage%20Guide.zh-tw.md)
 
 40 个内置 skill 在实际中如何工作：哪些自动触发、哪些需要显式调用，以及每个的使用时机。
 
@@ -21,22 +21,23 @@ Claude Code 通过两种方式决定加载 skill：
 ## 部署分层
 
 `deploy-agents.sh` / `deploy-agents.ps1` 按分层部署技能（Phase 4）。默认分层
-为 `minimal`（10 个技能）。用 `--profile minimal | standard | full` 选择分层
+为 `minimal`（15 个技能）。用 `--profile minimal | standard | full` 选择分层
 （PowerShell：`-Profile`）。成员定义在 `skills-profiles.json` 中，下表必须与之
 一致（CI §3r 检查）。入选依据与每个技能的证据见
 `docs/internal/skill-tiers.md`。
 
-### minimal (default — 10 skills)
+### minimal (default — 15 skills)
 
 `verification-before-completion`, `systematic-debugging`,
 `test-driven-development`, `living-documentation`, `writing-plans`,
 `executing-plans`, `using-git-worktrees`, `subagent-driven-development`,
-`requesting-code-review`, `codegraph`
+`requesting-code-review`, `codegraph`, `openspec-new-change`,
+`openspec-propose`, `openspec-apply-change`, `openspec-verify-change`,
+`openspec-archive-change`
 
-### standard (18 skills)
+### standard (20 skills)
 
-Minimal plus: `comet`, `openspec-new-change`, `openspec-propose`,
-`openspec-apply-change`, `openspec-verify-change`, `openspec-archive-change`,
+Minimal plus: `comet`, `openspec-continue-change`, `openspec-update-change`,
 `finishing-a-development-branch`, `dispatching-parallel-agents`
 
 ### full (40 skills)

@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "kind": "maker-checker",
+  "goal_id": "mc-graph-template",
+  "goal_file": "/tmp/phase5-wt-mc/docs/internal/phase5/goal-mc.md",
+  "status": "complete",
+  "round": 5,
+  "consecutive_passes": 2,
+  "max_rounds": 5,
+  "consecutive_passes_required": 2,
+  "timeout_s": 60,
+  "max_seconds": 600,
+  "require_approval": true,
+  "started_epoch": 1793188877,
+  "ended_epoch": 1793188892,
+  "rounds": [
+    {
+      "round": 1,
+      "phase": "maker",
+      "command": "python3 /tmp/phase5-wt-mc/docs/internal/phase5/maker-graph.py",
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.052
+    },
+    {
+      "round": 1,
+      "phase": "verify",
+      "command": "python3 /tmp/phase5-wt-mc/docs/internal/phase5/checker-graph.py",
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.189,
+      "outcome": "fail"
+    },
+    {
+      "round": 2,
+      "phase": "maker",
+      "command": "python3 /tmp/phase5-wt-mc/docs/internal/phase5/maker-graph.py",
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.052
+    },
+    {
+      "round": 2,
+      "phase": "verify",
+      "command": "python3 /tmp/phase5-wt-mc/docs/internal/phase5/checker-graph.py",
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.19,
+      "outcome": "fail"
+    },
+    {
+      "round": 3,
+      "phase": "maker",
+      "command": "python3 /tmp/phase5-wt-mc/docs/internal/phase5/maker-graph.py",
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.05
+    },
+    {
+      "round": 3,
+      "phase": "verify",
+      "command": "python3 /tmp/phase5-wt-mc/docs/internal/phase5/checker-graph.py",
+      "returncode": 1,
+      "timed_out": false,
+      "duration_s": 0.179,
+      "outcome": "fail"
+    },
+    {
+      "round": 4,
+      "phase": "maker",
+      "command": "python3 /tmp/phase5-wt-mc/docs/internal/phase5/maker-graph.py",
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.051
+    },
+    {
+      "round": 4,
+      "phase": "verify",
+      "command": "python3 /tmp/phase5-wt-mc/docs/internal/phase5/checker-graph.py",
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.173,
+      "outcome": "pass"
+    },
+    {
+      "round": 5,
+      "phase": "maker",
+      "command": "python3 /tmp/phase5-wt-mc/docs/internal/phase5/maker-graph.py",
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.05
+    },
+    {
+      "round": 5,
+      "phase": "verify",
+      "command": "python3 /tmp/phase5-wt-mc/docs/internal/phase5/checker-graph.py",
+      "returncode": 0,
+      "timed_out": false,
+      "duration_s": 0.188,
+      "outcome": "pass"
+    }
+  ]
+}

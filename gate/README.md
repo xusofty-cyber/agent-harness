@@ -145,11 +145,26 @@ Two logged escape hatches, both visible in the evidence and the log:
   any item is `in_progress`. Set `GATE_ALLOW_STOP=1` with a non-empty
   `GATE_STOP_REASON` to stop now; the hook appends a `stop_override`
   event first. An override without a reason is not an override.
+  If the hook already blocked the same stop once, Claude Code sets
+  `stop_hook_active` and a second attempt is allowed (blocking again
+  would loop forever); the allowance is logged as
+  `stop_allowed_hook_active`.
+
+**Audit responsibility for overrides.** An override is a human decision,
+not a passing run: `check-clean` never re-verifies an overridden item
+(3b skips override items by design), so nothing else will catch a bad
+override. The person who overrides owns the follow-up: every override
+must be re-examined at the next session breakpoint (SESSION_STATE
+review) and either verified for real or reopened
+(`pass-gate.py reopen`). An override older than one session without
+re-examination must be treated as an open item again.
+`pass-gate.py status` and `events` list overrides explicitly so a
+reviewer can find them.
 
 ## Deploy
 
 `deploy-agents.sh` / `.ps1` copy the gate *code* (`pass-gate.py`,
-`feature_list.schema.json`, `init.template.sh`, this README) to the
+`graph.py`, `feature_list.schema.json`, `init.template.sh`, this README) to the
 target's `gate/`. They never copy `feature_list.json`, `events.jsonl`,
 or `clean-state.json` — those are per-project state. A target project
 runs `sh gate/init.template.sh --name <project> --verify "<cmd>" --start

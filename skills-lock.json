@@ -121,7 +121,10 @@
       "version": "0.1.0",
       "skillPath": ".agents/skills/open-code-review/SKILL.md",
       "computedHash": "d53c2617dacf50ffbab13b41d7ce6f3b55b8a76940da783b81870dca01946bf8",
-      "domain": "local"
+      "domain": "local",
+      "npmVersion": "1.13.3",
+      "pinnedAt": "2026-10-28",
+      "pinnedFrom": "npm view @alibaba-group/open-code-review version"
     },
     "openspec": {
       "source": "Fission-AI/OpenSpec",
@@ -276,10 +279,10 @@
       "skillPath": ".agents/skills/rtk/SKILL.md",
       "computedHash": "1bf7772274c3ad42ef5172d294a6115e26f0acc639037a4c5fa283d8d67f4900",
       "domain": "utility",
-      "pinnedCommit": "e05c7bdfacfcfe1f845d11f47339e4eae63eb3f5",
+      "pinnedCommit": "7e92da00a5cf737dc87850505aa3dea603454613",
       "installerSha256": "7ca3997314f631b8ad267e5add9af4b7a2f0351bdab0b1c5a9b7ed4008d0434a",
-      "installerUrl": "https://raw.githubusercontent.com/rtk-ai/rtk/e05c7bdfacfcfe1f845d11f47339e4eae63eb3f5/install.sh",
-      "pinnedAt": "2026-10-28"
+      "installerUrl": "https://raw.githubusercontent.com/rtk-ai/rtk/7e92da00a5cf737dc87850505aa3dea603454613/install.sh",
+      "pinnedAt": "2026-10-29"
     },
     "subagent-driven-development": {
       "source": "obra/superpowers",

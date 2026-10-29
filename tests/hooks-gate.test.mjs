@@ -156,6 +156,15 @@ test("Stop hook override without a reason does not override", () => {
   assert.equal(r.exitCode, 2);
 });
 
+test("Stop hook allows stopping on second attempt (stop_hook_active) and logs it", () => {
+  const dir = makeGateDir([inProgressItem]);
+  const r = runHook(STOP_GATE, { cwd: dir, stop_hook_active: true }, dir);
+  assert.equal(r.exitCode, 0);
+  const events = readFileSync(join(dir, "gate", "events.jsonl"), "utf-8");
+  assert.match(events, /stop_allowed_hook_active/);
+  assert.match(events, /half-done-thing/);
+});
+
 test("Stop hook fail-open on unreadable feature list", () => {
   const dir = mkdtempSync(join(tmpdir(), "gate-hook-test-"));
   mkdirSync(join(dir, "gate"));

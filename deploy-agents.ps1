@@ -39,8 +39,10 @@ param (
 
     [switch]$IncludeHeavySkills,
 
-    # Phase 4 (4-1): deployment profile. Default minimal (10 core skills);
-    # membership lives in skills-profiles.json. NOTE: $Profile is a
+    # Phase 4 (4-1): deployment profile. Default minimal (15 skills: 10 gate core + 5 openspec core);
+    # membership lives in skills-profiles.json. D58 (user final ruling
+    # 2026-10-29): minimal ships the gate itself only (no graph.py, no
+    # loop layer); standard/full add orchestration. NOTE: $Profile is a
     # PowerShell automatic variable and cannot be a parameter name, so the
     # parameter is $SkillProfile.
     [ValidateSet("minimal", "standard", "full")]
@@ -52,6 +54,13 @@ param (
 # 35c9860b77b42bafa0c2d80d8d695889f888a924). Must match
 # skills-lock.json comet.npmVersion — tests/repo_checks.py guards it.
 $script:CometNpmVersion = "0.5.1"
+
+# Phase 6 (6-2): pinned Open Code Review CLI version, measured 2026-10-28
+# with `npm view @alibaba-group/open-code-review version` (1.13.3). Must
+# match skills-lock.json open-code-review.npmVersion — tests/repo_checks.py
+# guards it. The open-code-review *skill* is authored in-repo (local); the
+# pin here is for the optional *CLI* it can delegate to, not the skill.
+$script:OcrNpmVersion = "1.13.3"
 
 $ToolClaude = $true
 $ToolCopilot = $true
@@ -202,9 +211,7 @@ function Prompt-InteractiveWizard {
     $langOptions = @(
         @{ Label = "English (en)"; Value = "en" },
         @{ Label = "简体中文 (Simplified Chinese, zh)"; Value = "zh" },
-        @{ Label = "繁體中文 (Traditional Chinese, zh-tw)"; Value = "zh-tw" },
-        @{ Label = "Français (French, fr)"; Value = "fr" },
-        @{ Label = "Deutsch (German, de)"; Value = "de" }
+        @{ Label = "繁體中文 (Traditional Chinese, zh-tw)"; Value = "zh-tw" }
     )
     $script:Language = Prompt-SingleSelect "[1/5] 选择规则模板语言 (Select Template Language):" $langOptions
 
@@ -287,8 +294,8 @@ $LangSuffix = switch -Regex ($NormLang) {
     '^(zh|cn|zh-cn|zh-hans)$' { '' }
     '^(zh-tw|tw|zh-hk|hk|zh-hant)$' { '.zh-tw' }
     '^(en|en-us|en-gb)$' { '.en' }
-    '^(fr|fr-fr)$' { '.fr' }
-    '^(de|de-de)$' { '.de' }
+    # FR/DE removed by user final ruling 2026-10-29 (D27); those inputs
+    # fall through to the default below.
     Default { '.en' }
 }
 
@@ -332,6 +339,14 @@ if (-not (Test-Path $ResolvedProjectTemplate)) {
         $found = Get-ChildItem -Path $ScriptDir -Filter "*项目级*AGENTS*.md" -File -ErrorAction SilentlyContinue | Select-Object -First 1
     }
     if ($found) { $ResolvedProjectTemplate = $found.FullName }
+}
+
+# TIER_SLIM_TEMPLATE (merged from v3-yunkai, D-009): minimal/standard
+# profiles ship the slim Project template when a .slim.md variant exists
+# for the resolved language; full always ships the full text.
+if ($SkillProfile -ne "full") {
+    $slimTemplate = $ResolvedProjectTemplate -replace '\.md$', '.slim.md'
+    if (Test-Path $slimTemplate) { $ResolvedProjectTemplate = $slimTemplate }
 }
 
 $ResolvedDirectoryTemplate = Resolve-TemplateFile "Directory AGENTS" $LangSuffix
@@ -516,11 +531,11 @@ function Guide-OptionalCliTools([string]$TargetPath) {
     } else {
         Write-Host "  Open Code Review CLI (ocr) is optional. The open-code-review skill works without it (Tier B methodology mode); installing enables zero-LLM-cost delegation review."
         if (Confirm-OptionalStep "Install Open Code Review CLI now?") {
-            & $npmCmd install -g @alibaba-group/open-code-review
-            if ($LASTEXITCODE -ne 0) { Write-Warning "ocr installation failed. Manual command: npm install -g @alibaba-group/open-code-review" }
+            & $npmCmd install -g "@alibaba-group/open-code-review@$script:OcrNpmVersion"
+            if ($LASTEXITCODE -ne 0) { Write-Warning "ocr installation failed. Manual command: npm install -g @alibaba-group/open-code-review@$script:OcrNpmVersion" }
             else { Write-Host "  [INFO] ocr installed. Delegation mode needs no LLM key; the host agent performs the review." -ForegroundColor Yellow }
         } else {
-            Write-Host "  Install command: npm install -g @alibaba-group/open-code-review"
+            Write-Host "  Install command: npm install -g @alibaba-group/open-code-review@$script:OcrNpmVersion"
         }
     }
 
@@ -1267,6 +1282,8 @@ if ((Test-Path $SourceSkillsLock) -and (-not $isSelfRepo)) {
 
 # Deploy gate layer (Phase 1): pass-gate.py + schema + init template.
 # GateDeploy
+# GraphDeploy (merged from v3-yunyi): gate/graph.py ships with the gate
+# layer — the graph executor, not per-project state.
 # Only the code ships. feature_list.json / events.jsonl are per-project
 # state, created by `gate/init.template.sh` or `pass-gate.py init` — never
 # copied from this repo. Skipped on self-deploy (same directory).
@@ -1276,7 +1293,22 @@ if ((Test-Path $SourceGateDir) -and (-not $isSelfRepo)) {
     if (-not (Test-Path $TargetGateDir)) {
         New-Item -ItemType Directory -Path $TargetGateDir -Force | Out-Null
     }
-    foreach ($gateFile in @("pass-gate.py", "feature_list.schema.json", "init.template.sh", "README.md")) {
+# TierGateGraphLoop (D58, user final ruling 2026-10-29): graph.py ships
+# only on standard/full profiles. On minimal, a previously deployed
+# graph.py is backed up and removed (re-deploy with -SkillProfile standard
+# to keep it).
+    $gateFiles = @("pass-gate.py", "comet_adapter.py", "feature_list.schema.json", "init.template.sh", "README.md")
+    if ($SkillProfile -ne "minimal") {
+        $gateFiles = @("pass-gate.py", "graph.py", "comet_adapter.py", "feature_list.schema.json", "init.template.sh", "README.md")
+    } else {
+        $oldGraph = Join-Path $TargetGateDir "graph.py"
+        if (Test-Path $oldGraph) {
+            Backup-ManagedPath $oldGraph
+            Remove-Item -Path $oldGraph -Force
+            Write-Host "  [INFO] minimal tier does not ship graph.py (existing file backed up and removed; use -SkillProfile standard to keep it)"
+        }
+    }
+    foreach ($gateFile in $gateFiles) {
         $sourceFile = Join-Path $SourceGateDir $gateFile
         if (Test-Path $sourceFile) {
             $targetFile = Join-Path $TargetGateDir $gateFile
@@ -1286,7 +1318,70 @@ if ((Test-Path $SourceGateDir) -and (-not $isSelfRepo)) {
             }
         }
     }
-    Write-Host "  [OK] Deployed gate layer: gate/ (pass-gate.py + schema + init.template.sh)" -ForegroundColor Green
+    if ($SkillProfile -eq "minimal") {
+        Write-Host "  [OK] Deployed gate layer: gate/ (pass-gate.py + comet_adapter.py + schema + init.template.sh; graph.py ships with standard+)" -ForegroundColor Green
+    } else {
+        Write-Host "  [OK] Deployed gate layer: gate/ (pass-gate.py + graph.py + comet_adapter.py + schema + init.template.sh)" -ForegroundColor Green
+    }
+}
+
+# Deploy Loop layer (Phase 6, 6-5; D21 leftover): loop.py + templates.
+# LoopDeploy
+# Only the code + templates ship. loop-state.json / loop-events.jsonl are
+# per-project state, created by `tools/loop.py` runs — never copied from
+# this repo. Skipped on self-deploy (same directory).
+$SourceLoopDir = Join-Path $ScriptDir "templates\loop"
+if ((Test-Path $SourceLoopDir) -and (-not $isSelfRepo)) {
+    $TargetLoopDir = Join-Path $ResolvedProjectPath "templates\loop"
+    if (-not (Test-Path $TargetLoopDir)) {
+        New-Item -ItemType Directory -Path $TargetLoopDir -Force | Out-Null
+    }
+    if ($SkillProfile -eq "minimal") {
+        foreach ($loopFile in @("goal.template.md", "goal.template.zh.md", "loop-state.template.md", "loop-state.template.zh.md", "graph.template.md", "graph.template.zh.md")) {
+            $targetFile = Join-Path $TargetLoopDir $loopFile
+            if (Test-Path $targetFile) {
+                Backup-ManagedPath $targetFile
+                Remove-Item -Path $targetFile -Force
+            }
+        }
+        if ((Test-Path $TargetLoopDir) -and ((Get-ChildItem $TargetLoopDir -Force).Count -eq 0)) {
+            Remove-Item -Path $TargetLoopDir -Force
+        }
+        Write-Host "  [INFO] minimal tier does not ship loop templates (existing files backed up and removed; use -SkillProfile standard to keep them)"
+    } else {
+        foreach ($loopFile in @("goal.template.md", "goal.template.zh.md", "loop-state.template.md", "loop-state.template.zh.md", "graph.template.md", "graph.template.zh.md")) {
+            $sourceFile = Join-Path $SourceLoopDir $loopFile
+            if (Test-Path $sourceFile) {
+                $targetFile = Join-Path $TargetLoopDir $loopFile
+                if ($Update -or (-not (Test-Path $targetFile))) {
+                    if ($Update) { Backup-ManagedPath $targetFile }
+                    Copy-Item -Path $sourceFile -Destination $targetFile -Force
+                }
+            }
+        }
+        Write-Host "  [OK] Deployed loop templates: templates/loop/ (goal / loop-state / graph, EN+ZH)" -ForegroundColor Green
+    }
+}
+$SourceLoopRunner = Join-Path $ScriptDir "tools\loop.py"
+if ((Test-Path $SourceLoopRunner) -and (-not $isSelfRepo)) {
+    $TargetToolsDir = Join-Path $ResolvedProjectPath "tools"
+    if (-not (Test-Path $TargetToolsDir)) {
+        New-Item -ItemType Directory -Path $TargetToolsDir -Force | Out-Null
+    }
+    $targetLoopRunner = Join-Path $TargetToolsDir "loop.py"
+    if ($SkillProfile -eq "minimal") {
+        if (Test-Path $targetLoopRunner) {
+            Backup-ManagedPath $targetLoopRunner
+            Remove-Item -Path $targetLoopRunner -Force
+            Write-Host "  [INFO] minimal tier does not ship loop runner (existing file backed up and removed; use -SkillProfile standard to keep it)"
+        }
+    } else {
+        if ($Update -or (-not (Test-Path $targetLoopRunner))) {
+            if ($Update) { Backup-ManagedPath $targetLoopRunner }
+            Copy-Item -Path $SourceLoopRunner -Destination $targetLoopRunner -Force
+        }
+        Write-Host "  [OK] Deployed loop runner: tools/loop.py" -ForegroundColor Green
+    }
 }
 
 # Sync .ai-memory.toml.example
@@ -1357,6 +1452,21 @@ foreach ($sub in $docSubdirs) {
 }
 Write-Host "  [OK] Initialized living documentation scaffold: docs/{specs,architecture,reference,guides,management,tests,adr}" -ForegroundColor Green
 
+# Merged from v3-yunkai: snapshot an existing .comet/ state dir before
+# comet init rewrites it. Backups live under .comet/backups/ (covered by
+# the scaffolded gitignore).
+function Backup-CometState {
+    param([string]$TargetDir)
+    $cometDir = Join-Path $TargetDir ".comet"
+    if (-not (Test-Path $cometDir)) { return }
+    $ts = Get-Date -Format "yyyyMMdd-HHmmss"
+    $dest = Join-Path $cometDir "backups\$ts"
+    New-Item -ItemType Directory -Path $dest -Force | Out-Null
+    Get-ChildItem -LiteralPath $cometDir -Force | Where-Object { $_.Name -ne "backups" } |
+        Copy-Item -Destination $dest -Recurse -Force
+    Write-Host "  [OK] Comet state backed up: .comet/backups/$ts" -ForegroundColor Green
+}
+
 # ==============================================================================
 # 9. Optional Comet CLI Init (-CometInit) & Configuration Scaffold
 # ==============================================================================
@@ -1373,6 +1483,7 @@ if ($cometCli -or $CometInit) {
 }
 if ($CometInit) {
     if ($cometCli) {
+        Backup-CometState $ResolvedProjectPath
         Write-Host "`n>>> Running 'comet init' in target project..." -ForegroundColor Yellow
         try {
             Push-Location $ResolvedProjectPath

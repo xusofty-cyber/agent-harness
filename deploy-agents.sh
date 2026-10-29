@@ -22,35 +22,44 @@ NC='\033[0m' # No Color
 # Never write a different version in docs; the lock is the record.
 COMET_NPM_VERSION="0.5.1"
 
+# Phase 6 (6-2): pinned Open Code Review CLI version, measured 2026-10-28
+# with `npm view @alibaba-group/open-code-review version` (1.13.3). Must
+# match skills-lock.json open-code-review.npmVersion — tests/repo_checks.py
+# guards it. The open-code-review *skill* is authored in-repo (local); the
+# pin here is for the optional *CLI* it can delegate to, not the skill.
+OCR_NPM_VERSION="1.13.3"
+
 # Print usage
 usage() {
     echo -e "${CYAN}用法 (Usage):${NC}"
-    echo "  $0 <项目根目录路径> [--global|-g] [--update|-u] [--initialize|-i] [--directory <相对目录>] [--check|-k] [--lang <en|zh|zh-tw|fr|de>]"
-    echo "  $0 --global|-g [--update|-u] [--lang <en|zh|zh-tw|fr|de>]   # 初始化全局配置；--update 先备份再覆盖已有规则"
+    echo "  $0 <项目根目录路径> [--global|-g] [--update|-u] [--initialize|-i] [--directory <相对目录>] [--check|-k] [--lang <en|zh|zh-tw>]"
+    echo "  $0 --global|-g [--update|-u] [--lang <en|zh|zh-tw>]   # 初始化全局配置；--update 先备份再覆盖已有规则"
     echo ""
     echo -e "${CYAN}参数说明 (Parameters):${NC}"
     echo "  <项目根目录路径>   目标项目所在的相对路径或绝对路径。"
     echo "  --global, -g       初始化 Claude、Antigravity 2.0/CLI/IDE、Codex 用户全局规则。"
     echo "  --update, -u       更新模板仓库；与 --global 一起使用时，先备份再覆盖全局规则。"
-    echo "  --lang, -l         指定模板语言 (en, zh, zh-tw, fr, de；默认 en)。"
+    echo "  --lang, -l         指定模板语言 (en, zh, zh-tw；默认 en)。"
     echo "  --interactive, -I  启动逐步交互式选择向导（单选语言/范围、多选 Agent 工具与选项）。"
     echo "  --initialize, -i 识别项目事实，生成 AGENTS.md 并列出待确认项。"
     echo "  --directory       与 --initialize 配合，为现有子目录生成目录级 AGENTS.md。"
     echo "  --check, -k       检查项目级规则中的初始化占位项；可搭配 --directory 检查模块规则。"
     echo "  --comet-init       若系统中已安装 comet CLI，自动在目标项目中运行 comet init。"
     echo "  --include-heavy-skills 部署可选重型技能 docx 与 brainstorming（默认跳过；docx 约 1.3 MB，brainstorming 含本地服务 server.cjs）。只影响本次新复制，不删除目标项目已有文件。"
-    echo "  --profile <minimal|standard|full> 部署技能分层（默认 minimal：10 个核心技能；standard：18 个；full：全部 40 个。成员见 skills-profiles.json）。"
+    echo "  --profile <minimal|standard|full> 部署分层（默认 minimal：15 个技能（10 个门禁核心 + 5 个 openspec 核心）+ 门禁本身（不含 graph.py 与循环层）；standard：20 个技能 + 门禁 + 编排（graph.py、loop.py 与模板）；full：全部 40 个技能 + 门禁 + 编排。技能成员见 skills-profiles.json）。"
     echo "  --ai-memory-init, -m 初始化项目 .ai-memory.toml 并接入跨工具记忆 (ai-memory)。
   --pipeline         启动统一流水线 (Pipeline: 规则部署 + AI记忆 + 技能同步 + 文档质检)。"
     echo ""
     echo -e "${CYAN}示例 (Examples):${NC}"
     echo "  $0 /path/to/my-project --lang en"
     echo "  $0 /path/to/my-project --lang zh-tw"
-    echo "  $0 /path/to/my-project --global --update --lang fr"
+    echo "  $0 /path/to/my-project --global --update --lang zh-tw"
     echo "  $0 /path/to/my-project --comet-init"
     echo "  $0 /path/to/my-project --ai-memory-init"
     echo "  $0 --global --update"
-    exit 1
+    # Exit code is the caller's choice: --help passes 0, error paths
+    # (missing target) call usage with no argument and keep the old 1.
+    exit "${1:-1}"
 }
 
 # Parse arguments
@@ -62,7 +71,7 @@ DO_AI_MEMORY_INIT=false
 DO_INITIALIZE=false
 DO_CHECK=false
 INCLUDE_HEAVY_SKILLS=false
-# Phase 4 (4-1): deployment profile. Default minimal (10 core skills);
+# Phase 4 (4-1): deployment profile. Default minimal (15 skills: 10 gate core + 5 openspec core);
 # membership lives in skills-profiles.json, never in this script.
 PROFILE="minimal"
 DIRECTORY_PATH=""
@@ -128,7 +137,7 @@ while [ "$arg_index" -lt "$#" ]; do
             ;;
         --lang|-l)
             arg_index=$((arg_index + 1))
-            if [ "$arg_index" -ge "$#" ]; then echo "[!] --lang requires a language code (e.g. en, zh, zh-tw, fr, de)" >&2; exit 2; fi
+            if [ "$arg_index" -ge "$#" ]; then echo "[!] --lang requires a language code (e.g. en, zh, zh-tw)" >&2; exit 2; fi
             LANG_OPTION="${args[$arg_index]}"
             ;;
         --directory)
@@ -137,7 +146,7 @@ while [ "$arg_index" -lt "$#" ]; do
             DIRECTORY_PATH="${args[$arg_index]}"
             ;;
         --help|-h)
-            usage
+            usage 0
             ;;
         *)
             if [ -z "$TARGET_PROJECT_ARG" ]; then
@@ -354,9 +363,7 @@ prompt_interactive_wizard() {
     prompt_select "[1/5] 选择规则模板语言 (Select Template Language):" \
         "English (en)" "en" \
         "简体中文 (Simplified Chinese, zh)" "zh" \
-        "繁體中文 (Traditional Chinese, zh-tw)" "zh-tw" \
-        "Français (French, fr)" "fr" \
-        "Deutsch (German, de)" "de"
+        "繁體中文 (Traditional Chinese, zh-tw)" "zh-tw"
     LANG_OPTION="$SELECTED_VALUE"
 
     prompt_select "[2/5] 选择部署范围 (Select Deployment Scope):" \
@@ -461,12 +468,8 @@ case "$NORM_LANG" in
     en|en-us|en-gb)
         LANG_SUFFIX=".en"
         ;;
-    fr|fr-fr)
-        LANG_SUFFIX=".fr"
-        ;;
-    de|de-de)
-        LANG_SUFFIX=".de"
-        ;;
+    # FR/DE removed by user final ruling 2026-10-29 (D27); those inputs
+    # fall through to the default below.
     *)
         LANG_SUFFIX=".en"
         ;;
@@ -535,6 +538,16 @@ if [ ! -f "${PROJECT_TEMPLATE}" ]; then
     if [ ! -f "${PROJECT_TEMPLATE}" ]; then
         PROJECT_TEMPLATE="${SCRIPT_DIR}/项目级 AGENTS.md"
     fi
+fi
+
+# TIER_SLIM_TEMPLATE (merged from v3-yunkai, D-009): minimal/standard
+# profiles ship the slim Project template when a .slim.md variant exists
+# for the resolved language; full always ships the full text. Ablation #2
+# showed the slim template is outcome-neutral on t3/t4 with ~31% less
+# apparatus context.
+if [ "$PROFILE" != "full" ]; then
+    _slim_tpl="${PROJECT_TEMPLATE%.md}.slim.md"
+    if [ -f "$_slim_tpl" ]; then PROJECT_TEMPLATE="$_slim_tpl"; fi
 fi
 
 DIRECTORY_TEMPLATE="$(resolve_template "Directory AGENTS" "$LANG_SUFFIX")"
@@ -676,14 +689,16 @@ install_pinned_script() {
 guide_optional_cli_tools() {
     local target="$1"
     # Phase 2 (2-2): pinned installers. The URL pins the upstream commit and
-    # the SHA256 is the hash of the installer at that commit, both measured
-    # 2026-10-28. They must match skills-lock.json (codegraph/rtk entries) —
+    # the SHA256 is the hash of the installer at that commit (codegraph
+    # measured 2026-10-28; rtk re-pinned to tip 2026-10-29, installer
+    # script byte-identical, same SHA256). They must match
+    # skills-lock.json (codegraph/rtk entries) —
     # tests/repo_checks.py guards the agreement. Never pipe a live network
     # stream into a shell: install_pinned_script downloads to a temp file,
     # verifies the hash, and only then runs it.
     local install_codegraph_url='https://raw.githubusercontent.com/colbymchenry/codegraph/01e0ac3aa7419a7ab75583963e8a95359f3af1d3/install.sh'
     local install_codegraph_sha='e8bbcc694584d5c88fa7c25103fc0f9c238d63a86c1494ca03448b680dbcc86e'
-    local install_rtk_url='https://raw.githubusercontent.com/rtk-ai/rtk/e05c7bdfacfcfe1f845d11f47339e4eae63eb3f5/install.sh'
+    local install_rtk_url='https://raw.githubusercontent.com/rtk-ai/rtk/7e92da00a5cf737dc87850505aa3dea603454613/install.sh'
     local install_rtk_sha='7ca3997314f631b8ad267e5add9af4b7a2f0351bdab0b1c5a9b7ed4008d0434a'
 
     echo -e "\n${CYAN}>>> 可选 CLI 工具（Ponytail / Caveman 已作为 Skill 随项目部署）${NC}"
@@ -743,13 +758,13 @@ guide_optional_cli_tools() {
     else
         echo "  Open Code Review CLI (ocr) 未安装。open-code-review 技能仍可用（Tier B 方法论模式），安装后可启用零 Token 开销的委托评审。"
         if prompt_yes_no "现在安装 Open Code Review CLI？"; then
-            if npm install -g @alibaba-group/open-code-review; then
+            if npm install -g "@alibaba-group/open-code-review@${OCR_NPM_VERSION}"; then
                 echo -e "  ${GREEN}[√] ocr 已安装。委托模式无需配置 LLM Key，由当前 Agent 直接推理。${NC}"
             else
-                echo "  [!] ocr 安装失败。可手动执行：npm install -g @alibaba-group/open-code-review"
+                echo "  [!] ocr 安装失败。可手动执行：npm install -g @alibaba-group/open-code-review@${OCR_NPM_VERSION}"
             fi
         else
-            echo "  安装命令：npm install -g @alibaba-group/open-code-review"
+            echo "  安装命令：npm install -g @alibaba-group/open-code-review@${OCR_NPM_VERSION}"
         fi
     fi
 
@@ -1413,13 +1428,27 @@ fi
 
 # Deploy gate layer (Phase 1): pass-gate.py + schema + init template.
 # gate-deploy
+# graph-deploy (merged from v3-yunyi): gate/graph.py ships with the gate
+# layer — the graph executor, not per-project state.
+# tier-gate-graph-loop (D58, user final ruling 2026-10-29): graph.py ships
+# only on standard/full profiles. On minimal, a previously deployed
+# graph.py is backed up and removed (re-deploy with --profile standard
+# to keep it).
 # Only the code ships. feature_list.json / events.jsonl are per-project
 # state, created by `gate/init.template.sh` or `pass-gate.py init` — never
 # copied from this repo. Skipped on self-deploy (same directory).
 if [ -d "${SCRIPT_DIR}/gate" ] && [ "${SCRIPT_DIR}" != "${TARGET_PROJECT_DIR}" ]; then
     TARGET_GATE_DIR="${TARGET_PROJECT_DIR}/gate"
     mkdir -p "${TARGET_GATE_DIR}"
-    for gate_file in pass-gate.py feature_list.schema.json init.template.sh README.md; do
+    for gate_file in pass-gate.py graph.py comet_adapter.py feature_list.schema.json init.template.sh README.md; do
+        if [ "$gate_file" = "graph.py" ] && [ "$PROFILE" = "minimal" ]; then
+            if [ -f "${TARGET_GATE_DIR}/graph.py" ]; then
+                backup_path "${TARGET_GATE_DIR}/graph.py"
+                rm -f "${TARGET_GATE_DIR}/graph.py"
+                echo -e "  [i] minimal 档不部署 graph.py（已有文件已备份并移除；改用 --profile standard 可保留）"
+            fi
+            continue
+        fi
         if [ -f "${SCRIPT_DIR}/gate/${gate_file}" ]; then
             if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_GATE_DIR}/${gate_file}" ]; then
                 if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_GATE_DIR}/${gate_file}"; fi
@@ -1427,7 +1456,62 @@ if [ -d "${SCRIPT_DIR}/gate" ] && [ "${SCRIPT_DIR}" != "${TARGET_PROJECT_DIR}" ]
             fi
         fi
     done
-    echo -e "  ${GREEN}[√] 已部署门禁层: gate/ (pass-gate.py + schema + init.template.sh)${NC}"
+    if [ "$PROFILE" = "minimal" ]; then
+        echo -e "  ${GREEN}[√] 已部署门禁层: gate/ (pass-gate.py + comet_adapter.py + schema + init.template.sh；graph.py 随 standard+ 发货)${NC}"
+    else
+        echo -e "  ${GREEN}[√] 已部署门禁层: gate/ (pass-gate.py + graph.py + comet_adapter.py + schema + init.template.sh)${NC}"
+    fi
+fi
+
+# Deploy Loop layer (Phase 6, 6-5; D21 leftover): loop.py + templates.
+# loop-deploy
+# tier-gate-graph-loop (D58, user final ruling 2026-10-29): the loop layer
+# ships only on standard/full profiles. On minimal, previously deployed
+# loop files are backed up and removed (re-deploy with --profile standard
+# to keep them).
+# Only the code + templates ship. loop-state.json / loop-events.jsonl are
+# per-project state, created by `tools/loop.py` runs — never copied from
+# this repo. Skipped on self-deploy (same directory).
+if [ -d "${SCRIPT_DIR}/templates/loop" ] && [ "${SCRIPT_DIR}" != "${TARGET_PROJECT_DIR}" ]; then
+    TARGET_LOOP_DIR="${TARGET_PROJECT_DIR}/templates/loop"
+    if [ "$PROFILE" = "minimal" ]; then
+        for loop_file in goal.template.md goal.template.zh.md loop-state.template.md loop-state.template.zh.md graph.template.md graph.template.zh.md; do
+            if [ -f "${TARGET_LOOP_DIR}/${loop_file}" ]; then
+                backup_path "${TARGET_LOOP_DIR}/${loop_file}"
+                rm -f "${TARGET_LOOP_DIR}/${loop_file}"
+            fi
+        done
+        rmdir "${TARGET_LOOP_DIR}" 2>/dev/null || true
+        echo -e "  [i] minimal 档不部署循环层模板（已有文件已备份并移除；改用 --profile standard 可保留）"
+    else
+        mkdir -p "${TARGET_LOOP_DIR}"
+        for loop_file in goal.template.md goal.template.zh.md loop-state.template.md loop-state.template.zh.md graph.template.md graph.template.zh.md; do
+            if [ -f "${SCRIPT_DIR}/templates/loop/${loop_file}" ]; then
+                if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_LOOP_DIR}/${loop_file}" ]; then
+                    if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_LOOP_DIR}/${loop_file}"; fi
+                    cp -f "${SCRIPT_DIR}/templates/loop/${loop_file}" "${TARGET_LOOP_DIR}/${loop_file}"
+                fi
+            fi
+        done
+        echo -e "  ${GREEN}[√] 已部署循环层模板: templates/loop/ (goal / loop-state / graph，中英)${NC}"
+    fi
+fi
+if [ -f "${SCRIPT_DIR}/tools/loop.py" ] && [ "${SCRIPT_DIR}" != "${TARGET_PROJECT_DIR}" ]; then
+    TARGET_TOOLS_DIR="${TARGET_PROJECT_DIR}/tools"
+    if [ "$PROFILE" = "minimal" ]; then
+        if [ -f "${TARGET_TOOLS_DIR}/loop.py" ]; then
+            backup_path "${TARGET_TOOLS_DIR}/loop.py"
+            rm -f "${TARGET_TOOLS_DIR}/loop.py"
+            echo -e "  [i] minimal 档不部署循环层运行器（已有文件已备份并移除；改用 --profile standard 可保留）"
+        fi
+    else
+        mkdir -p "${TARGET_TOOLS_DIR}"
+        if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_TOOLS_DIR}/loop.py" ]; then
+            if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_TOOLS_DIR}/loop.py"; fi
+            cp -f "${SCRIPT_DIR}/tools/loop.py" "${TARGET_TOOLS_DIR}/loop.py"
+        fi
+        echo -e "  ${GREEN}[√] 已部署循环层运行器: tools/loop.py${NC}"
+    fi
 fi
 
 # Sync .ai-memory.toml.example
@@ -1490,6 +1574,20 @@ for doc_subdir in specs architecture reference guides management tests adr; do
 done
 echo -e "  ${GREEN}[√] 已就绪文档骨架目录: docs/{specs,architecture,reference,guides,management,tests,adr}${NC}"
 
+# Merged from v3-yunkai: snapshot an existing .comet/ state dir before
+# comet init rewrites it. Backups live under .comet/backups/ (covered by
+# the scaffolded gitignore).
+backup_comet_state() {
+    local target_dir="$1" ts dest
+    [ -d "${target_dir}/.comet" ] || return 0
+    ts="$(date +%Y%m%d-%H%M%S)"
+    dest="${target_dir}/.comet/backups/${ts}"
+    mkdir -p "$dest"
+    cp -R "${target_dir}/.comet/." "$dest/" 2>/dev/null || true
+    rm -rf "$dest/backups"
+    echo -e "  ${GREEN}[√] Comet 状态已备份 (state backup): .comet/backups/${ts}${NC}"
+}
+
 # ==============================================================================
 # 9. Optional Comet CLI Init (--comet-init) & Configuration Scaffold
 # ==============================================================================
@@ -1505,6 +1603,7 @@ fi
 
 if [ "$DO_COMET_INIT" = true ]; then
     if command -v comet >/dev/null 2>&1; then
+        backup_comet_state "${TARGET_PROJECT_DIR}"
         echo -e "\n${YELLOW}>>> 正在目标项目中运行 'comet init'...${NC}"
         (cd "${TARGET_PROJECT_DIR}" && comet init) || echo -e "  ${YELLOW}[!] comet init 执行存在告警。${NC}"
     else

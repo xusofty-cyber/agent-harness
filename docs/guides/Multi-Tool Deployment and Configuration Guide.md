@@ -1,6 +1,6 @@
 # Multi-Tool (Codex / Claude Code / Antigravity 2.0 / CLI / IDE / Zed) AI Engineering Deployment & Configuration Guide
 
-> **Language / 语言**: **English** | [简体中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [繁體中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [Français](Multi-Tool%20Deployment%20and%20Configuration%20Guide.fr.md) | [Deutsch](Multi-Tool%20Deployment%20and%20Configuration%20Guide.de.md)
+> **Language / 语言**: **English** | [简体中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [繁體中文](Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md)
 
 This guide provides an end-to-end specification on how to deploy, configure, and collaboratively utilize the **Three-Tier AGENTS.md Architecture** (Global, Project, and Directory levels) across **OpenAI Codex / GitHub Copilot**, **Claude Code**, **Google Antigravity IDE**, and **Zed IDE**, tailored for real-world scenarios emphasizing software engineering while supporting professional technical documentation.
 
@@ -112,7 +112,7 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
        ├─ [Zero arguments in terminal OR with -Interactive / --interactive]
        │       ▼
        │  Phase 0: Interactive Step-by-Step Terminal Wizard (TUI Arrow-Key & Checkboxes)
-       │    ├─ [1/5] Select Template Language (English / 简体中文 / 繁體中文 / Français / Deutsch)
+       │    ├─ [1/5] Select Template Language (English / 简体中文 / 繁體中文)
        │    ├─ [2/5] Select Deployment Scope (Target Project only / Global Rules only / Both)
        │    ├─ [3/5] Enter Target Project Path (defaults to current directory [.])
        │    │        (Note: Codex, Antigravity, Zed natively read AGENTS.md without bridges)
@@ -183,7 +183,7 @@ The scripts deploy files to configured paths. Tool-specific loading behavior is 
 **Parameters**:
 - `-ProjectPath` (Positional 0): Path to target project. If omitted with `-Global`, only updates user global rules.
 - `-Global` (`-g`): Initializes missing `~/.claude/CLAUDE.md`, `~/.gemini/AGENTS.md`, and Codex `$CODEX_HOME/AGENTS.md` (default `~/.codex/AGENTS.md`). Existing files are preserved without `-Update`.
-- `-Language` (`-l`): Selects template language (`en`, `zh`, `zh-tw`, `fr`, `de`; defaults to `en`).
+- `-Language` (`-l`): Selects template language (`en`, `zh`, `zh-tw`; defaults to `en`).
 - `-Interactive` (`-i`): Launches the step-by-step interactive selection wizard (single-select language & scope, multi-select agent bridges and options). Triggered automatically when run with zero arguments in an interactive terminal.
 - `-Update` (`-u`): Fast-forwards the template repository, automatically invokes `tools/sync-skills.py --check` to scan external skills for upstream updates with interactive confirmation, and syncs files to the target. Combined with `-Global`, it backs up and replaces existing global rule files. Codex's non-empty `$CODEX_HOME/AGENTS.override.md` takes precedence and is updated as the active file. Existing project-managed rules, hooks, skills, and lock metadata follow their documented backup/update behavior. It does not upgrade global CLIs.
 - `-CometInit` (`-c`): Automatically executes `comet init` in the target project if Comet CLI is installed.

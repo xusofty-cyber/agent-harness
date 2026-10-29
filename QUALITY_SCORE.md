@@ -1,15 +1,47 @@
-# QUALITY_SCORE.md — first edition (2026-10-28, Phase 3)
+# Quality Score — merged edition (2026-10-28, feat/merge-v3)
 
-First measured quality snapshot for agent-harness. Every number below is
-either a real run in `eval/results/` or is marked **unmeasured**. Nothing
-here is an upstream number quoted as our own.
+Per-module scores for the merged branch (`feat/phase0-v3` skeleton +
+`v3-yunyi` + `v3-yunkai`), with the evidence behind each. Scores are
+0–10, deliberately un-generous: a score claims only what the cited
+evidence shows. Re-issued when the evidence changes (monthly,
+alongside benchmark baselines). Format merged from `v3-yunkai`; the
+skeleton's baseline numbers are kept as an appendix below.
 
-## Measured baseline (full 36-run matrix, 2026-10-28)
+| Module | Score | Evidence |
+|---|---|---|
+| Gate layer (`gate/`) | 8 | 43 unit tests (pass-gate 17 + terminate 14 + graph 7 + comet_adapter 5) + repo_checks §3k gate validation (672 PASS total); dogfooded on this repo (3/3 feature_list items passing with gate evidence, Phase 1); bench gate arm left verifiable evidence in 24/24 runs across rounds 3–5; terminate/handoff/run, Graph executor, and comet_adapter all landed in this merge. Not 10: graph/comet-adapter paths are still young (7 and 5 tests); the gate's real-world soak time is still short. |
+| Pipeline & deploy | 7 | Strict gates real since Phase 2 (drift fixtures prove exit codes); comet pinned 0.5.1 + state backup verified end-to-end (this merge); deploy dir creation tested; three profiles measured (minimal 15 skills / 280,960 B, standard 20 / 321,898 B, full 38 / 757,688 B); slim Project template ships with minimal/standard (D-009, this merge). Not higher: ps1 paths are review-verified, not execution-verified on Windows. |
+| Hooks & guard | 7 | 125 hook tests green (hooks 90 + write 12 + gate 11 + lifecycle 12) + 5 server tests; guard expands substitutions recursively, enforces the D27 resolver conjunction (13 tests), logs parse failures to guard-alerts.jsonl and still fails open; yunkai's nested-substitution hardening tests added in this merge; the P1-2 closure (wrapper options, alias deny, xargs/find, same-command variables) added 17 more. Not higher: guard remains a guardrail, not a sandbox (documented); Stop hook has no soak time yet. |
+| Distribution (templates + 40 skills) | 5 | Counts machine-guarded (skills-lock: 36 github entries pinned, CI `--check --strict`); licensing inventoried; template-size ablation done — slim Project template adopted for minimal/standard tiers (D-009). Still: ~99K tokens of SKILL.md for 40 skills with zero per-skill usage evidence and known overlaps (e.g. two debugging skills); the skill catalog is the ablation cadence's next target. |
+| Numbers & claims hygiene | 6 | Repo's own stale figures fixed in Phase 0 and now CI-guarded (repo_checks 672 PASS); upstream figures (comet skill) dispositioned in the 2026-10-28 bench baseline; this merge's numbers are all re-measured (see verification record). Not higher: the upstream text still ships un-annotated in the synced skill (cannot edit without breaking sync). |
+| Evaluation | 4 | t1–t4: 36-run matrix, 36/36 pass, 0 false completions (but ceiling effect — tasks too trivial to discriminate arms); t5–t8: one-round matrix 13/13 accepted, 0 false completions (this merge, `eval/results/bench-t5-t8-merge-round1.md`), but the executor reused one implementation per task across arms, so no arm discrimination was measured; rubric calibrated 5 rounds, standing advisory-only (D28, user final ruling 2026-10-29; live second review deferred, not owed); thresholds provisional. But tasks are minutes-scale and arms are same-model — scores here measure provability and cost, not capability deltas. |
 
-Source: `docs/bench/baseline-2026-10.md`, `eval/results/*.json`. Bare arm
-ran in the Phase 3 session; pack/gate arms ran in a fresh session the
-same day (see the baseline report's Confounds — cross-arm duration gaps
-are confounded by executor; only pack-vs-gate is a clean comparison).
+Overall posture: the enforcement and measurement spine is real; the
+distribution bulk is unproven value and the evaluation is young.
+Subtraction (Phase 4, driven by these numbers) is where the
+distribution score is supposed to move — by shrinking, not growing.
+
+## What changes next
+
+1. ~~Complete the t5–t8 one-round matrix (4 tasks × 3 arms + dist-slim
+   arm) and record it in `docs/internal/merge-verification.md`; if the
+   hard tasks separate the arms, the Evaluation score moves.~~ Done
+   2026-10-28 in this merge: 13/13 accepted, 0 false completions —
+   but one implementation per task was reused across arms, so no arm
+   separation was measured; the score stays 4 until independent
+   per-run executions (or harder tasks) separate the arms.
+2. Live second-person rubric calibration round — DEFERRED, not owed (D28): only on a real project the user knows well, when conditions mature; only then revisit `stable`/auto-approval.
+3. Monthly ablation continues (next run 2026-11); `writing-skills`
+   removal still awaits owner sign-off.
+4. Re-issue this scorecard when the evidence above changes.
+
+## Appendix — skeleton baseline numbers (Phase 3, kept verbatim)
+
+Source: `docs/bench/baseline-2026-10.md`, `eval/results/*.json`. Bare
+arm ran in the Phase 3 session; pack/gate arms ran in a fresh session
+the same day (see the baseline report's Confounds — cross-arm duration
+gaps are confounded by executor; only pack-vs-gate is a clean
+comparison).
 
 | Task | Bare median | Pack median | Gate median | Pooled median | Completion |
 |---|---|---|---|---|---|
@@ -34,7 +66,7 @@ demonstrated in Phase 1 dogfood, not by this matrix. Pack-vs-gate
 (clean comparison, same executor): gate costs ~1 s and +1 round
 (the verify + status calls), no outcome difference.
 
-## Unmeasured
+### Unmeasured (from the skeleton edition)
 
 - **Token cost: unmeasured.** No host exposes a programmatic token API
   (see `docs/internal/token-adapters.md`). Cost is tracked via Phase 2
@@ -48,9 +80,11 @@ demonstrated in Phase 1 dogfood, not by this matrix. Pack-vs-gate
   whether the gate reduces false completions.
 - **Skill-load cost (measured, v2 3-4; re-measured per profile in Phase
   4):** `eval/run-bench.sh measure-load` now reports all three profiles
-  (2026-10-28). `minimal` (default): **10 skill dirs, 212,777 skills
-  bytes, 700,569 deployed-total bytes**. `standard`: **18 dirs, 301,118
-  skills bytes, 877,254 deployed-total bytes**. `full`: **38 dirs (heavy
+  (2026-10-28). `minimal` (default): **15 skill dirs, 280,960 skills
+  bytes, 789,323 deployed-total bytes** (re-measured 2026-10-29
+  after the D31 adjustment). `standard`: **20 dirs, 321,898
+  skills bytes, 912,560 deployed-total bytes** (re-measured 2026-10-29
+  after the D30 adjustment). `full`: **38 dirs (heavy
   skills gated), 757,688 skills bytes, 1,790,382 deployed-total bytes**
   (Phase 3 reported 1,790,367 for the same 38 — re-measured now, 15 bytes
   difference from a deployed file changed since; the current figure is
@@ -64,28 +98,18 @@ demonstrated in Phase 1 dogfood, not by this matrix. Pack-vs-gate
   outcome regression (see `docs/ablation/ablation-2026-10-writing-skills.md`).
   Candidate for removal on bench evidence only; owner decision pending.
 
-## Module snapshot (rubric-scored, see `eval/rubric.md`)
+### Module snapshot, rubric-scored (skeleton edition, see `eval/rubric.md`)
 
 | Module | Score | Basis |
 |---|---|---|
 | Gate (`gate/`) | Accept (11/12) | Phase 1 dogfood-1 calibration round: fake pass intercepted, handover ~1 s |
 | Comet adapter | Accept (11/12) | Phase 2 recovery calibration round: stateVersion preserved, auto_resume high confidence |
 | Pipeline (`--strict`) | Accept | Phase 2 verification: strict FAIL exit 1 / advisory WARN exit 0, no PASS on failure |
-| Hooks (5 events) | Accept | 56 + 10 + 11 + 12 hook tests pass; parse failures logged, still fail-open |
+| Hooks (5 events) | Accept | 125 hook tests pass (90 + 12 + 11 + 12); parse failures logged, still fail-open |
 | Benchmarks (`eval/`) | Accept | 36/36 runs pass (12 per arm); thresholds re-derived from the full matrix, still provisional |
-| Docs / i18n | Revise | EN/ZH current; FR/DE/ZH-TW frozen per D3; rubric not yet `stable` (no live second-judge calibration round yet) |
+| Docs / i18n | Revise | EN/ZH current; FR/DE deleted per D27; ZH-TW frozen per D3; rubric standing advisory-only (D28) |
 
 Module scores are judgement calls anchored to the evidence cited, not
 measurements. The rubric itself is **calibrated (5 rounds, 0 divergences)**
-but not `stable` — see `eval/calibration.md`.
-
-## What changes next
-
-1. ~~Run the `pack` and `gate` arms (24 runs) to complete the matrix.~~
-   Done 2026-10-28: 36/36 runs, thresholds re-derived (still provisional).
-2. One live second-person rubric calibration round → rubric `stable`.
-3. ~~Re-derive thresholds from the full 36-run matrix; replace the
-   provisional ones above.~~ Done (see baseline report); they stay
-   provisional until a same-executor three-arm run or harder tasks
-   tighten the spread.
-4. Phase 4 ablation uses the skill-load numbers above as its input.
+but standing advisory-only, not `stable` — see D28 and
+`eval/calibration.md`.

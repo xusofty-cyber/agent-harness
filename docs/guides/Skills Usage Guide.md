@@ -1,6 +1,6 @@
 # Skills Usage Guide
 
-> **Language / 语言**: **English** | [简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md) | [Français](Skills%20Usage%20Guide.fr.md) | [Deutsch](Skills%20Usage%20Guide.de.md)
+> **Language / 语言**: **English** | [简体中文](Skills%20Usage%20Guide.zh.md) | [繁體中文](Skills%20Usage%20Guide.zh-tw.md)
 
 How the 40 bundled skills actually work in practice: which ones trigger automatically,
 which ones you invoke explicitly, and when to use each.
@@ -22,23 +22,24 @@ If Claude doesn't pick up a skill when you expect it, just name it explicitly.
 ## Deployment profiles
 
 `deploy-agents.sh` / `deploy-agents.ps1` deploy skills in tiers (Phase 4).
-The default tier is `minimal` (10 skills). Pick a tier with
+The default tier is `minimal` (15 skills). Pick a tier with
 `--profile minimal | standard | full` (PowerShell: `-Profile`). Membership
 is defined in `skills-profiles.json`; the lists below must match it
 (CI §3r checks this). Rationale and per-skill evidence:
 `docs/internal/skill-tiers.md`.
 
-### minimal (default — 10 skills)
+### minimal (default — 15 skills)
 
 `verification-before-completion`, `systematic-debugging`,
 `test-driven-development`, `living-documentation`, `writing-plans`,
 `executing-plans`, `using-git-worktrees`, `subagent-driven-development`,
-`requesting-code-review`, `codegraph`
+`requesting-code-review`, `codegraph`, `openspec-new-change`,
+`openspec-propose`, `openspec-apply-change`, `openspec-verify-change`,
+`openspec-archive-change`
 
-### standard (18 skills)
+### standard (20 skills)
 
-Minimal plus: `comet`, `openspec-new-change`, `openspec-propose`,
-`openspec-apply-change`, `openspec-verify-change`, `openspec-archive-change`,
+Minimal plus: `comet`, `openspec-continue-change`, `openspec-update-change`,
 `finishing-a-development-branch`, `dispatching-parallel-agents`
 
 ### full (40 skills)
