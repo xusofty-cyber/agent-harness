@@ -2,7 +2,7 @@
 
 > **Language / 語言**: [English](Skills%20Usage%20Guide.md) | [簡體中文](Skills%20Usage%20Guide.zh.md) | **繁體中文**
 
-40 個內建 skill 在實戰中如何運作：哪些會自動觸發、哪些需要你明確調用，以及各自的使用時機。
+39 個內建 skill 在實戰中如何運作：哪些會自動觸發、哪些需要你明確調用，以及各自的使用時機。
 
 ## Skill 觸發機制
 
@@ -41,12 +41,12 @@ Claude Code 透過兩種方式決定載入 skill：
 Minimal 再加上：`comet`、`openspec-continue-change`、`openspec-update-change`、
 `finishing-a-development-branch`、`dispatching-parallel-agents`
 
-### full (40 skills)
+### full (39 skills)
 
-`.agents/skills/` 中的全部 40 個 skill 目錄（見下方目錄）。
+`.agents/skills/` 中的全部 39 個 skill 目錄（見下方目錄）。
 `docx` 與 `brainstorming` 是重量級 skills，只有同時傳入
 `--include-heavy-skills` / `-IncludeHeavySkills` 時才會複製；若無該旗標，
-full 只部署 38 個。
+full 只部署 37 個。
 <!-- profiles:end -->
 
 ## Skill 分類目錄
@@ -57,13 +57,13 @@ full 只部署 38 個。
 > | 領域 | Skills | 用途 |
 > |---|---|---|
 > | `openspec` | 17 | OpenSpec 規格驅動工作流程家族 |
-> | `superpowers` | 16 | obra/superpowers 方法論家族 |
+> | `superpowers` | 15 | obra/superpowers 方法論家族 |
 > | `local` | 6 | 倉庫自研（engineering-docs、living-documentation、open-code-review、option-review、cross-tool-memory、git-advanced） |
 > | `document` | 2 | 文件處理（docx、pdf） |
 > | `integration` | 2 | 外部工具整合（comet、codegraph） |
 > | `utility` | 3 | 單一用途工具（caveman、ponytail、rtk） |
 >
-> **數量說明**：`skills-lock.json` 有 42 個條目，但本目錄只列 40 個 skill。
+> **數量說明**：`skills-lock.json` 有 41 個條目，但本目錄只列 39 個 skill。
 > 多出的 2 個（`openspec`、`superpowers`）是來源倉庫的 meta 條目——
 > 僅作來源標記，非可安裝 skill。
 
@@ -133,7 +133,6 @@ full 只部署 38 個。
 
 | Skill | 觸發 | 斜線命令 | 作用 | 使用時機 |
 |---|---|---|---|---|
-| `writing-skills` | 自動 | — | 指導 skill 的建立／編輯／驗證。 | 在 `.agents/skills/` 下建立或修改 skill 時。 |
 | `diagnosing-superpowers` | 自動 | — | 診斷 superpowers 工作流程出錯的原因。 | Claude 忽視計畫、重複工作或表現異常時。說「diagnose what went wrong」。 |
 
 ### 7. 工程文件

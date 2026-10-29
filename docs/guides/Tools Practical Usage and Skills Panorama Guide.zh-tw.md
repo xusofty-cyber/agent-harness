@@ -4,14 +4,13 @@
 
 本指南為使用 AI 代理進行軟體工程與技術文件撰寫提供全面的手冊：**應安裝哪些 skills 和 Harness 工具、底層的 token 經濟學、工具配置與接線、何時以及如何呼叫核心斜線命令（例如 `/comet`、`/plan`、`/opsx`、`codegraph`），以及端到端的實戰演練。**
 
-
 ---
 
 ## 目錄
 
 1. [核心架構與工具矩陣（誰負責什麼）](#1-核心架構與工具矩陣誰負責什麼)
 2. [Skills 與生態系工具盤點](#2-skills-與生態系工具盤點)
-   - 2.1 40 個內建原生 Skills 分類
+   - 2.1 39 個內建原生 Skills 分類
    - 2.2 版本鎖定、線上更新與 Skill 同步（`skills-lock.json` + `deploy-agents` + `tools/sync-skills.py`）
    - 2.3 可選的 Harness CLI 工具
    - 2.4 Skill 載入與可選 CLI 設定
@@ -94,7 +93,7 @@
 
 ## 2. Skills 與生態系工具盤點
 
-### 2.1 40 個內建原生 Skills 分類
+### 2.1 39 個內建原生 Skills 分類
 
 安裝程式將倉庫的 skill 目錄複製到 `.agents/skills/`；實際的探索行為取決於宿主工具及其配置。
 
@@ -135,7 +134,6 @@
 - **`requesting-code-review`**：合併前審查驗證。
 - **`open-code-review`**：確定性程式碼審查——規則優先、行錨定、覆蓋率強制。Tier A 透過 `ocr` CLI 委派，Tier B 為純方法論。
 - **`receiving-code-review`**：對人工審查意見的技術評估。
-- **`writing-skills`**：Skill 建立器與驗證器。
 - **`diagnosing-superpowers`**：稽核工作階段漂移或成本。
 
 #### 4. 極簡程式碼與語法圖

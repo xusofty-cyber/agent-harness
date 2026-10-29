@@ -26,7 +26,7 @@ graph TD
     G[Global AGENTS.md<br/>cross-project constitution] --> P[Project AGENTS.md<br/>project template]
     P --> D[Directory AGENTS.md<br/>monorepo micro-boundaries]
     P --> R[.agents/rules/<br/>on-demand sub-rules]
-    R --> S[.agents/skills/<br/>40 on-demand skills]
+    R --> S[.agents/skills/<br/>39 on-demand skills]
     G --> H[.claude/hooks/<br/>PreToolUse guards]
     S --> T[tools/<br/>sync, tui, doc-impact]
 ```
@@ -44,7 +44,7 @@ graph TD
    - 部分命令模式會被硬性阻擋，其他情況則發出非阻擋式警告；
    - 正則檢查無法涵蓋所有命令形式，也無法取代伺服器端分支保護。
 
-3. **40 個可複用技能目錄（[`.agents/skills/`](.agents/skills/)）**：
+3. **39 個可複用技能目錄（[`.agents/skills/`](.agents/skills/)）**：
    - **Comet 整合指引**：檢查已安裝版本與專案配置；此技能不實作 Comet 的狀態機或階段守衛；
    - **活文件與工程文件**：`living-documentation`（四層文件模型：specs/architecture/reference/guides、基於 frontmatter 的程式碼—文件雙向追溯、L0/L1/L2 影響維護）與 `engineering-docs`（15 個雙語階段閘門範本，涵蓋 31 種研發文件類型，確保跨 agent 的一致性）；
    - **規格驅動開發（SDD）**：完整的 12 個技能 `openspec` 套件（提案、套用變更、驗證、同步規格、歸檔、探索）；
@@ -53,7 +53,7 @@ graph TD
    - **輸出與溝通指引**：`rtk`（可選的 Rust Token Killer CLI 指引；命令重寫鉤子需要設定）與 `caveman`（精簡回應 Skill）；
    - **決策前審查與共享記憶**：`option-review`（隔離的五維度候選方案審查矩陣）與 `cross-tool-memory`（專案範圍的長期記憶導航輔助）；
    - **專業文件處理**：`docx`（Word 格式設定與操作）與 `pdf`（結構化擷取與分析）。注意：`docx` 隨附完整的 OOXML 驗證工具鏈（約 1.3 MB，多為 XSD schema），是本倉庫最大的技能——它預設不再部署；傳入 `--include-heavy-skills` / `-IncludeHeavySkills` 才會一併部署它（以及 `brainstorming`，它隨附本地協同伺服器 `scripts/server.cjs`）。先前已部署的副本會留在原地；該旗標只影響新的副本。
-   - **技能使用與觸發指南**：所有 40 個技能的觸發模式（自動／顯式／混合）、分類與專案記憶設定，詳見 [`Skills Usage Guide.md`](docs/guides/Skills%20Usage%20Guide.zh-tw.md)（[English](docs/guides/Skills%20Usage%20Guide.md) | [簡體中文](docs/guides/Skills%20Usage%20Guide.zh.md)）。部署設定檔（Phase 4，D58；成員關係的唯一事實來源是 `skills-profiles.json`）：預設僅部署 15 個技能（`--profile minimal`：10 個閘門核心＋5 個 openspec 核心）加上閘門本身（沒有 `gate/graph.py`，沒有迴圈層）；`--profile standard` 部署 20 個技能加上閘門＋編排（graph＋loop）；`--profile full` 預設部署 38 個技能加上閘門＋編排，或傳入 `--include-heavy-skills` 時部署全部 40 個。以 `minimal` 重新部署較舊的 minimal 專案會移除其 graph/loop 檔案（會先備份）；若要保留它們，請使用 `--profile standard`。
+   - **技能使用與觸發指南**：所有 39 個技能的觸發模式（自動／顯式／混合）、分類與專案記憶設定，詳見 [`Skills Usage Guide.md`](docs/guides/Skills%20Usage%20Guide.zh-tw.md)（[English](docs/guides/Skills%20Usage%20Guide.md) | [簡體中文](docs/guides/Skills%20Usage%20Guide.zh.md)）。部署設定檔（Phase 4，D58；成員關係的唯一事實來源是 `skills-profiles.json`）：預設僅部署 15 個技能（`--profile minimal`：10 個閘門核心＋5 個 openspec 核心）加上閘門本身（沒有 `gate/graph.py`，沒有迴圈層）；`--profile standard` 部署 20 個技能加上閘門＋編排（graph＋loop）；`--profile full` 預設部署 37 個技能加上閘門＋編排，或傳入 `--include-heavy-skills` 時部署全部 39 個。以 `minimal` 重新部署較舊的 minimal 專案會移除其 graph/loop 檔案（會先備份）；若要保留它們，請使用 `--profile standard`。
 
 4. **一鍵部署、互動精靈與統一流水線（`deploy-agents` 與 `run-pipeline`）**：
    - **互動式逐步終端精靈**：不帶參數執行指令碼（或傳入 `--interactive` / `-Interactive`）會啟動引導式 TUI 精靈（方向鍵移動、空白鍵切換、Enter 確認），用於選擇範本語言（`en`、`zh`、`zh-tw`）、部署範圍（`project`、`global`、`both`）、目標專案路徑，以及多選 agent 橋接檔案（Claude、Copilot、Cursor、Gemini、Windsurf、Cline、Roo、Qwen、Kiro、Continue、Trae、CodeBuddy、WorkBuddy）加上可選的工作流程，避免 CLI 操作失誤；
@@ -76,8 +76,8 @@ graph TD
 | Claude Code | `CLAUDE.md` 橋接、`.claude/skills/` 連結、`.claude/settings.json` 鉤子 | 強制執行（鉤子） | 由指令碼設定；鉤子僅在 Claude Code 用戶端中執行 |
 | Antigravity 2.0 / CLI / IDE 與擴充套件 | 專案規則／技能；`--global` 寫入 `~/.gemini/AGENTS.md` 外加 `GEMINI.md` 相容性指針 | 強制執行（鉤子） | 目前的介面會同時載入兩個全域名稱；較舊的 IDE 版本可以跟隨指針。CLI 專用規則仍維持獨立。專案會部署 Antigravity 規則轉接器（`.agents/rules/agent-harness.md`，觸發條件：always_on），指向 `AGENTS.md`，以及一組閘門鉤子（`.agents/hooks.json`：PreToolUse/Stop/SessionStart/PostToolUse），將 Antigravity 酬載轉譯為 Claude 閘門鉤子。建置環境中未驗證過實際的 Antigravity CLI/IDE 執行（沒有 `agy` 二進位檔）；協定層級測試通過（`tests/antigravity-hooks.test.mjs`） |
 | Codex | 全域 `$CODEX_HOME/AGENTS.md`（預設 `~/.codex/AGENTS.md`）、專案 `AGENTS.md` 與 `.agents/skills/` | 僅配置 | `-Global` 會初始化 Codex 全域檔案；`-Global -Update` 會備份並取代作用中的全域指示 |
-| WorkBuddy | `.workbuddy/rules/agent-harness.md` 規則橋接 | 僅配置 | 僅有橋接檔案；此層未為 WorkBuddy 安裝鉤子；載入行為未在每個 WorkBuddy 版本上驗證，請在已安裝的版本上確認 |
-| DeepSeek Harness (dsh) | 透過 `--global` 設定全域 `${DSH_HOME:-~/.dsh}/AGENTS.md`；專案 `AGENTS.md` 原生讀取；技能透過 `.agents/skills/` | 僅配置 | 沒有專案橋接檔案（`AGENTS.md` 會被原生讀取）；透過 `cordis.patch.yml` 的 MCP 與閘門強制執行不屬於此橋接層 |
+| WorkBuddy | `.workbuddy/rules/agent-harness.md` 規則橋接 + `.workbuddy/settings.json` 閘門鉤子 | 閘門鉤子 | 鉤子把假定的 Claude 形酬載原樣交給 Claude 閘門指令碼（PreToolUse/Stop/SessionStart/PostToolUse）；鉤子格式與設定檔位置均未對照官方文件（本輪未抓取）或真機核實，協定層級測試通過；本倉庫發到 `.workbuddy/settings.json`，請在已安裝版本上確認 |
+| DeepSeek Harness (dsh) | 透過 `--global` 設定全域 `${DSH_HOME:-~/.dsh}/AGENTS.md`；專案 `AGENTS.md` 原生讀取；技能透過 `.agents/skills/` | 閘門外掛（需手動啟用，dsh 真機未驗證） | 沒有專案橋接檔案（`AGENTS.md` 會被原生讀取）；部署指令碼另裝 Cordis 閘門外掛（`.dsh/agent-harness-gate.mjs`，TypeScript 原始碼為 `.dsh/agent-harness-gate.ts`）與 `.dsh/cordis.patch.yml` 掛載行——啟用需手動，且 dsh 外掛 API 未在官方文件／真機上核實，不要把它當作已驗證的強制執行 |
 | ai-memory | Claude Code、Codex CLI 與 Antigravity CLI 的可選 MCP/hooks；Antigravity 2.0 與 IDE 僅 MCP 設定 | 僅配置 | 需每個專案明確選擇加入；Codex 桌面版必須對照已安裝版本檢查；ChatGPT 網頁版使用人工交接 |
 | GitHub Copilot | `.github/copilot-instructions.md` 橋接 | 僅配置 | 由指令碼設定；行為取決於 Copilot 版本／模式 |
 | Zed | `AGENTS.md` | 僅檔案 | 僅提供可複用檔案；指令碼不建立 Zed 專屬設定 |
@@ -87,7 +87,7 @@ graph TD
 
 ### 目前狀態（v0.3.0）——在依賴閘門之前請先閱讀
 
-- **強制執行取決於宿主。** Claude Code 鉤子會在用戶端中強制執行閘門（見上表）。在其他所有宿主上，閘門是一套紀律外加一道人工命令：請自行執行 `python3 gate/pass-gate.py verify` 與 `python3 gate/pass-gate.py check-clean`。與宿主無關的後備措施是 CI，它會重新執行每個 `passing` 項目的驗證命令（`tests/repo_checks.py` §3k）。已知繞過方式詳見 [`gate/README.md`](gate/README.md)，包括透過 Bash 直接編輯，以及純文字的成本帳本。
+- **強制執行取決於宿主。** Claude Code 鉤子會在用戶端中強制執行閘門（見上表）。Antigravity 鉤子與 dsh 閘門外掛雖已部署，但其真機強制執行均未驗證（見上表）。在其他所有宿主上，閘門是一套紀律外加一道人工命令：請自行執行 `python3 gate/pass-gate.py verify` 與 `python3 gate/pass-gate.py check-clean`。與宿主無關的後備措施是 CI，它會重新執行每個 `passing` 項目的驗證命令（`tests/repo_checks.py` §3k）。已知繞過方式詳見 [`gate/README.md`](gate/README.md)，包括透過 Bash 直接編輯，以及純文字的成本帳本。
 - **基準聲明，如實陳述。** 預先註冊的 B1 回合（t1–t8 × bare/pack/gate × 3 回合＝72 次執行）72/72 通過，每個組別皆為 0 次錯誤完成，因此依其預先註冊的規則，結果為 NO DISCRIMINATION。本版本不聲稱閘門能減少錯誤完成；唯一的攔截證據是 Phase 1 的 dogfood（一個被鉤子與 CI 攔下的植入式假通過）。
 - **B2 更難的基準，已預先註冊但尚未執行。** `eval/results/b2-preregistration-2026-10-29.md` 註冊了 t9–t12（多檔案＋文件同步、隱藏邊界案例、斷點續跑、含決策記錄優先的模糊需求）× bare/pack/gate × 3 回合＝36 次執行，沿用 B1 的決策規則：只有當 gate 比 bare 少至少 2 次錯誤完成時才算 DISCRIMINATION，而全零組別同樣意味著 NO DISCRIMINATION，而非成功。目前尚無 B2 執行；任務與其參照解答已驗證（設定＋解答＋驗收），但尚未量測任何組別。
 - **與宿主無關的第二道閘門（pre-push＋CI 範本）。** `templates/pre-push-gate/`（鉤子範本、檢查器、可選安裝器）與 `templates/ci-gate-check.yml` 為沒有執行期鉤子的專案提供一道不依賴任何宿主的閘門：檢查器會重新執行每個 `passing` 項目的驗證，並拒絕過時的證據，呼應 §3k。安裝方式有兩種：執行安裝器（明確選擇加入），或使用部署指令碼，部署指令碼目前預設會安裝這三個檔案（以 `--no-prepush-gate` / `-NoPrepushGate` 停用；保留 `--prepush-gate` / `-PrepushGate` 以相容），並遵循慣常的「已存在則跳過／更新時備份」規則。指南中所述的限制：pre-push 鉤子檢查的是工作樹，而不是被推送的提交，而 `git push --no-verify` 可以繞過它——請搭配 CI 範本與伺服器端分支保護。
@@ -107,7 +107,7 @@ agent-harness/
 │   │   ├── git-workflow.md          # Git 授權模型、受保護分支隔離
 │   │   ├── security-boundary.md     # 8 項高風險操作保護矩陣
 │   │   └── token-discipline.md      # 讀取／取得／表述閘門、日誌截斷
-│   └── skills/                      # 40 個原生工程技能（Comet、OpenSpec、Superpowers…）
+│   └── skills/                      # 39 個原生工程技能（Comet、OpenSpec、Superpowers…）
 ├── .claude/
 │   ├── settings.json                # Claude Code 鉤子設定（五類鉤子事件全接線）
 │   └── hooks/                       # 鉤子指令碼（Node.js，讀取 stdin JSON）
