@@ -1,0 +1,19 @@
+{
+  "ablation": "",
+  "arm": "pack",
+  "duration_s": 31,
+  "ended_epoch": 1793278694,
+  "false_completion": 0,
+  "host": "htch-runtime",
+  "interventions": 0,
+  "model": "Muse Spark",
+  "notes": "decision_score=2 (scale explicit + reason surveys fixture for prior discount/percent usage and reports none found); decision record written before implementation, per executor report; acceptance independently re-verified by coordinator",
+  "outcome": "pass",
+  "rep": 1,
+  "rounds": 11,
+  "run_dir": "/tmp/bench/t12-ambiguous-decision/pack/rep1",
+  "start_commit": "2e583970fb952158ad83617fe436534abd38295d",
+  "started_epoch": 1793278663,
+  "task": "t12-ambiguous-decision",
+  "verify_attempts": 1
+}
