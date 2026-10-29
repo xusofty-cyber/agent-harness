@@ -647,7 +647,7 @@ plan's attribution is corrected here, not silently repeated.
 - **Guard:** repo_checks `eval:rubric-advisory-only` pins status
   `advisory-only` with auto-approve off.
 
-## D29 — C4: the skeleton's schema is the standard (merge ruling, provisional)
+## D29 — C4: the skeleton's schema is the standard (merge ruling, confirmed by user 2026-10-29)
 
 - **Decision:** `gate/feature_list.schema.json` keeps the skeleton's
   shape (top-level `items`, verification as an object
@@ -661,7 +661,7 @@ plan's attribution is corrected here, not silently repeated.
   the two (closed object, required evidence rules). Adopting the
   looser yunkai schema would have weakened the gate for every existing
   deployment.
-- **Provisional:** 合并执行时暂定，用户复核时可改。
+- **Confirmed:** 用户 2026-10-29 逐项过批准时通过（第 1 项），不再暂定。
 
 ## D30 — C5: standard profile is 18 skills (merge ruling, provisional)
 
