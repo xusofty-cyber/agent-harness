@@ -1,0 +1,19 @@
+{
+  "ablation": "",
+  "arm": "gate",
+  "duration_s": 187,
+  "ended_epoch": 1793277091,
+  "false_completion": 0,
+  "host": "htch-runtime",
+  "interventions": 0,
+  "model": "Muse Spark",
+  "notes": "pilot batch; verify_attempts counts manual acceptance (1) + pass-gate verify (1 failed + 1 passed); acceptance independently re-verified by coordinator",
+  "outcome": "pass",
+  "rep": 1,
+  "rounds": 22,
+  "run_dir": "/tmp/bench/t9-multi-file/gate/rep1",
+  "start_commit": "2e583970fb952158ad83617fe436534abd38295d",
+  "started_epoch": 1793276904,
+  "task": "t9-multi-file",
+  "verify_attempts": 3
+}
