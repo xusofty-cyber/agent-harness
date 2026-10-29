@@ -745,14 +745,14 @@ deliberately did not take it (reason given).
 | D44 | yunkai D-005 | Second pilot executed on webhookBox: gate ran on a real project, 2 features passed with evidence; kit not adopted there by owner decision | Record (experience only, no code; pilot branch discarded) |
 | D45 | yunkai D-010 | v3-yunkai is not merged to main; main stays as the owner directs | Record (honoured: this merge touches no main) |
 | D46 | yunyi D11 | Gate logic in `gate/harness.py`, `gate/pass-gate.py` a thin shim | Not adopted — skeleton has no harness.py; pass-gate.py is the implementation |
-| D47 | yunyi D15 | check-clean FAILs when SESSION_STATE still has template placeholders | Not adopted in this merge (candidate follow-up) |
-| D48 | yunyi D24 | repo_checks no longer fails fresh clones for gitignored local-only files | Not adopted in this merge (candidate follow-up) |
+| D47 | yunyi D15 | check-clean FAILs when SESSION_STATE still has template placeholders | Superseded by D59 — ADOPTED in the 2026-10-29 optimisation round (check-clean dimension 3c) |
+| D48 | yunyi D24 | repo_checks no longer fails fresh clones for gitignored local-only files | Superseded by D60 — ADOPTED IN EFFECT in the 2026-10-29 optimisation round (no code change; no check requires a gitignored file) |
 | D49 | yunkai D-008 | Loop/Graph engineering deferred, with triggers (manual re-mention ≥5×, workflow inexpressible in feature list, host missing a primitive) | Not adopted — merge ships Loop + Graph per C9/D34; triggers kept as the revisit signal |
 | D50 | yunyi D14 | SESSION_STATE history archived to `docs/internal/SESSION_STATE.archive-2026-10-28.md` | Record (yunyi-internal housekeeping) |
 | D51 | yunyi D25 | Phase 4 proceeds despite unmet gates 4–5, by explicit user instruction, deviation recorded | Record (yunyi-internal process) |
 | D52 | yunyi D33 | Phase 6 leftovers closeout (SESSION_STATE de/fr/zh-tw rewritten, core review keeps minimal 10) | Record (yunyi-internal) |
 | D53 | yunyi D20 | Support-matrix tiers: 真强制 / 仅配置 / 仅文件; tier upgrades need a repo test | Record (framing only) |
-| D54 | yunyi D30 | Multilingual + lint: EN↔ZH pairs hard, others warn-only; harness lint-rules in CI | Partially adopted — EN/ZH hard covered by D19; harness lint-rules not ported |
+| D54 | yunyi D30 | Multilingual + lint: EN↔ZH pairs hard, others warn-only; harness lint-rules in CI | Partially adopted — EN/ZH hard covered by D19; superseded in part by D62 — harness lint-rules ported in the 2026-10-29 optimisation round (tools/lint-rules.py) |
 | D55 | yunyi D13 | Comet template archive `required`; repo's own `.comet/config.yaml` stays `automatic` | Covered by D4 in substance; record |
 | D56 | yunyi D6 | `docx` and `brainstorming/server.cjs` default OPTIONAL, not deleted; confirm usage first | Covered in substance by the skeleton's heavy-skill gating; record |
 
