@@ -80,10 +80,13 @@ verified with measured numbers, not claims.
 
 ## Measured numbers (re-verify on release day)
 
-- `tests/repo_checks.py`: 599 checks passing at Phase 5 (count grows with
-  Phase 6 additions — see the run log).
-- Hook tests: 56 + 10 + 12 passing.
-- Deploy smoke: `deploy-agents.sh` to an empty directory exits 0.
+- `tests/repo_checks.py`: 672 checks passing (final verification of the
+  2026-10-29 panel-fix round; re-verify on release day).
+- Hook tests: 90 + 12 + 11 + 12 = 125 passing (+ 5 server tests).
+- pytest: 109 passed (gate tests 43: pass-gate 17 + terminate 14 +
+  graph 7 + comet_adapter 5).
+- Deploy smoke: `deploy-agents.sh` to an empty directory exits 0 for
+  all three profiles (minimal correctly ships no graph/loop per D58).
 - `sync-skills.py --check --strict`: all skills in-sync vs pins (~34 s).
 - Bench: 36/36 pass, 0 false completions; thresholds provisional.
 
