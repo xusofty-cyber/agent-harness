@@ -1373,6 +1373,54 @@ else
     echo "  [i] 目标项目已存在 .agents/rules/agent-harness.md，跳过。"
 fi
 
+# Antigravity hooks (.agents/hooks.json + .agents/hooks/)
+# Antigravity's native hooks protocol (PreToolUse / PostToolUse /
+# SessionStart / Stop, .agents/hooks.json). The adapters translate
+# Antigravity payloads into the Claude hook scripts, which are copied
+# here too so Antigravity-only projects (no .claude/hooks/) still gate.
+# Adapters fall back to .claude/hooks/ when the copy is absent.
+ANTIGRAVITY_HOOKS_JSON="${SCRIPT_DIR}/.agents/hooks.json"
+TARGET_AGENTS_DIR="${TARGET_PROJECT_DIR}/.agents"
+TARGET_AGENTS_HOOKS_DIR="${TARGET_AGENTS_DIR}/hooks"
+if [ -f "${ANTIGRAVITY_HOOKS_JSON}" ]; then
+    mkdir -p "${TARGET_AGENTS_DIR}"
+    TARGET_AGENTS_HOOKS_JSON="${TARGET_AGENTS_DIR}/hooks.json"
+    if [ "$DO_UPDATE" = true ] || [ ! -f "${TARGET_AGENTS_HOOKS_JSON}" ]; then
+        if [ "$DO_UPDATE" = true ]; then backup_path "${TARGET_AGENTS_HOOKS_JSON}"; fi
+        cp -f "${ANTIGRAVITY_HOOKS_JSON}" "${TARGET_AGENTS_HOOKS_JSON}"
+        echo -e "  ${GREEN}[√] 已部署 Antigravity hooks: .agents/hooks.json${NC}"
+    else
+        echo "  [i] 目标项目已存在 .agents/hooks.json，跳过。"
+    fi
+    SOURCE_AGENTS_HOOKS_DIR="${SCRIPT_DIR}/.agents/hooks"
+    if [ -d "${SOURCE_AGENTS_HOOKS_DIR}" ]; then
+        mkdir -p "${TARGET_AGENTS_HOOKS_DIR}"
+        for hook in "${SOURCE_AGENTS_HOOKS_DIR}"/*.mjs; do
+            [ -f "$hook" ] || continue
+            hook_name=$(basename "$hook")
+            target_hook="${TARGET_AGENTS_HOOKS_DIR}/${hook_name}"
+            if [ "$DO_UPDATE" = true ] || [ ! -f "$target_hook" ]; then
+                if [ "$DO_UPDATE" = true ]; then backup_path "$target_hook"; fi
+                cp -f "$hook" "$target_hook"
+            fi
+        done
+    fi
+    SOURCE_CLAUDE_HOOKS_DIR="${SCRIPT_DIR}/.claude/hooks"
+    if [ -d "${SOURCE_CLAUDE_HOOKS_DIR}" ]; then
+        mkdir -p "${TARGET_AGENTS_HOOKS_DIR}"
+        for guard in guard.mjs guard-write.mjs guard-feature-list.mjs stop-gate.mjs session-start.mjs post-tool-use.mjs; do
+            if [ -f "${SOURCE_CLAUDE_HOOKS_DIR}/${guard}" ]; then
+                target_guard="${TARGET_AGENTS_HOOKS_DIR}/${guard}"
+                if [ "$DO_UPDATE" = true ] || [ ! -f "$target_guard" ]; then
+                    if [ "$DO_UPDATE" = true ]; then backup_path "$target_guard"; fi
+                    cp -f "${SOURCE_CLAUDE_HOOKS_DIR}/${guard}" "$target_guard"
+                fi
+            fi
+        done
+        echo -e "  ${GREEN}[√] 已部署 Antigravity hooks 脚本: .agents/hooks/${NC}"
+    fi
+fi
+
 # Review sensitive paths config (.agents/review-sensitive-paths.json)
 if [ -f "${SOURCE_REVIEW_SENSITIVE_PATHS}" ]; then
     TARGET_SENSITIVE_PATHS="${TARGET_PROJECT_DIR}/.agents/review-sensitive-paths.json"
@@ -1747,7 +1795,7 @@ echo -e "${CYAN} 目标项目: ${TARGET_PROJECT_DIR}${NC}"
 echo -e "${CYAN} 规则目录: ${TARGET_RULES_DIR}${NC}"
 echo -e "${CYAN} 技能目录: ${TARGET_SKILLS_DIR}${NC}"
 echo -e "${CYAN} 部署档位: ${PROFILE}（minimal 只有门禁本身，不含 graph.py 与循环层；standard/full 含编排）${NC}"
-echo -e "${CYAN} 门禁强制力: 仅 Claude Code 钩子在客户端强制执行；其他宿主请手动跑 gate/pass-gate.py verify 与 check-clean，CI 会二次重跑 passing 项。${NC}"
+echo -e "${CYAN} 门禁强制力: Claude Code 与 Antigravity 钩子在客户端强制执行；其他宿主请手动跑 gate/pass-gate.py verify 与 check-clean，CI 会二次重跑 passing 项。${NC}"
 if command -v comet >/dev/null 2>&1; then
     echo -e "\n${YELLOW}[TIP] 检测到 Comet CLI。请按当前版本文档为该项目选择并配置工作流。${NC}"
 elif command -v ai-memory >/dev/null 2>&1; then
