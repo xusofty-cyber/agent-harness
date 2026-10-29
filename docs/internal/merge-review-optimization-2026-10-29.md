@@ -112,20 +112,20 @@ Fixed by a preflight + tail detail (commit `cb1f6d2`, see §2).
 
 ### 1.10 Other verified facts (used, not re-litigated)
 
-- SESSION_STATE template drift is real: EN base 31 lines, ZH 27 lines,
++ SESSION_STATE template drift is real: EN base 31 lines, ZH 27 lines,
   DE/FR/ZH-TW 46 lines (old format); yunyi's 11-line breakpoint format
   was not adopted. Settled by D61 (see §2).
-- Yunyi's lint-rules were not ported (merge DECISIONS D54 admits partial
++ Yunyi's lint-rules were not ported (merge DECISIONS D54 admits partial
   adoption). Ported now (commit `b5c0c4a`, D62, see §2).
-- The merge branch never had a real GitHub CI run (ci.yml triggers only
++ The merge branch never had a real GitHub CI run (ci.yml triggers only
   on pushes to main/long-term-memory-governance and on pull requests).
   `workflow_dispatch` added (commit `7f23a9f`); a real run is still
   owed before release (see §4).
-- Gate bootstrap verification covers only the test command: t5's
++ Gate bootstrap verification covers only the test command: t5's
   DECISIONS.md topics and t6's `tests_median_extra.py` are outside gate
   acceptance (merge-verification self-reports this). Fixed by
   VERIFY_CMD (commit `f785acb`, see §2).
-- Yunyi's D15 placeholder rule lives in yunyi's `gate/harness.py`
++ Yunyi's D15 placeholder rule lives in yunyi's `gate/harness.py`
   clean-state check (FAIL when SESSION_STATE still contains unfilled
   template placeholders). The skeleton template's own unfilled markers
   are `<YYYY-MM-DD>`, `<PROJECT_NAME>`, and the phrase "What this
@@ -160,9 +160,9 @@ Fixed by a preflight + tail detail (commit `cb1f6d2`, see §2).
 
 Detail per optimization item:
 
-- **QUALITY_SCORE drift (O1):** 6/6 → 3/3 (3 items, all passing).
-- **Pin precision (O2):** D31 bullet note; true-lock rule untouched.
-- **Gate bootstrap extras (O3, preferred option):** `eval/bench/prep.py`
++ **QUALITY_SCORE drift (O1):** 6/6 → 3/3 (3 items, all passing).
++ **Pin precision (O2):** D31 bullet note; true-lock rule untouched.
++ **Gate bootstrap extras (O3, preferred option):** `eval/bench/prep.py`
   gains VERIFY_CMD — t5 = unit tests + DECISIONS.md ≥5/6 topic groups
   (same groups as `evaluate.py`), t6 = unit tests +
   `tests_median_extra`; t7/t8 unchanged. `clean-state.json`
@@ -171,13 +171,13 @@ Detail per optimization item:
   behavioral gate runs: solution without the extra FAILs verify, with
   it PASSes). The fallback option (documenting "gate only checks test
   commands") was NOT needed.
-- **SESSION_STATE format (O4, D61):** skeleton 31-line EN format is
++ **SESSION_STATE format (O4, D61):** skeleton 31-line EN format is
   final (D29-consistent); yunyi's 11-line format NOT adopted.
   `tools/i18n-check.py` gains a warning-only drift check (>5 lines,
   mirroring LINT-006): ZH-TW SESSION_STATE (46 vs 31) prints a [drift]
   reminder, exit still 0; ZH (27 vs 31) within tolerance;
   PROJECT_CONTEXT variants aligned (63/63/63).
-- **Lint-rules port (O5, D62):** `tools/lint-rules.py` + repo_checks
++ **Lint-rules port (O5, D62):** `tools/lint-rules.py` + repo_checks
   `lint-rules:exit-0` (CI runs repo_checks, so CI is covered) +
   `tests/lint_rules_test.py` 3/3 (yunyi's test file had zero test
   functions; written fresh). Rule-by-rule: LINT-001 entry presence —
@@ -197,17 +197,17 @@ Detail per optimization item:
   port kept for defense in depth; LINT-006 translation drift — NEW
   alert, overlaps the i18n-check drift warning by design (linter view
   vs translation-tracker view).
-- **D47/D48 (O6, D59/D60):** D47 ADOPTED — new check-clean dimension
++ **D47/D48 (O6, D59/D60):** D47 ADOPTED — new check-clean dimension
   3c in `gate/pass-gate.py` (skeleton-adapted markers; any FAIL
   dimension keeps exit 1; missing file is SKIP for 3c) +
   `tests/check_clean_test.py` 4/4. D48 ADOPTED IN EFFECT, no code
   change — repo_checks has no check requiring a gitignored file;
   confirmed by the fresh-clone run (§5).
-- **pytest hidden dependency (O7):** `run-bench.sh smoke` preflight
++ **pytest hidden dependency (O7):** `run-bench.sh smoke` preflight
   fails fast with an explicit diagnosis + install line when pytest is
   missing (verified with a stub python); repo_checks
   `eval:bench-smoke-passes` detail now includes the smoke tail.
-- **Pass-gate behavior suite (O8):** yunkai's 7 tests ported into
++ **Pass-gate behavior suite (O8):** yunkai's 7 tests ported into
   `tests/pass_gate_test.py` (3 plural tests kept; 10/10 pass). Mapping
   is documented in the file header: verify-success (evidence
   exit_code 0 + output_sha256, event `verified`), verify-failure
@@ -217,34 +217,34 @@ Detail per optimization item:
   None, verified + reopened events preserved), WIP enforced at start
   (start/start refusal, WIP=1), status rejects claimed completion and
   empty verification. No new gate features invented.
-- **check-thresholds t5–t8 (O9):** `_load_records` also loads
++ **check-thresholds t5–t8 (O9):** `_load_records` also loads
   `bench-t5-t8-merge-round1/*.json`, normalizing `accepted` → outcome
   and task/arm from filenames; median/false-completion checks skip
   those groups (no data). Real data: t1–t4 12 groups ok, t5–t8 13
   groups "no conclusion" (1 record each), no breach. Docstring states
   the acceptance-only limitation; 2 new threshold tests.
-- **CI trigger (O10):** `workflow_dispatch:` added to ci.yml `on:`
++ **CI trigger (O10):** `workflow_dispatch:` added to ci.yml `on:`
   only; push/PR triggers unchanged, no automatic runs.
-- **Graph/loop tier (O11):** decided by user ruling D58, not by
++ **Graph/loop tier (O11):** decided by user ruling D58, not by
   analysis — see §3.
-- **Fresh-clone + deploy matrix (O12):** see §5.
++ **Fresh-clone + deploy matrix (O12):** see §5.
 
 ## 3. Policy items decided by user final ruling 2026-10-29 (landed)
 
-- **Hard stop ON (D57):** yunyi `cost.py` check gate + D23 ceilings
++ **Hard stop ON (D57):** yunyi `cost.py` check gate + D23 ceilings
   ported (`eval/cost.py`, `eval/cost-budget.json`,
   `tests/cost_test.py` 5/5); `eval/cost-ledger.jsonl` gitignored;
   repo_checks `cost-gate:*` guards. `tools/cost-ledger.py` stays
   warn-only — two ledgers, two roles — so skeleton D12 and yunkai
   D-007 stand for their own tools while branch policy for verification
   runs is ON. The provisional OFF ruling is replaced, not deleted.
-- **archive_confirmation template default automatic (D26):**
++ **archive_confirmation template default automatic (D26):**
   `templates/comet.config.yaml:54` required → automatic; D4 kept as
   Phase 0 history, superseded for the template going forward; deployed
   projects untouched (deploy copies the template only when the target
   lacks it); this repo has no own `.comet/config.yaml` (removed in
   Phase 0 dedup).
-- **FR/DE deletion (D27):** 18 files deleted + references cleaned
++ **FR/DE deletion (D27):** 18 files deleted + references cleaned
   (repo_checks §3h 3×3 languages + link roots, i18n-check GENERATED
   ZH-TW only, i18n-status rows, README/guide switchers, deploy +
   pipeline language menus and mappings with fr/de inputs falling back
@@ -257,7 +257,7 @@ Detail per optimization item:
   checks) → 669 (tier: +8 net §3t + 1 PARITY) → 670 (lint-rules check)
   → 671 (rubric-advisory-only check). Every step explained; no silent
   drift.
-- **Graph/loop tier standard+ (D58):** minimal ships the gate itself
++ **Graph/loop tier standard+ (D58):** minimal ships the gate itself
   only (no `gate/graph.py`, no `tools/loop.py`, no `templates/loop/`);
   standard/full keep them. Deploy scripts (sh+ps1, `TierGateGraphLoop`
   PARITY row) gate copying on the profile; re-deploying with minimal
@@ -270,7 +270,7 @@ Detail per optimization item:
   re-deploy with minimal (backed up first); to keep them, re-deploy
   with `--profile standard`. Loop/graph implementations untouched —
   distribution only. repo_checks §3t asserts per-tier file sets.
-- **Rubric standing advisory-only (D28):** `eval/rubric-status.json`
++ **Rubric standing advisory-only (D28):** `eval/rubric-status.json`
   status provisional → advisory-only, `confirmation_round_required`
   true → false; `--gate` still refuses (exit 2) — behavior unchanged,
   docstring + refusal message reworded. D28 rewritten in place to
@@ -289,7 +289,7 @@ Detail per optimization item:
 
 ## 4. Still awaiting user ruling (nothing else is open)
 
-- **VERSION switch + tag (D35):** VERSION 0.2.1 → 0.3.0 + tag `v0.3.0`.
++ **VERSION switch + tag (D35):** VERSION 0.2.1 → 0.3.0 + tag `v0.3.0`.
   Prepared only: `tools/check-release.py` passes on 0.2.1 today
   (VERSION/CHANGELOG/lock consistent, 42 lock entries);
   `docs/internal/release-checklist.md` carries the procedure (PR to
@@ -298,36 +298,36 @@ Detail per optimization item:
 
 ## 5. Verification (final numbers, this round)
 
-- `python3 tests/repo_checks.py`: **671 PASS / 0 FAIL** (worktree).
++ `python3 tests/repo_checks.py`: **671 PASS / 0 FAIL** (worktree).
   Count walk: 662 (merge) → 666 (cost-gate +4) → 660 (P3: −6 template
   checks) → 669 (tier: +8 net §3t + 1 PARITY) → 670 (lint-rules check)
   → 671 (rubric-advisory-only check). Every step explained; no silent
   drift.
-- Fresh clone (`git clone ~/workspace/agent-harness-phase0 -b
++ Fresh clone (`git clone ~/workspace/agent-harness-phase0 -b
   feat/merge-v3 /tmp/fresh-merge-v3`, HEAD `aafc6a6`): clean tree,
   repo_checks **671 PASS** — also confirms D48/D60 (no check requires
   a gitignored file).
-- Hook tests: **73 + 12 + 11 + 12 = 108**, server **5/5**.
-- pytest: **94 passed** (69 at merge + 5 cost + 4 bootstrap-verify + 4
++ Hook tests: **73 + 12 + 11 + 12 = 108**, server **5/5**.
++ pytest: **94 passed** (69 at merge + 5 cost + 4 bootstrap-verify + 4
   check-clean + 3 lint-rules + 7 pass-gate behavior + 2 threshold
   normalization = 94; arithmetic checks out).
-- Bench smoke: **OK** (`bash eval/run-bench.sh smoke`); missing-pytest
++ Bench smoke: **OK** (`bash eval/run-bench.sh smoke`); missing-pytest
   path verified separately (PREFLIGHT FAILED + install line, exit 1).
-- Deploy matrix (from the fresh clone): minimal / standard / full /
++ Deploy matrix (from the fresh clone): minimal / standard / full /
   `--comet-init` all exit 0; minimal ships gate without graph.py, no
   loop.py, 0 loop templates; standard and full ship graph.py +
   loop.py + 6 loop templates; minimal-over-standard migration removes
   graph/loop with `.bak.` backups; all shipped runners `--help` exit 0.
-- `python3 tools/check-release.py`: OK (VERSION 0.2.1, CHANGELOG
++ `python3 tools/check-release.py`: OK (VERSION 0.2.1, CHANGELOG
   newest 0.2.1, lock 42 entries).
-- Negative tests: true-lock guard present (repo_checks §5c); VERSION
++ Negative tests: true-lock guard present (repo_checks §5c); VERSION
   mismatch would fail check-release (not exercised by changing VERSION
   — the switch is user-gated, see §4).
-- `python3 tools/lint-rules.py`: 5 PASS + LINT-006 WARN (expected
++ `python3 tools/lint-rules.py`: 5 PASS + LINT-006 WARN (expected
   SESSION_STATE zh-tw drift), exit 0.
-- `python3 eval/check-thresholds.py`: t1–t4 12 groups ok, t5–t8 13
++ `python3 eval/check-thresholds.py`: t1–t4 12 groups ok, t5–t8 13
   groups no conclusion, no breach.
-- `python3 tools/i18n-check.py`: pass (5 reminders + 1 [drift]).
++ `python3 tools/i18n-check.py`: pass (5 reminders + 1 [drift]).
 
 ## 6. Pre-release checklist (what remains, in order)
 
@@ -376,17 +376,17 @@ impression.
 
 Sweep fixes (each with its verification):
 
-- **Deploy/pipeline help still advertised fr/de** (`e486268`):
++ **Deploy/pipeline help still advertised fr/de** (`e486268`):
   deploy-agents.sh usage lines, `--lang` help + error message, one
   `--lang fr` example; run-pipeline.sh/ps1 usage lines. All now list
   en/zh/zh-tw only. Verified: --lang fr deploy exits 0 with EN
   content (fallback, not a crash).
-- **`deploy-agents.sh --help` exited 1** (`e486268`): `usage()` itself
++ **`deploy-agents.sh --help` exited 1** (`e486268`): `usage()` itself
   ends in `exit 1`, so the old `--help` branch's `exit 0` was dead
   code. `usage()` now takes an exit-code argument (`--help` passes 0,
   missing-target error path keeps 1). Verified: --help exit 0, no-arg
   exit 1, repo_checks pass.
-- **Stale doc wording vs settled rulings** (`d381774`): DECISIONS
++ **Stale doc wording vs settled rulings** (`d381774`): DECISIONS
   pending intro now lists D-011 + D16/D21 as settled; QUALITY_SCORE
   Docs/i18n row "FR/DE frozen per D3" → "FR/DE deleted per D27"
   (ZH-TW still frozen); release draft NOT-done rubric bullet "still
@@ -394,7 +394,7 @@ Sweep fixes (each with its verification):
   "FR/DE/ZH-TW stale / 9 older rows" bullet → ZH-TW-only with the
   current 5-row count from i18n-status.md; ps1 SkillProfile param
   comment gains the D58 tier sentence (parity with sh help).
-- **Orphan D27 lines** (`5a79181`): the D27 rewrite had left an
++ **Orphan D27 lines** (`5a79181`): the D27 rewrite had left an
   orphan sentence ("Freezing is the reversible option.") plus the old
   Provisional line under a user-final ruling; both removed. C1–C10
   intro qualified: D26/D27/D28 are user-final, D29–D35 remain
@@ -402,13 +402,13 @@ Sweep fixes (each with its verification):
 
 ## 8. Deliberately NOT changed in this round
 
-- No push, no merge to main, no PR into main, no tag (per standing
++ No push, no merge to main, no PR into main, no tag (per standing
   rule + this task's explicit instruction).
-- No change to loop/graph implementations (tier change is distribution
++ No change to loop/graph implementations (tier change is distribution
   only).
-- No change to the true-lock rule, the cost-ledger warn-only tool, or
++ No change to the true-lock rule, the cost-ledger warn-only tool, or
   the deploy profile skill membership (skills-profiles.json untouched).
-- No switch to yunyi's 11-line SESSION_STATE format; no adoption of
++ No switch to yunyi's 11-line SESSION_STATE format; no adoption of
   yunyi's all-2 Accept rule, auto-approve, or PIN_EXEMPT.
-- No re-pinning of codegraph/comet/rtk to upstream tips.
-- No discriminating bench round (see §6.3).
++ No re-pinning of codegraph/comet/rtk to upstream tips.
++ No discriminating bench round (see §6.3).

@@ -39,7 +39,7 @@
   (on merge failure it records `blocked` with `stop_reason`
   `merge_conflict`, prints conflicted files, leaves the repo mid-merge
   for inspection, and never emits `merged`/`done`). New `--force` flag
-  + docstring. Verified: `tests/graph_test.py` 7 pass, including a
+  - docstring. Verified: `tests/graph_test.py` 7 pass, including a
   merge-conflict case that blocks without merged/done and leaves
   `UU shared.txt`, and result-protection cases (main refused with
   main's log still 1 commit; existing branch refused without `--force`,

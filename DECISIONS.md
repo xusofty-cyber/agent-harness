@@ -924,7 +924,7 @@ still pending.
 ## D62 — Lint-rules ported (yunyi 6 rules, skeleton-adapted) (review ruling, 2026-10-29)
 
 - **Decision:** yunyi's 6 lint rules are ported to `tools/lint-rules.py`
-  + repo_checks `lint-rules:exit-0` (CI runs repo_checks, so CI is
+  - repo_checks `lint-rules:exit-0` (CI runs repo_checks, so CI is
   covered). Rule-by-rule reconciliation (full table in
   docs/internal/merge-review-optimization-2026-10-29.md):
   LINT-001 entry presence — NEW coverage, ENTRY_FILES adapted to
