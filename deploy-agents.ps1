@@ -1259,6 +1259,71 @@ if (-not $isSelfRepo) {
     }
 }
 
+# Dsh gate (DeepSeek Harness Cordis plugin: .dsh/agent-harness-gate.mjs)
+# NOTE: the Cordis contract here is unverified in this round (see .dsh/agent-harness-gate.ts header).
+# dsh has no hooks.json surface: the gate ships as a Cordis plugin file
+# plus a generated cordis.patch.yml row (absolute plugin path, filled
+# in at deploy time). The plugin translates dsh tool calls into the
+# Claude hook scripts, which are copied here too (into .dsh/hooks/,
+# falling back to .claude/hooks/) so dsh-only projects still gate.
+# Activation is NOT automatic: the user merges the generated row into
+# $DSH_HOME/profiles/<profile>/cordis.patch.yml (or the home patch) or
+# passes it per launch with `dsh --profile <profile> --patch
+# .dsh/cordis.patch.yml` -- profiles live in $DSH_HOME and may not
+# exist yet when this script runs. Until a live dsh run confirms the
+# agent/turn-stopping steering path, dsh stop enforcement is
+# provisional; tools/pre-execute denial is the documented contract.
+# Existing target files are skipped (update mode backs up first, then
+# overwrites), matching the other deploy sections.
+if (-not $isSelfRepo) {
+    $SourceDshPlugin = Join-Path $ScriptDir ".dsh\agent-harness-gate.mjs"
+    $SourceDshPatchTemplate = Join-Path $ScriptDir ".dsh\cordis.patch.template.yml"
+    if (Test-Path $SourceDshPlugin) {
+        $TargetDshDir = Join-Path $ResolvedProjectPath ".dsh"
+        if (-not (Test-Path $TargetDshDir)) {
+            New-Item -ItemType Directory -Path $TargetDshDir -Force | Out-Null
+        }
+        $TargetDshPlugin = Join-Path $TargetDshDir "agent-harness-gate.mjs"
+        if ($Update -or (-not (Test-Path $TargetDshPlugin))) {
+            if ($Update) { Backup-ManagedPath $TargetDshPlugin }
+            Copy-Item -Path $SourceDshPlugin -Destination $TargetDshPlugin -Force
+            Write-Host "  [OK] Deployed Dsh gate plugin: .dsh/agent-harness-gate.mjs" -ForegroundColor Green
+        } else {
+            Write-Host "  [INFO] .dsh/agent-harness-gate.mjs already exists, keeping existing file." -ForegroundColor Gray
+        }
+        $SourceClaudeHooksDir = Join-Path $ScriptDir ".claude\hooks"
+        if (Test-Path $SourceClaudeHooksDir) {
+            $TargetDshHooksDir = Join-Path $TargetDshDir "hooks"
+            if (-not (Test-Path $TargetDshHooksDir)) {
+                New-Item -ItemType Directory -Path $TargetDshHooksDir -Force | Out-Null
+            }
+            foreach ($guard in @("guard.mjs", "guard-write.mjs", "guard-feature-list.mjs", "stop-gate.mjs", "session-start.mjs", "post-tool-use.mjs")) {
+                $srcGuard = Join-Path $SourceClaudeHooksDir $guard
+                if (Test-Path $srcGuard) {
+                    $destGuard = Join-Path $TargetDshHooksDir $guard
+                    if ($Update -or (-not (Test-Path $destGuard))) {
+                        if ($Update) { Backup-ManagedPath $destGuard }
+                        Copy-Item -Path $srcGuard -Destination $destGuard -Force
+                    }
+                }
+            }
+            Write-Host "  [OK] Deployed Dsh gate hook scripts: .dsh/hooks/" -ForegroundColor Green
+        }
+        if (Test-Path $SourceDshPatchTemplate) {
+            $TargetDshPatch = Join-Path $TargetDshDir "cordis.patch.yml"
+            if ($Update -or (-not (Test-Path $TargetDshPatch))) {
+                if ($Update) { Backup-ManagedPath $TargetDshPatch }
+                $patchContent = Get-Content -Path $SourceDshPatchTemplate -Raw -Encoding utf8
+                $patchContent = $patchContent.Replace("__PLUGIN_PATH__", $TargetDshPlugin)
+                $patchContent | Out-File -FilePath $TargetDshPatch -Encoding utf8
+                Write-Host "  [OK] Generated Dsh gate mount row: .dsh/cordis.patch.yml (merge into a profile or home patch to activate)" -ForegroundColor Green
+            } else {
+                Write-Host "  [INFO] .dsh/cordis.patch.yml already exists, keeping existing file." -ForegroundColor Gray
+            }
+        }
+    }
+}
+
 # Template gate (pre-push hook + checker + CI template, on by default,
 # opt-out via -NoPrepushGate; -PrepushGate is retained for compatibility)
 # Host-independent: no agent host is required, only git, Python 3, and the

@@ -70,6 +70,49 @@ try:
 except Exception as e:  # noqa: BLE001
     check("antigravity-hooks:parse", False, str(e))
 
+# --- 1c. dsh gate plugin wiring ---
+# The dsh gate plugin (.dsh/agent-harness-gate.mjs) must exist, register
+# the documented dsh extension points, delegate to the Claude hook
+# scripts (never a second copy of the guard rules), and ship a patch
+# template with the placeholder the deploy scripts fill in.
+dsh_plugin = ROOT / ".dsh" / "agent-harness-gate.mjs"
+check("dsh-gate:plugin-exists", dsh_plugin.exists())
+if dsh_plugin.exists():
+    dsh_text = dsh_plugin.read_text(encoding="utf-8-sig")
+    check("dsh-gate:name", "agent-harness-gate" in dsh_text)
+    for event in ["tools/pre-execute", "tools/result", "agent/created", "agent/turn-stopping"]:
+        check(f"dsh-gate:event:{event}", event in dsh_text)
+    check("dsh-gate:delegates-guard", "guard.mjs" in dsh_text)
+    check("dsh-gate:delegates-stop", "stop-gate.mjs" in dsh_text)
+    check("dsh-gate:delegates-session", "session-start.mjs" in dsh_text)
+    check("dsh-gate:delegates-ledger", "post-tool-use.mjs" in dsh_text)
+    check("dsh-gate:no-guard-copy", "PROTECTED_BRANCHES" not in dsh_text)
+    check("dsh-gate:deny-contract", '"deny"' in dsh_text or "'deny'" in dsh_text)
+dsh_patch = ROOT / ".dsh" / "cordis.patch.template.yml"
+check("dsh-gate:patch-template-exists", dsh_patch.exists())
+if dsh_patch.exists():
+    patch_text = dsh_patch.read_text(encoding="utf-8-sig")
+    check("dsh-gate:patch-insert", "- insert:" in patch_text)
+    check("dsh-gate:patch-id", "agent-harness-gate" in patch_text)
+    check("dsh-gate:patch-placeholder", "__PLUGIN_PATH__" in patch_text)
+check("dsh-gate:test-exists", (ROOT / "tests" / "dsh-gate.test.mjs").exists())
+# The TypeScript source is canonical: the .mjs is its type-stripped
+# artifact, so the source, its minimal tsconfig, and the node shims
+# that make an isolated tsc check possible must all be present, and
+# the .mjs must carry the same unverified-contract honesty note.
+dsh_ts = ROOT / ".dsh" / "agent-harness-gate.ts"
+check("dsh-gate:ts-exists", dsh_ts.exists())
+check("dsh-gate:tsconfig-exists", (ROOT / ".dsh" / "tsconfig.json").exists())
+check("dsh-gate:node-shims-exists", (ROOT / ".dsh" / "node-shims.d.ts").exists())
+if dsh_ts.exists():
+    dsh_ts_text = dsh_ts.read_text(encoding="utf-8-sig")
+    check("dsh-gate:ts-apply", "export function apply" in dsh_ts_text)
+    check("dsh-gate:ts-name", '"agent-harness-gate"' in dsh_ts_text)
+    check("dsh-gate:ts-no-enum", "enum " not in dsh_ts_text)
+    check("dsh-gate:ts-honesty", "未在官方文档/真机上核实" in dsh_ts_text)
+if dsh_plugin.exists():
+    check("dsh-gate:mjs-honesty", "未在官方文档/真机上核实" in dsh_text)
+
 # --- 2. TOML example validity (branch-aware: only on branches that have it) ---
 toml_example = ROOT / "templates" / "ai-memory.toml.example"
 if toml_example.exists():
@@ -1163,6 +1206,7 @@ PARITY = [
     ("DSH_HOME", "DSH_HOME", "DeepSeek Harness global rules"),
     ("Antigravity rules adapter", "Antigravity rules adapter", "Antigravity .agents/rules frontmatter adapter"),
     ("Antigravity hooks", "Antigravity hooks", "Antigravity .agents/hooks.json gate hooks"),
+    ("Dsh gate", "Dsh gate", "dsh gate plugin deployment"),
     ("PrepushGate", "prepush-gate", "template gate deployment (pre-push hook + checker + CI template)"),
     ("New-RuleDirBridge", "bridge_rule_dir", "rule-directory bridge helper"),
     (".windsurf/rules", ".windsurf/rules", "Windsurf bridge"),

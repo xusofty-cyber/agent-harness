@@ -1,0 +1,36 @@
+{
+  // Minimal config for the dsh gate plugin only. This is NOT the
+  // repository's build config (the repo has no package.json and no
+  // build step): it exists so a `tsc --noEmit` check can be run
+  // against the plugin in isolation:
+  //
+  //   tsc --noEmit -p .dsh/tsconfig.json
+  //
+  // Notes, stated honestly:
+  // - `types: []` plus `.dsh/node-shims.d.ts` (included via `files`)
+  //   supply the Node built-in declarations, because the repo vendors
+  //   no @types/node. A consumer that already has @types/node should
+  //   run tsc with its own types instead of these shims.
+  // - Only erasable TypeScript is used in agent-harness-gate.ts, so
+  //   the runtime artifact is produced by type stripping (see the
+  //   header of agent-harness-gate.ts), not by tsc emit.
+  // - tsc itself was NOT run in the build environment for this change:
+  //   no typescript binary is installed there and the night-batch
+  //   no-approval-card discipline forbids fetching it, so a tsc pass
+  //   remains an owed check (see the PR body). What WAS verified
+  //   locally: Node 24 type stripping imports the .ts source, and
+  //   the full protocol test suite passes against the stripped .mjs.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022"],
+    "types": [],
+    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "files": ["agent-harness-gate.ts", "node-shims.d.ts"]
+}
