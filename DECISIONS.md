@@ -547,6 +547,12 @@ Phase 0 decision meeting.
 - **Unchanged from D21:** Loop's need is still unproven (2 met + 2
   partial + 1 not met on the L14 criteria); shipping it in deploy does
   not claim otherwise. Approval stays human, always.
+- **Tier qualifier (panel fix P1-9, 2026-10-29):** the "both deploy
+  scripts ship" sentence above is qualified by D58 (user final ruling,
+  2026-10-29): graph/loop ship only on the standard and full profiles.
+  Minimal deployments do NOT ship `gate/graph.py`, `tools/loop.py`, or
+  `templates/loop/` — minimal is the gate only. The D25 text is
+  otherwise unchanged.
 - **Date:** 2026-10-28.
 
 ---
