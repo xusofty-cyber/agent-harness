@@ -486,3 +486,27 @@ dimension distribution verification 36 × 2, handover
 scores of 2 and 1 score of 1; verdicts 36 × Accept. The
 pre-ruling numbers in §§1–4 (17 × 12, 19 × 11) remain the
 historical record of the 2026-10-29 calibration.
+
+**D-1 blind test (2026-10-30, appended evidence; no score changed).**
+A separate continuation session was given only the t10 pack rep2
+run record and the baseline working tree, to test whether the
+skipped docs-sync DoD step is discoverable from the record alone.
+It did not read the B2 report, this calibration report, any
+scorecard, or any handover note. Method limitation, stated
+plainly: child sessions inherit parent conversation context, so
+strictly sterile blindness cannot be independently verified; this
+note itself cites only record and working-tree evidence, not
+conversation-history claims. Material evidence: the run record
+(outcome pass, false_completion 0) carries 17 fields with no
+completion detail — its notes field reads in full "acceptance
+independently re-verified by coordinator", with no change list,
+no test names, no DoD line items, and no acceptance output; the
+working tree is the baseline as-is (no power implementation, no
+self-written boundary tests), so it cannot establish what the
+round omitted; the original run dir no longer exists. A
+continuation from the record alone would have to redo the whole
+DoD. Conclusion: from the record alone, a new session cannot
+learn the round's completion details or any deviation.
+**Handover stays 1** (total stays 11, verdict stays Accept).
+No scorecard score was changed by this note; the item 2 audit
+conclusion above stands alongside this blind-test evidence.
