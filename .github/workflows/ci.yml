@@ -57,7 +57,7 @@ jobs:
         run: shellcheck -S warning ./*.sh
 
       - name: Node syntax check (hooks)
-        run: node --check .claude/hooks/guard.mjs && node --check .claude/hooks/guard-write.mjs && node --check .claude/hooks/guard-feature-list.mjs && node --check .claude/hooks/stop-gate.mjs && node --check .claude/hooks/session-start.mjs && node --check .claude/hooks/post-tool-use.mjs
+        run: node --check .claude/hooks/guard.mjs && node --check .claude/hooks/guard-write.mjs && node --check .claude/hooks/guard-feature-list.mjs && node --check .claude/hooks/stop-gate.mjs && node --check .claude/hooks/session-start.mjs && node --check .claude/hooks/post-tool-use.mjs && node --check .dsh/agent-harness-gate.mjs
 
       - name: Hook behavior tests
         run: |
@@ -65,6 +65,7 @@ jobs:
           node tests/hooks-gate.test.mjs
           node tests/hooks-write.test.mjs
           node tests/hooks-lifecycle.test.mjs
+          node tests/dsh-gate.test.mjs
 
       - name: Python unit tests
         run: |
@@ -97,6 +98,9 @@ jobs:
           test -f /tmp/smoke-proj/.workbuddy/settings.json
           test -f /tmp/smoke-proj/.workbuddy/hooks/workbuddy-pre-tool-use.mjs
           test -f /tmp/smoke-proj/.workbuddy/hooks/guard.mjs
+          test -f /tmp/smoke-proj/.dsh/agent-harness-gate.mjs
+          test -f /tmp/smoke-proj/.dsh/cordis.patch.yml
+          test -f /tmp/smoke-proj/.dsh/hooks/guard.mjs
           test -f /tmp/smoke-proj/skills-lock.json
           test -d /tmp/smoke-proj/.agents/skills
           test -d /tmp/smoke-proj/docs/specs
