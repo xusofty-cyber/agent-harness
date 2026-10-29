@@ -720,6 +720,21 @@ check("cost-gate:ledger-gitignored",
       "eval/cost-ledger.jsonl" in (ROOT / ".gitignore").read_text(encoding="utf-8"),
       "eval/cost-ledger.jsonl must be gitignored (local-only ledger)")
 
+# --- D26 guard (panel P1-12): the comet template default must stay
+# `automatic` (user final ruling 2026-10-29, superseding D4's
+# `required`). Like the rubric/cost guards above, this pins a ruling
+# in a check so a quiet template edit turns red instead of drifting.
+# Only the TEMPLATE is pinned: a project's own .comet/config.yaml may
+# legitimately choose `required`.
+_archive_lines = [ln.strip() for ln in
+                  (ROOT / "templates" / "comet.config.yaml").read_text(encoding="utf-8").splitlines()]
+_archive_values = [ln.split(":", 1)[1].strip() for ln in _archive_lines
+                   if ln.startswith("archive_confirmation:")]
+check("archive-template-default",
+      _archive_values == ["automatic"],
+      "templates/comet.config.yaml archive_confirmation must be "
+      "'automatic' (D26, user final ruling 2026-10-29)")
+
 # --- 3q. Benchmarks & evaluation (Phase 3, v3 §4.5) ---
 # Framework first, then measured runs: 4 tasks (fixed start commit,
 # acceptance, budget), rubric (six dimensions), calibration (3+ rounds),
