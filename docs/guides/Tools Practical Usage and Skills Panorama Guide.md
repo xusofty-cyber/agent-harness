@@ -203,7 +203,7 @@ Skill availability depends on the host tool and its configuration. Terminal-leve
   Or `npm install -g @colbymchenry/codegraph@1.6.2`. Windows PowerShell — download the pinned `install.ps1` (`codegraph.installerUrlPs1`), verify its SHA256 (`024091f428cac6eaa217bae8f840a9572a91daab974a8354085ba72f86f6aee1`), then run it, or use the same versioned npm install. Run `codegraph install` to wire agents and `codegraph init` in the project.
 - **RTK (Rust Token Killer) CLI**: never pipe an installer to a shell. macOS/Linux — download the installer pinned in `skills-lock.json` (`rtk.installerUrl`), verify its SHA256, then run it:
   ```bash
-  curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/e05c7bdfacfcfe1f845d11f47339e4eae63eb3f5/install.sh -o /tmp/rtk-install.sh
+  curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/7e92da00a5cf737dc87850505aa3dea603454613/install.sh -o /tmp/rtk-install.sh
   echo "7ca3997314f631b8ad267e5add9af4b7a2f0351bdab0b1c5a9b7ed4008d0434a  /tmp/rtk-install.sh" | sha256sum -c -
   sh /tmp/rtk-install.sh
   ```

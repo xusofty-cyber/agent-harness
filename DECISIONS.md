@@ -964,3 +964,29 @@ still pending.
   and properties.items.type. The first run also caught LINT-004
   residue in the new 3c code itself (D59 literals); the 3c pattern is
   now assembled from parts, the same trick lint-rules uses.
+
+## D63 — rtk pin re-pinned to upstream tip (user walkthrough 2026-10-29, item 7)
+
+- **Decision:** the rtk lock pin moves from `e05c7bdf…` to upstream
+  tip `7e92da00…` (user walkthrough 2026-10-29, item 7). Lock
+  `pinnedCommit` + `installerUrl` + `pinnedAt` (2026-10-29) updated;
+  `installerSha256` is UNCHANGED: the installer script is
+  byte-identical between the two commits (verified by download +
+  SHA256), so the deploy script's hash stays
+  `7ca39973…`. Panorama Guide EN/ZH installer URLs updated to match.
+- **Reason:** the 24 commits between pin and tip are tracking/savings
+  bug fixes (savings-figure inflation, token-estimate capping,
+  windowed-baseline leaks), routine dependency bumps, one internal
+  discover-lexer refactor, and CI-only changes; no installer or
+  interface changes. The old pin carried known tracking-figure bugs.
+- **Limit, stated plainly:** re-pinning is NOT binary pinning. The
+  rtk installer resolves the LATEST release at install time
+  (`get_latest_version`, overridable only via `RTK_VERSION`), so the
+  pin pins the installer script version, not the installed binary
+  version — that was already true of the old pin (identical script).
+  The re-pin keeps the lock truthful and records the reviewed tip;
+  it does not change which binary a fresh install gets. The D13 gap
+  (ps1 winget channel unpinned) is unchanged by this entry.
+- **Verification:** installer downloaded from the new URL and SHA256
+  matched the lock value; repo_checks installer-pin checks pass
+  (lock URL + SHA agree with deploy-agents.sh).

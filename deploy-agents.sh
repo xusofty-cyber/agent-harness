@@ -689,14 +689,16 @@ install_pinned_script() {
 guide_optional_cli_tools() {
     local target="$1"
     # Phase 2 (2-2): pinned installers. The URL pins the upstream commit and
-    # the SHA256 is the hash of the installer at that commit, both measured
-    # 2026-10-28. They must match skills-lock.json (codegraph/rtk entries) —
+    # the SHA256 is the hash of the installer at that commit (codegraph
+    # measured 2026-10-28; rtk re-pinned to tip 2026-10-29, installer
+    # script byte-identical, same SHA256). They must match
+    # skills-lock.json (codegraph/rtk entries) —
     # tests/repo_checks.py guards the agreement. Never pipe a live network
     # stream into a shell: install_pinned_script downloads to a temp file,
     # verifies the hash, and only then runs it.
     local install_codegraph_url='https://raw.githubusercontent.com/colbymchenry/codegraph/01e0ac3aa7419a7ab75583963e8a95359f3af1d3/install.sh'
     local install_codegraph_sha='e8bbcc694584d5c88fa7c25103fc0f9c238d63a86c1494ca03448b680dbcc86e'
-    local install_rtk_url='https://raw.githubusercontent.com/rtk-ai/rtk/e05c7bdfacfcfe1f845d11f47339e4eae63eb3f5/install.sh'
+    local install_rtk_url='https://raw.githubusercontent.com/rtk-ai/rtk/7e92da00a5cf737dc87850505aa3dea603454613/install.sh'
     local install_rtk_sha='7ca3997314f631b8ad267e5add9af4b7a2f0351bdab0b1c5a9b7ed4008d0434a'
 
     echo -e "\n${CYAN}>>> 可选 CLI 工具（Ponytail / Caveman 已作为 Skill 随项目部署）${NC}"

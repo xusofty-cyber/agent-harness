@@ -224,9 +224,9 @@
 
 #### 3. RTK CLI（可选）
 - **本仓库已提供**：Skill 使用说明，不包含 RTK CLI，也不会自动拦截或重写命令。
-- **安装**：切勿把安装脚本直接管道给 shell。macOS/Linux 先下载 `skills-lock.json` 里固定的安装脚本（`rtk.installerUrl`，commit `e05c7bdf…`），校验 SHA256 后再运行：
+- **安装**：切勿把安装脚本直接管道给 shell。macOS/Linux 先下载 `skills-lock.json` 里固定的安装脚本（`rtk.installerUrl`，commit `7e92da00…`），校验 SHA256 后再运行：
   ```bash
-  curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/e05c7bdfacfcfe1f845d11f47339e4eae63eb3f5/install.sh -o /tmp/rtk-install.sh
+  curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/7e92da00a5cf737dc87850505aa3dea603454613/install.sh -o /tmp/rtk-install.sh
   echo "7ca3997314f631b8ad267e5add9af4b7a2f0351bdab0b1c5a9b7ed4008d0434a  /tmp/rtk-install.sh" | sha256sum -c -
   sh /tmp/rtk-install.sh
   ```
