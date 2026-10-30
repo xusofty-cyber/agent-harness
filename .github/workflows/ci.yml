@@ -149,7 +149,9 @@ jobs:
           $smoke = Join-Path $env:RUNNER_TEMP "smoke-proj-ps1"
           New-Item -ItemType Directory -Force $smoke | Out-Null
           & ./deploy-agents.ps1 $smoke
-          if ($LASTEXITCODE -ne 0) { throw "deploy-agents.ps1 exited $LASTEXITCODE" }
+          $smokeOk = $?
+          $smokeCode = $LASTEXITCODE
+          if (-not $smokeOk -or ($null -ne $smokeCode -and $smokeCode -ne 0)) { throw "deploy-agents.ps1 smoke failed (exit=$smokeCode)" }
           foreach ($f in @("AGENTS.md", "CLAUDE.md",
                            ".agents/rules/security-boundary.md",
                            ".claude/settings.json",
