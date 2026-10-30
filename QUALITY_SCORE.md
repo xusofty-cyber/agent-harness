@@ -23,7 +23,7 @@ and B3 evidence, not from new surface.
 
 ---
 
-# Quality Score — merged edition (2026-10-28, feat/merge-v3) [history]
+## Quality Score — merged edition (2026-10-28, feat/merge-v3) [history]
 
 Per-module scores for the merged branch (`feat/phase0-v3` skeleton +
 `v3-yunyi` + `v3-yunkai`), with the evidence behind each. Scores are
