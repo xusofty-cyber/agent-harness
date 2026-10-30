@@ -6,6 +6,10 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+### Fixed (v0.5.1, from the 2026-10-30 agy live retest)
+
+- **Antigravity `edit_file` bypassed the gate entirely.** The live retest (full gate flow on agy 1.4.10) proved a direct `edit_file` edit of `gate/feature_list.json` could forge a `passing` state with empty evidence: `edit_file` was in neither `.agents/hooks.json`'s PreToolUse matcher nor the adapter's `WRITE_TOOLS` set — the same bug class as the v0.4.0 `write_file` fix (PR #76), one tool name further. Both lists now include `edit_file`, with pinning tests (deny on feature_list, allow on ordinary files). The host matrix stays `partial-live` until the direct-edit step is re-run live against the fix.
+
 ### Added (v0.5.1 round, 2026-10-30)
 
 - **Event-log hash chain (D67)**: every event `pass-gate.py` appends to `gate/events.jsonl` now carries `prev` (SHA-256 of the previous log line as stored) and `hash` (SHA-256 of prev + the event's canonical form), and each append updates the `gate/events-head.json` checkpoint. `pass-gate.py events --verify-chain` recomputes the chain and compares the tail against the checkpoint; `check-clean` reports it as dimension 3e. Legacy unchained lines (Stop hook, comet adapter, pre-D67 logs) never break verification. Detects chained-line edits, earlier-line edits/deletions/reordering, and tail deletion; does NOT detect deleting the checkpoint together with the tail or a wholesale log+checkpoint rewrite — tamper evidence, not a signature (limits stated in `gate/README.md` and D67).
