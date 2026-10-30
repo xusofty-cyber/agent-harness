@@ -1,1 +1,149 @@
-IyEvYmluL3NoCiMgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KIyBnYXRlL2luaXQudGVtcGxhdGUuc2gg4oCUIHNjYWZmb2xkIGEgcHJvamVjdCBmb3IgdGhlIGdhdGUgbGF5ZXIgKFBoYXNlIDEpLgojCiMgVXNhZ2UgKHJ1biBmcm9tIHRoZSBwcm9qZWN0IHJvb3QpOgojICAgc2ggZ2F0ZS9pbml0LnRlbXBsYXRlLnNoIC0tbmFtZSA8cHJvamVjdC1uYW1lPiBcCiMgICAgICAgLS12ZXJpZnkgIjxjb21tYW5kIHRoYXQgcHJvdmVzIHRoZSBwcm9qZWN0IHdvcmtzPiIgXAojICAgICAgIC0tc3RhcnQgIjxzdGFuZGFyZCBzdGFydCBjb21tYW5kPiIgXAojICAgICAgIFstLWJ1aWxkICI8YnVpbGQgY29tbWFuZD4iXSBbLS1mb3JjZV0KIwojIENyZWF0ZXM6CiMgICBnYXRlL2ZlYXR1cmVfbGlzdC5qc29uICAgKHZpYSBwYXNzLWdhdGUucHkgaW5pdCwgZnJvbSB0aGUgdGVtcGxhdGUpCiMgICBnYXRlL2NsZWFuLXN0YXRlLmpzb24gICAgKGJ1aWxkIC8gdGVzdCAvIHN0YXJ0IGNvbW1hbmRzIGZvciBjaGVjay1jbGVhbikKIyAgIFNFU1NJT05fU1RBVEUubWQgICAgICAgICAoYnJlYWtwb2ludCBmb3JtYXQsIGlmIG1pc3NpbmcpCiMgICBERUNJU0lPTlMubWQgICAgICAgICAgICAgKGRlY2lzaW9uIGxvZywgaWYgbWlzc2luZykKIyBUaGVuIHJ1bnMgLS12ZXJpZnkgb25jZSBhcyBhIHNtb2tlIHRlc3Q7IGEgbm9uLXplcm8gZXhpdCBmYWlscyBpbml0LgojCiMgLS1uYW1lLCAtLXZlcmlmeSBhbmQgLS1zdGFydCBhcmUgUkVRVUlSRUQuIEEgdmFsdWUgbGVmdCBhcyBhIHBsYWNlaG9sZGVyCiMgKGVtcHR5LCBvciBzdGlsbCBjb250YWluaW5nIDwuLi4+KSBmYWlscyBpbml0IGluc3RlYWQgb2Ygc2lsZW50bHkKIyBzY2FmZm9sZGluZyBhIGJyb2tlbiBwcm9qZWN0LiAtLWJ1aWxkIGlzIG9wdGlvbmFsOyB3aXRob3V0IGl0IHRoZSBidWlsZAojIGRpbWVuc2lvbiBvZiBjaGVjay1jbGVhbiByZXBvcnRzIFNLSVAuCiMKIyBUaGlzIHNjcmlwdCBpcyBzZWxmLWNvbnRhaW5lZDogaXQgb25seSBkZXBlbmRzIG9uIGdhdGUvcGFzcy1nYXRlLnB5CiMgc2l0dGluZyBuZXh0IHRvIGl0LCBzbyBpdCB3b3JrcyBhZnRlciBkZXBsb3kgY29waWVzIGdhdGUvIHRvIGEgdGFyZ2V0CiMgcHJvamVjdCAobm8gdGVtcGxhdGVzLyBkaXJlY3RvcnkgbmVlZGVkIGF0IHRoZSB0YXJnZXQpLgojID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CnNldCAtdQoKU0NSSVBUX0RJUj0kKENEUEFUSD0gY2QgLS0gIiQoZGlybmFtZSAtLSAiJDAiKSIgJiYgcHdkKQpQUk9KRUNUX05BTUU9IiIKVkVSSUZZX0NNRD0iIgpTVEFSVF9DTUQ9IiIKQlVJTERfQ01EPSIiCkZPUkNFPWZhbHNlCgp3aGlsZSBbICQjIC1ndCAwIF07IGRvCiAgICBjYXNlICIkMSIgaW4KICAgICAgICAtLW5hbWUpICAgUFJPSkVDVF9OQU1FPSIkMiI7IHNoaWZ0IDIgOzsKICAgICAgICAtLXZlcmlmeSkgVkVSSUZZX0NNRD0iJDIiOyBzaGlmdCAyIDs7CiAgICAgICAgLS1zdGFydCkgIFNUQVJUX0NNRD0iJDIiOyBzaGlmdCAyIDs7CiAgICAgICAgLS1idWlsZCkgIEJVSUxEX0NNRD0iJDIiOyBzaGlmdCAyIDs7CiAgICAgICAgLS1mb3JjZSkgIEZPUkNFPXRydWU7IHNoaWZ0IDs7CiAgICAgICAgLWh8LS1oZWxwKQogICAgICAgICAgICBzZWQgLW4gJzIsMzBwJyAiJDAiCiAgICAgICAgICAgIGV4aXQgMCA7OwogICAgICAgICopCiAgICAgICAgICAgIGVjaG8gImluaXQ6IHVua25vd24gYXJndW1lbnQ6ICQxIiA+JjIKICAgICAgICAgICAgZWNobyAidXNhZ2U6IHNoIGdhdGUvaW5pdC50ZW1wbGF0ZS5zaCAtLW5hbWUgPHByb2plY3Q+IC0tdmVyaWZ5IFwiPGNtZD5cIiAtLXN0YXJ0IFwiPGNtZD5cIiBbLS1idWlsZCBcIjxjbWQ+XCJdIFstLWZvcmNlXSIgPiYyCiAgICAgICAgICAgIGV4aXQgMiA7OwogICAgZXNhYwpkb25lCgpmYWlsKCkgeyBlY2hvICJpbml0OiAkMSIgPiYyOyBleGl0IDE7IH0KCiMgLS0tIFJlcXVpcmVkIHZhbHVlcyBtdXN0IGJlIHJlYWwsIG5vdCBwbGFjZWhvbGRlcnMgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQpbIC1uICIkUFJPSkVDVF9OQU1FIiBdIHx8IGZhaWwgIi0tbmFtZSBpcyByZXF1aXJlZCIKWyAtbiAiJFZFUklGWV9DTUQiIF0gfHwgZmFpbCAiLS12ZXJpZnkgaXMgcmVxdWlyZWQgKHRoZSBjb21tYW5kIHRoYXQgcHJvdmVzIHRoZSBwcm9qZWN0IHdvcmtzKSIKWyAtbiAiJFNUQVJUX0NNRCIgXSB8fCBmYWlsICItLXN0YXJ0IGlzIHJlcXVpcmVkICh0aGUgc3RhbmRhcmQgc3RhcnQgY29tbWFuZCkiCmNhc2UgIiRQUk9KRUNUX05BTUUkVkVSSUZZX0NNRCRTVEFSVF9DTUQkQlVJTERfQ01EIiBpbgogICAgKiI8Iip8KiI+IiopIGZhaWwgImEgdmFsdWUgc3RpbGwgY29udGFpbnMgYSA8Li4uPiBwbGFjZWhvbGRlciDigJQgZmlsbCBpbiByZWFsIGNvbW1hbmRzIGZpcnN0IiA7Owplc2FjCgojIC0tLSBmZWF0dXJlX2xpc3QuanNvbiAodmlhIHBhc3MtZ2F0ZSwgc28gdGhlIGZpbGUgaXMgYWx3YXlzIHZhbGlkKSAtLS0tLS0tLS0KaWYgWyAtZiAiZ2F0ZS9mZWF0dXJlX2xpc3QuanNvbiIgXSAmJiBbICIkRk9SQ0UiID0gZmFsc2UgXTsgdGhlbgogICAgZWNobyAiaW5pdDogZ2F0ZS9mZWF0dXJlX2xpc3QuanNvbiBhbHJlYWR5IGV4aXN0cyAodXNlIC0tZm9yY2UgdG8gb3ZlcndyaXRlKSIKZWxzZQogICAgcHl0aG9uMyAiJFNDUklQVF9ESVIvcGFzcy1nYXRlLnB5IiAtLXJvb3QgLiBpbml0IC0tcHJvamVjdCAiJFBST0pFQ1RfTkFNRSIgJHtGT1JDRTorLS1mb3JjZX0gXAogICAgICAgIHx8IGZhaWwgInBhc3MtZ2F0ZS5weSBpbml0IGZhaWxlZCIKICAgIGVjaG8gImluaXQ6IGdhdGUvZmVhdHVyZV9saXN0Lmpzb24gY3JlYXRlZCIKZmkKCiMgLS0tIGNsZWFuLXN0YXRlLmpzb24gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiMgQnVpbGQgdGhlIEpTT04gdmFsdWVzIGZpcnN0IHNvIGFuIGFic2VudCAtLWJ1aWxkIHJlbmRlcnMgYXMgbnVsbCwgbm90CiMgYXMgYW4gZW1wdHkgdmFsdWUgKHdoaWNoIHdvdWxkIGJlIGludmFsaWQgSlNPTikuCkJVSUxEX0pTT049Im51bGwiCmlmIFsgLW4gIiRCVUlMRF9DTUQiIF07IHRoZW4KICAgIEJVSUxEX0pTT049JChwcmludGYgJyVzJyAiJEJVSUxEX0NNRCIgfCBweXRob24zIC1jICdpbXBvcnQganNvbixzeXM7IHByaW50KGpzb24uZHVtcHMoc3lzLnN0ZGluLnJlYWQoKSkpJykKZmkKVkVSSUZZX0pTT049JChwcmludGYgJyVzJyAiJFZFUklGWV9DTUQiIHwgcHl0aG9uMyAtYyAnaW1wb3J0IGpzb24sc3lzOyBwcmludChqc29uLmR1bXBzKHN5cy5zdGRpbi5yZWFkKCkpKScpClNUQVJUX0pTT049JChwcmludGYgJyVzJyAiJFNUQVJUX0NNRCIgfCBweXRob24zIC1jICdpbXBvcnQganNvbixzeXM7IHByaW50KGpzb24uZHVtcHMoc3lzLnN0ZGluLnJlYWQoKSkpJykKY2F0ID4gZ2F0ZS9jbGVhbi1zdGF0ZS5qc29uIDw8RU9GCnsKICAiYnVpbGQiOiAkQlVJTERfSlNPTiwKICAidGVzdCI6ICRWRVJJRllfSlNPTiwKICAic3RhcnQiOiAkU1RBUlRfSlNPTgp9CkVPRgpweXRob24zIC1tIGpzb24udG9vbCBnYXRlL2NsZWFuLXN0YXRlLmpzb24gPi9kZXYvbnVsbCBcCiAgICB8fCBmYWlsICJnYXRlL2NsZWFuLXN0YXRlLmpzb24gaXMgbm90IHZhbGlkIEpTT04iCmVjaG8gImluaXQ6IGdhdGUvY2xlYW4tc3RhdGUuanNvbiB3cml0dGVuIgoKIyAtLS0gU0VTU0lPTl9TVEFURS5tZCAoYnJlYWtwb2ludCBmb3JtYXQsIG9ubHkgaWYgbWlzc2luZykgLS0tLS0tLS0tLS0tLS0tLS0tLQppZiBbICEgLWYgIlNFU1NJT05fU1RBVEUubWQiIF07IHRoZW4KICAgIGNhdCA+IFNFU1NJT05fU1RBVEUubWQgPDxFT0YKIyBTRVNTSU9OX1NUQVRFIOKAlCBzZXNzaW9uIGJyZWFrcG9pbnQKCj4gKipVcGRhdGVkKio6ICQoZGF0ZSAtdSArJVktJW0tJWQpIHwgKipQcm9qZWN0Kio6ICRQUk9KRUNUX05BTUUKPiAqKkZlYXR1cmUgbGlzdCoqOiBnYXRlL2ZlYXR1cmVfbGlzdC5qc29uIChzdGF0dXMgdmlhIFxgcHl0aG9uMyBnYXRlL3Bhc3MtZ2F0ZS5weSBzdGF0dXNcYCkKCiMjIEdvYWwKCi0gPFdoYXQgdGhpcyBzZXNzaW9uIGlzIHRyeWluZyB0byBzaGlwLCBpbiBvbmUgbGluZT4KCiMjIEluIHByb2dyZXNzCgotIDxmZWF0dXJlX2xpc3QgaWQ+OiA8b25lLWxpbmUgc3RhdGU+IChvcjogbm9uZSDigJQgcnVuIFxgcGFzcy1nYXRlLnB5IHN0YXJ0IC0taWQgPGlkPlxgKQoKIyMgTmV4dAoKLSBbIF0gPE5leHQgY29uY3JldGUgc3RlcD4KCiMjIEJsb2NrZWQKCi0gPEJsb2NrZXIsIG9yICJub25lIj4KCiMjIExhc3QgdmVyaWZpY2F0aW9uCgotIDxMYXN0IGNvbW1hbmQgcnVuIGFuZCBpdHMgcmVzdWx0LCBvciAibm9uZSB5ZXQiPgpFT0YKICAgIGVjaG8gImluaXQ6IFNFU1NJT05fU1RBVEUubWQgY3JlYXRlZCIKZWxzZQogICAgZWNobyAiaW5pdDogU0VTU0lPTl9TVEFURS5tZCBhbHJlYWR5IGV4aXN0cywga2VwdCIKZmkKCiMgLS0tIERFQ0lTSU9OUy5tZCAob25seSBpZiBtaXNzaW5nKSAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KaWYgWyAhIC1mICJERUNJU0lPTlMubWQiIF07IHRoZW4KICAgIGNhdCA+IERFQ0lTSU9OUy5tZCA8PCdFT0YnCiMgRGVjaXNpb25zCgpXcml0dGVuIGRlY2lzaW9uIHJlY29yZHMuIEVhY2ggZW50cnk6IGRlY2lzaW9uLCByYXRpb25hbGUsIHJlamVjdGVkCmFsdGVybmF0aXZlLCBkYXRlLiBTZWUgdGVtcGxhdGVzL0RFQ0lTSU9OUy50ZW1wbGF0ZS5tZCBpbiBhZ2VudC1oYXJuZXNzLgoKIyMgKG5vIGRlY2lzaW9ucyByZWNvcmRlZCB5ZXQpCkVPRgogICAgZWNobyAiaW5pdDogREVDSVNJT05TLm1kIGNyZWF0ZWQiCmVsc2UKICAgIGVjaG8gImluaXQ6IERFQ0lTSU9OUy5tZCBhbHJlYWR5IGV4aXN0cywga2VwdCIKZmkKCiMgLS0tIFNtb2tlOiBydW4gVkVSSUZZIG9uY2UsIGZhaWwgbG91ZGx5IGluc3RlYWQgb2Ygc2lsZW50bHkgLS0tLS0tLS0tLS0tLS0tLS0KZWNobyAiaW5pdDogc21va2UgcnVuOiAkVkVSSUZZX0NNRCIKaWYgc2ggLWMgIiRWRVJJRllfQ01EIjsgdGhlbgogICAgZWNobyAiaW5pdDogT0sg4oCUICRQUk9KRUNUX05BTUUgaXMgZ2F0ZWQgKHZlcmlmeSBwYXNzZWQpIgogICAgZWNobyAiaW5pdDogbmV4dCwgd29yayB0aHJvdWdoIHRlbXBsYXRlcy9pbml0aWFsaXplci1wbGF5Ym9vay5tZCBpbiIKICAgIGVjaG8gIiAgICAgIGFnZW50LWhhcm5lc3MgKG9wZW5pbmcgcXVlc3Rpb25zLCBmZWF0dXJlLWxpc3QgZGlzY2lwbGluZSwiCiAgICBlY2hvICIgICAgICBpbml0aWFsaXphdGlvbiBhY2NlcHRhbmNlIGNoZWNrbGlzdCkgYmVmb3JlIHN0YXJ0aW5nIGl0ZW1zLiIKZWxzZQogICAgZmFpbCAic21va2UgdmVyaWZpY2F0aW9uIGZhaWxlZCAoZXhpdCAkPykg4oCUIGZpeCB0aGUgcHJvamVjdCwgdGhlbiByZS1ydW4gaW5pdCIKZmkK
+#!/bin/sh
+# =============================================================================
+# gate/init.template.sh — scaffold a project for the gate layer (Phase 1).
+#
+# Usage (run from the project root):
+#   sh gate/init.template.sh --name <project-name> \
+#       --verify "<command that proves the project works>" \
+#       --start "<standard start command>" \
+#       [--build "<build command>"] [--force]
+#
+# Creates:
+#   gate/feature_list.json   (via pass-gate.py init, from the template)
+#   gate/clean-state.json    (build / test / start commands for check-clean)
+#   SESSION_STATE.md         (breakpoint format, if missing)
+#   DECISIONS.md             (decision log, if missing)
+# Then runs --verify once as a smoke test; a non-zero exit fails init.
+#
+# --name, --verify and --start are REQUIRED. A value left as a placeholder
+# (empty, or still containing <...>) fails init instead of silently
+# scaffolding a broken project. --build is optional; without it the build
+# dimension of check-clean reports SKIP.
+#
+# This script is self-contained: it only depends on gate/pass-gate.py
+# sitting next to it, so it works after deploy copies gate/ to a target
+# project (no templates/ directory needed at the target).
+# =============================================================================
+set -u
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+PROJECT_NAME=""
+VERIFY_CMD=""
+START_CMD=""
+BUILD_CMD=""
+FORCE=false
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --name)   PROJECT_NAME="$2"; shift 2 ;;
+        --verify) VERIFY_CMD="$2"; shift 2 ;;
+        --start)  START_CMD="$2"; shift 2 ;;
+        --build)  BUILD_CMD="$2"; shift 2 ;;
+        --force)  FORCE=true; shift ;;
+        -h|--help)
+            sed -n '2,30p' "$0"
+            exit 0 ;;
+        *)
+            echo "init: unknown argument: $1" >&2
+            echo "usage: sh gate/init.template.sh --name <project> --verify \"<cmd>\" --start \"<cmd>\" [--build \"<cmd>\"] [--force]" >&2
+            exit 2 ;;
+    esac
+done
+
+fail() { echo "init: $1" >&2; exit 1; }
+
+# --- Required values must be real, not placeholders -------------------------
+[ -n "$PROJECT_NAME" ] || fail "--name is required"
+[ -n "$VERIFY_CMD" ] || fail "--verify is required (the command that proves the project works)"
+[ -n "$START_CMD" ] || fail "--start is required (the standard start command)"
+case "$PROJECT_NAME$VERIFY_CMD$START_CMD$BUILD_CMD" in
+    *"<"*|*">"*) fail "a value still contains a <...> placeholder — fill in real commands first" ;;
+esac
+
+# --- feature_list.json (via pass-gate, so the file is always valid) ---------
+if [ -f "gate/feature_list.json" ] && [ "$FORCE" = false ]; then
+    echo "init: gate/feature_list.json already exists (use --force to overwrite)"
+else
+    python3 "$SCRIPT_DIR/pass-gate.py" --root . init --project "$PROJECT_NAME" ${FORCE:+--force} \
+        || fail "pass-gate.py init failed"
+    echo "init: gate/feature_list.json created"
+fi
+
+# --- clean-state.json ---------------------------------------------------------
+# Build the JSON values first so an absent --build renders as null, not
+# as an empty value (which would be invalid JSON).
+BUILD_JSON="null"
+if [ -n "$BUILD_CMD" ]; then
+    BUILD_JSON=$(printf '%s' "$BUILD_CMD" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
+fi
+VERIFY_JSON=$(printf '%s' "$VERIFY_CMD" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
+START_JSON=$(printf '%s' "$START_CMD" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
+cat > gate/clean-state.json <<EOF
+{
+  "build": $BUILD_JSON,
+  "test": $VERIFY_JSON,
+  "start": $START_JSON
+}
+EOF
+python3 -m json.tool gate/clean-state.json >/dev/null \
+    || fail "gate/clean-state.json is not valid JSON"
+echo "init: gate/clean-state.json written"
+
+# --- SESSION_STATE.md (breakpoint format, only if missing) -------------------
+if [ ! -f "SESSION_STATE.md" ]; then
+    cat > SESSION_STATE.md <<EOF
+# SESSION_STATE — session breakpoint
+
+> **Updated**: $(date -u +%Y-%m-%d) | **Project**: $PROJECT_NAME
+> **Feature list**: gate/feature_list.json (status via \`python3 gate/pass-gate.py status\`)
+
+## Goal
+
+- <What this session is trying to ship, in one line>
+
+## In progress
+
+- <feature_list id>: <one-line state> (or: none — run \`pass-gate.py start --id <id>\`)
+
+## Next
+
+- [ ] <Next concrete step>
+
+## Blocked
+
+- <Blocker, or "none">
+
+## Last verification
+
+- <Last command run and its result, or "none yet">
+EOF
+    echo "init: SESSION_STATE.md created"
+else
+    echo "init: SESSION_STATE.md already exists, kept"
+fi
+
+# --- DECISIONS.md (only if missing) ------------------------------------------
+if [ ! -f "DECISIONS.md" ]; then
+    cat > DECISIONS.md <<'EOF'
+# Decisions
+
+Written decision records. Each entry: decision, rationale, rejected
+alternative, date. See templates/DECISIONS.template.md in agent-harness.
+
+## (no decisions recorded yet)
+EOF
+    echo "init: DECISIONS.md created"
+else
+    echo "init: DECISIONS.md already exists, kept"
+fi
+
+# --- Smoke: run VERIFY once, fail loudly instead of silently -----------------
+echo "init: smoke run: $VERIFY_CMD"
+if sh -c "$VERIFY_CMD"; then
+    echo "init: OK — $PROJECT_NAME is gated (verify passed)"
+    echo "init: next, work through templates/initializer-playbook.md in"
+    echo "      agent-harness (opening questions, feature-list discipline,"
+    echo "      initialization acceptance checklist) before starting items."
+else
+    fail "smoke verification failed (exit $?) — fix the project, then re-run init"
+fi

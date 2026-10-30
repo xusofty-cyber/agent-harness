@@ -1,1 +1,196 @@
-IyBnYXRlLyDigJQgdGhlIHNlbGYtb3duZWQgdmVyaWZpY2F0aW9uIGdhdGUgKFBoYXNlIDEpCgpUaGUgZ2F0ZSBpcyB0aGUgcGFydCBvZiBhZ2VudC1oYXJuZXNzIHRoYXQgbWFrZXMgImRvbmUiIGNoZWNrYWJsZS4gSXQgaXMKc21hbGwgb24gcHVycG9zZTogYSBKU09OIHN0YXRlIG1hY2hpbmUsIG9uZSBzdGRsaWItb25seSBQeXRob24gc2NyaXB0LCB0d28KQ2xhdWRlIENvZGUgaG9va3MsIGFuZCBhbiBhcHBlbmQtb25seSBsb2cuIEl0IGRvZXMgbm90IHJ1biB5b3VyIG1vZGVsCmxvb3AsIHNjaGVkdWxlIHdvcmssIG9yIGNhbGwgYW55IHZlbmRvciBDTEkuIENvbWV0IGlzIGFuIG9wdGlvbmFsIGFkYXB0ZXIKZWxzZXdoZXJlIGluIHRoaXMgcmVwbzsgdGhlIGdhdGUgd29ya3Mgd2l0aCBvciB3aXRob3V0IGl0IChEMSkuCgojIyBGaWxlcwoKfCBGaWxlIHwgV2hhdCBpdCBpcyB8CnwtLS18LS0tfAp8IGBmZWF0dXJlX2xpc3Quc2NoZW1hLmpzb25gIHwgSlNPTiBTY2hlbWEgZm9yIHRoZSBmZWF0dXJlIGxpc3Q6IHN0YXR1c2VzLCByZXF1aXJlZCBmaWVsZHMsIGFsbG93ZWQgdHJhbnNpdGlvbnMsIFdJUD0xLCBldmlkZW5jZS1yZXF1aXJlZC1mb3ItcGFzc2luZyB8CnwgYHBhc3MtZ2F0ZS5weWAgfCBUaGUgZ2F0ZS4gU3RkbGliIG9ubHkuIFJlYWRzIHRoZSBsaXN0LCBydW5zIHZlcmlmaWNhdGlvbiBjb21tYW5kcywgbW92ZXMgaXRlbXMsIHdyaXRlcyBldmlkZW5jZSwgYXBwZW5kcyBldmVudHMgfAp8IGBpbml0LnRlbXBsYXRlLnNoYCB8IFNjYWZmb2xkIGEgcHJvamVjdCBmb3IgdGhlIGdhdGUgKGZlYXR1cmUgbGlzdCwgY2xlYW4tc3RhdGUgY29uZmlnLCBTRVNTSU9OX1NUQVRFLCBERUNJU0lPTlMpICsgb25lIHNtb2tlIHJ1biB8CnwgYGZlYXR1cmVfbGlzdC5qc29uYCB8ICoqVGhpcyByZXBvJ3Mgb3duIGxpc3QqKiAoZG9nZm9vZCkuIFBlci1wcm9qZWN0IHN0YXRlOyBkZXBsb3llZCB0YXJnZXRzIGNyZWF0ZSB0aGVpciBvd24gdmlhIGBpbml0YCDigJQgZGVwbG95IG5ldmVyIGNvcGllcyB0aGlzIGZpbGUgfAp8IGBjbGVhbi1zdGF0ZS5qc29uYCB8IEJ1aWxkL3Rlc3Qvc3RhcnQgY29tbWFuZHMgZm9yIGBjaGVjay1jbGVhbmAgKHRoaXMgcmVwbydzIG93bikgfAp8IGBldmVudHMuanNvbmxgIHwgQXBwZW5kLW9ubHkgZXZlbnQgbG9nLiBFdmVyeSB0cmFuc2l0aW9uIGxhbmRzIGhlcmUgfAoKVGhlIHNjaGVtYSBsaXZlcyBpbiBgZ2F0ZS9gOyB0aGUgaHVtYW4gdGVtcGxhdGUgbGl2ZXMgaW4KYHRlbXBsYXRlcy9mZWF0dXJlX2xpc3QudGVtcGxhdGUuanNvbmAuCgojIyBUaGUgbG9vcAoKYGBgY29uc29sZQpwYXNzLWdhdGUucHkgYWRkIC0taWQgPGlkPiAtLXRpdGxlICIuLi4iIC0tYmVoYXZpb3IgIi4uLiIgLS1jb21tYW5kICI8dmVyaWZ5PiIKcGFzcy1nYXRlLnB5IHN0YXJ0IC0taWQgPGlkPiAgICAgICAgIyBXSVA9MTogb25lIGl0ZW0gaW5fcHJvZ3Jlc3MgYXQgYSB0aW1lCi4uLiBkbyB0aGUgd29yayAuLi4KcGFzcy1nYXRlLnB5IHZlcmlmeSAtLWlkIDxpZD4gICAgICAgIyBydW5zIHRoZSBjb21tYW5kOyBleGl0IDAgLT4gcGFzc2luZyArIGV2aWRlbmNlCnBhc3MtZ2F0ZS5weSB2ZXJpZnkgLS1hbGwgICAgICAgICAgICMgdmVyaWZ5IGV2ZXJ5dGhpbmcgaW5fcHJvZ3Jlc3MKcGFzcy1nYXRlLnB5IGJsb2NrIC0taWQgPGlkPiAtLXJlYXNvbiAiLi4uIiAgICMgc3R1Y2s/IHNheSBzbywgZG9uJ3QgZmFrZSBpdApwYXNzLWdhdGUucHkgcmVvcGVuIC0taWQgPGlkPiAtLXJlYXNvbiAiLi4uIiAgIyBwYXNzaW5nIHdhcyB3cm9uZzsgcmVhc29uIHJlcXVpcmVkCnBhc3MtZ2F0ZS5weSBzdGF0dXMgICAgICAgICAgICAgICAgICMgd2hhdCBpcyB3aGVyZQpwYXNzLWdhdGUucHkgY2hlY2stY2xlYW4gICAgICAgICAgICAjIGZpdmUtZGltZW5zaW9uIGhhbmRvdmVyIGNoZWNrCnBhc3MtZ2F0ZS5weSBldmVudHMgLS1sYXN0IDIwICAgICAgICMgd2hhdCBoYXBwZW5lZApgYGAKCkFuIGl0ZW0gbWF5IGVudGVyIGBwYXNzaW5nYCBvbmx5IHdpdGggZXZpZGVuY2U6IHRoZSBjb21tYW5kIHRoYXQgcmFuLAppdHMgZXhpdCBjb2RlICgwKSwgd2hlbiBpdCByYW4sIGFuZCB0aGUgdGFpbCBvZiBpdHMgb3V0cHV0LiBgcGFzc2luZ2AgaXMKaXJyZXZlcnNpYmxlIGV4Y2VwdCB0aHJvdWdoIGByZW9wZW5gLCB3aGljaCBjbGVhcnMgdGhlIGV2aWRlbmNlIGFuZApyZXF1aXJlcyBhIHJlYXNvbi4gVGhlIHZlcmlmaWNhdGlvbiBjb21tYW5kIGlzIHRoZSBkZWZpbml0aW9uIG9mIGRvbmUg4oCUCmlmIGl0IGRvZXMgbm90IGFjdHVhbGx5IHByb3ZlIHRoZSBiZWhhdmlvdXIsIHRoZSBnYXRlIGlzIGEgcml0dWFsLCBub3QgYQpjaGVjay4gV3JpdGUgdGhlIGNvbW1hbmQgZmlyc3QsIHRoZW4gdGhlIGNvZGUuCgoqKlZlcmlmaWNhdGlvbiBsZXZlbCAodjAuNC4xLCBENjYpLioqIGB2ZXJpZmljYXRpb24ubGV2ZWxgIG9wdGlvbmFsbHkKcmVjb3JkcyBob3cgc3Ryb25nIHRoZSBwcm9vZiBpczogYGFzc2VydGAgKHRleHQvZXhpc3RlbmNlIGFzc2VydGlvbikgPApgdW5pdGAgPCBgaW50ZWdyYXRpb25gIDwgYGUyZWAuIEl0IGlzIGRlc2NyaXB0aXZlLCBuZXZlciBhIGdhdGUg4oCUCmBjaGVjay1jbGVhbmAgZGltZW5zaW9uIDNkIHJlcG9ydHMgdGhlIHBhc3NpbmcgbWl4IGJ5IGxldmVsICh0aGlzIHJlcG8KY3VycmVudGx5IHJlYWRzIGBhc3NlcnQgNSwgdW5pdCAxYCwgd2hpY2ggaXMgaG9uZXN0IGZvciBkb2NzIGNoYW5nZXMKYW5kIGEgd2FybmluZyBzaWduIGZvciBmZWF0dXJlIHdvcmspLCBhbmQgYHBhc3MtZ2F0ZS5weSBhZGQgLS1sZXZlbGAKc2V0cyBpdCBhdCBjcmVhdGlvbi4gQW4gaXRlbSB3aXRob3V0IGEgbGV2ZWwgaXMgcmVwb3J0ZWQgYXMKYHVuc3BlY2lmaWVkYC4gVGhlIHBvaW50IGlzIHZpc2liaWxpdHk6IGEgYHBhc3NpbmdgIHByb3ZlZCBieSBgZ3JlcGAKbXVzdCBub3QgbG9vayBpZGVudGljYWwgdG8gb25lIHByb3ZlZCBlbmQtdG8tZW5kIChjb3Vyc2UgTDEwKS4KCiMjIENsZWFuLXN0YXRlIChoYW5kb3ZlciBjaGVjaykKCmBjaGVjay1jbGVhbmAgcnVucyB0aGUgZml2ZSBjb3Vyc2UgZGltZW5zaW9uczsgdGhlIHByb2dyZXNzIGRpbWVuc2lvbgpoYXMgdHdvIGNoZWNrcyAoM2EgbmFycmF0aXZlLCAzYiBtYWNoaW5lLXJlYWRhYmxlIHRydXRoKToKCjEuICoqYnVpbGQqKiBwYXNzZXMg4oCUIGBnYXRlL2NsZWFuLXN0YXRlLmpzb246IGJ1aWxkYAoyLiAqKnRlc3RzKiogcGFzcyDigJQgYGNsZWFuLXN0YXRlLmpzb246IHRlc3RgCjMuICoqcHJvZ3Jlc3MgcmVjb3JkZWQqKiDigJQgKGEpIGBTRVNTSU9OX1NUQVRFLm1kYCBuYW1lcyB0aGUgaW5fcHJvZ3Jlc3MKICAgaXRlbTsgKGIpIGV2ZXJ5IGBwYXNzaW5nYCBpdGVtJ3MgdmVyaWZpY2F0aW9uIHN0aWxsIGV4aXRzIDAgb24gcmUtcnVuCjQuICoqdGVtcCBhcnRlZmFjdHMgY2xlYW5lZCoqIOKAlCBubyBgKi50bXBgIC8gYCouYmFrKmAgLyBgX19weWNhY2hlX19gIC8KICAgYCoubG9nYCBpbiBgZ2l0IHN0YXR1c2AKNS4gKipzdGFuZGFyZCBzdGFydCBwYXRoIHdvcmtzKiog4oCUIGBjbGVhbi1zdGF0ZS5qc29uOiBzdGFydGAKCkEgZGltZW5zaW9uIHdpdGggbm8gY29tbWFuZCBjb25maWd1cmVkIHJlcG9ydHMgU0tJUCwgbm90IFBBU1MuIEFueSBGQUlMCm1lYW5zOiBkbyBub3QgaGFuZCBvZmYgeWV0LgoKIyMgQW50aS10YW1wZXI6IGRlZmVuY2UgaW4gZGVwdGgsIG5vdCBhIGd1YXJhbnRlZQoKQW4gYWdlbnQgY2FuIGFsd2F5cyByZXdyaXRlIGEgSlNPTiBmaWxlLiBUaGUgZ2F0ZSBkb2VzIG5vdCBwcmV0ZW5kCm90aGVyd2lzZS4gVGhyZWUgbGVncyByYWlzZSB0aGUgY29zdCBvZiBmYWtpbmcgYSBwYXNzIGFuZCBsZWF2ZSBhIHRyYWNlOgoKMS4gKipQcmVUb29sVXNlIGhvb2sqKiAoYC5jbGF1ZGUvaG9va3MvZ3VhcmQtZmVhdHVyZS1saXN0Lm1qc2ApOiBkaXJlY3QKICAgV3JpdGUvRWRpdCB0byBhbnkgYGZlYXR1cmVfbGlzdC5qc29uYCBpcyBkZW5pZWQgKGV4aXQgMikuIFRoZSBvbmx5CiAgIHdyaXRlciBpcyBgcGFzcy1nYXRlLnB5YCwgaW52b2tlZCB0aHJvdWdoIEJhc2guICoqQ2xhdWRlIENvZGUgb25seSoqIOKAlAogICBvdGhlciBob3N0cyBoYXZlIG5vIHN1Y2ggaG9vazsgb24gdGhlbSB0aGlzIGxlZyBkb2VzIG5vdGhpbmcuCjIuICoqQ0kgc2Vjb25kIGNoZWNrKiogKGB0ZXN0cy9yZXBvX2NoZWNrcy5weWAgwqczayk6IGZvciBldmVyeSBgcGFzc2luZ2AKICAgaXRlbSwgQ0kgcmUtcnVucyB0aGUgdmVyaWZpY2F0aW9uIGNvbW1hbmQgYW5kIHJlcXVpcmVzIGV4aXQgMCAqbm93KiwKICAgYW5kIHJlcXVpcmVzIGEgYHZlcmlmaWVkYC9gb3ZlcnJpZGVgIGV2ZW50IGZvciB0aGUgaXRlbS4gQSBoYW5kLWVkaXRlZAogICBldmlkZW5jZSBibG9jayB3aXRoIGludmVudGVkIG91dHB1dCBpcyBjYXVnaHQgaGVyZS4gVGhpcyBsZWcgcnVucyBhdAogICByZXZpZXcgdGltZSwgbm90IGF0IHJ1biB0aW1lLgozLiAqKkV2ZW50IGxvZyoqIChgZ2F0ZS9ldmVudHMuanNvbmxgKTogZXZlcnkgdHJhbnNpdGlvbiBpcyBhcHBlbmRlZCB3aXRoCiAgIGEgbW9ub3RvbmljIHNlcXVlbmNlIG51bWJlciBhbmQgY29tbWl0dGVkIHRvIGdpdCwgc28gcmV3cml0aW5nIGhpc3RvcnkKICAgc2hvd3MgdXAgYXMgYSBkaWZmLiBJdCBjYW5ub3Qgc3RvcCBhIHJld3JpdGU7IGl0IG1ha2VzIG9uZSB2aXNpYmxlLgoKS25vd24gZ2FwcyAocmVjb3JkZWQgaG9uZXN0bHksIG5vdCBmaXhlZCBieSBwcmV0ZW5kaW5nKToKCi0gQSBkaXJlY3QgZWRpdCB0aHJvdWdoIEJhc2ggKGBzZWRgLCBgcHl0aG9uYCwgaGVyZWRvYykgYnlwYXNzZXMgbGVnIDEKICBlbnRpcmVseSBhbmQgbGVhdmVzIG5vIGV2ZW50IOKAlCBsZWcgMiBpcyB0aGUgb25seSBjYXRjaCwgYW5kIG9ubHkgYXQgQ0kKICB0aW1lLiBUaGlzIHdhcyBkZW1vbnN0cmF0ZWQgaW4gZG9nZm9vZGluZzogYSBmYWtlIHBhc3MgcGxhbnRlZCBieQogIGhhbmQtZWRpdCBoYWQgbm8gZXZlbnQ7IENJIMKnM2sgY2F1Z2h0IGl0IGFueXdheS4KLSBMZWcgMiByZS1ydW5zIHZlcmlmaWNhdGlvbiBjb21tYW5kcywgc28gYSBzbG93IG9yIGZsYWt5IGNvbW1hbmQgbWFrZXMKICBDSSBzbG93IG9yIGZsYWt5LiBLZWVwIHZlcmlmaWNhdGlvbiBjb21tYW5kcyBmYXN0IGFuZCBoZXJtZXRpYy4KLSBgZXZlbnRzLmpzb25sYCBzZXEgbnVtYmVycyBhcmUgbW9ub3RvbmljLCBub3QgZ2FwbGVzczsgYSBkZWxldGVkIGxpbmUKICBpcyBkZXRlY3RhYmxlIG9ubHkgYnkgYSBtaXNzaW5nIHNlcSBudW1iZXIsIHdoaWNoIENJIGZsYWdzIGFzCiAgInNlcSBub3QgaW5jcmVhc2luZyIgb25seSBpZiB0aGUgb3JkZXIgYnJlYWtzIOKAlCBhIGNsZWFuIGRlbGV0aW9uIG9mIHRoZQogICpsYXN0KiBsaW5lcyBpcyBub3QgZGV0ZWN0YWJsZSBmcm9tIHRoZSBmaWxlIGFsb25lLiBHaXQgaGlzdG9yeSBpcyB0aGUKICBiYWNrc3RvcDogY29tcGFyZSBhZ2FpbnN0IHRoZSBsYXN0IHJldmlld2VkIGNvbW1pdC4KCiMjIFNlc3Npb24gbGlmZWN5Y2xlIGhvb2tzIChQaGFzZSAyLCAyLTMpCgpCZXNpZGVzIHRoZSBnYXRlIGhvb2tzIGFib3ZlLCB0d28gbGlmZWN5Y2xlIGhvb2tzIGNvbXBsZXRlIHRoZSBzZXQKKGFsbCBmaXZlIENsYXVkZSBDb2RlIGhvb2sgZXZlbnRzIGFyZSBub3cgd2lyZWQgaW4gYC5jbGF1ZGUvc2V0dGluZ3MuanNvbmApOgoKLSAqKlNlc3Npb25TdGFydCoqIChgLmNsYXVkZS9ob29rcy9zZXNzaW9uLXN0YXJ0Lm1qc2ApOiB3aGVuIGEgc2Vzc2lvbgogIHN0YXJ0cyBpbiBhIHByb2plY3Qgd2l0aCBhIGdhdGUsIGl0IHByaW50cyBhIGNvbXBhY3QgcmVzdW1lIOKAlCBpdGVtCiAgY291bnRzLCBpbl9wcm9ncmVzcy9ibG9ja2VkIGl0ZW1zLCBhbmQgdGhlIGZpcnN0IGxpbmVzIG9mCiAgYFNFU1NJT05fU1RBVEUubWRgLiBObyBnYXRlIHN0YXRlIG1lYW5zIHNpbGVuY2UsIG5ldmVyIGFuIGVycm9yLgotICoqUG9zdFRvb2xVc2UqKiAoYC5jbGF1ZGUvaG9va3MvcG9zdC10b29sLXVzZS5tanNgKTogYXBwZW5kcyBvbmUgSlNPTgogIGxpbmUgcGVyIHRvb2wgY2FsbCB0byBgZ2F0ZS9jb3N0LWxlZGdlci5qc29ubGAgKHRvb2wgbmFtZSArIHRpbWVzdGFtcCkg4oCUCiAgdGhlIHJhdyBtYXRlcmlhbCBmb3IgdGhlIGNvc3QgbGVkZ2VyJ3MgcHJveHkgbWV0cmljcwogIChgdG9vbHMvY29zdC1sZWRnZXIucHlgKS4gSXQgb25seSByZWNvcmRzIHdoZW4gYGdhdGUvYCBleGlzdHMsIGFuZAogIGBDT1NUX0xFREdFUj0wYCBkaXNhYmxlcyBpdCBlbnRpcmVseS4gVGhlIGxlZGdlciBpcyBsb2NhbCB0ZWxlbWV0cnkgYW5kCiAgaXMgZ2l0aWdub3JlZCAodW5saWtlIGBmZWF0dXJlX2xpc3QuanNvbmAvYGV2ZW50cy5qc29ubGAsIHdoaWNoIGFyZQogIHJldmlld2FibGUgZXZpZGVuY2UgYW5kIGNvbW1pdHRlZCBwZXIgRDgpLgotICoqU3RvcCoqIChgLmNsYXVkZS9ob29rcy9zdG9wLWdhdGUubWpzYCwgUGhhc2UgMSk6IGJsb2NrcyBzdG9wcGluZyB3aGlsZQogIGFueSBpdGVtIGlzIGBpbl9wcm9ncmVzc2AsIHdpdGggdGhlIGxvZ2dlZCBodW1hbiBvdmVycmlkZSBjaGFubmVsLgoKQWxsIHRocmVlIGFyZSBDbGF1ZGUgQ29kZSBvbmx5IOKAlCBvdGhlciBob3N0cyBoYXZlIG5vIGhvb2sgZXZlbnRzLCBzbyBvbgp0aGVtIHRoZXNlIGxlZ3MgZG8gbm90aGluZy4gRXZlcnkgaG9vayBpcyBmYWlsLW9wZW46IGEgcGFyc2UgZmFpbHVyZSBvcgphbiB1bnJlYWRhYmxlIHN0YXRlIGZpbGUgbG9ncyB0byBzdGRlcnIgYW5kIGV4aXRzIDAuCgojIyBDb3N0IGxlZGdlciAoUGhhc2UgMiwgMi01KQoKVGhlIGxlZGdlciByZWNvcmRzIGRldGVybWluaXN0aWMgKipwcm94eSBtZXRyaWNzKiog4oCUIGl0IGlzIG5vdCBhIHRva2VuCmxlZGdlciAobm8gaG9zdCBleHBvc2VzIGEgcHJvZ3JhbW1hdGljIHRva2VuIEFQSTsgc2VlCmBkb2NzL2ludGVybmFsL3Rva2VuLWFkYXB0ZXJzLm1kYCk6CgotIGBnYXRlL2Nvc3QtbGVkZ2VyLmpzb25sYDogb25lIGxpbmUgcGVyIFBvc3RUb29sVXNlIHRvb2wgY2FsbCAoaG9vaykgYW5kCiAgb25lIGxpbmUgcGVyIHBpcGVsaW5lIHN0YWdlIChgcnVuLXBpcGVsaW5lLnNoYC9gLnBzMWAsIG9ubHkgd2hlbiB0aGUKICB0YXJnZXQgaGFzIGEgYGdhdGUvYCkuIExvY2FsIHRlbGVtZXRyeSwgKipnaXRpZ25vcmVkKiouCi0gYGdhdGUvY29zdC1idWRnZXQuanNvbmA6IHBlci1kYXkgY2FwcyAocnVucywgdG9vbCBjYWxscywgdmVyaWZ5CiAgZmFpbHVyZXMsIG92ZXJyaWRlcykgKyBhIHBlci1zdGFnZSBkdXJhdGlvbiBjYXAuIENyZWF0ZWQgYnkKICBgcHl0aG9uMyB0b29scy9jb3N0LWxlZGdlci5weSBpbml0LWJ1ZGdldGAgKG5ldmVyIG92ZXJ3cml0ZXMpLiBUaGlzIGZpbGUKICBpcyBwb2xpY3ksIHNvIGl0ICoqaXMqKiBjb21taXR0ZWQgd2l0aCB0aGUgcHJvamVjdC4KLSBgcHl0aG9uMyB0b29scy9jb3N0LWxlZGdlci5weSBzdW1tYXJ5IFstLWpzb25dYDogYWdncmVnYXRlcyB0aGUgbGVkZ2VyCiAgcGx1cyBgZ2F0ZS9ldmVudHMuanNvbmxgICh2ZXJpZnlfZmFpbGVkIC8gb3ZlcnJpZGUgY291bnRzKS4KLSBgcHl0aG9uMyB0b29scy9jb3N0LWxlZGdlci5weSBjaGVjay1idWRnZXRgOiBleGl0IDAgd2l0aGluIGJ1ZGdldDsKICBleGl0IDEgb3ZlciBidWRnZXQg4oCUIHByaW50cyB0aGUgZXhjZWVkZWQgbGltaXRzIHRvIHN0ZGVyciBhbmQgcmVjb3JkcwogIG9uZSBgYnVkZ2V0X2V4Y2VlZGVkYCBldmVudCBpbiBgZ2F0ZS9ldmVudHMuanNvbmxgIChkZWR1cGVkIHBlciBkYXkpLgogIE92ZXItYnVkZ2V0ICoqbmV2ZXIgYXV0by1zdG9wcyBhIHJ1bioqOiBidWRnZXQgc2VtYW50aWNzIGZvciBhdXRvLXN0b3AKICBhcmUgbm90IGRlZmluZWQgeWV0LgoKIyMgSHVtYW4gb3ZlcnJpZGUgKG5vIGRlYWRsb2NrcykKClR3byBsb2dnZWQgZXNjYXBlIGhhdGNoZXMsIGJvdGggdmlzaWJsZSBpbiB0aGUgZXZpZGVuY2UgYW5kIHRoZSBsb2c6CgotIGBwYXNzLWdhdGUucHkgb3ZlcnJpZGUgLS1pZCA8aWQ+IC0tcmVhc29uICIuLi4iIFstLWJ5IE5BTUVdYCDigJQgbWFya3MKICB0aGUgaXRlbSBwYXNzaW5nIHdpdGggYGV2aWRlbmNlLm92ZXJyaWRlYCAoZXhpdF9jb2RlIOKIkjEgPSAibm8gcGFzc2luZwogIHJ1biIpLiBBIHJldmlld2VyIHNlZXMgaXQgd2FzIGFuIG92ZXJyaWRlLCBub3QgYSBwYXNzaW5nIHJ1bi4KLSBUaGUgU3RvcCBob29rIChgLmNsYXVkZS9ob29rcy9zdG9wLWdhdGUubWpzYCkgYmxvY2tzIHN0b3BwaW5nIHdoaWxlCiAgYW55IGl0ZW0gaXMgYGluX3Byb2dyZXNzYC4gU2V0IGBHQVRFX0FMTE9XX1NUT1A9MWAgd2l0aCBhIG5vbi1lbXB0eQogIGBHQVRFX1NUT1BfUkVBU09OYCB0byBzdG9wIG5vdzsgdGhlIGhvb2sgYXBwZW5kcyBhIGBzdG9wX292ZXJyaWRlYAogIGV2ZW50IGZpcnN0LiBBbiBvdmVycmlkZSB3aXRob3V0IGEgcmVhc29uIGlzIG5vdCBhbiBvdmVycmlkZS4KICBJZiB0aGUgaG9vayBhbHJlYWR5IGJsb2NrZWQgdGhlIHNhbWUgc3RvcCBvbmNlLCBDbGF1ZGUgQ29kZSBzZXRzCiAgYHN0b3BfaG9va19hY3RpdmVgIGFuZCBhIHNlY29uZCBhdHRlbXB0IGlzIGFsbG93ZWQgKGJsb2NraW5nIGFnYWluCiAgd291bGQgbG9vcCBmb3JldmVyKTsgdGhlIGFsbG93YW5jZSBpcyBsb2dnZWQgYXMKICBgc3RvcF9hbGxvd2VkX2hvb2tfYWN0aXZlYC4KCioqQXVkaXQgcmVzcG9uc2liaWxpdHkgZm9yIG92ZXJyaWRlcy4qKiBBbiBvdmVycmlkZSBpcyBhIGh1bWFuIGRlY2lzaW9uLApub3QgYSBwYXNzaW5nIHJ1bjogYGNoZWNrLWNsZWFuYCBuZXZlciByZS12ZXJpZmllcyBhbiBvdmVycmlkZGVuIGl0ZW0KKDNiIHNraXBzIG92ZXJyaWRlIGl0ZW1zIGJ5IGRlc2lnbiksIHNvIG5vdGhpbmcgZWxzZSB3aWxsIGNhdGNoIGEgYmFkCm92ZXJyaWRlLiBUaGUgcGVyc29uIHdobyBvdmVycmlkZXMgb3ducyB0aGUgZm9sbG93LXVwOiBldmVyeSBvdmVycmlkZQptdXN0IGJlIHJlLWV4YW1pbmVkIGF0IHRoZSBuZXh0IHNlc3Npb24gYnJlYWtwb2ludCAoU0VTU0lPTl9TVEFURQpyZXZpZXcpIGFuZCBlaXRoZXIgdmVyaWZpZWQgZm9yIHJlYWwgb3IgcmVvcGVuZWQKKGBwYXNzLWdhdGUucHkgcmVvcGVuYCkuIEFuIG92ZXJyaWRlIG9sZGVyIHRoYW4gb25lIHNlc3Npb24gd2l0aG91dApyZS1leGFtaW5hdGlvbiBtdXN0IGJlIHRyZWF0ZWQgYXMgYW4gb3BlbiBpdGVtIGFnYWluLgpgcGFzcy1nYXRlLnB5IHN0YXR1c2AgYW5kIGBldmVudHNgIGxpc3Qgb3ZlcnJpZGVzIGV4cGxpY2l0bHkgc28gYQpyZXZpZXdlciBjYW4gZmluZCB0aGVtLgoKIyMgRGVwbG95CgpgZGVwbG95LWFnZW50cy5zaGAgLyBgLnBzMWAgY29weSB0aGUgZ2F0ZSAqY29kZSogKGBwYXNzLWdhdGUucHlgLApgZ3JhcGgucHlgLCBgZmVhdHVyZV9saXN0LnNjaGVtYS5qc29uYCwgYGluaXQudGVtcGxhdGUuc2hgLCB0aGlzIFJFQURNRSkgdG8gdGhlCnRhcmdldCdzIGBnYXRlL2AuIFRoZXkgbmV2ZXIgY29weSBgZmVhdHVyZV9saXN0Lmpzb25gLCBgZXZlbnRzLmpzb25sYCwKb3IgYGNsZWFuLXN0YXRlLmpzb25gIOKAlCB0aG9zZSBhcmUgcGVyLXByb2plY3Qgc3RhdGUuIEEgdGFyZ2V0IHByb2plY3QKcnVucyBgc2ggZ2F0ZS9pbml0LnRlbXBsYXRlLnNoIC0tbmFtZSA8cHJvamVjdD4gLS12ZXJpZnkgIjxjbWQ+IiAtLXN0YXJ0CiI8Y21kPiJgIHRvIGNyZWF0ZSBpdHMgb3duIHN0YXRlLCBvciBgcHl0aG9uMyBnYXRlL3Bhc3MtZ2F0ZS5weSBpbml0YC4KCk5vdGU6IGBwYXNzLWdhdGUucHkgaW5pdGAgbG9va3MgZm9yIGB0ZW1wbGF0ZXMvZmVhdHVyZV9saXN0LnRlbXBsYXRlLmpzb25gCm5leHQgdG8gdGhlIHJlcG87IGluIGEgZGVwbG95ZWQgdGFyZ2V0IHRoYXQgZGlyZWN0b3J5IGRvZXMgbm90IGV4aXN0LCBzbwppbml0IGZhbGxzIGJhY2sgdG8gYW4gZW1wdHkgbGlzdCBhbmQgYGFkZGAgaXMgdGhlIHdheSBpdGVtcyBhcmUgY3JlYXRlZC4KVGhhdCBpcyBpbnRlbnRpb25hbCDigJQgdGhlIGV4YW1wbGVzIGFyZSByZXBvIGRvY3VtZW50YXRpb24sIG5vdCBhIGRlZmF1bHQuCgojIyBEb2dmb29kCgpQaGFzZSAxIHdhcyBkb2dmb29kZWQgdHdpY2U7IHRoZSByZWNvcmQgaXMKYGRvY3MvaW50ZXJuYWwvcGhhc2UxLWRvZ2Zvb2QubWRgLiBJbiBzaG9ydDogdGhpcyByZXBvJ3Mgb3duCmBTRVNTSU9OX1NUQVRFLm1kYCBtaWdyYXRpb24gd2VudCB0aHJvdWdoIHRoZSBnYXRlIChmYWtlIHBhc3MgcGxhbnRlZCwKY2F1Z2h0IGJ5IENJIMKnM2ssIGhvb2sgZGVuaWVkIGEgZGlyZWN0IHdyaXRlLCByZWFsIHZlcmlmeSBwYXNzZWQpLCBhbmQKYSBzZWNvbmQgc21hbGwgcHJvamVjdCAoYC90bXAvdGlueWNhbGNgLCBhIENMSSBjYWxjdWxhdG9yKSB3ZW50CmZhaWxpbmcg4oaSIHBhc3Npbmcgb24gYSByZWFsIGZlYXR1cmUgd2l0aCBhIHNlY29uZCBpbnRlcmNlcHQgY2F1Z2h0IGJ5CmBjaGVjay1jbGVhbmAgZGltZW5zaW9uIDNiLiBCb3RoIGhhbmRvdmVycyB3ZXJlIHRpbWVkIGF0IH4xcyBvZiByZWFkaW5nLgo=
+# gate/ — the self-owned verification gate (Phase 1)
+
+The gate is the part of agent-harness that makes "done" checkable. It is
+small on purpose: a JSON state machine, one stdlib-only Python script, two
+Claude Code hooks, and an append-only log. It does not run your model
+loop, schedule work, or call any vendor CLI. Comet is an optional adapter
+elsewhere in this repo; the gate works with or without it (D1).
+
+## Files
+
+| File | What it is |
+|---|---|
+| `feature_list.schema.json` | JSON Schema for the feature list: statuses, required fields, allowed transitions, WIP=1, evidence-required-for-passing |
+| `pass-gate.py` | The gate. Stdlib only. Reads the list, runs verification commands, moves items, writes evidence, appends events |
+| `init.template.sh` | Scaffold a project for the gate (feature list, clean-state config, SESSION_STATE, DECISIONS) + one smoke run |
+| `feature_list.json` | **This repo's own list** (dogfood). Per-project state; deployed targets create their own via `init` — deploy never copies this file |
+| `clean-state.json` | Build/test/start commands for `check-clean` (this repo's own) |
+| `events.jsonl` | Append-only event log. Every transition lands here |
+
+The schema lives in `gate/`; the human template lives in
+`templates/feature_list.template.json`.
+
+## The loop
+
+```console
+pass-gate.py add --id <id> --title "..." --behavior "..." --command "<verify>"
+pass-gate.py start --id <id>        # WIP=1: one item in_progress at a time
+... do the work ...
+pass-gate.py verify --id <id>       # runs the command; exit 0 -> passing + evidence
+pass-gate.py verify --all           # verify everything in_progress
+pass-gate.py block --id <id> --reason "..."   # stuck? say so, don't fake it
+pass-gate.py reopen --id <id> --reason "..."  # passing was wrong; reason required
+pass-gate.py status                 # what is where
+pass-gate.py check-clean            # five-dimension handover check
+pass-gate.py events --last 20       # what happened
+```
+
+An item may enter `passing` only with evidence: the command that ran,
+its exit code (0), when it ran, and the tail of its output. `passing` is
+irreversible except through `reopen`, which clears the evidence and
+requires a reason. The verification command is the definition of done —
+if it does not actually prove the behaviour, the gate is a ritual, not a
+check. Write the command first, then the code.
+
+**Verification level (v0.4.1, D66).** `verification.level` optionally
+records how strong the proof is: `assert` (text/existence assertion) <
+`unit` < `integration` < `e2e`. It is descriptive, never a gate —
+`check-clean` dimension 3d reports the passing mix by level (this repo
+currently reads `assert 5, unit 1`, which is honest for docs changes
+and a warning sign for feature work), and `pass-gate.py add --level`
+sets it at creation. An item without a level is reported as
+`unspecified`. The point is visibility: a `passing` proved by `grep`
+must not look identical to one proved end-to-end (course L10).
+
+## Clean-state (handover check)
+
+`check-clean` runs the five course dimensions; the progress dimension
+has two checks (3a narrative, 3b machine-readable truth):
+
+1. **build** passes — `gate/clean-state.json: build`
+2. **tests** pass — `clean-state.json: test`
+3. **progress recorded** — (a) `SESSION_STATE.md` names the in_progress
+   item; (b) every `passing` item's verification still exits 0 on re-run
+4. **temp artefacts cleaned** — no `*.tmp` / `*.bak*` / `__pycache__` /
+   `*.log` in `git status`
+5. **standard start path works** — `clean-state.json: start`
+
+A dimension with no command configured reports SKIP, not PASS. Any FAIL
+means: do not hand off yet.
+
+## Anti-tamper: defence in depth, not a guarantee
+
+An agent can always rewrite a JSON file. The gate does not pretend
+otherwise. Three legs raise the cost of faking a pass and leave a trace:
+
+1. **PreToolUse hook** (`.claude/hooks/guard-feature-list.mjs`): direct
+   Write/Edit to any `feature_list.json` is denied (exit 2). The only
+   writer is `pass-gate.py`, invoked through Bash. **Claude Code only** —
+   other hosts have no such hook; on them this leg does nothing.
+2. **CI second check** (`tests/repo_checks.py` §3k): for every `passing`
+   item, CI re-runs the verification command and requires exit 0 *now*,
+   and requires a `verified`/`override` event for the item. A hand-edited
+   evidence block with invented output is caught here. This leg runs at
+   review time, not at run time.
+3. **Event log** (`gate/events.jsonl`): every transition is appended with
+   a monotonic sequence number and committed to git, so rewriting history
+   shows up as a diff. It cannot stop a rewrite; it makes one visible.
+
+Known gaps (recorded honestly, not fixed by pretending):
+
+- A direct edit through Bash (`sed`, `python`, heredoc) bypasses leg 1
+  entirely and leaves no event — leg 2 is the only catch, and only at CI
+  time. This was demonstrated in dogfooding: a fake pass planted by
+  hand-edit had no event; CI §3k caught it anyway.
+- Leg 2 re-runs verification commands, so a slow or flaky command makes
+  CI slow or flaky. Keep verification commands fast and hermetic.
+- `events.jsonl` seq numbers are monotonic, not gapless; a deleted line
+  is detectable only by a missing seq number, which CI flags as
+  "seq not increasing" only if the order breaks — a clean deletion of the
+  *last* lines is not detectable from the file alone. Git history is the
+  backstop: compare against the last reviewed commit.
+
+## Session lifecycle hooks (Phase 2, 2-3)
+
+Besides the gate hooks above, two lifecycle hooks complete the set
+(all five Claude Code hook events are now wired in `.claude/settings.json`):
+
+- **SessionStart** (`.claude/hooks/session-start.mjs`): when a session
+  starts in a project with a gate, it prints a compact resume — item
+  counts, in_progress/blocked items, and the first lines of
+  `SESSION_STATE.md`. No gate state means silence, never an error.
+- **PostToolUse** (`.claude/hooks/post-tool-use.mjs`): appends one JSON
+  line per tool call to `gate/cost-ledger.jsonl` (tool name + timestamp) —
+  the raw material for the cost ledger's proxy metrics
+  (`tools/cost-ledger.py`). It only records when `gate/` exists, and
+  `COST_LEDGER=0` disables it entirely. The ledger is local telemetry and
+  is gitignored (unlike `feature_list.json`/`events.jsonl`, which are
+  reviewable evidence and committed per D8).
+- **Stop** (`.claude/hooks/stop-gate.mjs`, Phase 1): blocks stopping while
+  any item is `in_progress`, with the logged human override channel.
+
+All three are Claude Code only — other hosts have no hook events, so on
+them these legs do nothing. Every hook is fail-open: a parse failure or
+an unreadable state file logs to stderr and exits 0.
+
+## Cost ledger (Phase 2, 2-5)
+
+The ledger records deterministic **proxy metrics** — it is not a token
+ledger (no host exposes a programmatic token API; see
+`docs/internal/token-adapters.md`):
+
+- `gate/cost-ledger.jsonl`: one line per PostToolUse tool call (hook) and
+  one line per pipeline stage (`run-pipeline.sh`/`.ps1`, only when the
+  target has a `gate/`). Local telemetry, **gitignored**.
+- `gate/cost-budget.json`: per-day caps (runs, tool calls, verify
+  failures, overrides) + a per-stage duration cap. Created by
+  `python3 tools/cost-ledger.py init-budget` (never overwrites). This file
+  is policy, so it **is** committed with the project.
+- `python3 tools/cost-ledger.py summary [--json]`: aggregates the ledger
+  plus `gate/events.jsonl` (verify_failed / override counts).
+- `python3 tools/cost-ledger.py check-budget`: exit 0 within budget;
+  exit 1 over budget — prints the exceeded limits to stderr and records
+  one `budget_exceeded` event in `gate/events.jsonl` (deduped per day).
+  Over-budget **never auto-stops a run**: budget semantics for auto-stop
+  are not defined yet.
+
+## Human override (no deadlocks)
+
+Two logged escape hatches, both visible in the evidence and the log:
+
+- `pass-gate.py override --id <id> --reason "..." [--by NAME]` — marks
+  the item passing with `evidence.override` (exit_code −1 = "no passing
+  run"). A reviewer sees it was an override, not a passing run.
+- The Stop hook (`.claude/hooks/stop-gate.mjs`) blocks stopping while
+  any item is `in_progress`. Set `GATE_ALLOW_STOP=1` with a non-empty
+  `GATE_STOP_REASON` to stop now; the hook appends a `stop_override`
+  event first. An override without a reason is not an override.
+  If the hook already blocked the same stop once, Claude Code sets
+  `stop_hook_active` and a second attempt is allowed (blocking again
+  would loop forever); the allowance is logged as
+  `stop_allowed_hook_active`.
+
+**Audit responsibility for overrides.** An override is a human decision,
+not a passing run: `check-clean` never re-verifies an overridden item
+(3b skips override items by design), so nothing else will catch a bad
+override. The person who overrides owns the follow-up: every override
+must be re-examined at the next session breakpoint (SESSION_STATE
+review) and either verified for real or reopened
+(`pass-gate.py reopen`). An override older than one session without
+re-examination must be treated as an open item again.
+`pass-gate.py status` and `events` list overrides explicitly so a
+reviewer can find them.
+
+## Deploy
+
+`deploy-agents.sh` / `.ps1` copy the gate *code* (`pass-gate.py`,
+`graph.py`, `feature_list.schema.json`, `init.template.sh`, this README) to the
+target's `gate/`. They never copy `feature_list.json`, `events.jsonl`,
+or `clean-state.json` — those are per-project state. A target project
+runs `sh gate/init.template.sh --name <project> --verify "<cmd>" --start
+"<cmd>"` to create its own state, or `python3 gate/pass-gate.py init`.
+
+Note: `pass-gate.py init` looks for `templates/feature_list.template.json`
+next to the repo; in a deployed target that directory does not exist, so
+init falls back to an empty list and `add` is the way items are created.
+That is intentional — the examples are repo documentation, not a default.
+
+## Dogfood
+
+Phase 1 was dogfooded twice; the record is
+`docs/internal/phase1-dogfood.md`. In short: this repo's own
+`SESSION_STATE.md` migration went through the gate (fake pass planted,
+caught by CI §3k, hook denied a direct write, real verify passed), and
+a second small project (`/tmp/tinycalc`, a CLI calculator) went
+failing → passing on a real feature with a second intercept caught by
+`check-clean` dimension 3b. Both handovers were timed at ~1s of reading.
