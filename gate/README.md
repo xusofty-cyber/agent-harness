@@ -42,6 +42,16 @@ requires a reason. The verification command is the definition of done —
 if it does not actually prove the behaviour, the gate is a ritual, not a
 check. Write the command first, then the code.
 
+**Verification level (v0.4.1, D66).** `verification.level` optionally
+records how strong the proof is: `assert` (text/existence assertion) <
+`unit` < `integration` < `e2e`. It is descriptive, never a gate —
+`check-clean` dimension 3d reports the passing mix by level (this repo
+currently reads `assert 5, unit 1`, which is honest for docs changes
+and a warning sign for feature work), and `pass-gate.py add --level`
+sets it at creation. An item without a level is reported as
+`unspecified`. The point is visibility: a `passing` proved by `grep`
+must not look identical to one proved end-to-end (course L10).
+
 ## Clean-state (handover check)
 
 `check-clean` runs the five course dimensions; the progress dimension

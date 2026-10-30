@@ -60,7 +60,13 @@ ITEM_REQUIRED = ("id", "priority", "area", "title",
 # in_progress). A single-snapshot validator cannot check transitions.
 ITEM_KEYS = set(ITEM_REQUIRED) | {"evidence", "notes", "external_evidence"}
 TOP_KEYS = {"version", "project", "items"}
-VERIFICATION_KEYS = {"command", "timeout_seconds"}
+VERIFICATION_KEYS = {"command", "timeout_seconds", "level"}
+# Verification strength, weakest to strongest (v0.4.1, D66). Optional:
+# an item without a level is reported as "unspecified" by check-clean.
+# The level is descriptive, never a gate: it makes evidence strength
+# visible instead of letting a grep-assert passing look identical to
+# an end-to-end passing (course L10).
+LEVELS = ("assert", "unit", "integration", "e2e")
 EVIDENCE_KEYS = {"command", "exit_code", "ran_at", "output_tail", "override",
                  "output_sha256"}
 OVERRIDE_KEYS = {"by", "reason", "at"}
@@ -193,6 +199,10 @@ def validate(data):
                 if not _is_int(timeout) or not 1 <= timeout <= 3600:
                     errors.append(f"{where}.verification.timeout_seconds "
                                   "must be an integer in 1..3600")
+            if "level" in verification \
+                    and verification["level"] not in LEVELS:
+                errors.append(f"{where}.verification.level must be one "
+                              f"of {LEVELS}")
         evidence = item.get("evidence")
         if evidence is not None and not isinstance(evidence, dict):
             errors.append(f"{where}.evidence must be an object or null")
@@ -380,7 +390,8 @@ def cmd_add(args):
         "user_visible_behavior": args.behavior,
         "status": "not_started",
         "verification": {"command": args.command,
-                         "timeout_seconds": args.timeout},
+                         "timeout_seconds": args.timeout,
+                         **({"level": args.level} if args.level else {})},
         "evidence": None,
         "notes": args.notes or "",
     }
@@ -642,8 +653,10 @@ def cmd_status(args):
         ev = item.get("evidence") or {}
         mark = "override" if ev.get("override") else (
             "evidence" if ev else "no evidence")
+        _lvl = (item.get("verification") or {}).get("level")
+        _lvl_s = f" <{_lvl}>" if _lvl else ""
         print(f"  [{item['status']:12}] {item['id']} ({item['priority']}) "
-              f"— {item['title']} [{mark}]")
+              f"— {item['title']} [{mark}]{_lvl_s}")
     if errors:
         print("validation errors:")
         for e in errors:
@@ -1108,6 +1121,23 @@ def cmd_check_clean(args):
             results.append(("3c progress/no placeholders", "PASS",
                             "no unfilled placeholders"))
 
+    # 3d. verification-strength summary (v0.4.1, D66; course L10).
+    # Informational only — never a FAIL: a passing proved by a text
+    # assertion and a passing proved end-to-end must not *look*
+    # identical in the handover report, but the gate does not prescribe
+    # the right level for a given item; the human does, at review time.
+    if passing:
+        _counts = {}
+        for _item in passing:
+            _lvl = (_item.get("verification") or {}).get("level") \
+                or "unspecified"
+            _counts[_lvl] = _counts.get(_lvl, 0) + 1
+        _order = list(LEVELS) + ["unspecified"]
+        _summary = ", ".join(f"{lvl} {_counts[lvl]}"
+                             for lvl in _order if lvl in _counts)
+        results.append(("3d verification levels (info)", "PASS",
+                        f"passing by level: {_summary}"))
+
     # 4. temp artefacts cleaned
     temp_hits = []
     try:
@@ -1163,6 +1193,9 @@ def main(argv=None):
     p.add_argument("--command", required=True,
                    help="verification command (exit 0 = pass)")
     p.add_argument("--timeout", type=int, default=300)
+    p.add_argument("--level", choices=LEVELS, default=None,
+                   help="verification strength: assert < unit < "
+                        "integration < e2e (descriptive, see D66)")
     p.add_argument("--notes", default="")
     p.set_defaults(func=cmd_add)
 

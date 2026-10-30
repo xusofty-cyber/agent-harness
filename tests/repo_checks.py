@@ -33,6 +33,19 @@ def check(name: str, ok: bool, detail: str = "") -> None:
         failures.append(name)
 
 
+env_skips: list[str] = []
+
+
+def check_env(name: str, detail: str = "") -> None:
+    """Record a check that could not run because the *environment* is
+    missing a prerequisite (v0.4.1). An environment skip is not a pass
+    and not a repository failure: it is reported separately so a clean
+    machine without the prerequisite is not indistinguishable from a
+    broken repository."""
+    print(f"[ENV-SKIP] {name}" + (f" — {detail}" if detail else ""))
+    env_skips.append(name)
+
+
 # --- 1. JSON validity ---
 for rel in [".claude/settings.json", ".agents/hooks.json", ".workbuddy/settings.json", "skills-lock.json"]:
     p = ROOT / rel
@@ -926,9 +939,26 @@ _bench_smoke = subprocess.run(
 _smoke_lines = [l for l in
                 (_bench_smoke.stdout + _bench_smoke.stderr).strip().splitlines()
                 if l.strip()]
-check("eval:bench-smoke-passes", _bench_smoke.returncode == 0,
-      "eval/run-bench.sh smoke failed: "
-      + (" | ".join(_smoke_lines[-2:]) if _smoke_lines else "(no output)"))
+if _bench_smoke.returncode != 0 \
+        and subprocess.run(["python3", "-c", "import pytest"],
+                           capture_output=True).returncode != 0 \
+        and any("pytest" in _l for _l in _smoke_lines):
+    # NOTE: the interpreter that matters is the `python3` on PATH —
+    # run-bench.sh invokes it directly, whatever interpreter runs
+    # this script (a venv driver does not change the smoke's python).
+    # The smoke's only failure is the missing pytest prerequisite in
+    # this environment (run-bench.sh itself says "install it first").
+    # Classify it as an environment skip, not a repository failure;
+    # CI installs pytest, so the check still runs at full strength
+    # there (v0.4.1; a real smoke failure with pytest present still
+    # FAILs below).
+    check_env("eval:bench-smoke-passes",
+              "pytest not installed in this environment; "
+              "run-bench.sh smoke not executed")
+else:
+    check("eval:bench-smoke-passes", _bench_smoke.returncode == 0,
+          "eval/run-bench.sh smoke failed: "
+          + (" | ".join(_smoke_lines[-2:]) if _smoke_lines else "(no output)"))
 
 # --- 3q2. B2 discriminating bench (t9-t12) + pre-push/CI template gate ---
 # B2 preregistration must exist before any B2 run and must fix the
@@ -1534,6 +1564,9 @@ if broken_links:
     check("link:no-broken", False, f"{len(broken_links)} broken internal links")
 
 print()
+if env_skips:
+    print(f"{len(env_skips)} check(s) skipped for missing environment "
+          f"prerequisites (not failures): {', '.join(env_skips)}")
 if failures:
     print(f"{len(failures)} check(s) failed.")
     sys.exit(1)

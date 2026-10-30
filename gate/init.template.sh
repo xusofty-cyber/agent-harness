@@ -141,6 +141,9 @@ fi
 echo "init: smoke run: $VERIFY_CMD"
 if sh -c "$VERIFY_CMD"; then
     echo "init: OK — $PROJECT_NAME is gated (verify passed)"
+    echo "init: next, work through templates/initializer-playbook.md in"
+    echo "      agent-harness (opening questions, feature-list discipline,"
+    echo "      initialization acceptance checklist) before starting items."
 else
     fail "smoke verification failed (exit $?) — fix the project, then re-run init"
 fi

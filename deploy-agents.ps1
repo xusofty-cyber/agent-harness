@@ -1200,7 +1200,7 @@ if (-not $isSelfRepo) {
     if (-not (Test-Path $TargetRulesDir)) { New-Item -ItemType Directory -Path $TargetRulesDir -Force | Out-Null }
     $AntigravityAdapter = Join-Path $TargetRulesDir "agent-harness.md"
     if (-not (Test-Path $AntigravityAdapter)) {
-        "---`ntrigger: always_on`ndescription: \"Agent Harness canonical rules: follow AGENTS.md and .agents/rules/\"`n---`n`n@AGENTS.md`n" | Out-File -FilePath $AntigravityAdapter -Encoding utf8
+        "---`ntrigger: always_on`ndescription: `"Agent Harness canonical rules: follow AGENTS.md and .agents/rules/`"`n---`n`n@AGENTS.md`n" | Out-File -FilePath $AntigravityAdapter -Encoding utf8
         Write-Host "  [OK] Deployed Antigravity rules adapter: .agents/rules/agent-harness.md (trigger: always_on)" -ForegroundColor Green
     } else {
         Write-Host "  [INFO] .agents/rules/agent-harness.md already exists, keeping existing file." -ForegroundColor Gray

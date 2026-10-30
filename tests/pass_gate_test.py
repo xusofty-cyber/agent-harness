@@ -189,6 +189,33 @@ class StatusPluralTest(unittest.TestCase):
         self.assertIn("(2 items)", _status_with(2))
 
 
+class VerificationLevelTest(unittest.TestCase):
+    """D66: verification.level is optional, enum-checked, and only
+    descriptive — an unknown level is a validation error, a missing
+    level is not, and check-clean summarises the passing mix."""
+
+    def _data(self, level_marker):
+        item = {"id": "a", "title": "a", "priority": "p1", "area": "gate",
+                "user_visible_behavior": "x", "status": "not_started",
+                "verification": {"command": "true", "timeout_seconds": 60},
+                "evidence": None}
+        if level_marker is not None:
+            item["verification"]["level"] = level_marker
+        return {"version": 1, "project": "t", "items": [item]}
+
+    def test_valid_levels_and_absence_validate(self):
+        mod = _load_pass_gate()
+        for lvl in ("assert", "unit", "integration", "e2e", None):
+            self.assertEqual(mod.validate(self._data(lvl)), [],
+                             f"level={lvl!r} should validate")
+
+    def test_unknown_level_rejected(self):
+        mod = _load_pass_gate()
+        errors = mod.validate(self._data("smoke"))
+        self.assertTrue(any("verification.level" in e for e in errors),
+                        errors)
+
+
 if __name__ == "__main__":
     unittest.main()
 
@@ -321,3 +348,4 @@ class PassGateBehaviorTest(unittest.TestCase):
         r = _run_gate(root, "status")
         self.assertEqual(r.returncode, 1)
         self.assertIn("non-empty string", r.stdout + r.stderr)
+

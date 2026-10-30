@@ -1056,3 +1056,26 @@ still pending.
   `writing-skills` rows and 40-skill counts go stale until the ZH-TW
   regeneration branch lands (merge order set by the coordinator).
   The 2026-11 monthly ablation moves on to another component.
+
+## D66 — verification.level: evidence strength is recorded, never gated (v0.4.1 convergence, 2026-10-30)
+
+- **Decision:** `verification` gains an optional `level` field —
+  `assert` < `unit` < `integration` < `e2e` — in
+  `gate/feature_list.schema.json`, validated by `pass-gate.py`
+  (unknown values are validation errors; absence is not), settable via
+  `pass-gate.py add --level`, shown by `status`, and summarised by
+  `check-clean` as the informational dimension 3d. This repo's own six
+  passing items are labelled in the same change (`assert` ×5,
+  `unit` ×1; evidence blocks untouched, so §3k re-verification is
+  unaffected).
+- **Reason:** the gate proved *that* a verification ran, but a
+  `passing` proved by a text assertion looked identical to one proved
+  end-to-end — the exact blind spot course L10 warns about. Making
+  strength visible changes how items are written; prescribing a
+  minimum level per item would be a policy the evidence does not yet
+  support, so the level is descriptive only and 3d never FAILs.
+- **Origin:** the 2026-10-30 external deep-analysis of v0.4.0 against
+  Learn Harness Engineering (L10/P05 gap §5.2), adopted as the first
+  item of the v0.4.1 convergence round. B3 (real-project
+  discriminating bench) remains the v0.5.0 theme and is not replaced
+  by this change.

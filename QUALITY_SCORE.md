@@ -1,4 +1,29 @@
-# Quality Score — merged edition (2026-10-28, feat/merge-v3)
+# Quality Score — v0.4.0 edition (2026-10-30, v0.4.1 convergence round)
+
+Re-issued for v0.4.0 plus the v0.4.1 convergence changes. Scores are
+0–10, deliberately un-generous: a score claims only what the cited
+evidence shows. The 2026-10-28 merged edition is kept verbatim below
+as history.
+
+| Module | Score | Evidence |
+|---|---|---|
+| Gate layer (`gate/`) | 8 | Unchanged core, still the strongest module: this repo's feature list now carries 6/6 passing items with evidence; v0.4.1 adds `verification.level` (D66) and check-clean dimension 3d, which reports this repo's passing mix as `assert 5, unit 1` — visible, and a standing warning for feature work. Not higher: real-world soak time is still short and every passing item here is docs-scale. |
+| Host bridges (Antigravity / WorkBuddy / dsh) | 4 | New module, scored by `docs/internal/host-verification-matrix.md` tiers: Antigravity CLI `partial-live` (one live agy 1.4.10 run found and fixed a real cwd bug), Antigravity IDE / WorkBuddy / dsh `protocol-only` (payloads assumed, no live run). Protocol suites pass (20 + 16 + 19 tests). v0.4.1 discharges one owed check: `tsc --noEmit` on the dsh plugin passes (TypeScript 5.9.3, exit 0). Not higher: no bridge has run a full gate flow on its live host. |
+| Pipeline & deploy | 7 | As the merged edition, plus: v0.4.1 adds a Windows CI execution smoke for `deploy-agents.ps1` (the ps-analyzer job now also runs the deploy and asserts the core file set). Not higher until that job has actually run green in CI — at re-issue time it is committed, not yet observed. |
+| Hooks & guard | 7 | Claude suites unchanged and green (90 + 12 + 11 + 12); total hook-related tests including bridges: 168, all passing locally 2026-10-30. Guard is still a guardrail, not a sandbox (documented); Stop hook soak time still short. |
+| Distribution (templates + 39 skills) | 5 | Unchanged problem, unchanged score: ~99K tokens of SKILL.md, zero per-skill usage evidence, known overlaps. Skill-usage telemetry and the second monthly ablation remain unmeasured/undone; they are v0.5.x work, and this score does not move until they land. |
+| Numbers & claims hygiene | 7 | Up from 6: README's enforcement wording now matches the host-verification matrix in EN and ZH (nothing below `live-verified` is worded as enforced); this scorecard is re-issued on evidence change as promised; repo_checks now classifies missing-environment failures (e.g. no pytest) as `[ENV-SKIP]`, distinct from repository failures. Not higher: the ZH-TW Multi-Tool guide remains knowingly stale (explicitly recorded in `docs/internal/i18n-status.md`), and upstream comet-skill figures still ship un-annotated. |
+| Evaluation | 4 | Unchanged, deliberately: B2 (t9–t12, 36 runs) reproduced B1's result — 36/36 pass, 0 false completions on every arm, NO DISCRIMINATION under the pre-registered rules. The bench still measures provability and cost on minutes-scale toy tasks, not capability deltas. The score moves only when B3 runs on real projects (v0.5.0 theme); token cost remains unmeasured (no host exposes a token API — proxy metrics only). |
+
+Overall posture (v0.4.0): the gate and its evidence spine are real;
+the bridge layer is broad but shallow (deployed, not live-verified);
+the evaluation still cannot say whether any of it improves outcomes
+on real work. The next score movement is expected from subtraction
+and B3 evidence, not from new surface.
+
+---
+
+## Quality Score — merged edition (2026-10-28, feat/merge-v3) [history]
 
 Per-module scores for the merged branch (`feat/phase0-v3` skeleton +
 `v3-yunyi` + `v3-yunkai`), with the evidence behind each. Scores are

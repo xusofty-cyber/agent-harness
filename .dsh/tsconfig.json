@@ -14,12 +14,15 @@
   // - Only erasable TypeScript is used in agent-harness-gate.ts, so
   //   the runtime artifact is produced by type stripping (see the
   //   header of agent-harness-gate.ts), not by tsc emit.
-  // - tsc itself was NOT run in the build environment for this change:
-  //   no typescript binary is installed there and the night-batch
-  //   no-approval-card discipline forbids fetching it, so a tsc pass
-  //   remains an owed check (see the PR body). What WAS verified
-  //   locally: Node 24 type stripping imports the .ts source, and
-  //   the full protocol test suite passes against the stripped .mjs.
+  // - tsc status: NOT run in the original build environment (no
+  //   typescript binary, night-batch no-fetch discipline). It WAS
+  //   run in the v0.4.1 convergence round (2026-10-30, TypeScript
+  //   5.x, this exact config): `tsc --noEmit -p .dsh/tsconfig.json`
+  //   exits 0 with no errors. Also verified: Node 24 type stripping
+  //   imports the .ts source, and the full protocol test suite
+  //   passes against the stripped .mjs. The dsh plugin API itself
+  //   remains unverified against a live dsh (see
+  //   docs/internal/host-verification-matrix.md).
   "compilerOptions": {
     "target": "ES2022",
     "module": "NodeNext",

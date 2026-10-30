@@ -17,7 +17,8 @@
       "user_visible_behavior": "docs/internal/SESSION_STATE.md is at most 60 lines, has the five breakpoint sections, and names this item id.",
       "verification": {
         "command": "python3 -c \"import pathlib; t=pathlib.Path('docs/internal/SESSION_STATE.md').read_text(); assert len(t.splitlines())<=60, len(t.splitlines()); assert 'p1-dogfood-session-state' in t; assert all(h in t for h in ['## Goal','## In progress','## Next','## Blocked','## Last verification'])\"",
-        "timeout_seconds": 60
+        "timeout_seconds": 60,
+        "level": "assert"
       }
     },
     {
@@ -37,7 +38,8 @@
       "user_visible_behavior": "gate/README.md exists, states the anti-tamper limits honestly, and docs/internal/phase1-dogfood.md records the dogfood run.",
       "verification": {
         "command": "test -f gate/README.md && test -f docs/internal/phase1-dogfood.md && grep -q 'defence in depth' gate/README.md && grep -q 'p1-dogfood-session-state' docs/internal/phase1-dogfood.md",
-        "timeout_seconds": 60
+        "timeout_seconds": 60,
+        "level": "assert"
       }
     },
     {
@@ -57,7 +59,8 @@
       "user_visible_behavior": "node tests/hooks-gate.test.mjs reports 10 pass / 0 fail.",
       "verification": {
         "command": "node tests/hooks-gate.test.mjs",
-        "timeout_seconds": 120
+        "timeout_seconds": 120,
+        "level": "unit"
       }
     },
     {
@@ -69,7 +72,8 @@
       "status": "passing",
       "verification": {
         "command": "python3 -c \"import pathlib; t=pathlib.Path('docs/internal/SESSION_STATE.md').read_text(); assert len(t.splitlines())<=60, len(t.splitlines()); assert all(h in t for h in ['## Goal','## In progress','## Next','## Blocked','## Last verification']); assert 'night-dogfood-session-state' in t; assert 'p1-dogfood-session-state' in t; assert 'feat/phase0-v3' not in t\"",
-        "timeout_seconds": 300
+        "timeout_seconds": 300,
+        "level": "assert"
       },
       "evidence": {
         "command": "python3 -c \"import pathlib; t=pathlib.Path('docs/internal/SESSION_STATE.md').read_text(); assert len(t.splitlines())<=60, len(t.splitlines()); assert all(h in t for h in ['## Goal','## In progress','## Next','## Blocked','## Last verification']); assert 'night-dogfood-session-state' in t; assert 'p1-dogfood-session-state' in t; assert 'feat/phase0-v3' not in t\"",
@@ -89,7 +93,8 @@
       "status": "passing",
       "verification": {
         "command": "python3 -c \"import pathlib; t=pathlib.Path('docs/internal/dogfood-2026-10-29.md').read_text(); assert all(h in t for h in ['## Task','## Sessions','## Evidence','## Check-clean','## Friction and suggestions','## Unverified']); assert 'night/dogfood' in t; assert 'agy --print' in t; assert 'not merged' in t\"",
-        "timeout_seconds": 300
+        "timeout_seconds": 300,
+        "level": "assert"
       },
       "evidence": {
         "command": "python3 -c \"import pathlib; t=pathlib.Path('docs/internal/dogfood-2026-10-29.md').read_text(); assert all(h in t for h in ['## Task','## Sessions','## Evidence','## Check-clean','## Friction and suggestions','## Unverified']); assert 'night/dogfood' in t; assert 'agy --print' in t; assert 'not merged' in t\"",
@@ -109,7 +114,8 @@
       "status": "passing",
       "verification": {
         "command": "python3 -c \"import pathlib; t=pathlib.Path('docs/internal/gate-operator-checklist.md').read_text(); assert len(t.splitlines())<=80, len(t.splitlines()); assert 'WIP=1' in t; assert 'check-clean' in t; assert 'pass-gate.py verify' in t; assert 'never hand-edit' in t\"",
-        "timeout_seconds": 300
+        "timeout_seconds": 300,
+        "level": "assert"
       },
       "evidence": {
         "command": "python3 -c \"import pathlib; t=pathlib.Path('docs/internal/gate-operator-checklist.md').read_text(); assert len(t.splitlines())<=80, len(t.splitlines()); assert 'WIP=1' in t; assert 'check-clean' in t; assert 'pass-gate.py verify' in t; assert 'never hand-edit' in t\"",
