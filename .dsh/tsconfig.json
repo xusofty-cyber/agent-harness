@@ -1,1 +1,39 @@
-ewogIC8vIE1pbmltYWwgY29uZmlnIGZvciB0aGUgZHNoIGdhdGUgcGx1Z2luIG9ubHkuIFRoaXMgaXMgTk9UIHRoZQogIC8vIHJlcG9zaXRvcnkncyBidWlsZCBjb25maWcgKHRoZSByZXBvIGhhcyBubyBwYWNrYWdlLmpzb24gYW5kIG5vCiAgLy8gYnVpbGQgc3RlcCk6IGl0IGV4aXN0cyBzbyBhIGB0c2MgLS1ub0VtaXRgIGNoZWNrIGNhbiBiZSBydW4KICAvLyBhZ2FpbnN0IHRoZSBwbHVnaW4gaW4gaXNvbGF0aW9uOgogIC8vCiAgLy8gICB0c2MgLS1ub0VtaXQgLXAgLmRzaC90c2NvbmZpZy5qc29uCiAgLy8KICAvLyBOb3Rlcywgc3RhdGVkIGhvbmVzdGx5OgogIC8vIC0gYHR5cGVzOiBbXWAgcGx1cyBgLmRzaC9ub2RlLXNoaW1zLmQudHNgIChpbmNsdWRlZCB2aWEgYGZpbGVzYCkKICAvLyAgIHN1cHBseSB0aGUgTm9kZSBidWlsdC1pbiBkZWNsYXJhdGlvbnMsIGJlY2F1c2UgdGhlIHJlcG8gdmVuZG9ycwogIC8vICAgbm8gQHR5cGVzL25vZGUuIEEgY29uc3VtZXIgdGhhdCBhbHJlYWR5IGhhcyBAdHlwZXMvbm9kZSBzaG91bGQKICAvLyAgIHJ1biB0c2Mgd2l0aCBpdHMgb3duIHR5cGVzIGluc3RlYWQgb2YgdGhlc2Ugc2hpbXMuCiAgLy8gLSBPbmx5IGVyYXNhYmxlIFR5cGVTY3JpcHQgaXMgdXNlZCBpbiBhZ2VudC1oYXJuZXNzLWdhdGUudHMsIHNvCiAgLy8gICB0aGUgcnVudGltZSBhcnRpZmFjdCBpcyBwcm9kdWNlZCBieSB0eXBlIHN0cmlwcGluZyAoc2VlIHRoZQogIC8vICAgaGVhZGVyIG9mIGFnZW50LWhhcm5lc3MtZ2F0ZS50cyksIG5vdCBieSB0c2MgZW1pdC4KICAvLyAtIHRzYyBzdGF0dXM6IE5PVCBydW4gaW4gdGhlIG9yaWdpbmFsIGJ1aWxkIGVudmlyb25tZW50IChubwogIC8vICAgdHlwZXNjcmlwdCBiaW5hcnksIG5pZ2h0LWJhdGNoIG5vLWZldGNoIGRpc2NpcGxpbmUpLiBJdCBXQVMKICAvLyAgIHJ1biBpbiB0aGUgdjAuNC4xIGNvbnZlcmdlbmNlIHJvdW5kICgyMDI2LTEwLTMwLCBUeXBlU2NyaXB0CiAgLy8gICA1LngsIHRoaXMgZXhhY3QgY29uZmlnKTogYHRzYyAtLW5vRW1pdCAtcCAuZHNoL3RzY29uZmlnLmpzb25gCiAgLy8gICBleGl0cyAwIHdpdGggbm8gZXJyb3JzLiBBbHNvIHZlcmlmaWVkOiBOb2RlIDI0IHR5cGUgc3RyaXBwaW5nCiAgLy8gICBpbXBvcnRzIHRoZSAudHMgc291cmNlLCBhbmQgdGhlIGZ1bGwgcHJvdG9jb2wgdGVzdCBzdWl0ZQogIC8vICAgcGFzc2VzIGFnYWluc3QgdGhlIHN0cmlwcGVkIC5tanMuIFRoZSBkc2ggcGx1Z2luIEFQSSBpdHNlbGYKICAvLyAgIHJlbWFpbnMgdW52ZXJpZmllZCBhZ2FpbnN0IGEgbGl2ZSBkc2ggKHNlZQogIC8vICAgZG9jcy9pbnRlcm5hbC9ob3N0LXZlcmlmaWNhdGlvbi1tYXRyaXgubWQpLgogICJjb21waWxlck9wdGlvbnMiOiB7CiAgICAidGFyZ2V0IjogIkVTMjAyMiIsCiAgICAibW9kdWxlIjogIk5vZGVOZXh0IiwKICAgICJtb2R1bGVSZXNvbHV0aW9uIjogIk5vZGVOZXh0IiwKICAgICJsaWIiOiBbIkVTMjAyMiJdLAogICAgInR5cGVzIjogW10sCiAgICAic3RyaWN0IjogdHJ1ZSwKICAgICJub1VuY2hlY2tlZEluZGV4ZWRBY2Nlc3MiOiBmYWxzZSwKICAgICJub0VtaXQiOiB0cnVlLAogICAgInNraXBMaWJDaGVjayI6IHRydWUsCiAgICAiZm9yY2VDb25zaXN0ZW50Q2FzaW5nSW5GaWxlTmFtZXMiOiB0cnVlCiAgfSwKICAiZmlsZXMiOiBbImFnZW50LWhhcm5lc3MtZ2F0ZS50cyIsICJub2RlLXNoaW1zLmQudHMiXQp9Cg==
+{
+  // Minimal config for the dsh gate plugin only. This is NOT the
+  // repository's build config (the repo has no package.json and no
+  // build step): it exists so a `tsc --noEmit` check can be run
+  // against the plugin in isolation:
+  //
+  //   tsc --noEmit -p .dsh/tsconfig.json
+  //
+  // Notes, stated honestly:
+  // - `types: []` plus `.dsh/node-shims.d.ts` (included via `files`)
+  //   supply the Node built-in declarations, because the repo vendors
+  //   no @types/node. A consumer that already has @types/node should
+  //   run tsc with its own types instead of these shims.
+  // - Only erasable TypeScript is used in agent-harness-gate.ts, so
+  //   the runtime artifact is produced by type stripping (see the
+  //   header of agent-harness-gate.ts), not by tsc emit.
+  // - tsc status: NOT run in the original build environment (no
+  //   typescript binary, night-batch no-fetch discipline). It WAS
+  //   run in the v0.4.1 convergence round (2026-10-30, TypeScript
+  //   5.x, this exact config): `tsc --noEmit -p .dsh/tsconfig.json`
+  //   exits 0 with no errors. Also verified: Node 24 type stripping
+  //   imports the .ts source, and the full protocol test suite
+  //   passes against the stripped .mjs. The dsh plugin API itself
+  //   remains unverified against a live dsh (see
+  //   docs/internal/host-verification-matrix.md).
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022"],
+    "types": [],
+    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "files": ["agent-harness-gate.ts", "node-shims.d.ts"]
+}
