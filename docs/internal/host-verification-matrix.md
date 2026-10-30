@@ -1,1 +1,37 @@
-IyBIb3N0IHZlcmlmaWNhdGlvbiBtYXRyaXggKHYwLjQuMSkKCk9uZSBwbGFjZSB0aGF0IGFuc3dlcnMsIHBlciBob3N0OiAqKmhvdyBzdHJvbmdseSBpcyB0aGUgZ2F0ZSBhY3R1YWxseQp2ZXJpZmllZCB0aGVyZT8qKiBUaGUgUkVBRE1FIHN1cHBvcnQgdGFibGUgbGlua3MgaGVyZS4gQSBob3N0IG1heSBvbmx5Cm1vdmUgdXAgYSB0aWVyIG9uIHJlY29yZGVkIGV2aWRlbmNlLCBuZXZlciBvbiBwcm90b2NvbCB0ZXN0cyBhbG9uZS4KCiMjIFRpZXJzCgp8IFRpZXIgfCBNZWFuaW5nIHwKfC0tLXwtLS18CnwgYGxpdmUtdmVyaWZpZWRgIHwgQSBmdWxsIGdhdGUgZmxvdyAoYWRkIOKGkiBzdGFydCDihpIgdmVyaWZ5IOKGkiBTdG9wIGJsb2NrKSBoYXMgYmVlbiBydW4gb24gdGhlIHJlYWwgaG9zdC9jbGllbnQgYW5kIHRoZSBydW4gaXMgcmVjb3JkZWQuIHwKfCBgcGFydGlhbC1saXZlYCB8IFNvbWUgbGl2ZSBldmlkZW5jZSBleGlzdHMgKGUuZy4gb25lIHJlYWwgQ0xJIHJ1biB0aGF0IGZvdW5kIGFuZCBmaXhlZCBhIGJ1ZyksIGJ1dCB0aGUgZnVsbCBnYXRlIGZsb3cgaGFzIG5vdCBiZWVuIHJ1biBsaXZlLCBvciBhIHN1cmZhY2UgKElERSB2cyBDTEkpIGlzIHVudGVzdGVkLiB8CnwgYHByb3RvY29sLW9ubHlgIHwgQWRhcHRlcnMgcGFzcyBwcm90b2NvbC1sZXZlbCB0ZXN0cyB3aXRoIG1vY2tlZCBwYXlsb2Fkczsgbm8gbGl2ZSBob3N0IHJ1bi4gUGF5bG9hZCBzaGFwZXMgYXJlIGFzc3VtZWQsIG5vdCBjb25maXJtZWQuIHwKfCBgY29uZmlnLW9ubHlgIHwgTm8gZ2F0ZSBlbmZvcmNlbWVudCBvbiB0aGlzIGhvc3Q6IHJ1bGVzL2ZpbGVzIGFyZSBkZXBsb3llZCwgdGhlIGdhdGUgaXMgbWFudWFsIGRpc2NpcGxpbmUgcGx1cyB0aGUgaG9zdC1pbmRlcGVuZGVudCBDSS9wcmUtcHVzaCBiYWNrc3RvcC4gfAoKIyMgTWF0cml4IChhcyBvZiAyMDI2LTEwLTMwLCB2MC40LjAgKyB2MC40LjEgY29udmVyZ2VuY2Ugcm91bmQpCgp8IEhvc3QgfCBUaWVyIHwgRXZpZGVuY2UgfCBPd2VkIGJlZm9yZSBtb3ZpbmcgdXAgfAp8LS0tfC0tLXwtLS18LS0tfAp8IENsYXVkZSBDb2RlIHwgYGxpdmUtdmVyaWZpZWRgIHwgRml2ZSBob29rIGV2ZW50cyB3aXJlZCBpbiBgLmNsYXVkZS9zZXR0aW5ncy5qc29uYDsgMTY4IGhvb2sgdGVzdHMgcGFzcyBsb2NhbGx5IChob29rcyA5MCArIGdhdGUgMTEgKyBsaWZlY3ljbGUgMTIgKyBhbnRpZ3Jhdml0eSAyMCArIHdvcmtidWRkeSAxNiArIGRzaCAxOSwgYWxsIHByb3RvY29sIHN1aXRlcyBpbmNsdWRlZCk7IFBoYXNlIDEgZG9nZm9vZCBpbnRlcmNlcHRlZCBhIHBsYW50ZWQgZmFrZSBwYXNzIGxpdmUgfCDigJQgfAp8IEFudGlncmF2aXR5IENMSSAoYWd5KSB8IGBwYXJ0aWFsLWxpdmVgIHwgQSBsaXZlIGBhZ3kgLS1wcmludGAgcnVuIChDTEkgMS40LjEwKSBwcm92ZWQgdGhlIGhvb2sgY3dkIGJlaGF2aW91ciBhbmQgZXhwb3NlZCB0aGUgYC5hZ2VudHMvLmFnZW50cy9gIHBhdGggYnVnLCBmaXhlZCBpbiB2MC40LjAgKFBSICM3NikgfCBGdWxsIGdhdGUgZmxvdyBvbiBhZ3kgYWZ0ZXIgdGhlIGZpeCAodGhlIGVhcmxpZXIgbGl2ZSByZXRlc3Qgd2FzIGRlY2xpbmVkIGF0IGEgdXNlciBjb25maXJtYXRpb24gZ2F0ZSk7IHNlZSBDSEFOR0VMT0cgfAp8IEFudGlncmF2aXR5IElERSB8IGBwcm90b2NvbC1vbmx5YCB8IEFkYXB0ZXJzIHNoYXJlZCB3aXRoIENMSTsgSURFIGN3ZCBiZWhhdmlvdXIgbmV2ZXIgb2JzZXJ2ZWQgbGl2ZSB8IE9uZSBsaXZlIElERSBydW4gb2YgdGhlIGZvdXIgaG9vayBldmVudHMgfAp8IFdvcmtCdWRkeSB8IGBwcm90b2NvbC1vbmx5YCB8IGB0ZXN0cy93b3JrYnVkZHktaG9va3MudGVzdC5tanNgIDE2IHBhc3MgYWdhaW5zdCAqYXNzdW1lZCogQ2xhdWRlLXNoYXBlZCBwYXlsb2FkcyB8IFZlcmlmeSBwYXlsb2FkIHNoYXBlIGFuZCBzZXR0aW5ncyBsb2NhdGlvbiBhZ2FpbnN0IG9mZmljaWFsIGRvY3MgKiphbmQqKiBvbmUgaW5zdGFsbGVkIFdvcmtCdWRkeSBidWlsZCB8CnwgRGVlcFNlZWsgSGFybmVzcyAoZHNoKSB8IGBwcm90b2NvbC1vbmx5YCB8IGB0ZXN0cy9kc2gtZ2F0ZS50ZXN0Lm1qc2AgMTkgcGFzcyBhZ2FpbnN0IGEgbW9jayBDb3JkaXMgY29udGV4dDsgdGhlIHBsdWdpbiBBUEkgc3VyZmFjZSBpcyB1bnZlcmlmaWVkIGFnYWluc3Qgb2ZmaWNpYWwgZG9jdW1lbnRhdGlvbjsgYHRzYyAtLW5vRW1pdGAgZGlzY2hhcmdlZCAyMDI2LTEwLTMwIGluIHRoZSB2MC40LjEgcm91bmQgKFR5cGVTY3JpcHQgNS54LCBleGl0IDAsIG5vIGVycm9ycykgfCBPbmUgbGl2ZSBkc2ggcnVuIHdpdGggdGhlIHBsdWdpbiBhY3RpdmF0ZWQ7IG9mZmljaWFsLWRvYyByZS1jaGVjayBvZiBldmVyeSBldmVudCBuYW1lIGFuZCBzdGVlcmluZyBzdXJmYWNlIHVzZWQgfAp8IENvZGV4IC8gQ29waWxvdCAvIFplZCAvIG90aGVycyByZWFkaW5nIGBBR0VOVFMubWRgIHwgYGNvbmZpZy1vbmx5YCB8IE5hdGl2ZSBgQUdFTlRTLm1kYCBsb2FkaW5nOyBubyBob29rcyB8IE5vdGhpbmcgb3dlZCDigJQgdGhlIHRpZXIgaXMgdGhlIGhvbmVzdCBjZWlsaW5nIHVubGVzcyBhIGhvc3QgZ2FpbnMgYSBob29rIHN1cmZhY2UgfAp8IEhvc3QtaW5kZXBlbmRlbnQgKGFueSBnaXQgcHJvamVjdCkgfCBgbGl2ZS12ZXJpZmllZGAgKGFzIGEgY2hlY2tlcikgfCBgdGVtcGxhdGVzL3ByZS1wdXNoLWdhdGUvYCArIGB0ZW1wbGF0ZXMvY2ktZ2F0ZS1jaGVjay55bWxgIHJlLXJ1biBldmVyeSBgcGFzc2luZ2AgaXRlbSdzIHZlcmlmaWNhdGlvbiAobWlycm9ycyByZXBvX2NoZWNrcyDCpzNrLCB3aGljaCBydW5zIGluIHRoaXMgcmVwbydzIENJKSB8IFNlcnZlci1zaWRlIGJyYW5jaCBwcm90ZWN0aW9uIGlzIHRoZSBkZXBsb3llcidzIHNpZGUsIG5vdCB0aGlzIHJlcG8ncyB8CgojIyBSdWxlcwoKMS4gUkVBRE1FJ3MgRW5mb3JjZW1lbnQgY29sdW1uIG11c3Qgbm90IGNsYWltIG1vcmUgdGhhbiB0aGlzIG1hdHJpeDoKICAgYW55dGhpbmcgYmVsb3cgYGxpdmUtdmVyaWZpZWRgIGlzIHdvcmRlZCAiZGVwbG95ZWQsIG5vdAogICBsaXZlLXZlcmlmaWVkIiB0aGVyZS4KMi4gV2hlbiBhIGxpdmUgcnVuIGhhcHBlbnMsIHJlY29yZCBpdCBoZXJlIHdpdGggZGF0ZSwgaG9zdCB2ZXJzaW9uLAogICBhbmQgd2hhdCBmbG93ZWQgKGxpbmsgdGhlIHNlc3Npb24vZG9nZm9vZCBub3RlKSwgdGhlbiB1cGRhdGUgdGhlCiAgIHRpZXIgaW4gdGhlIHNhbWUgY2hhbmdlLgozLiBBIHRpZXIgbmV2ZXIgZ29lcyBkb3duIHNpbGVudGx5OiBpZiBhIGxpdmUgcnVuICpmYWlscyosIHJlY29yZCB0aGUKICAgZmFpbHVyZSBoZXJlIGZpcnN0LCB0aGVuIGRlY2lkZS4K
+# Host verification matrix (v0.4.1)
+
+One place that answers, per host: **how strongly is the gate actually
+verified there?** The README support table links here. A host may only
+move up a tier on recorded evidence, never on protocol tests alone.
+
+## Tiers
+
+| Tier | Meaning |
+|---|---|
+| `live-verified` | A full gate flow (add → start → verify → Stop block) has been run on the real host/client and the run is recorded. |
+| `partial-live` | Some live evidence exists (e.g. one real CLI run that found and fixed a bug), but the full gate flow has not been run live, or a surface (IDE vs CLI) is untested. |
+| `protocol-only` | Adapters pass protocol-level tests with mocked payloads; no live host run. Payload shapes are assumed, not confirmed. |
+| `config-only` | No gate enforcement on this host: rules/files are deployed, the gate is manual discipline plus the host-independent CI/pre-push backstop. |
+
+## Matrix (as of 2026-10-30, v0.4.0 + v0.4.1 convergence round)
+
+| Host | Tier | Evidence | Owed before moving up |
+|---|---|---|---|
+| Claude Code | `live-verified` | Five hook events wired in `.claude/settings.json`; 168 hook tests pass locally (hooks 90 + gate 11 + lifecycle 12 + antigravity 20 + workbuddy 16 + dsh 19, all protocol suites included); Phase 1 dogfood intercepted a planted fake pass live | — |
+| Antigravity CLI (agy) | `partial-live` | A live `agy --print` run (CLI 1.4.10) proved the hook cwd behaviour and exposed the `.agents/.agents/` path bug, fixed in v0.4.0 (PR #76) | Full gate flow on agy after the fix (the earlier live retest was declined at a user confirmation gate); see CHANGELOG |
+| Antigravity IDE | `protocol-only` | Adapters shared with CLI; IDE cwd behaviour never observed live | One live IDE run of the four hook events |
+| WorkBuddy | `protocol-only` | `tests/workbuddy-hooks.test.mjs` 16 pass against *assumed* Claude-shaped payloads | Verify payload shape and settings location against official docs **and** one installed WorkBuddy build |
+| DeepSeek Harness (dsh) | `protocol-only` | `tests/dsh-gate.test.mjs` 19 pass against a mock Cordis context; the plugin API surface is unverified against official documentation; `tsc --noEmit` discharged 2026-10-30 in the v0.4.1 round (TypeScript 5.x, exit 0, no errors) | One live dsh run with the plugin activated; official-doc re-check of every event name and steering surface used |
+| Codex / Copilot / Zed / others reading `AGENTS.md` | `config-only` | Native `AGENTS.md` loading; no hooks | Nothing owed — the tier is the honest ceiling unless a host gains a hook surface |
+| Host-independent (any git project) | `live-verified` (as a checker) | `templates/pre-push-gate/` + `templates/ci-gate-check.yml` re-run every `passing` item's verification (mirrors repo_checks §3k, which runs in this repo's CI) | Server-side branch protection is the deployer's side, not this repo's |
+
+## Rules
+
+1. README's Enforcement column must not claim more than this matrix:
+   anything below `live-verified` is worded "deployed, not
+   live-verified" there.
+2. When a live run happens, record it here with date, host version,
+   and what flowed (link the session/dogfood note), then update the
+   tier in the same change.
+3. A tier never goes down silently: if a live run *fails*, record the
+   failure here first, then decide.

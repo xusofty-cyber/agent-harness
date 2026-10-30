@@ -1,1 +1,39 @@
-IyBkb2NzL2ludGVybmFsIOKAlCDku5PlupPoh6rouqvnmoTlvIDlj5Hov5Dnu7TorrDlvZUKCuacrOebruW9leWtmOaUviAqKmFnZW50LWhhcm5lc3Mg5LuT5bqT6Ieq6Lqr55qEKirlvIDlj5Hov4fnqIvorrDlvZXvvIjlj4zovajnirbmgIHorrDlv4bnmoQgZG9nZm9vZCDlrp7kvovvvInvvIwKKirkuI3mmK8qKumaj+aooeadv+WIhuWPkeeahOWGheWuue+8jGBkZXBsb3ktYWdlbnRzLipgIOS5n+S4jeS8muaLt+i0neWug+S7rOOAggoKLSBgUFJPSkVDVF9DT05URVhULm1kYCDigJTigJQg5pys5LuT5bqT55qE6aG555uu5YWo5pmv5LiO5ryU6L+b57yW5bm05Y+yCi0gYFNFU1NJT05fU1RBVEUubWRgIOKAlOKAlCDmnKzku5PlupPnmoTlvIDlj5Hmlq3ngrnkuI7kuIvkuIDmraXorqHliJIKLSBgU0VTU0lPTl9SRVNVTUUubWRgIOKAlOKAlCDkvJror53mgaLlpI3lpIflv5gKCuaooeadv+S4reaPkOWIsOeahCBgUFJPSkVDVF9DT05URVhULm1kYCAvIGBTRVNTSU9OX1NUQVRFLm1kYCDlj4zovajorrDlv4bmqKHlvI/vvIwK5oyH55qE5pivKirkvb/nlKjmnKzmqKHmnb/nmoTkuIvmuLjpobnnm64qKuW6lOWcqOiHquW3semhueebruagueebruW9lee7tOaKpOeahOS4pOS4quaWh+S7tu+8jArkuI7mnKznm67lvZXov5nkuInkuKrmlofku7bmmK8i5qih5byPIuS4jiLlrp7kvosi55qE5YWz57O777yM5LiN6KaB5re35reG44CCCgotIGBzdXBlcnBvd2Vycy9gIOKAlOKAlCDlt7LlkIjlhaXlip/og73nmoTorr7orqHmlofmoaPlvZLmoaPvvIhgcGxhbnMvYCDlrp7njrDorqHliJLjgIFgc3BlY3MvYCDorr7orqHop4TmoLzvvInjgILms6jmhI/vvJrlkIQgc2tpbGwg5Lit5o+Q5Yiw55qEIGBkb2NzL3N1cGVycG93ZXJzL3BsYW5zL2Ag5pivKirmnKrmnaXmlrDorqHliJLnmoTlrZjmlL7nuqblrpoqKu+8jOS4jeWPl+atpOasoeW9kuaho+W9seWTjeOAggoKIyMg546w6KGM5Yi25bqmIHZzIOWOhuWPsui9qOi/ue+8iHYwLjQuMSDntKLlvJXvvIkKCuaWsOS8muivneWFiOivu+OAjOeOsOihjOOAjee7hO+8m+OAjOWOhuWPsuOAjee7hOaYr+Wuoeiuoei9qOi/ue+8jOWPquWcqOi/vea6r+afkOadoeWGs+etlueahArmnaXljobml7bmiY3pnIDopoHmiZPlvIDvvIzkuI3opoHmiorlhbbkuK3nmoTpmLbmrrXmgKfnu5PorrrlvZPkvZznjrDooYzop4TliJnjgIIKCioq546w6KGM77yIbGl2aW5n77yJKirvvJoKCi0gYGhvc3QtdmVyaWZpY2F0aW9uLW1hdHJpeC5tZGAg4oCU4oCUIOWQhOWuv+S4u+mXqOemgeeahOmqjOivgeaho+S9je+8iOWUr+S4gOWPo+W+hO+8iQotIGBpMThuLXN0YXR1cy5tZGAg4oCU4oCUIOe5geS4ree/u+ivkeeKtuaAgeWPsOi0pgotIGBza2lsbC10aWVycy5tZGAg4oCU4oCUIOaKgOiDveWIhuaho+eahOeQhueUseiusOW9lQotIGBnYXRlLW9wZXJhdG9yLWNoZWNrbGlzdC5tZGAg4oCU4oCUIOaXoOmSqeWtkOWuv+S4u+S4iuaJi+WKqOi3kemXqOemgeeahOa4heWNlQotIGByZWxlYXNlLWNoZWNrbGlzdC5tZGAg4oCU4oCUIOWPkeeJiOa4heWNlQotIGBhaS1tZW1vcnktcm91dGluZy5tZGAg4oCU4oCUIOi3qOS8muivneiusOW/hui3r+eUsQotIGB0b2tlbi1hZGFwdGVycy5tZGAg4oCU4oCUIOS4uuS7gOS5iOaIkOacrOWPquiDveeUqOS7o+eQhuaMh+aghwotIGB1c2Vycy1hbmQtY2hhbmdlLWNvc3QubWRgIOKAlOKAlCDlj5jmm7TmiJDmnKzlj6PlvoQKCioq5Y6G5Y+y77yIaGlzdG9yaWNhbO+8jOS/neeVmeWOn+aWh+S4jeaUue+8iSoq77yaCgotIGBwaGFzZTEtZG9nZm9vZC5tZGDjgIFgcGhhc2UyLXZlcmlmaWNhdGlvbi5tZGDjgIFgcGhhc2U0LXZlcmlmaWNhdGlvbi5tZGDjgIEKICBgcGhhc2U1LWdyYXBoLm1kYOOAgWBwaGFzZTUtbG9vcHMubWRg44CBYHBoYXNlNS9g44CBYHBoYXNlNi12ZXJpZmljYXRpb24ubWRgCi0gYG1lcmdlLXZlcmlmaWNhdGlvbi5tZGDjgIFgbWVyZ2UtcnVsaW5ncy1hbmQtZml4ZXMtMjAyNi0xMC0yOS5tZGDjgIEKICBgbWVyZ2UtcmV2aWV3LW9wdGltaXphdGlvbi0yMDI2LTEwLTI5Lm1kYOOAgWBwYW5lbC1maXhlcy0yMDI2LTEwLTI5Lm1kYAotIGBkb2dmb29kLTIwMjYtMTAtMjkubWRg44CBYHJlbGVhc2UtdjAuMy4wLm1kYOOAgWBwcm9wb3NhbHMvYOOAgQogIGBTRVNTSU9OX1JFU1VNRSoubWRg44CBYGJyYWluc3Rvcm1pbmctc2VydmVyLXNhZmV0eS5tZGAK
+# docs/internal — 仓库自身的开发运维记录
+
+本目录存放 **agent-harness 仓库自身的**开发过程记录（双轨状态记忆的 dogfood 实例），
+**不是**随模板分发的内容，`deploy-agents.*` 也不会拷贝它们。
+
+- `PROJECT_CONTEXT.md` —— 本仓库的项目全景与演进编年史
+- `SESSION_STATE.md` —— 本仓库的开发断点与下一步计划
+- `SESSION_RESUME.md` —— 会话恢复备忘
+
+模板中提到的 `PROJECT_CONTEXT.md` / `SESSION_STATE.md` 双轨记忆模式，
+指的是**使用本模板的下游项目**应在自己项目根目录维护的两个文件，
+与本目录这三个文件是"模式"与"实例"的关系，不要混淆。
+
+- `superpowers/` —— 已合入功能的设计文档归档（`plans/` 实现计划、`specs/` 设计规格）。注意：各 skill 中提到的 `docs/superpowers/plans/` 是**未来新计划的存放约定**，不受此次归档影响。
+
+## 现行制度 vs 历史轨迹（v0.4.1 索引）
+
+新会话先读「现行」组；「历史」组是审计轨迹，只在追溯某条决策的
+来历时才需要打开，不要把其中的阶段性结论当作现行规则。
+
+**现行（living）**：
+
+- `host-verification-matrix.md` —— 各宿主门禁的验证档位（唯一口径）
+- `i18n-status.md` —— 繁中翻译状态台账
+- `skill-tiers.md` —— 技能分档的理由记录
+- `gate-operator-checklist.md` —— 无钩子宿主上手动跑门禁的清单
+- `release-checklist.md` —— 发版清单
+- `ai-memory-routing.md` —— 跨会话记忆路由
+- `token-adapters.md` —— 为什么成本只能用代理指标
+- `users-and-change-cost.md` —— 变更成本口径
+
+**历史（historical，保留原文不改）**：
+
+- `phase1-dogfood.md`、`phase2-verification.md`、`phase4-verification.md`、
+  `phase5-graph.md`、`phase5-loops.md`、`phase5/`、`phase6-verification.md`
+- `merge-verification.md`、`merge-rulings-and-fixes-2026-10-29.md`、
+  `merge-review-optimization-2026-10-29.md`、`panel-fixes-2026-10-29.md`
+- `dogfood-2026-10-29.md`、`release-v0.3.0.md`、`proposals/`、
+  `SESSION_RESUME*.md`、`brainstorming-server-safety.md`
