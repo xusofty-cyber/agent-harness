@@ -1,1 +1,52 @@
-IyDliJ3lp4vljJbmk43kvZzmiYvlhowg4oCUIOesrOS4gOS4quS8muivneWPquWBmuaQreW7uu+8iOivvueoiyBMMDbvvIkKCuWIneWni+WMluS4juWunueOsOaYr+S4pOenjeW3peS9nOOAguWcqOS4gOS4quW3suaOpeWFpemXqOemgeeahOmhueebruS4iu+8jOesrOS4gOS4quS8muivnQoqKuS4jeWBmuS7u+S9leWKn+iDveW8gOWPkSoq77ya5a6D5Y+q5Lqn5Ye65LiA5Lu95Y+v5L+h55qE6LW35aeL54q25oCB77yM6K6p5ZCO57ut5Lya6K+dCuiDveWcqOatpOWfuuehgOS4iuaOqOi/m+OAguWmguaenOaCqOaYr+WIneWni+WMluiAhe+8jOmqjOaUtua4heWNleWFqOmDqOmAmui/h+WQjuWwseWBnOOAggoKIyMgMS4g5byA5bel6L+96Zeu77yI5Yqo56yU5LmL5YmN5YWI6Zeu5riF77yJCgotIOi/meS4qumhueebruS4gOWPpeivneaYr+S7gOS5iO+8n+iwgeWcqOeUqO+8nwotIOesrOS4gOS4qumHjOeoi+eikeeahCLlrozmiJAi5piv5LuA5LmI5oSP5oCdIOKAlCDlk6rlh6DmnaHlkb3ku6Tog73or4HmmI4KICDvvIjmnoTlu7ogLyDmtYvor5UgLyDlkK/liqjvvInvvJ8KLSDnjrDpmLbmrrXmmI7noa7kuI3lgZrku4DkuYjvvJ8KLSDlk6rkupvot6/lvoTmlY/mhJ/vvIjlr4bpkqXjgIHmlbDmja7jgIHnlJ/kuqfphY3nva7vvInvvJ8KLSDlt7Lnu4/mnInku4DkuYjvvJrku5PlupPnirbmgIHjgIHlpLHotKXnmoTmtYvor5XjgIHlt7Lnn6XnmoTlgLrvvJ8KCuetlOahiOWGmei/myBgUFJPSkVDVF9DT05URVhULm1kYCDkuI4gYERFQ0lTSU9OUy5tZGAg4oCUIOWGmei/m+S7k+W6k++8jArkuI3nlZnlnKjogYrlpKnph4zvvIjor77nqIsgTDAz77yJ44CCCgojIyAyLiDohJrmiYvmnrblubbor4HmmI7otbflp4vnirbmgIEKCjEuIOi3keacrOS7k+W6k+eahOmDqOe9si/liJ3lp4vljJbot6/lvoTvvIhgZ2F0ZS9pbml0LnRlbXBsYXRlLnNoYAogICDmiJYgYHB5dGhvbjMgZ2F0ZS9wYXNzLWdhdGUucHkgaW5pdGDvvInjgIIKMi4g5oqK56ysIDEg5q2l5b6X5Yiw55qE55yf5a6e5p6E5bu644CB5rWL6K+V44CB5ZCv5Yqo5ZG95Luk5aGr5YWlCiAgIGBnYXRlL2NsZWFuLXN0YXRlLmpzb25gIOKAlCDljaDkvY3nrKbkuI3nrpfjgIIKMy4g5q+P5p2h5ZG95Luk5a6e6ZmF6LeR5LiA5qyh44CC6LW35aeL54q25oCB5p6E5bu65LiN6L+H77yM5pys6Lqr5bCx5piv5Yqf6IO95riF5Y2V55qECiAgIOesrOS4gOmhue+8jOiAjOS4jeaYr+iEmuazqOOAggoKIyMgMy4g5YaZ5Yqf6IO95riF5Y2V77yI5Yid5aeL5YyW6ICF55qE5Li76KaB5Lqn5Ye677yJCgrmr4/kuIDpobnmjInku6XkuIvpobrluo/lhpnvvJoKCjEuICoq5YWI5YaZ6aqM6K+B5ZG95LukKiog4oCUIOmAgOWHuiAwIOWNs+ivgeaYjuivpeihjOS4uueahOWRveS7pO+8jOW5tuagh+azqOWFtgogICBgbGV2ZWxg77yIYGFzc2VydGAgLyBgdW5pdGAgLyBgaW50ZWdyYXRpb25gIC8gYGUyZWDvvIxENjbvvInjgIIKICAg5ZG95Luk5YaZ5LiN5Ye65p2l77yM6K+05piO6L+Z5LiA6aG56L+Y5rKh55CG6Kej77yb5ouG57uG5a6D77yM5oiW6ICF5o+Q6Zeu44CCCjIuICoq55So5oi35Y+v6KeB6KGM5Li6Kiog4oCUIOWujOaIkOWQjueUqOaIt+aIluS4i+S4gOS4quS8muivneiDveinguWvn+WIsOS7gOS5iOOAggogICDmsqHmnInooYzkuLrvvIzlsLHmsqHmnInov5nkuIDpobnjgIIKMy4g5qCH6aKY44CBYXJlYeOAgeS8mOWFiOe6pyDigJQg5pyA5ZCO5YaZ77yM5YaZ566A55+t44CCCgrnlKggYHBhc3MtZ2F0ZS5weSBhZGRgIOa3u+WKoO+8iOe7neS4jeaJi+aUuSBgZmVhdHVyZV9saXN0Lmpzb25g77yJ44CCCuaOkuW6j+WOn+WIme+8mumjjumZqeacgOWkp+eahOWBh+iuvuacgOWFiOiiq+mqjOivgeOAggoKIyMgNC4g5Yid5aeL5YyW6aqM5pS25riF5Y2VCgotIFsgXSBgcGFzcy1nYXRlLnB5IHN0YXR1c2Ag5qCh6aqM6Zu26ZSZ6K+vCi0gWyBdIGBwYXNzLWdhdGUucHkgY2hlY2stY2xlYW5gIOmAmui/h++8iOaIluavj+S4qiBGQUlMIOacrOi6q+W3sueri+S4ugogICAgICDlip/og73muIXljZXnmoTkuIDpobnvvIkKLSBbIF0gYFNFU1NJT05fU1RBVEUubWRgIOWGmeaYjuebruagh+S4juimgeWQr+WKqOeahOesrOS4gOmhuQotIFsgXSDliJ3lp4vljJbogIXkuI3nlZnkuIvku7vkvZUgYGluX3Byb2dyZXNzYCDpobkg4oCUIOW8gOWni+W5sua0u+aYr+S4i+S4gOS4qgogICAgICDkvJror53nmoTnrKzkuIDkuKrliqjkvZwKLSBbIF0g5pWP5oSf6Lev5b6E5LiO5LiN5YGa55qE6IyD5Zu05bey6JC95a2XCgrlhajpg6jmu6HotrPlkI7vvIzpobnnm67miY3lj6/ku6Xov5vlhaXlrp7njrDkvJror53jgIIK
+# 初始化操作手册 — 第一个会话只做搭建（课程 L06）
+
+初始化与实现是两种工作。在一个已接入门禁的项目上，第一个会话
+**不做任何功能开发**：它只产出一份可信的起始状态，让后续会话
+能在此基础上推进。如果您是初始化者，验收清单全部通过后就停。
+
+## 1. 开工追问（动笔之前先问清）
+
+- 这个项目一句话是什么？谁在用？
+- 第一个里程碑的"完成"是什么意思 — 哪几条命令能证明
+  （构建 / 测试 / 启动）？
+- 现阶段明确不做什么？
+- 哪些路径敏感（密钥、数据、生产配置）？
+- 已经有什么：仓库状态、失败的测试、已知的债？
+
+答案写进 `PROJECT_CONTEXT.md` 与 `DECISIONS.md` — 写进仓库，
+不留在聊天里（课程 L03）。
+
+## 2. 脚手架并证明起始状态
+
+1. 跑本仓库的部署/初始化路径（`gate/init.template.sh`
+   或 `python3 gate/pass-gate.py init`）。
+2. 把第 1 步得到的真实构建、测试、启动命令填入
+   `gate/clean-state.json` — 占位符不算。
+3. 每条命令实际跑一次。起始状态构建不过，本身就是功能清单的
+   第一项，而不是脚注。
+
+## 3. 写功能清单（初始化者的主要产出）
+
+每一项按以下顺序写：
+
+1. **先写验证命令** — 退出 0 即证明该行为的命令，并标注其
+   `level`（`assert` / `unit` / `integration` / `e2e`，D66）。
+   命令写不出来，说明这一项还没理解；拆细它，或者提问。
+2. **用户可见行为** — 完成后用户或下一个会话能观察到什么。
+   没有行为，就没有这一项。
+3. 标题、area、优先级 — 最后写，写简短。
+
+用 `pass-gate.py add` 添加（绝不手改 `feature_list.json`）。
+排序原则：风险最大的假设最先被验证。
+
+## 4. 初始化验收清单
+
+- [ ] `pass-gate.py status` 校验零错误
+- [ ] `pass-gate.py check-clean` 通过（或每个 FAIL 本身已立为
+      功能清单的一项）
+- [ ] `SESSION_STATE.md` 写明目标与要启动的第一项
+- [ ] 初始化者不留下任何 `in_progress` 项 — 开始干活是下一个
+      会话的第一个动作
+- [ ] 敏感路径与不做的范围已落字
+
+全部满足后，项目才可以进入实现会话。

@@ -1,1 +1,30 @@
-IyBTRVNTSU9OX1NUQVRFIOKAlCDmnIPoqbHmlrfpu54KCj4gKirmm7TmlrAqKu+8mjxZWVlZLU1NLUREPiB8ICoq5bCI5qGIKirvvJo8UFJPSkVDVF9OQU1FPgo+ICoq5Yqf6IO95riF5ZauKirvvJpgZ2F0ZS9mZWF0dXJlX2xpc3QuanNvbmDvvIjni4DmhYvku6UgYHB5dGhvbjMgZ2F0ZS9wYXNzLWdhdGUucHkgc3RhdHVzYCDngrrmupbvvIkKPiAqKuimj+WJhyoq77ya5pyA5aSa5LiA6aCB44CC5pys5paH5Lu26LaF6YGO5LiA6aCB5pmC77yM5oqK5bey5a6M5oiQ55qE5bel5L2c56e75YiwCj4gYENIQU5HRUxPRy5tZGDvvIzpgJnoo6Hlj6rnlZnmlrfpu57jgILmrbflj7LkuI3mmK/ni4DmhYvjgIIKCiMjIEdvYWwKCi0gPOacrOasoeacg+ipseimgeS6pOS7mOS7gOm6vO+8jOS4gOihjOWvq+WujD4KCiMjIEluIHByb2dyZXNzCgotIGA8ZmVhdHVyZV9saXN0IGlkPmDvvJo85LiA6KGM54uA5oWLPu+8iOaIlu+8mueEoSDigJQg5Z+36KGMIGBwYXNzLWdhdGUucHkgc3RhcnQgLS1pZCA8aWQ+YO+8iQoKIyMgTmV4dAoKLSBbIF0gPOS4i+S4gOWAi+WFt+mrlOatpempnz4KLSBbIF0gPOS4i+S4gOWAi+WFt+mrlOatpempnz4KCiMjIEJsb2NrZWQKCi0gPOmYu+Whnumghe+8jOaIluOAjOeEoeOAjT4KCiMjIExhc3QgdmVyaWZpY2F0aW9uCgotIDzmnIDlvozln7fooYznmoTlkb3ku6ToiIfntZDmnpzvvIzmiJbjgIzlsJrnhKHjgI0+Ci0g6K2J5pOa5ZyoIGBnYXRlL2ZlYXR1cmVfbGlzdC5qc29uYO+8iGBldmlkZW5jZWAg5qyE5L2N77yJ6IiHCiAgYGdhdGUvZXZlbnRzLmpzb25sYO+8jOS4jeWcqOmAmeijoeeahOaWh+Wtl+ijoeOAgumAmeijoeeahOaWh+WtlwogIOiIh+WKn+iDvea4heWWruS4jeS4gOiHtOaZgu+8jOS7peWKn+iDvea4heWWrueCuua6luOAggo=
+# SESSION_STATE — 會話斷點
+
+> **更新**：<YYYY-MM-DD> | **專案**：<PROJECT_NAME>
+> **功能清單**：`gate/feature_list.json`（狀態以 `python3 gate/pass-gate.py status` 為準）
+> **規則**：最多一頁。本文件超過一頁時，把已完成的工作移到
+> `CHANGELOG.md`，這裡只留斷點。歷史不是狀態。
+
+## Goal
+
+- <本次會話要交付什麼，一行寫完>
+
+## In progress
+
+- `<feature_list id>`：<一行狀態>（或：無 — 執行 `pass-gate.py start --id <id>`）
+
+## Next
+
+- [ ] <下一個具體步驟>
+- [ ] <下一個具體步驟>
+
+## Blocked
+
+- <阻塞項，或「無」>
+
+## Last verification
+
+- <最後執行的命令與結果，或「尚無」>
+- 證據在 `gate/feature_list.json`（`evidence` 欄位）與
+  `gate/events.jsonl`，不在這裡的文字裡。這裡的文字
+  與功能清單不一致時，以功能清單為準。

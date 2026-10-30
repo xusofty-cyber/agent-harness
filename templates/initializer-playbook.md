@@ -1,1 +1,54 @@
-IyBJbml0aWFsaXplciBwbGF5Ym9vayDigJQgdGhlIGZpcnN0IHNlc3Npb24gb25seSBzZXRzIHVwIChjb3Vyc2UgTDA2KQoKSW5pdGlhbGl6YXRpb24gYW5kIGltcGxlbWVudGF0aW9uIGFyZSBkaWZmZXJlbnQgam9icy4gVGhlIGZpcnN0CnNlc3Npb24gb24gYSBnYXRlZCBwcm9qZWN0IGRvZXMgKipubyBmZWF0dXJlIHdvcmsqKjogaXQgcHJvZHVjZXMgYQp0cnVzdHdvcnRoeSBzdGFydGluZyBzdGF0ZSB0aGF0IGxhdGVyIHNlc3Npb25zIGNhbiBidWlsZCBvbi4gSWYgeW91CmFyZSB0aGUgaW5pdGlhbGl6ZXIsIHN0b3AgYWZ0ZXIgdGhlIGFjY2VwdGFuY2UgY2hlY2tsaXN0IHBhc3Nlcy4KCiMjIDEuIE9wZW5pbmcgcXVlc3Rpb25zIChhc2sgYmVmb3JlIHdyaXRpbmcgYW55dGhpbmcpCgotIFdoYXQgaXMgdGhpcyBwcm9qZWN0LCBpbiBvbmUgc2VudGVuY2U/IFdobyB1c2VzIGl0PwotIFdoYXQgZG9lcyAiZG9uZSIgbWVhbiBmb3IgdGhlIGZpcnN0IG1pbGVzdG9uZSDigJQgd2hpY2ggY29tbWFuZHMKICBwcm92ZSBpdCAoYnVpbGQgLyB0ZXN0IC8gc3RhcnQpPwotIFdoYXQgaXMgZXhwbGljaXRseSBvdXQgb2Ygc2NvcGUgZm9yIG5vdz8KLSBXaGljaCBwYXRocyBhcmUgc2Vuc2l0aXZlIChzZWNyZXRzLCBkYXRhLCBwcm9kdWN0aW9uIGNvbmZpZyk/Ci0gV2hhdCBhbHJlYWR5IGV4aXN0czogcmVwbyBzdGF0ZSwgZmFpbGluZyB0ZXN0cywga25vd24gZGVidD8KClJlY29yZCB0aGUgYW5zd2VycyBpbiBgUFJPSkVDVF9DT05URVhULm1kYCBhbmQgYERFQ0lTSU9OUy5tZGAg4oCUIGluCnRoZSByZXBvLCBub3QgaW4gY2hhdCAoY291cnNlIEwwMykuCgojIyAyLiBTY2FmZm9sZCBhbmQgcHJvdmUgdGhlIHN0YXJ0aW5nIHN0YXRlCgoxLiBSdW4gdGhlIGRlcGxveS9pbml0IHBhdGggZm9yIHRoaXMgcmVwbyAoYGdhdGUvaW5pdC50ZW1wbGF0ZS5zaGAKICAgb3IgYHB5dGhvbjMgZ2F0ZS9wYXNzLWdhdGUucHkgaW5pdGApLgoyLiBGaWxsIGBnYXRlL2NsZWFuLXN0YXRlLmpzb25gIHdpdGggdGhlIHByb2plY3QncyByZWFsIGJ1aWxkLCB0ZXN0CiAgIGFuZCBzdGFydCBjb21tYW5kcyBmcm9tIHN0ZXAgMSDigJQgcGxhY2Vob2xkZXJzIGRvIG5vdCBjb3VudC4KMy4gUnVuIGVhY2ggY29tbWFuZCBvbmNlLiBBIHN0YXJ0aW5nIHN0YXRlIHRoYXQgZG9lcyBub3QgYnVpbGQgaXMKICAgdGhlIGZpcnN0IGZlYXR1cmUtbGlzdCBpdGVtLCBub3QgYSBmb290bm90ZS4KCiMjIDMuIFdyaXRlIHRoZSBmZWF0dXJlIGxpc3QgKHRoZSBpbml0aWFsaXplcidzIG1haW4gcHJvZHVjdCkKCkZvciBlYWNoIGl0ZW0sIGluIHRoaXMgb3JkZXI6CgoxLiAqKlZlcmlmaWNhdGlvbiBjb21tYW5kIGZpcnN0Kiog4oCUIHRoZSBjb21tYW5kIHdob3NlIGV4aXQgMCBwcm92ZXMKICAgdGhlIGJlaGF2aW91ciwgcGx1cyBpdHMgYGxldmVsYCAoYGFzc2VydGAgLyBgdW5pdGAgLwogICBgaW50ZWdyYXRpb25gIC8gYGUyZWAsIEQ2NikuIElmIHlvdSBjYW5ub3Qgd3JpdGUgdGhlIGNvbW1hbmQsCiAgIHRoZSBpdGVtIGlzIG5vdCB1bmRlcnN0b29kIHlldDsgc3BsaXQgaXQgb3IgYXNrLgoyLiAqKlVzZXItdmlzaWJsZSBiZWhhdmlvdXIqKiDigJQgd2hhdCBhIHVzZXIgb3IgdGhlIG5leHQgc2Vzc2lvbiBjYW4KICAgb2JzZXJ2ZSB3aGVuIGl0IGlzIGRvbmUuIE5vIGJlaGF2aW91ciwgbm8gaXRlbS4KMy4gVGl0bGUsIGFyZWEsIHByaW9yaXR5IOKAlCBsYXN0LCBhbmQgYnJpZWZseS4KClVzZSBgcGFzcy1nYXRlLnB5IGFkZGAgKG5ldmVyIGhhbmQtZWRpdCBgZmVhdHVyZV9saXN0Lmpzb25gKS4KT3JkZXIgaXRlbXMgc28gdGhlIHJpc2tpZXN0IGFzc3VtcHRpb24gaXMgdGVzdGVkIGVhcmxpZXN0LgoKIyMgNC4gSW5pdGlhbGl6YXRpb24gYWNjZXB0YW5jZSBjaGVja2xpc3QKCi0gWyBdIGBwYXNzLWdhdGUucHkgc3RhdHVzYCB2YWxpZGF0ZXMgd2l0aCB6ZXJvIGVycm9ycwotIFsgXSBgcGFzcy1nYXRlLnB5IGNoZWNrLWNsZWFuYCBwYXNzZXMgKG9yIGV2ZXJ5IEZBSUwgaXMgaXRzZWxmCiAgICAgIGZpbGVkIGFzIGEgZmVhdHVyZS1saXN0IGl0ZW0pCi0gWyBdIGBTRVNTSU9OX1NUQVRFLm1kYCBuYW1lcyB0aGUgZ29hbCBhbmQgdGhlIGZpcnN0IGl0ZW0gdG8gc3RhcnQKLSBbIF0gTm8gaXRlbSBpcyBsZWZ0IGBpbl9wcm9ncmVzc2AgYnkgdGhlIGluaXRpYWxpemVyIOKAlCBzdGFydGluZwogICAgICB3b3JrIGlzIHRoZSBuZXh0IHNlc3Npb24ncyBmaXJzdCBhY3QKLSBbIF0gU2Vuc2l0aXZlIHBhdGhzIGFuZCBvdXQtb2Ytc2NvcGUgYXJlYXMgYXJlIHdyaXR0ZW4gZG93bgoKT25seSB0aGVuIGlzIHRoZSBwcm9qZWN0IHJlYWR5IGZvciBpbXBsZW1lbnRhdGlvbiBzZXNzaW9ucy4K
+# Initializer playbook — the first session only sets up (course L06)
+
+Initialization and implementation are different jobs. The first
+session on a gated project does **no feature work**: it produces a
+trustworthy starting state that later sessions can build on. If you
+are the initializer, stop after the acceptance checklist passes.
+
+## 1. Opening questions (ask before writing anything)
+
+- What is this project, in one sentence? Who uses it?
+- What does "done" mean for the first milestone — which commands
+  prove it (build / test / start)?
+- What is explicitly out of scope for now?
+- Which paths are sensitive (secrets, data, production config)?
+- What already exists: repo state, failing tests, known debt?
+
+Record the answers in `PROJECT_CONTEXT.md` and `DECISIONS.md` — in
+the repo, not in chat (course L03).
+
+## 2. Scaffold and prove the starting state
+
+1. Run the deploy/init path for this repo (`gate/init.template.sh`
+   or `python3 gate/pass-gate.py init`).
+2. Fill `gate/clean-state.json` with the project's real build, test
+   and start commands from step 1 — placeholders do not count.
+3. Run each command once. A starting state that does not build is
+   the first feature-list item, not a footnote.
+
+## 3. Write the feature list (the initializer's main product)
+
+For each item, in this order:
+
+1. **Verification command first** — the command whose exit 0 proves
+   the behaviour, plus its `level` (`assert` / `unit` /
+   `integration` / `e2e`, D66). If you cannot write the command,
+   the item is not understood yet; split it or ask.
+2. **User-visible behaviour** — what a user or the next session can
+   observe when it is done. No behaviour, no item.
+3. Title, area, priority — last, and briefly.
+
+Use `pass-gate.py add` (never hand-edit `feature_list.json`).
+Order items so the riskiest assumption is tested earliest.
+
+## 4. Initialization acceptance checklist
+
+- [ ] `pass-gate.py status` validates with zero errors
+- [ ] `pass-gate.py check-clean` passes (or every FAIL is itself
+      filed as a feature-list item)
+- [ ] `SESSION_STATE.md` names the goal and the first item to start
+- [ ] No item is left `in_progress` by the initializer — starting
+      work is the next session's first act
+- [ ] Sensitive paths and out-of-scope areas are written down
+
+Only then is the project ready for implementation sessions.
