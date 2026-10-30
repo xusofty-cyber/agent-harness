@@ -1146,3 +1146,41 @@ still pending.
 - **Origin:** the 2026-10-30 external deep-analysis of v0.4.0
   (gap §5.6: complexity debt — no usage telemetry), adopted in the
   v0.5.1 round.
+
+## D69 — B1–B4 conclusion: gate efficacy unproven; benchmark series sealed (owner decision, 2026-10-30)
+
+- **Context:** five pre-registered rounds have now measured the gate
+  against bare/pack arms. B1 (72 runs) and B2 (36 runs): NO
+  DISCRIMINATION, 0 false completions on every arm (ceiling effect).
+  B3 (real project med-on-time, 15 runs): false completions nonzero
+  (6/15) but identical across arms. B3.1 (18 runs, process fixes):
+  SEGMENTED, every false-completion cause arm-common. B4 (real host
+  Antigravity CLI with live hooks, enforcement dimensions, 17 valid
+  runs + 1 owner-quarantined cell): NULL under the frozen verdict
+  lines — gate silent forgery 0/3 but bare also 0/3; interruption
+  recovery 3/3 on both arms; guardrail read FC gate 1, bare 0.
+- **Decision (claims):** the claim that the gate reduces false
+  completions is recorded as **not established by B1–B4
+  measurement**. Outward documents (README EN/ZH) and this repo's
+  QUALITY_SCORE carry that annotation; historical records
+  (bench/ablation/release notes) are audit trail and are NOT
+  rewritten.
+- **Decision (benchmark sealing):** no new benchmark rounds. A
+  re-test is warranted only when a host or the gate mechanism
+  changes materially, and then only for the single affected
+  dimension — never a full-series re-run.
+- **What remains established:** evidence discipline (verify
+  evidence on disk), state management (feature_list, events.jsonl),
+  and direct-edit interception (PreToolUse guard) exist and work —
+  live catches: the Phase 1 dogfood planted pass, and the
+  2026-10-30 Antigravity `edit_file` bypass found and fixed in
+  v0.5.1. These are mechanism facts, not efficacy measurements.
+- **Explicitly NOT decided here:** simplification-agenda items 1–2
+  (the retain-minimal-set list, and cutting/demoting ceremony that
+  produced no measured utility) remain open pending the owner's
+  itemized review of process-cost candidates. This entry executes
+  agenda items 3–4 only.
+- **Origin:** B4 report (`eval/results/b4-2026-10-30.md`, NULL
+  verdict per its frozen §8) and the pre-registered simplification
+  agenda in the B4 preregistration; owner approved executing items
+  3–4 on 2026-10-30.
