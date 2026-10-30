@@ -6,6 +6,10 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+### Fixed
+
+- **`deploy-agents.ps1` shipped without a UTF-8 BOM — fixed.** It is the only shipped `.ps1` with non-ASCII (Chinese) strings but no BOM; Windows PowerShell 5.1 decodes BOM-less scripts as the system ANSI codepage (GBK on Chinese Windows), garbling the strings, swallowing quote characters and cascading into parse errors (`## [Unreleased]` operator, missing `}`, broken strings) before line 1 can run — reported by a user running `run-pipeline.ps1` on Windows, 2026-10-30. CI never saw it: the ps-analyzer job runs pwsh 7, which defaults to UTF-8. The file now starts with a UTF-8 BOM (content otherwise byte-identical), and `tests/repo_checks.py` gains a `ps1-encoding:non-ascii-has-bom` guard so no shipped `.ps1` can regress. `run-pipeline.ps1` and `setup-ai-memory.ps1` already carried BOMs.
+
 ## [0.5.1] - 2026-10-30
 
 Ships the v0.5.1 round (D67/D68, edit_file fix) together with the v0.4.1

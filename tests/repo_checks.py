@@ -649,6 +649,20 @@ check("comet-pin:lock",
       f"comet lock entry lacks npmVersion/pinnedCommit(40-hex)/pinnedAt: {_comet_meta}")
 _deploy_sh_txt = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")
 _deploy_ps1_txt = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
+# Windows PowerShell 5.1 decodes a BOM-less .ps1 as the system ANSI
+# codepage, garbling any non-ASCII (e.g. Chinese) string and cascading
+# into parse errors; pwsh 7 defaults to UTF-8, so CI never saw it.
+# Every shipped .ps1 with non-ASCII content must carry a UTF-8 BOM
+# (deploy-agents.ps1 lacked one until 2026-10-30 — user-reported).
+_ps1_bom_offenders = []
+for _ps1_path in sorted(ROOT.rglob("*.ps1")):
+    if ".git" in _ps1_path.parts:
+        continue
+    _raw = _ps1_path.read_bytes()
+    if any(b > 127 for b in _raw) and not _raw.startswith(b"\xef\xbb\xbf"):
+        _ps1_bom_offenders.append(str(_ps1_path.relative_to(ROOT)))
+check("ps1-encoding:non-ascii-has-bom", not _ps1_bom_offenders,
+      f".ps1 files with non-ASCII content but no UTF-8 BOM: {_ps1_bom_offenders}")
 _sh_pin = _re3.search(r'COMET_NPM_VERSION="([^"]+)"', _deploy_sh_txt)
 _ps1_pin = _re3.search(r'\$script:CometNpmVersion = "([^"]+)"', _deploy_ps1_txt)
 check("comet-pin:scripts-agree-with-lock",
