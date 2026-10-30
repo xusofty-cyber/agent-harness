@@ -190,6 +190,70 @@ test("post-tool-use fail-open on malformed stdin (logs, exit 0)", () => {
   assert.equal(existsSync(join(dir, "gate", "cost-ledger.jsonl")), false);
 });
 
+// --- post-tool-use: skill-usage telemetry (D68) ---
+test("post-tool-use records a skill-usage line for a Skill invocation", () => {
+  const dir = makeGateDir([inProgressItem]);
+  const r = runHook(
+    POST_TOOL_USE,
+    {
+      tool_name: "Skill",
+      tool_input: { skill: "brainstorming", args: "secret plans" },
+      session_id: "sess-1",
+      cwd: dir,
+    },
+    dir
+  );
+  assert.equal(r.exitCode, 0);
+  const usage = join(dir, ".claude", "skill-usage.jsonl");
+  assert.ok(existsSync(usage));
+  const lines = readFileSync(usage, "utf-8").trim().split("\n");
+  assert.equal(lines.length, 1);
+  const rec = JSON.parse(lines[0]);
+  assert.equal(rec.skill, "brainstorming");
+  assert.equal(rec.session, "sess-1");
+  assert.ok(rec.ts);
+  // Name only: the invocation's arguments are never recorded.
+  assert.equal("args" in rec, false);
+  assert.equal(JSON.stringify(rec).includes("secret plans"), false);
+  // The cost ledger still records the call itself.
+  assert.ok(existsSync(join(dir, "gate", "cost-ledger.jsonl")));
+});
+
+test("post-tool-use writes no skill-usage line for non-Skill tools", () => {
+  const dir = makeGateDir([inProgressItem]);
+  const r = runHook(
+    POST_TOOL_USE,
+    { tool_name: "Bash", tool_input: { command: "ls" }, cwd: dir },
+    dir
+  );
+  assert.equal(r.exitCode, 0);
+  assert.equal(existsSync(join(dir, ".claude", "skill-usage.jsonl")), false);
+});
+
+test("post-tool-use writes no skill-usage line when the skill name is absent", () => {
+  const dir = makeGateDir([inProgressItem]);
+  const r = runHook(
+    POST_TOOL_USE,
+    { tool_name: "Skill", tool_input: {}, cwd: dir },
+    dir
+  );
+  assert.equal(r.exitCode, 0);
+  assert.equal(existsSync(join(dir, ".claude", "skill-usage.jsonl")), false);
+});
+
+test("post-tool-use respects SKILL_LEDGER=0 opt-out (cost ledger unaffected)", () => {
+  const dir = makeGateDir([inProgressItem]);
+  const r = runHook(
+    POST_TOOL_USE,
+    { tool_name: "Skill", tool_input: { skill: "brainstorming" }, cwd: dir },
+    dir,
+    { SKILL_LEDGER: "0" }
+  );
+  assert.equal(r.exitCode, 0);
+  assert.equal(existsSync(join(dir, ".claude", "skill-usage.jsonl")), false);
+  assert.ok(existsSync(join(dir, "gate", "cost-ledger.jsonl")));
+});
+
 // --- settings.json wires all five hook events ---
 test("settings.json registers PreToolUse, Stop, SessionStart, PostToolUse, UserPromptSubmit", () => {
   const settings = JSON.parse(

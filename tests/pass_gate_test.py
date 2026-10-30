@@ -5,6 +5,7 @@ Run: python3 tests/pass_gate_test.py
 Stdlib only. The status line must read "0 items" / "1 item" / "2 items".
 """
 
+import hashlib
 import json
 import subprocess
 import sys
@@ -214,6 +215,151 @@ class VerificationLevelTest(unittest.TestCase):
         errors = mod.validate(self._data("smoke"))
         self.assertTrue(any("verification.level" in e for e in errors),
                         errors)
+
+
+class EventChainTest(unittest.TestCase):
+    """D67: the events hash chain is tamper evidence, verified by
+    recompute + the events-head.json checkpoint.
+
+    - a clean chain verifies, including when legacy (unchained) lines
+      precede it or an unchained line lands between chained events;
+    - editing a middle line breaks verification at that event;
+    - deleting the tail is caught by the checkpoint staying ahead.
+    """
+
+    def _gate_dir(self, td):
+        gate = Path(td) / "gate"
+        gate.mkdir()
+        return gate
+
+    def _append3(self, mod, td):
+        for i in range(3):
+            mod._append_event(td, f"ev{i}", "x", f"d{i}")
+
+    def test_append_writes_prev_hash_and_checkpoint(self):
+        mod = _load_pass_gate()
+        with tempfile.TemporaryDirectory() as td:
+            gate = self._gate_dir(td)
+            r1 = mod._append_event(td, "a", "x", "d")
+            self.assertEqual(r1["prev"], "")  # genesis: empty log
+            r2 = mod._append_event(td, "b", "x", "d")
+            line1 = (gate / "events.jsonl").read_text(
+                encoding="utf-8").splitlines()[0]
+            self.assertEqual(
+                r2["prev"],
+                hashlib.sha256(line1.encode("utf-8")).hexdigest())
+            head = json.loads((gate / "events-head.json").read_text(
+                encoding="utf-8"))
+            self.assertEqual(head, {"seq": r2["seq"], "hash": r2["hash"]})
+
+    def test_clean_chain_verifies(self):
+        mod = _load_pass_gate()
+        with tempfile.TemporaryDirectory() as td:
+            self._gate_dir(td)
+            self._append3(mod, td)
+            state, detail = mod._verify_event_chain(td)
+            self.assertEqual(state, "ok", detail)
+
+    def test_chain_starts_after_legacy_lines(self):
+        mod = _load_pass_gate()
+        with tempfile.TemporaryDirectory() as td:
+            gate = self._gate_dir(td)
+            (gate / "events.jsonl").write_text(
+                '{"ts": "2026-10-29T00:00:00Z", "event": "legacy", '
+                '"item": "x", "via": "old-writer", "files": []}\n',
+                encoding="utf-8")
+            mod._append_event(td, "a", "x", "d")
+            mod._append_event(td, "b", "x", "d")
+            state, detail = mod._verify_event_chain(td)
+            self.assertEqual(state, "ok", detail)
+
+    def test_unchained_line_between_chained_events_still_verifies(self):
+        mod = _load_pass_gate()
+        with tempfile.TemporaryDirectory() as td:
+            gate = self._gate_dir(td)
+            mod._append_event(td, "a", "x", "d")
+            # Another tool (stop-gate / comet_adapter shape) appends
+            # an unchained line; the next chained append points at it.
+            with open(gate / "events.jsonl", "a", encoding="utf-8") as f:
+                f.write('{"seq": 2, "ts": "t", "actor": "hook", '
+                        '"event": "stop_override", "item_id": null, '
+                        '"detail": ""}\n')
+            mod._append_event(td, "b", "x", "d")
+            state, detail = mod._verify_event_chain(td)
+            self.assertEqual(state, "ok", detail)
+
+    def test_edited_middle_line_breaks_chain_at_that_event(self):
+        mod = _load_pass_gate()
+        with tempfile.TemporaryDirectory() as td:
+            gate = self._gate_dir(td)
+            self._append3(mod, td)
+            lines = (gate / "events.jsonl").read_text(
+                encoding="utf-8").splitlines()
+            rec = json.loads(lines[1])
+            rec["detail"] = "tampered"
+            lines[1] = json.dumps(rec, ensure_ascii=False)
+            (gate / "events.jsonl").write_text(
+                "\n".join(lines) + "\n", encoding="utf-8")
+            state, detail = mod._verify_event_chain(td)
+            self.assertEqual(state, "broken", detail)
+            self.assertIn("seq 2", detail)
+
+    def test_tail_deletion_detected_via_checkpoint(self):
+        mod = _load_pass_gate()
+        with tempfile.TemporaryDirectory() as td:
+            gate = self._gate_dir(td)
+            self._append3(mod, td)
+            lines = (gate / "events.jsonl").read_text(
+                encoding="utf-8").splitlines()
+            (gate / "events.jsonl").write_text(
+                "\n".join(lines[:-1]) + "\n", encoding="utf-8")
+            state, detail = mod._verify_event_chain(td)
+            self.assertEqual(state, "broken", detail)
+            self.assertIn("deleted", detail)
+
+    def test_missing_checkpoint_is_broken_not_silent(self):
+        mod = _load_pass_gate()
+        with tempfile.TemporaryDirectory() as td:
+            gate = self._gate_dir(td)
+            self._append3(mod, td)
+            (gate / "events-head.json").unlink()
+            state, detail = mod._verify_event_chain(td)
+            self.assertEqual(state, "broken", detail)
+            self.assertIn("events-head.json", detail)
+
+    def test_legacy_only_log_is_no_chain(self):
+        mod = _load_pass_gate()
+        with tempfile.TemporaryDirectory() as td:
+            gate = self._gate_dir(td)
+            (gate / "events.jsonl").write_text(
+                '{"seq": 1, "ts": "t", "actor": "a", "event": "e", '
+                '"item_id": null, "detail": ""}\n', encoding="utf-8")
+            state, _ = mod._verify_event_chain(td)
+            self.assertEqual(state, "no-chain")
+
+    def test_cli_verify_chain_exit_codes(self):
+        with tempfile.TemporaryDirectory() as td:
+            gate = self._gate_dir(td)
+            (gate / "feature_list.json").write_text(json.dumps(
+                {"version": 1, "project": "p", "items": []}))
+            mod = _load_pass_gate()
+            mod._append_event(td, "a", "x", "d")
+            r = subprocess.run(
+                [sys.executable, str(PASS_GATE), "--root", td,
+                 "events", "--verify-chain"],
+                capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+            self.assertIn("chain OK", r.stdout)
+            lines = (gate / "events.jsonl").read_text(
+                encoding="utf-8").splitlines()
+            (gate / "events.jsonl").write_text(
+                lines[0].replace('"a"', '"z"') + "\n", encoding="utf-8")
+            r = subprocess.run(
+                [sys.executable, str(PASS_GATE), "--root", td,
+                 "events", "--verify-chain"],
+                capture_output=True, text=True)
+            self.assertEqual(r.returncode, 1)
+            self.assertIn("BROKEN", r.stdout)
 
 
 if __name__ == "__main__":

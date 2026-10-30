@@ -50,5 +50,7 @@ Order items so the riskiest assumption is tested earliest.
 - [ ] No item is left `in_progress` by the initializer — starting
       work is the next session's first act
 - [ ] Sensitive paths and out-of-scope areas are written down
+- [ ] One health-check command exists and is wired into
+      `clean-state.json` (see `templates/observability-guide.md`)
 
 Only then is the project ready for implementation sessions.

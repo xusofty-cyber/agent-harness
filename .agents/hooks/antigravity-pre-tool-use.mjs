@@ -13,6 +13,11 @@
 // both the matcher and this set, because neither listed write_file):
 //   run_command            -> Bash,            tool_input.command = CommandLine
 //   write_file             -> Write,           tool_input.file_path = Path
+//   edit_file              -> Write,           tool_input.file_path = Path
+//     (added 2026-10-30: the live retest proved edit_file was in neither
+//     the matcher nor this set, and a direct edit_file edit forged a
+//     passing state with no evidence — see
+//     docs/internal/host-verification-matrix.md)
 //   write_to_file /
 //   replace_file_content /
 //   multi_replace_file_content
@@ -38,6 +43,7 @@ import {
 
 const WRITE_TOOLS = new Set([
   "write_file",
+  "edit_file",
   "write_to_file",
   "replace_file_content",
   "multi_replace_file_content",

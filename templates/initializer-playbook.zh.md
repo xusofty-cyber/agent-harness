@@ -48,5 +48,7 @@
 - [ ] 初始化者不留下任何 `in_progress` 项 — 开始干活是下一个
       会话的第一个动作
 - [ ] 敏感路径与不做的范围已落字
+- [ ] 一条健康检查命令已存在并接进 `clean-state.json`
+      （见 `templates/observability-guide.zh.md`）
 
 全部满足后，项目才可以进入实现会话。

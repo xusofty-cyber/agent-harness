@@ -7,6 +7,14 @@
 > `provisional` is a judgement call to be re-tested, not a finding.
 > Re-selection is scheduled after the 36-run bench matrix completes
 > (pack/gate arms, Phase 3 follow-up); review date **2026-11-28**.
+>
+> **Update (v0.5.1, D68):** usage telemetry now exists — the
+> PostToolUse hook records Skill invocations (name only) to
+> `.claude/skill-usage.jsonl`, and `tools/skill-usage-report.py`
+> reports per-skill loads plus zero-load deployed skills as the
+> monthly ablation's input. The tier selections above predate any
+> telemetry data and stay `provisional` until the 2026-11 ablation
+> round re-tests them against real counts.
 
 ## The profiles
 

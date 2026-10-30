@@ -6,12 +6,28 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-10-30
+
+Ships the v0.5.1 round (D67/D68, edit_file fix) together with the v0.4.1
+convergence round (PR #86), which was merged the same day and never
+tagged separately.
+
+### Fixed (v0.5.1, from the 2026-10-30 agy live retest)
+
+- **Antigravity `edit_file` bypassed the gate entirely.** The live retest (full gate flow on agy 1.4.10) proved a direct `edit_file` edit of `gate/feature_list.json` could forge a `passing` state with empty evidence: `edit_file` was in neither `.agents/hooks.json`'s PreToolUse matcher nor the adapter's `WRITE_TOOLS` set — the same bug class as the v0.4.0 `write_file` fix (PR #76), one tool name further. Both lists now include `edit_file`, with pinning tests (deny on feature_list, allow on ordinary files). The host matrix stays `partial-live` until the direct-edit step is re-run live against the fix.
+
+### Added (v0.5.1 round, 2026-10-30)
+
+- **Event-log hash chain (D67)**: every event `pass-gate.py` appends to `gate/events.jsonl` now carries `prev` (SHA-256 of the previous log line as stored) and `hash` (SHA-256 of prev + the event's canonical form), and each append updates the `gate/events-head.json` checkpoint. `pass-gate.py events --verify-chain` recomputes the chain and compares the tail against the checkpoint; `check-clean` reports it as dimension 3e. Legacy unchained lines (Stop hook, comet adapter, pre-D67 logs) never break verification. Detects chained-line edits, earlier-line edits/deletions/reordering, and tail deletion; does NOT detect deleting the checkpoint together with the tail or a wholesale log+checkpoint rewrite — tamper evidence, not a signature (limits stated in `gate/README.md` and D67).
+- **Observability guide** (`templates/observability-guide.md` + `.zh.md`): the target-project half of harness observability — structured logs with trace ids (ids, never payloads or secrets), one read-only health-check command, wiring it into `gate/clean-state.json`, and the log-based debugging loop (reproduce from the trace → hypothesis → close observability gaps → fix → regression-check the same query). Referenced from `gate/README.md` and the initializer playbooks (EN/ZH).
+- **Skill-usage telemetry (D68)**: the Claude Code PostToolUse hook records Skill invocations — skill name + timestamp (+ session id when present), never arguments or content — to `.claude/skill-usage.jsonl` (gitignored local telemetry, fail-open, `SKILL_LEDGER=0` opt-out). New `tools/skill-usage-report.py` aggregates per-skill load counts and lists deployed skills with zero recorded loads, as standing input to the monthly ablation (D20). Counts cover only hosts with a PostToolUse surface in gated projects, so they are a lower bound.
+
 ### Added (v0.4.1 convergence round, 2026-10-30)
 
 - **Verification levels (D66)**: `verification.level` (`assert` < `unit` < `integration` < `e2e`) in the feature-list schema, validated by `pass-gate.py`, settable via `add --level`, shown by `status`, and summarised by the new informational `check-clean` dimension 3d. Descriptive only — it never fails a check; it makes evidence strength visible (this repo's own passing mix now reads `assert 5, unit 1`). Origin: the 2026-10-30 external deep-analysis of v0.4.0 against Learn Harness Engineering (L10 gap).
 - **Host verification matrix** (`docs/internal/host-verification-matrix.md`): per-host tiers (`live-verified` / `partial-live` / `protocol-only` / `config-only`) with the evidence and the owed checks per host. README (EN/ZH) enforcement wording aligned to it: Antigravity and WorkBuddy are now worded "deployed (not live-verified)" in the support table.
 - **Initializer playbook** (`templates/initializer-playbook.md` + `.zh.md`, course L06): opening questions, feature-list discipline (verification command first, level labelled), and an initialization acceptance checklist. `gate/init.template.sh` points at it after a successful smoke run.
-- **Windows CI execution smoke for `deploy-agents.ps1`**: the ps-analyzer job now also executes the deploy against a temp project and asserts the core deployed file set. Committed in this round; not yet observed green in CI at the time of writing.
+- **Windows CI execution smoke for `deploy-agents.ps1`**: the ps-analyzer job now also executes the deploy against a temp project and asserts the core deployed file set. First executed by PR #86's CI, where it caught the `deploy-agents.ps1` parse failure recorded below; after the fixes, PR #86 CI went fully green (2026-10-30) and the PR was merged the same day.
 
 ### Changed / fixed
 

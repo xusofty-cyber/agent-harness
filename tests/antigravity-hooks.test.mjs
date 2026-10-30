@@ -349,3 +349,25 @@ test("adapter with cwd=.agents and no workspacePaths still denies force push", (
   assert.equal(json.decision, "deny");
   assert.match(json.reason, /Force push/);
 });
+
+// Live agy CLI 1.4.10 also exposes an "edit_file" tool. The 2026-10-30
+// live retest (~/workspace/agy-gate-retest) proved a direct edit_file
+// edit of gate/feature_list.json forged a passing state with empty
+// evidence, because edit_file was in neither the hooks.json matcher
+// nor WRITE_TOOLS. These tests pin the fix.
+test("edit_file (live agy name, Path arg) direct edit of feature_list.json is denied", () => {
+  const dir = makeProject({ items: [] });
+  const r = preTool(dir, "edit_file", {
+    Path: join(dir, "gate", "feature_list.json"),
+  });
+  assert.equal(r.json.decision, "deny");
+  assert.match(r.json.reason, /pass-gate\.py/);
+});
+
+test("edit_file on an ordinary file is allowed", () => {
+  const dir = makeProject();
+  const r = preTool(dir, "edit_file", {
+    Path: join(dir, "README.md"),
+  });
+  assert.equal(r.json.decision, "allow");
+});

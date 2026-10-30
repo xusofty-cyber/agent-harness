@@ -72,6 +72,7 @@ jobs:
           python3 tests/sync_skills_test.py
           python3 tests/doc_impact_test.py
           python3 tests/cost_ledger_test.py
+          python3 tests/skill_usage_report_test.py
           python3 tests/pass_gate_test.py
 
       - name: Repository static checks

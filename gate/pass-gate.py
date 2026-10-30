@@ -22,7 +22,7 @@ Usage (run from the project root, or pass --root):
   pass-gate.py override --id <id> --reason <text> [--by NAME]
   pass-gate.py status [--json]
   pass-gate.py check-clean [--root DIR]
-  pass-gate.py events [--last N]
+  pass-gate.py events [--last N] [--verify-chain]
   pass-gate.py terminate --id <id> --stage static|runtime|system
       (merged from v3-yunyi: three-layer termination, no skipping)
   pass-gate.py handoff [--out PATH]
@@ -89,6 +89,10 @@ def _feature_list_path(root):
 
 def _events_path(root):
     return os.path.join(root, "gate", "events.jsonl")
+
+
+def _events_head_path(root):
+    return os.path.join(root, "gate", "events-head.json")
 
 
 def _load(root):
@@ -299,6 +303,51 @@ def _read_events(root):
     return events
 
 
+def _canonical_event(record):
+    """Deterministic serialization used for chain hashing (D67): the
+    record without its `hash` field, keys sorted, compact separators.
+    The stored line itself keeps the human-friendly field order; only
+    the hash input is canonicalised, so verification does not depend
+    on how a writer ordered the keys."""
+    body = {k: v for k, v in record.items() if k != "hash"}
+    return json.dumps(body, ensure_ascii=False, sort_keys=True,
+                      separators=(",", ":"))
+
+
+def _line_hash(line):
+    return hashlib.sha256(line.encode("utf-8")).hexdigest()
+
+
+def _last_event_line(root):
+    """The last non-empty line of events.jsonl exactly as stored
+    (without its trailing newline), or None when the log is absent or
+    has no non-empty line."""
+    path = _events_path(root)
+    if not os.path.exists(path):
+        return None
+    last = None
+    with open(path, encoding="utf-8", errors="replace") as f:
+        for line in f:
+            line = line.rstrip("\n")
+            if line.strip():
+                last = line
+    return last
+
+
+def _write_events_head(root, record):
+    """Checkpoint the chain head (D67): {seq, hash} of the newest
+    chained event, written atomically on every chained append. The
+    checkpoint is what makes tail deletion detectable — the log alone
+    cannot notice its own missing tail, so verification compares the
+    file's last chained event against this separately stored head."""
+    path = _events_head_path(root)
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump({"seq": record["seq"], "hash": record["hash"]}, f)
+        f.write("\n")
+    os.replace(tmp, path)
+
+
 def _append_event(root, event, item_id, detail):
     """Append one event to gate/events.jsonl (append-only by convention).
 
@@ -310,6 +359,15 @@ def _append_event(root, event, item_id, detail):
     tool without a seq (or with a non-integer seq) can never crash
     the append with KeyError — the next append simply continues from
     the highest known seq.
+
+    Hash chain (D67): every event written here carries `prev` — the
+    SHA-256 of the previous log line exactly as stored ("" when the
+    log was empty) — and `hash` — the SHA-256 of prev + the canonical
+    form of the record without `hash`. Events written by other tools
+    (stop-gate, comet_adapter) stay unchained legacy lines; they do
+    not break the chain because the next chained event's `prev`
+    points at whatever line precedes it. See _verify_event_chain and
+    gate/README.md for exactly what this does and does not prove.
     """
     path = _events_path(root)
     events = _read_events(root)
@@ -317,6 +375,8 @@ def _append_event(root, event, item_id, detail):
     for rec in events:
         if isinstance(rec, dict) and isinstance(rec.get("seq"), int):
             seq = max(seq, rec["seq"] + 1)
+    last_line = _last_event_line(root)
+    prev = _line_hash(last_line) if last_line is not None else ""
     record = {
         "seq": seq,
         "ts": _utcnow(),
@@ -324,10 +384,96 @@ def _append_event(root, event, item_id, detail):
         "event": event,
         "item_id": item_id,
         "detail": detail,
+        "prev": prev,
     }
+    record["hash"] = _line_hash(prev + _canonical_event(record))
     with open(path, "a", encoding="utf-8") as f:
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    _write_events_head(root, record)
     return record
+
+
+def _verify_event_chain(root):
+    """Recompute the events hash chain (D67).
+
+    Returns (state, detail) with state one of:
+      "ok"       — every chained event's prev/hash recompute cleanly
+                   and the events-head.json checkpoint agrees with the
+                   log's last chained event;
+      "no-chain" — no chained events yet (a legacy-only log, or no log
+                   at all): nothing to verify, nothing broken;
+      "broken"   — detail names the first problem found.
+
+    Detects: editing any chained line (its hash stops matching),
+    editing/deleting/reordering lines before a chained event (the
+    next event's prev stops matching), deleting tail events (the
+    checkpoint stays ahead of the log), appending chained events
+    without updating the checkpoint (checkpoint behind). Does NOT
+    detect: deleting the checkpoint together with the tail, or a
+    wholesale rewrite of log + checkpoint — the chain is tamper
+    evidence inside the repo, git history remains the backstop.
+    """
+    path = _events_path(root)
+    if not os.path.exists(path):
+        return "no-chain", "no gate/events.jsonl yet"
+    prev_line = None
+    last_chained = None
+    n_chained = 0
+    with open(path, encoding="utf-8", errors="replace") as f:
+        raw_lines = f.read().splitlines()
+    for lineno, raw in enumerate(raw_lines, 1):
+        if not raw.strip():
+            continue
+        try:
+            rec = json.loads(raw)
+        except json.JSONDecodeError:
+            return "broken", f"line {lineno} is not valid JSON"
+        if isinstance(rec, dict) and "prev" in rec and "hash" in rec:
+            expected_prev = _line_hash(prev_line) \
+                if prev_line is not None else ""
+            if rec["prev"] != expected_prev:
+                return "broken", (
+                    f"seq {rec.get('seq')}: prev does not match the "
+                    f"SHA-256 of the previous line (line {lineno}) — "
+                    "an earlier line was edited, deleted or reordered")
+            if rec["hash"] != _line_hash(
+                    rec["prev"] + _canonical_event(rec)):
+                return "broken", (
+                    f"seq {rec.get('seq')}: hash does not recompute "
+                    f"(line {lineno}) — this event was edited")
+            last_chained = rec
+            n_chained += 1
+        prev_line = raw
+    if last_chained is None:
+        return "no-chain", ("no chained events yet (legacy log); the "
+                            "chain starts with the first event a "
+                            "chaining pass-gate appends")
+    head_path = _events_head_path(root)
+    if not os.path.exists(head_path):
+        return "broken", ("chained events exist but "
+                          "gate/events-head.json is missing — tail "
+                          "integrity cannot be confirmed")
+    try:
+        with open(head_path, encoding="utf-8") as f:
+            head = json.load(f)
+    except (json.JSONDecodeError, OSError) as e:
+        return "broken", f"gate/events-head.json is unreadable: {e}"
+    if head.get("hash") != last_chained["hash"] \
+            or head.get("seq") != last_chained["seq"]:
+        if isinstance(head.get("seq"), int) \
+                and isinstance(last_chained.get("seq"), int) \
+                and head["seq"] > last_chained["seq"]:
+            return "broken", (
+                f"checkpoint is ahead of the log (checkpoint seq "
+                f"{head['seq']} > last chained seq "
+                f"{last_chained['seq']}) — tail event(s) were deleted")
+        return "broken", (
+            f"checkpoint disagrees with the log tail (checkpoint "
+            f"seq {head.get('seq')!r} vs last chained seq "
+            f"{last_chained.get('seq')!r}) — the log or the "
+            "checkpoint was changed without the other")
+    return "ok", (f"chain intact: {n_chained} chained event(s), "
+                  f"head seq {last_chained['seq']}")
 
 
 def _find(data, item_id):
@@ -666,6 +812,16 @@ def cmd_status(args):
 
 
 def cmd_events(args):
+    if getattr(args, "verify_chain", False):
+        state, detail = _verify_event_chain(args.root)
+        if state == "ok":
+            print(f"event chain OK: {detail}")
+            return 0
+        if state == "no-chain":
+            print(f"event chain: {detail}")
+            return 0
+        print(f"event chain BROKEN: {detail}")
+        return 1
     events = _read_events(args.root)
     for ev in events[-args.last:]:
         print(f"#{ev['seq']} {ev['ts']} {ev['actor']} "
@@ -1138,6 +1294,18 @@ def cmd_check_clean(args):
         results.append(("3d verification levels (info)", "PASS",
                         f"passing by level: {_summary}"))
 
+    # 3e. event-log chain integrity (D67). A legacy log with no
+    # chained events is SKIP, not FAIL: the chain starts with the
+    # first event a chaining pass-gate appends, and logs written
+    # before D67 (or only by other tools) have nothing to verify.
+    _chain_state, _chain_detail = _verify_event_chain(args.root)
+    if _chain_state == "ok":
+        results.append(("3e progress/event chain", "PASS", _chain_detail))
+    elif _chain_state == "broken":
+        results.append(("3e progress/event chain", "FAIL", _chain_detail))
+    else:
+        results.append(("3e progress/event chain", "SKIP", _chain_detail))
+
     # 4. temp artefacts cleaned
     temp_hits = []
     try:
@@ -1238,6 +1406,10 @@ def main(argv=None):
 
     p = sub.add_parser("events", help="show the append-only event log")
     p.add_argument("--last", type=int, default=20)
+    p.add_argument("--verify-chain", action="store_true",
+                   help="recompute the events hash chain (D67) and "
+                        "compare it with gate/events-head.json; "
+                        "exit 1 if the chain is broken")
     p.set_defaults(func=cmd_events)
 
     p = sub.add_parser("terminate",
