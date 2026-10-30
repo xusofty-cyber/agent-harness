@@ -16,6 +16,7 @@ elsewhere in this repo; the gate works with or without it (D1).
 | `feature_list.json` | **This repo's own list** (dogfood). Per-project state; deployed targets create their own via `init` — deploy never copies this file |
 | `clean-state.json` | Build/test/start commands for `check-clean` (this repo's own) |
 | `events.jsonl` | Append-only event log. Every transition lands here |
+| `events-head.json` | Chain checkpoint (D67): `{seq, hash}` of the newest chained event, written by `pass-gate.py` on every append. Per-project state like `events.jsonl` — deploy never copies it |
 
 The schema lives in `gate/`; the human template lives in
 `templates/feature_list.template.json`.
@@ -33,6 +34,7 @@ pass-gate.py reopen --id <id> --reason "..."  # passing was wrong; reason requir
 pass-gate.py status                 # what is where
 pass-gate.py check-clean            # five-dimension handover check
 pass-gate.py events --last 20       # what happened
+pass-gate.py events --verify-chain  # is the log itself untampered? (D67)
 ```
 
 An item may enter `passing` only with evidence: the command that ran,
@@ -68,6 +70,12 @@ has two checks (3a narrative, 3b machine-readable truth):
 A dimension with no command configured reports SKIP, not PASS. Any FAIL
 means: do not hand off yet.
 
+`check-clean` verifies the system *at handover*; keeping the running
+system debuggable afterwards is the project's observability habit —
+see `templates/observability-guide.md` (structured logs with trace
+ids, one health-check command wired into `clean-state.json`, and the
+log-based debugging loop).
+
 ## Anti-tamper: defence in depth, not a guarantee
 
 An agent can always rewrite a JSON file. The gate does not pretend
@@ -85,6 +93,27 @@ otherwise. Three legs raise the cost of faking a pass and leave a trace:
 3. **Event log** (`gate/events.jsonl`): every transition is appended with
    a monotonic sequence number and committed to git, so rewriting history
    shows up as a diff. It cannot stop a rewrite; it makes one visible.
+4. **Event hash chain** (D67): every event `pass-gate.py` appends carries
+   `prev` (the SHA-256 of the previous log line exactly as stored; `""`
+   for the first line of an empty log) and `hash` (the SHA-256 of `prev`
+   plus the event's canonical form without `hash`). Each append also
+   updates the checkpoint `gate/events-head.json` (`{seq, hash}` of the
+   newest chained event). Verify any time with
+   `pass-gate.py events --verify-chain` (also `check-clean` dimension
+   3e). Events written by other tools (Stop hook, `comet_adapter.py`)
+   stay unchained legacy lines; they do not break the chain, because the
+   next chained event's `prev` points at whatever line precedes it.
+   Logs from before D67 are all-legacy: verification reports
+   "no chained events yet", not a failure.
+
+   The chain **detects**: editing any chained line (its `hash` stops
+   recomputing); editing, deleting or reordering any earlier line (the
+   following event's `prev` stops matching); deleting tail events (the
+   checkpoint stays ahead of the log); appending chained events without
+   updating the checkpoint (checkpoint behind). The chain does **not**
+   detect: deleting the checkpoint together with the tail, or rewriting
+   log and checkpoint wholesale — it is tamper evidence *inside* the
+   repo, not a signature; git history remains the backstop.
 
 Known gaps (recorded honestly, not fixed by pretending):
 
@@ -94,11 +123,13 @@ Known gaps (recorded honestly, not fixed by pretending):
   hand-edit had no event; CI §3k caught it anyway.
 - Leg 2 re-runs verification commands, so a slow or flaky command makes
   CI slow or flaky. Keep verification commands fast and hermetic.
-- `events.jsonl` seq numbers are monotonic, not gapless; a deleted line
-  is detectable only by a missing seq number, which CI flags as
-  "seq not increasing" only if the order breaks — a clean deletion of the
-  *last* lines is not detectable from the file alone. Git history is the
-  backstop: compare against the last reviewed commit.
+- `events.jsonl` seq numbers are monotonic, not gapless. For chained
+  events the D67 chain (leg 4) covers edits, mid-log deletions and —
+  via the checkpoint — tail deletions. Unchained legacy lines are
+  covered only indirectly: a later chained event's `prev` pins the
+  line that precedes it, but a legacy line at the very tail, written
+  by another tool after the last chained event, is protected by
+  nothing but git history.
 
 ## Session lifecycle hooks (Phase 2, 2-3)
 
@@ -176,7 +207,7 @@ reviewer can find them.
 `deploy-agents.sh` / `.ps1` copy the gate *code* (`pass-gate.py`,
 `graph.py`, `feature_list.schema.json`, `init.template.sh`, this README) to the
 target's `gate/`. They never copy `feature_list.json`, `events.jsonl`,
-or `clean-state.json` — those are per-project state. A target project
+`events-head.json`, or `clean-state.json` — those are per-project state. A target project
 runs `sh gate/init.template.sh --name <project> --verify "<cmd>" --start
 "<cmd>"` to create its own state, or `python3 gate/pass-gate.py init`.
 

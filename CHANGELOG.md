@@ -6,6 +6,12 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+### Added (v0.5.1 round, 2026-10-30)
+
+- **Event-log hash chain (D67)**: every event `pass-gate.py` appends to `gate/events.jsonl` now carries `prev` (SHA-256 of the previous log line as stored) and `hash` (SHA-256 of prev + the event's canonical form), and each append updates the `gate/events-head.json` checkpoint. `pass-gate.py events --verify-chain` recomputes the chain and compares the tail against the checkpoint; `check-clean` reports it as dimension 3e. Legacy unchained lines (Stop hook, comet adapter, pre-D67 logs) never break verification. Detects chained-line edits, earlier-line edits/deletions/reordering, and tail deletion; does NOT detect deleting the checkpoint together with the tail or a wholesale log+checkpoint rewrite — tamper evidence, not a signature (limits stated in `gate/README.md` and D67).
+- **Observability guide** (`templates/observability-guide.md` + `.zh.md`): the target-project half of harness observability — structured logs with trace ids (ids, never payloads or secrets), one read-only health-check command, wiring it into `gate/clean-state.json`, and the log-based debugging loop (reproduce from the trace → hypothesis → close observability gaps → fix → regression-check the same query). Referenced from `gate/README.md` and the initializer playbooks (EN/ZH).
+- **Skill-usage telemetry (D68)**: the Claude Code PostToolUse hook records Skill invocations — skill name + timestamp (+ session id when present), never arguments or content — to `.claude/skill-usage.jsonl` (gitignored local telemetry, fail-open, `SKILL_LEDGER=0` opt-out). New `tools/skill-usage-report.py` aggregates per-skill load counts and lists deployed skills with zero recorded loads, as standing input to the monthly ablation (D20). Counts cover only hosts with a PostToolUse surface in gated projects, so they are a lower bound.
+
 ### Added (v0.4.1 convergence round, 2026-10-30)
 
 - **Verification levels (D66)**: `verification.level` (`assert` < `unit` < `integration` < `e2e`) in the feature-list schema, validated by `pass-gate.py`, settable via `add --level`, shown by `status`, and summarised by the new informational `check-clean` dimension 3d. Descriptive only — it never fails a check; it makes evidence strength visible (this repo's own passing mix now reads `assert 5, unit 1`). Origin: the 2026-10-30 external deep-analysis of v0.4.0 against Learn Harness Engineering (L10 gap).

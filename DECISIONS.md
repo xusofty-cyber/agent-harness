@@ -1079,3 +1079,70 @@ still pending.
   item of the v0.4.1 convergence round. B3 (real-project
   discriminating bench) remains the v0.5.0 theme and is not replaced
   by this change.
+
+## D67 — events.jsonl hash chain + checkpoint: tamper evidence, with stated limits (v0.5.1, 2026-10-30)
+
+- **Decision:** every event `pass-gate.py` appends to
+  `gate/events.jsonl` carries two extra fields: `prev` — the SHA-256
+  of the previous log line exactly as stored (`""` when the log was
+  empty) — and `hash` — the SHA-256 of `prev` + the canonical form
+  of the record without `hash` (keys sorted, compact separators, so
+  verification does not depend on a writer's field order). Each
+  append also atomically rewrites the checkpoint
+  `gate/events-head.json` (`{seq, hash}` of the newest chained
+  event). `pass-gate.py events --verify-chain` recomputes the chain
+  and compares the tail against the checkpoint; `check-clean` reports
+  it as dimension 3e (PASS/FAIL only when chained events exist; a
+  legacy-only log is SKIP).
+- **Compatibility:** events written by other tools (Stop hook,
+  `comet_adapter.py`) stay unchained legacy lines and never break
+  verification — the next chained event's `prev` points at whatever
+  line precedes it, so legacy lines are pinned indirectly. Pre-D67
+  logs verify as "no chained events yet", not broken. The P0-1
+  tolerance behaviour is unchanged (seq-less lines tolerated, corrupt
+  lines still fail mutating commands cleanly with exit 2).
+- **Limits — stated exactly, not overstated:** the chain detects
+  editing a chained line, editing/deleting/reordering earlier lines,
+  deleting tail events (checkpoint ahead), and chained appends that
+  skip the checkpoint. It does NOT detect deleting the checkpoint
+  together with the tail, or a wholesale rewrite of log + checkpoint:
+  nothing stored only inside the same repository can. The chain is
+  tamper evidence, not a signature; git history remains the backstop
+  (gate/README.md anti-tamper leg 4 carries the same wording).
+- **Origin:** the 2026-10-30 external deep-analysis of v0.4.0
+  (gap §5.4: DeepSeek-style event-log integrity — a deleted tail line
+  was previously undetectable from the file alone), adopted in the
+  v0.5.1 round.
+
+## D68 — skill-usage telemetry: skill names only, local file, feeds the monthly ablation (v0.5.1, 2026-10-30)
+
+- **Decision:** the Claude Code PostToolUse hook
+  (`.claude/hooks/post-tool-use.mjs`) additionally records Skill
+  invocations: one JSON line per call in `.claude/skill-usage.jsonl`
+  containing exactly `{ts, skill}` plus `session` (the host session
+  id) when the payload carries one. `tools/skill-usage-report.py`
+  aggregates the log into per-skill load counts and the list of
+  deployed skills (directories with a `SKILL.md` under
+  `.agents/skills/` / `.claude/skills/`) with zero recorded loads —
+  the standing input to the monthly ablation (D20).
+- **What is NOT recorded:** the skill's arguments, prompts, tool
+  inputs/outputs, file paths, or any content — name and timestamp
+  only, the same privacy posture as the cost ledger. The file is
+  local telemetry: gitignored, never committed, and the hook is
+  fail-open (a write failure changes nothing) with a
+  `SKILL_LEDGER=0` opt-out mirroring `COST_LEDGER=0`. Recording only
+  happens in projects where the gate is in use (the hook's existing
+  gate/ precondition); hosts without a PostToolUse surface record
+  nothing, so counts are a lower bound, stated as such in the report
+  docs — absence of a load record is not proof a skill is unused
+  everywhere, only that it was not loaded here.
+- **Why:** U1 (no usage telemetry) is the recorded blocker behind
+  every skill-tier judgement call in `docs/internal/skill-tiers.md`:
+  the distribution carries ~99K tokens of SKILL.md with zero
+  per-skill usage evidence, and the only ablation so far
+  (writing-skills, D64/D65) had to be decided without it. Telemetry
+  does not itself remove or keep any skill — it gives the 2026-11
+  ablation round data instead of opinion.
+- **Origin:** the 2026-10-30 external deep-analysis of v0.4.0
+  (gap §5.6: complexity debt — no usage telemetry), adopted in the
+  v0.5.1 round.

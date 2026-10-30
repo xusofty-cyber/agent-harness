@@ -15,9 +15,14 @@
 //     stderr, matching the guard.mjs convention — Phase 2, 2-4).
 //   - The ledger is append-only; one line per call, no PII beyond the tool
 //     name and timestamp.
+//   - Skill telemetry (D68): when the call is a Skill invocation, one
+//     extra line ({ts, skill, session?} — the skill NAME only, never
+//     its arguments or any content) goes to .claude/skill-usage.jsonl.
+//     tools/skill-usage-report.py aggregates it for the monthly
+//     ablation (D20). Opt-out: SKILL_LEDGER=0.
 // Exit code is always 0.
 // ==============================================================================
-import { appendFileSync, existsSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 
 let input = "";
@@ -46,16 +51,38 @@ if (!existsSync(gateDir)) {
 }
 
 const tool = data.tool_name || "unknown";
+const ts = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 try {
   appendFileSync(
     join(gateDir, "cost-ledger.jsonl"),
     JSON.stringify({
-      ts: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+      ts,
       hook: "post-tool-use",
       tool,
     }) + "\n"
   );
 } catch {
   // Ledger write failure must never break the session — silent fail-open.
+}
+
+// Skill-usage telemetry (D68): name only, never args or content.
+if (tool === "Skill" && process.env.SKILL_LEDGER !== "0") {
+  const skill = data.tool_input && data.tool_input.skill;
+  if (typeof skill === "string" && skill) {
+    try {
+      const claudeDir = join(cwd, ".claude");
+      mkdirSync(claudeDir, { recursive: true });
+      const rec = { ts, skill };
+      if (typeof data.session_id === "string" && data.session_id) {
+        rec.session = data.session_id;
+      }
+      appendFileSync(
+        join(claudeDir, "skill-usage.jsonl"),
+        JSON.stringify(rec) + "\n"
+      );
+    } catch {
+      // Telemetry write failure must never break the session.
+    }
+  }
 }
 process.exit(0);
