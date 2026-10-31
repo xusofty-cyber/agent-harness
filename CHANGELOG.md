@@ -6,6 +6,10 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-31
+
+Ships the v0.6.0 round (D70/D71: bridge hash-chain parity, SESSION_STATE sync-state, graph fan-out, loop failure feedback, template ceremony reduction) together with the v0.5.2 audit fixes (ISS-01..ISS-11) and the PowerShell 5.1 BOM fix, none of which were tagged separately.
+
 ### Added
 
 - **Bridge hash-chain unification across Antigravity, WorkBuddy, and dsh (D71)**: `appendGateEvent()` in `.agents/hooks/antigravity-common.mjs` and `.workbuddy/hooks/workbuddy-common.mjs` (plus `dsh-turn-stopping` in `.dsh/agent-harness-gate.ts` / `.mjs`) now compute SHA-256 `prev` and `hash` and atomically update `gate/events-head.json` via PID-scoped temp files, and `antigravity-stop.mjs` / `workbuddy-stop.mjs` log `stop_blocked` on the first blocked stop.
