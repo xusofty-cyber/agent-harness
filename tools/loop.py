@@ -11,6 +11,10 @@ State (per loop, in --root):
   loop-state.json   current state: kind, goal, round, consecutive passes,
                     status, rounds[] (one record per round)
   loop-events.jsonl append-only events: seq, ts, type, detail
+  last-failure.log  output tail from the most recent failed maker/verify/checker
+                    (passed to the next maker round via LOOP_LAST_FAILURE_FILE
+                    and LOOP_LAST_FAILURE_TAIL; removed as soon as a verify
+                    round passes)
   maker/            maker working directory (maker-checker kind)
   checker/          checker working directory (isolated copy of artifacts)
 
@@ -48,7 +52,7 @@ import sys
 import time
 from datetime import datetime, timezone
 
-VERSION = "5.0.0"
+VERSION = "5.1.0"
 
 
 def _now_iso():
@@ -61,6 +65,10 @@ def _state_path(root):
 
 def _events_path(root):
     return os.path.join(root, "loop-events.jsonl")
+
+
+def _failure_log_path(root):
+    return os.path.join(root, "last-failure.log")
 
 
 def _load_state(root):
@@ -89,22 +97,31 @@ def _append_event(root, etype, detail):
 
 
 def _run_cmd(cmd, cwd, timeout, env_extra):
-    """Run one shell command. Returns (returncode, timed_out, duration_s)."""
-    env = dict(os.environ)
+    """Run one shell command. Returns (returncode, timed_out, duration_s, output_text)."""
+    env = {k: v for k, v in os.environ.items() if k not in ("BASH_ENV", "ENV")}
     env.update(env_extra)
     started = time.monotonic()
     try:
         proc = subprocess.run(cmd, shell=True, cwd=cwd, env=env,
                               capture_output=True, text=True, timeout=timeout)
-        return proc.returncode, False, time.monotonic() - started
-    except subprocess.TimeoutExpired:
-        return 124, True, time.monotonic() - started
+        combined = (proc.stdout or "") + (proc.stderr or "")
+        return proc.returncode, False, time.monotonic() - started, combined
+    except subprocess.TimeoutExpired as e:
+        out_s = (e.stdout.decode("utf-8", "replace")
+                 if isinstance(e.stdout, bytes) else (e.stdout or ""))
+        err_s = (e.stderr.decode("utf-8", "replace")
+                 if isinstance(e.stderr, bytes) else (e.stderr or ""))
+        combined = f"{out_s}{err_s}\n[TIMEOUT after {timeout}s]"
+        return 124, True, time.monotonic() - started, combined
 
 
-def _round_record(state, phase, cmd, rc, timed_out, duration_s):
-    return {"round": state["round"], "phase": phase, "command": cmd,
-            "returncode": rc, "timed_out": timed_out,
-            "duration_s": round(duration_s, 3)}
+def _round_record(state, phase, cmd, rc, timed_out, duration_s, output_tail=""):
+    rec = {"round": state["round"], "phase": phase, "command": cmd,
+           "returncode": rc, "timed_out": timed_out,
+           "duration_s": round(duration_s, 3)}
+    if output_tail:
+        rec["output_tail"] = output_tail[-512:]
+    return rec
 
 
 def _finish_round(state, root, verify_rc, verify_timed_out):
@@ -167,17 +184,48 @@ def _check_stop(state, root):
     return False, 0
 
 
+def _write_failure_log(root, round_no, phase, rc, output_text):
+    path = _failure_log_path(root)
+    tail = (output_text or "")[-4096:]
+    header = f"# Round {round_no} {phase} failed (exit {rc})\n"
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(header + tail)
+    except OSError:
+        pass
+    return tail
+
+
+def _clear_failure_log(failure_file):
+    if os.path.exists(failure_file):
+        try:
+            os.remove(failure_file)
+        except OSError:
+            pass
+
+
 def _run_loop(state, root, maker_cmd, verify_cmd, verify_cwd, artifact_note=None):
     """Shared round engine for goal-loop and maker-checker."""
     timeout = state.get("timeout_s")
+    last_failure_tail = ""
+    failure_file = os.path.abspath(_failure_log_path(root))
     while True:
         state["round"] += 1
         env_extra = {"LOOP_ROUND": str(state["round"]),
                      "LOOP_ROOT": os.path.abspath(root)}
+        if last_failure_tail:
+            env_extra["LOOP_LAST_FAILURE_FILE"] = failure_file
+            env_extra["LOOP_LAST_FAILURE_TAIL"] = last_failure_tail[-2048:]
         maker_cwd = os.path.join(root, "maker") if state["kind"] == "maker-checker" else root
-        rc, timed_out, dur = _run_cmd(maker_cmd, maker_cwd, timeout, env_extra)
-        state["rounds"].append(_round_record(state, "maker", maker_cmd, rc, timed_out, dur))
+        rc, timed_out, dur, out = _run_cmd(maker_cmd, maker_cwd, timeout, env_extra)
+        state["rounds"].append(
+            _round_record(state, "maker", maker_cmd, rc, timed_out, dur,
+                          out if (rc != 0 or timed_out) else "")
+        )
         if rc != 0 or timed_out:
+            last_failure_tail = _write_failure_log(
+                root, state["round"], "maker", rc, out
+            )
             _append_event(root, "maker_failed" if not timed_out else "maker_timeout",
                           {"round": state["round"], "returncode": rc})
             # A failed maker still counts as a round; verify is skipped and
@@ -190,11 +238,23 @@ def _run_loop(state, root, maker_cmd, verify_cmd, verify_cwd, artifact_note=None
             continue
         if artifact_note:
             artifact_note()
-        rc, timed_out, dur = _run_cmd(verify_cmd, verify_cwd, timeout, env_extra)
-        state["rounds"].append(_round_record(state, "verify", verify_cmd, rc, timed_out, dur))
+        rc, timed_out, dur, v_out = _run_cmd(verify_cmd, verify_cwd, timeout, env_extra)
+        state["rounds"].append(
+            _round_record(state, "verify", verify_cmd, rc, timed_out, dur,
+                          v_out if (rc != 0 or timed_out) else "")
+        )
+        if rc != 0 or timed_out:
+            last_failure_tail = _write_failure_log(
+                root, state["round"], "verify", rc, v_out
+            )
+        else:
+            last_failure_tail = ""
+            _clear_failure_log(failure_file)
         _finish_round(state, root, rc, timed_out)
         stopped, code = _check_stop(state, root)
         if stopped:
+            if code == 0:
+                _clear_failure_log(failure_file)
             return code
 
 

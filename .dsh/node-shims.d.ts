@@ -29,10 +29,19 @@ declare module "node:child_process" {
   ): SpawnSyncReturns;
 }
 
+declare module "node:crypto" {
+  export interface Hash {
+    update(data: string, encoding?: string): Hash;
+    digest(encoding: "hex"): string;
+  }
+  export function createHash(algorithm: string): Hash;
+}
+
 declare module "node:fs" {
   export function appendFileSync(path: string, data: string): void;
   export function existsSync(path: string): boolean;
   export function readFileSync(path: string, encoding: string): string;
+  export function renameSync(oldPath: string, newPath: string): void;
   export function unlinkSync(path: string): void;
   export function writeFileSync(path: string, data: string, encoding: string): void;
 }
@@ -43,6 +52,7 @@ declare module "node:path" {
 
 declare const process: {
   cwd: () => string;
+  pid: number;
   env: Record<string, string | undefined>;
   stderr: { write: (text: string) => void };
 };

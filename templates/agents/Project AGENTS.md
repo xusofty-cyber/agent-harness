@@ -66,11 +66,11 @@
 | **1. 需求分析** | 🎯 **PM (产品经理)** | 需求梳理、用户故事、PRD 与验收标准 | `brainstorming`, `engineering-docs` (PRD), `openspec` | 验收标准清晰，业务目标与边界无歧义 |
 | **2. 架构设计** | 🏗️ **Architect (架构师)** | 技术方案设计、架构图、选型与风险评估 (HLD/LLD) | `option-review`, `codegraph`, `engineering-docs` (HLD/LLD) | 方案经多维评审，无单向门风险与架构债务 |
 | **3. 编码实现** | 💻 **Developer (程序员)** | 业务代码实现、单元测试、局部代码优化 | `test-driven-development`, `ponytail`, `writing-plans` | 测试先行（红绿循环），最小清晰实现 |
-| **4. 代码审查** | 🔍 **Reviewer (审查员)** | 确定性审查报告、安全审计、修改清单 | `open-code-review`, `requesting-code-review` | 行号锚定，Critical / High 缺陷零残留 |
+| **4. 代码审查** | 🔍 **Reviewer (审查员)** | 确定性审查报告、安全审计、修改清单 | `open-code-review`, `requesting-code-review` | 行号锚定，Critical / Important 缺陷零残留 |
 | **5. 测试验证** | 🧪 **QA (测试工程师)** | 测试用例设计、边界验证、Bug 复测与验证报告 | `verification-before-completion`, `systematic-debugging` | 跑通测试套件，提供客观真实运行证据 |
 | **6. 交付归档** | 📦 **Release Team** | 活体文档与追溯同步、版本标记、变更归档 | `living-documentation`, `finishing-a-development-branch` | 代码与活体文档双向追溯同步 |
 
-> 专家团队评审规范见 Global AGENTS.md「专家团队评审法定席位」章节。
+> 多维确定性审查规范见 Global AGENTS.md「多维确定性审查规范」章节。
 
 ## 子级规则与工程技能调度矩阵（按需查阅与唤醒）
 
@@ -112,7 +112,7 @@
 2. [ ] **更新 SESSION_STATE.md**：记录已完成事项、实际验证证据、未完成步骤和仍有效的风险，并运行 `python3 gate/pass-gate.py check-clean` 确认交接五维全绿
 3. [ ] **更新 PROJECT_CONTEXT.md / DECISIONS.md**：如有架构变更、技术决策或长期约束变化，同步更新；仅断点变化时跳过
 4. [ ] **执行代码审查**：你必须自己调用 `open-code-review` 技能（或 `ocr` CLI）执行审查，行号锚定、全量覆盖。严禁询问用户是否要审查，直接执行
-5. [ ] **清零缺陷**：根据审查意见修复，Critical / High 缺陷清零后方可合并
+5. [ ] **清零缺陷**：根据审查意见修复，Critical / Important 缺陷清零后方可合并
 
 > 严禁跳过第 4 步直接合并。未出示审查与门禁验证证据前，不得声称任务完成。
 

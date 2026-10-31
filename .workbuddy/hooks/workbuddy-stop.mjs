@@ -90,5 +90,25 @@ if (input.stop_hook_active !== true) {
   writeStopState(projectRoot, { blocked: true, sessionId });
 }
 
+let blockedIds = "";
+try {
+  const list = JSON.parse(
+    readFileSync(join(projectRoot, "gate", "feature_list.json"), "utf-8"),
+  );
+  blockedIds = (list.items || [])
+    .filter((i) => i.status === "in_progress")
+    .map((i) => i.id)
+    .join(",");
+} catch {
+  // Best effort.
+}
+appendGateEvent(
+  projectRoot,
+  "workbuddy-stop",
+  "stop_blocked",
+  blockedIds || null,
+  "stop-gate blocked; continue=false returned",
+);
+
 printJson({ continue: false, reason: extractStopReason(res.stderr) });
 process.exit(0);

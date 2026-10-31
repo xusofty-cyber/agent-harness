@@ -321,3 +321,19 @@ test("apply: registers exactly the documented listeners", () => {
   ]);
   assert.equal(plugin.name, "agent-harness-gate");
 });
+
+test("turn-stopping: blocked stop writes hash-chained record and events-head.json that pass verify-chain", () => {
+  const dir = makeProject({
+    items: [{ id: "t1", status: "in_progress" }],
+  });
+  const ctx = applyTo(dir);
+  const agent = { id: "agent-1", steer: () => {} };
+  ctx.listeners["agent/turn-stopping"](agent);
+  assert.equal(existsSync(join(dir, "gate", "events-head.json")), true);
+  const out = execFileSync(
+    "python3",
+    [join(REPO_ROOT, "gate", "pass-gate.py"), "--root", dir, "events", "--verify-chain"],
+    { encoding: "utf-8" },
+  );
+  assert.match(out, /event chain OK/);
+});

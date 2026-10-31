@@ -66,11 +66,11 @@ This project enforces a tightly-knit engineering closed loop across all phases. 
 | **1. Requirements** | 🎯 **Product Manager (PM)** | Requirement elicitation, user stories, PRD, and acceptance criteria | `brainstorming`, `engineering-docs` (PRD), `openspec` | Clear acceptance criteria; unambiguous scope and value |
 | **2. Architecture** | 🏗️ **Architect** | Technical design, architecture diagrams, stack selection, risk analysis (HLD/LLD) | `option-review`, `codegraph`, `engineering-docs` (HLD/LLD) | Multi-angle review complete; zero irreversible one-way doors |
 | **3. Implementation**| 💻 **Developer** | Production code, unit tests, clean refactoring | `test-driven-development`, `ponytail`, `writing-plans` | Test-first (red-green loop); minimal clean implementation |
-| **4. Code Review** | 🔍 **Reviewer** | Deterministic review reports, security audit, remediation list | `open-code-review`, `requesting-code-review` | Line-anchored findings; zero Critical/High defects |
+| **4. Code Review** | 🔍 **Reviewer** | Deterministic review reports, security audit, remediation list | `open-code-review`, `requesting-code-review` | Line-anchored findings; zero Critical/Important defects |
 | **5. Verification** | 🧪 **QA (Test Engineer)** | Test case design, boundary testing, bug retests, test report | `verification-before-completion`, `systematic-debugging` | Full test suite passing with authentic terminal evidence |
 | **6. Delivery** | 📦 **Release Team** | Living doc & code traceability sync, release tagging, archiving | `living-documentation`, `finishing-a-development-branch` | Bidirectional living doc and code traceability verified |
 
-> See Global AGENTS.md "Mandatory Expert Panel" section for the review protocol.
+> See Global AGENTS.md "Multi-Angle Deterministic Review Protocol" section for the review protocol.
 
 ## Sub-rule and Engineering Skill Dispatch Matrix (On-Demand Activation)
 
@@ -113,7 +113,7 @@ When the verification gate is active (`gate/feature_list.json` exists), drive al
 2. [ ] **Update SESSION_STATE.md & check-clean**: Record completed items, verification evidence, remaining steps, and active risks, then run `python3 gate/pass-gate.py check-clean` to confirm a clean handover
 3. [ ] **Update PROJECT_CONTEXT.md / DECISIONS.md**: If architecture, technical decisions, or long-term constraints changed, sync updates; skip if only breakpoints changed
 4. [ ] **Execute code review**: You MUST invoke the `open-code-review` skill (or `ocr` CLI) yourself — line-anchored, full coverage. NEVER ask the user whether to review; just do it
-5. [ ] **Zero defects**: Fix per review feedback; Critical / High defects must be zero before merge
+5. [ ] **Zero defects**: Fix per review feedback; Critical / Important defects must be zero before merge
 
 > Never skip step 4 to merge directly. Do not claim task completion without gate verification and review evidence.
 
