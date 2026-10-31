@@ -45,7 +45,7 @@ Load context as needed by the task. Multi-step tasks should use structured plans
    - **Autonomous troubleshooting loop**: Upon encountering error traces, autonomously analyze traces/stacks, locate root causes, implement fixes, and verify with self-testing;
    - **Strict verification evidence gate**: Never claim task completion without presenting authentic, reproducible verification evidence (test outputs, execution results, or diff validations).
 3. **Session Finish**:
-   - Update `SESSION_STATE.md` at meaningful task/session boundaries: record completed items, real verification evidence, remaining steps, and active environmental risks; prune obsolete or completed state. Do not create state noise for sessions without changes.
+   - Update `SESSION_STATE.md` at meaningful task/session boundaries: record completed items, real verification evidence, remaining steps, and active environmental risks; prune obsolete or completed state (when `gate/feature_list.json` is active, `pass-gate.py` transitions auto-sync the root breakpoint while preserving human notes). Do not create state noise for sessions without changes.
    - Update `PROJECT_CONTEXT.md` only when long-term facts change (architecture, constraints, or confirmed technical decisions). It is a memory digest and navigation entry, not a substitute for code or formal documentation; link source paths and update outdated items promptly.
    - Reusable lessons not yet codified into rules can be written to `tasks/lessons.md` as needed; avoid duplicating the same fact.
    - **Memory privacy boundary**: Strictly forbid storing credentials, private keys, raw personal data, complete conversation/tool logs, or unnecessary personal info. Shared template repos must not store private user preferences or other project facts.
@@ -53,32 +53,17 @@ Load context as needed by the task. Multi-step tasks should use structured plans
 - Cross-tool memory services are enabled explicitly on a per-project basis; global rules neither configure nor enable personal-level auto-capture. When no memory service is present, continue using project conventions and Markdown files.
 - Automated capture must be explicitly enabled by operators, with host capture gating and data scope confirmed; path exclusion does not redact arbitrary prompt text. Storing credentials and private data in prompts or memories is strictly prohibited.
 
-## Engineering Lifecycle and Phase Gates
+## Engineering Phase Gates and Deterministic Review
 
-R&D projects must enforce a tightly-knit engineering closed loop across all phases. Skipping front-loaded design to jump straight into code or claiming delivery without verification is strictly forbidden:
-1. **Five Core Roles Collaboration Loop**:
-   - 🎯 **Product Manager (PM)**: Requirement analysis, user stories, PRD/SRS, and acceptance criteria; defines "what to build and business boundaries";
-   - 🏗️ **Architect**: Technical solution design, system architecture diagrams, tech stack evaluation/selection (HLD/LLD); defines "system decoupling and evolution roadmap";
-   - 💻 **Developer**: Implementation per technical designs, unit testing, and code optimization; strictly observes TDD and Ponytail minimal implementation;
-   - 🔍 **Reviewer**: Deterministic code review, architectural guardrails, best practices, and security audits; enforces pre-merge quality gates;
-   - 🧪 **QA (Test Engineer)**: Test case design, boundary/edge injection, automated verification, and defect tracking; provides objective quality proof.
-2. **Phase Gates**:
-   - **Requirements ➔ Architecture**: Do not initiate major technical design without clear business value and testable acceptance criteria;
-   - **Architecture ➔ Implementation**: Complex features and refactorings require technical design and trade-off matrices before touching production code;
-   - **Implementation ➔ Review**: Completed code must undergo line-anchored review; blocking issues and security risks must reach zero before merge;
-   - **Review ➔ Verification**: Following review approval, execute test suites from a QA perspective and provide verifiable, objective terminal execution evidence;
+R&D projects enforce verifiable phase gates across the lifecycle. Skipping front-loaded boundary checks to jump straight into code or claiming delivery without verification is strictly forbidden:
+1. **Phase Gates**:
+   - **Requirements & Architecture ➔ Implementation**: Complex features and structural changes require testable acceptance criteria and design trade-offs before touching production code;
+   - **Implementation ➔ Review & Verification**: Completed code must undergo line-anchored review and boundary testing; blocking issues (`Critical` / `Important`) must reach zero with authentic terminal execution evidence before merge;
    - **Verification ➔ Delivery**: Code may be archived and delivered only after all tests turn green and living documentation traceability is synchronized.
 
-### Mandatory Expert Panel for Reviews
+### Multi-Angle Deterministic Review Protocol
 
-When requested to conduct a review with an "expert panel", LLMs must not engage in generic, unanchored persona roleplay. **The following expert roles must be mandatorily present and provide independent verdicts**:
-- 🏗️ **[Architect] Architecture Expert**: Evaluates module decoupling, unidirectional dependencies, tech selection, and backward compatibility;
-- 🛡️ **[Security Auditor] Security Auditor**: Audits authorization, injection vectors, secrets/credentials exposure, and attack surfaces;
-- 💻 **[Lead Developer] Engineering Implementation Expert**: Evaluates code smells, concurrency/thread safety, resource lifecycles, and error robustness;
-- 🧪 **[QA Specialist] Quality & Testability Expert**: Audits test authenticity (rejecting pure-mock sham tests), edge cases, resilience, and testability;
-- 🎯 **[Product Manager] Product Value Expert** (mandatory during requirement & proposal review): Validates alignment with requirements, blocking scope creep and over-engineering.
-
-**Review Output Mandate**: Every expert role must produce an independent verdict containing: ① review scope; ② **line-anchored empirical findings (`File:Line`)**; ③ severity rating (`Critical` / `Important` / `Minor`); ④ explicit verdict (`PASS` / `REJECT` / `CONDITIONAL PASS`). Any unaddressed `Critical` finding serves as an absolute veto blocking delivery.
+When a change is high-risk or the user requests a multi-angle review, skip theatrical persona roleplay and directly evaluate across five core dimensions — **architecture decoupling & backward compatibility, security boundaries & credential protection, implementation & concurrency/error robustness, test authenticity (rejecting pure-mock sham tests), and requirement alignment (blocking scope creep)** — producing: ① review scope; ② **line-anchored empirical findings (`File:Line`)**; ③ severity rating (`Critical` / `Important` / `Minor`); ④ explicit verdict (`PASS` / `REJECT` / `CONDITIONAL PASS`). Any unaddressed `Critical` finding is an absolute veto blocking delivery.
 
 ## Authorization Boundaries and Git Safety Ironclad Rules
 
