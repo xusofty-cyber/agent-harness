@@ -1064,6 +1064,13 @@ check("profiles:heavy-in-full-only",
       "heavy skills (docx, brainstorming) must be listed in full.heavy and in no smaller profile")
 _deploy_sh_txt = (ROOT / "deploy-agents.sh").read_text(encoding="utf-8")
 _deploy_ps1_txt = (ROOT / "deploy-agents.ps1").read_text(encoding="utf-8-sig")
+_ablation_src = (ROOT / "tools" / "ablation.py").read_text(encoding="utf-8")
+check("ablation:d20-subcommands",
+      all(fn in _ablation_src for fn in ("def do_check(", "def do_prepare(", "def do_report(", "def thresholds(")),
+      "tools/ablation.py must preserve D20 check/prepare/report/thresholds implementation")
+check("ablation:blocking-scopes-bridges",
+      all(sc in _ablation_src for sc in (".agents/hooks/*", ".agents/rules/*.md", ".workbuddy/**/*", ".dsh/*")),
+      "tools/ablation.py BLOCKING_SCOPES lacks bridge/rule scopes")
 check("profiles:sh-default-minimal", 'PROFILE="minimal"' in _deploy_sh_txt,
       "deploy-agents.sh default PROFILE is not minimal")
 check("profiles:ps1-default-minimal", '$SkillProfile = "minimal"' in _deploy_ps1_txt,
