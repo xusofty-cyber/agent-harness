@@ -179,9 +179,19 @@ function Prompt-MultiSelect([string]$Title, [array]$Items) {
     while ($true) {
         for ($i = 0; $i -lt $count; $i++) {
             $pointer = if ($i -eq $cur) { "> " } else { "  " }
-            $box = if ($Items[$i].Checked) { "◉ " } else { "◯ " }
-            $fg = if ($i -eq $cur) { "Cyan" } elseif ($Items[$i].Checked) { "Green" } else { "Gray" }
-            Write-Host "$pointer$box$($Items[$i].Label)" -ForegroundColor $fg
+            # ASCII markers on purpose: unambiguous in every console
+            # codepage/font (the old hollow/filled circles were nearly
+            # indistinguishable, so spacebar toggles looked like no-ops).
+            $box = if ($Items[$i].Checked) { "[X] " } else { "[ ] " }
+            # A checked row turns Green even under the cursor, so the
+            # spacebar toggle has visible feedback the moment it lands.
+            $fg = if ($Items[$i].Checked) { "Green" } elseif ($i -eq $cur) { "Cyan" } else { "Gray" }
+            $line = "$pointer$box$($Items[$i].Label)"
+            try {
+                $width = $host.UI.RawUI.BufferSize.Width
+                if ($line.Length -lt $width) { $line = $line.PadRight($width - 1) }
+            } catch {}
+            Write-Host $line -ForegroundColor $fg
         }
 
         $key = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")

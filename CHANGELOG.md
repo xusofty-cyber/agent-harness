@@ -6,6 +6,10 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Deploy wizard multi-select feedback was nearly invisible — fixed.** `Prompt-MultiSelect` in `deploy-agents.ps1` rendered checked/unchecked as hollow vs filled circles (nearly indistinguishable at console font sizes) and kept the row under the cursor Cyan whether checked or not, so spacebar toggles looked like no-ops (user-reported on Windows, 2026-10-31). Checked rows now render an ASCII `[X]` / `[ ]` marker and turn Green even under the cursor, and each redrawn row is padded to the buffer width so stale glyphs from wrapped lines are cleared.
+
 ## [0.6.0] - 2026-10-31
 
 Ships the v0.6.0 round (D70/D71: bridge hash-chain parity, SESSION_STATE sync-state, graph fan-out, loop failure feedback, template ceremony reduction) together with the v0.5.2 audit fixes (ISS-01..ISS-11) and the PowerShell 5.1 BOM fix, none of which were tagged separately.
