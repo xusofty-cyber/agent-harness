@@ -519,3 +519,94 @@ class PassGateBehaviorTest(unittest.TestCase):
         self.assertIn("hash", rec)
         vc = _run_gate(root, "events", "--verify-chain")
         self.assertEqual(vc.returncode, 0, vc.stdout + vc.stderr)
+
+    def test_auto_sync_session_state_on_start_and_verify(self):
+        root = _project_with([_behavior_item("feat-sync", OK_CMD)])
+        tmpl = (ROOT / "templates" / "SESSION_STATE.template.md").read_text(
+            encoding="utf-8"
+        )
+        (root / "SESSION_STATE.md").write_text(tmpl, encoding="utf-8")
+        self.assertEqual(
+            _run_gate(root, "start", "--id", "feat-sync").returncode, 0
+        )
+        state_after_start = (root / "SESSION_STATE.md").read_text(encoding="utf-8")
+        self.assertIn("`feat-sync`", state_after_start)
+        self.assertNotIn("<YYYY-MM-DD>", state_after_start)
+        self.assertNotIn("<PROJECT_NAME>", state_after_start)
+        cc1 = _run_gate(root, "check-clean")
+        self.assertEqual(cc1.returncode, 0, cc1.stdout + cc1.stderr)
+        self.assertEqual(
+            _run_gate(root, "verify", "--id", "feat-sync").returncode, 0
+        )
+        state_after_verify = (root / "SESSION_STATE.md").read_text(encoding="utf-8")
+        self.assertIn("none — all items idle", state_after_verify)
+        self.assertIn("`feat-sync` PASS (exit 0)", state_after_verify)
+        cc2 = _run_gate(root, "check-clean")
+        self.assertEqual(cc2.returncode, 0, cc2.stdout + cc2.stderr)
+
+    def test_sync_state_windows_paths_idempotence_and_human_notes(self):
+        win_item = {
+            "id": "win-path-item",
+            "priority": "p1",
+            "area": "test",
+            "title": r"Fix C:\docs\spec and C:\tools\new path handling",
+            "user_visible_behavior": "Windows paths work",
+            "status": "not_started",
+            "verification": {
+                "command": f'{sys.executable} -c "print(r\'C:\\temp\\new\')"',
+                "timeout_seconds": 60,
+            },
+            "evidence": None,
+            "notes": "",
+        }
+        root = _project_with([win_item])
+        tmpl = (ROOT / "templates" / "SESSION_STATE.template.md").read_text(
+            encoding="utf-8"
+        )
+        # Inject human-authored notes under ## In progress and ## Blocked
+        tmpl = tmpl.replace(
+            "## In progress\n",
+            "## In progress\n\n- Human context: debugging Windows backslash escapes\n",
+        ).replace(
+            "## Blocked\n",
+            "## Blocked\n\n- Human note: keep eye on CI runner image\n",
+        )
+        (root / "SESSION_STATE.md").write_text(tmpl, encoding="utf-8")
+        # 1. Start item with C:\docs and C:\tools\new in title (must not crash with bad escape \d or corrupt \t/\n)
+        r_start = _run_gate(root, "start", "--id", "win-path-item")
+        self.assertEqual(r_start.returncode, 0, r_start.stdout + r_start.stderr)
+        s1 = (root / "SESSION_STATE.md").read_text(encoding="utf-8")
+        self.assertIn(r"C:\docs\spec", s1)
+        self.assertIn(r"C:\tools\new", s1)
+        self.assertNotIn("\t", s1)
+        self.assertIn("- Human context: debugging Windows backslash escapes", s1)
+        self.assertIn("- Human note: keep eye on CI runner image", s1)
+        # 2. Block with reason and check reason + human note are both present
+        r_blk = _run_gate(
+            root, "block", "--id", "win-path-item", "--reason", r"waiting on C:\deps\sdk"
+        )
+        self.assertEqual(r_blk.returncode, 0, r_blk.stdout + r_blk.stderr)
+        s_blk = (root / "SESSION_STATE.md").read_text(encoding="utf-8")
+        self.assertIn(r"waiting on C:\deps\sdk", s_blk)
+        self.assertIn("- Human note: keep eye on CI runner image", s_blk)
+        # 3. Unblock and verify (command has C:\temp\new)
+        self.assertEqual(
+            _run_gate(root, "unblock", "--id", "win-path-item").returncode, 0
+        )
+        r_ver = _run_gate(root, "verify", "--id", "win-path-item")
+        self.assertEqual(r_ver.returncode, 0, r_ver.stdout + r_ver.stderr)
+        # 4. Run sync-state 3 times consecutively: output must be byte-identical (no blank-line inflation)
+        after_v = (root / "SESSION_STATE.md").read_text(encoding="utf-8")
+        self.assertIn(r"C:\temp\new", after_v)
+        self.assertNotIn("\t", after_v)
+        for _ in range(3):
+            r_sync = _run_gate(root, "sync-state")
+            self.assertEqual(r_sync.returncode, 0, r_sync.stdout + r_sync.stderr)
+        after_3_syncs = (root / "SESSION_STATE.md").read_text(encoding="utf-8")
+        self.assertEqual(after_v, after_3_syncs)
+
+    def test_sync_state_cli_creates_when_requested(self):
+        root = _project_with([_behavior_item("feat-create", OK_CMD)])
+        r = _run_gate(root, "sync-state", "--create")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertTrue((root / "SESSION_STATE.md").is_file())

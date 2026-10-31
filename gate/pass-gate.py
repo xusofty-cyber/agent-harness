@@ -22,6 +22,7 @@ Usage (run from the project root, or pass --root):
   pass-gate.py override --id <id> --reason <text> [--by NAME]
   pass-gate.py status [--json]
   pass-gate.py check-clean [--root DIR]
+  pass-gate.py sync-state [--create]
   pass-gate.py events [--last N] [--verify-chain]
   pass-gate.py terminate --id <id> --stage static|runtime|system
       (merged from v3-yunyi: three-layer termination, no skipping)
@@ -109,11 +110,241 @@ def _load(root):
 
 def _save(root, data):
     path = _feature_list_path(root)
-    tmp = path + ".tmp"
+    tmp = f"{path}.{os.getpid()}.tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
         f.write("\n")
     os.replace(tmp, path)
+
+
+def _extract_md_section_lines(text, heading):
+    """Return existing non-empty lines under `heading` up to the next `## ` heading."""
+    m = re.search(
+        rf"^{re.escape(heading)}[ \t]*\r?\n(.*?)(?=^## |\Z)",
+        text,
+        re.MULTILINE | re.DOTALL,
+    )
+    if not m:
+        return []
+    return [ln.rstrip() for ln in m.group(1).splitlines() if ln.strip()]
+
+
+def _replace_md_section(text, heading, new_lines):
+    """Replace section body under `heading` up to the next `## ` heading.
+
+    Uses a callable replacement in `re.sub` so backslashes in `new_lines`
+    (e.g. Windows paths like C:\\docs or C:\\temp\\new) are never parsed as
+    regex escapes, and matches `[ \t]*\r?\n` on the heading line so blank
+    lines never accumulate across repeated syncs.
+    """
+    pattern = re.compile(
+        rf"(^{re.escape(heading)}[ \t]*\r?\n)(.*?)(?=^## |\Z)",
+        re.MULTILINE | re.DOTALL,
+    )
+    body = "\n".join(new_lines).rstrip() + "\n\n"
+    if pattern.search(text):
+        return pattern.sub(lambda m: f"{m.group(1)}\n{body}", text, count=1)
+    return text
+
+
+def _preserve_human_lines(existing_lines, known_ids):
+    """Keep human-authored notes/bullets while stripping template placeholders
+    and machine-generated item status lines."""
+    kept = []
+    item_prefix_re = re.compile(r"^-\s+`([^`]+)`:")
+    for ln in existing_lines:
+        s = ln.strip()
+        if (
+            "<feature_list id>" in s
+            or "<Blocker, or \"none\">" in s
+            or s.startswith("- none")
+            or "<!-- gate-sync -->" in s
+        ):
+            continue
+        m = item_prefix_re.match(s)
+        if m and m.group(1) in known_ids:
+            continue
+        kept.append(ln)
+    return kept
+
+
+def _latest_block_reasons(root):
+    """Map item_id -> most recent blocked reason from gate/events.jsonl."""
+    reasons = {}
+    try:
+        for ev in _read_events(root):
+            if isinstance(ev, dict) and ev.get("event") == "blocked" and ev.get("item_id"):
+                detail = str(ev.get("detail") or "").strip()
+                if detail:
+                    reasons[ev["item_id"]] = detail
+    except Exception:  # noqa: BLE001
+        pass
+    return reasons
+
+
+def _sync_session_state(root, data=None, last_verification_note=None,
+                        create_if_missing=False):
+    """Synchronize <root>/SESSION_STATE.md breakpoint with gate/feature_list.json.
+
+    Operates strictly on `<root>/SESSION_STATE.md` (never touches
+    `docs/internal/SESSION_STATE.md`). Updates `## In progress`,
+    `## Blocked`, `## Next` (when template placeholders remain),
+    `## Last verification`, and the `> **Updated**:` date header while
+    preserving human-written notes in `## In progress` and `## Blocked`.
+    """
+    if data is None:
+        data, err = _load(root)
+        if err or not isinstance(data, dict):
+            return False
+    target = os.path.join(root, "SESSION_STATE.md")
+    if not os.path.exists(target):
+        if not create_if_missing:
+            return False
+        today = _utcnow()[:10]
+        project_name = data.get("project") or "project"
+        initial = (
+            "# SESSION_STATE — session breakpoint\n\n"
+            f"> **Updated**: {today} | **Project**: {project_name}\n"
+            "> **Feature list**: `gate/feature_list.json` "
+            "(status via `python3 gate/pass-gate.py status`)\n\n"
+            "## Goal\n\n"
+            f"- Deliver verified items for {project_name}\n\n"
+            "## In progress\n\n"
+            "- none\n\n"
+            "## Next\n\n"
+            "- [ ] Run `python3 gate/pass-gate.py check-clean` before handoff\n\n"
+            "## Blocked\n\n"
+            "- none\n\n"
+            "## Last verification\n\n"
+            "- none yet\n"
+        )
+        tmp_init = f"{target}.{os.getpid()}.tmp"
+        with open(tmp_init, "w", encoding="utf-8") as f:
+            f.write(initial)
+        os.replace(tmp_init, target)
+
+    try:
+        with open(target, encoding="utf-8") as f:
+            text = f.read()
+    except OSError:
+        return False
+
+    today = _utcnow()[:10]
+    project_name = data.get("project") or "project"
+    text = text.replace("<YYYY-MM-DD>", today)
+    text = text.replace("<PROJECT_NAME>", project_name)
+    text = re.sub(
+        r"(>\s*\*\*Updated\*\*:\s*)\d{4}-\d{2}-\d{2}",
+        lambda m: f"{m.group(1)}{today}",
+        text,
+    )
+    text = text.replace(
+        "<What this session is trying to ship, in one line>",
+        f"Deliver verified items for {project_name}",
+    )
+
+    items = data.get("items") or []
+    known_ids = {i.get("id") for i in items if isinstance(i, dict) and i.get("id")}
+    in_progress = [i for i in items if i.get("status") == "in_progress"]
+    blocked = [i for i in items if i.get("status") == "blocked"]
+    not_started = [i for i in items if i.get("status") == "not_started"]
+
+    kept_in_prog = _preserve_human_lines(
+        _extract_md_section_lines(text, "## In progress"), known_ids
+    )
+    if in_progress:
+        in_prog_lines = [
+            f"- `{i['id']}`: {i.get('title', '')} (in_progress)"
+            for i in in_progress
+        ] + kept_in_prog
+    else:
+        in_prog_lines = [
+            "- none — all items idle (run `pass-gate.py start --id <id>`)"
+        ] + kept_in_prog
+    text = _replace_md_section(text, "## In progress", in_prog_lines)
+
+    block_reasons = _latest_block_reasons(root)
+    kept_blocked = _preserve_human_lines(
+        _extract_md_section_lines(text, "## Blocked"), known_ids
+    )
+    if blocked:
+        blocked_lines = []
+        for i in blocked:
+            iid = i["id"]
+            title = i.get("title", "")
+            reason = block_reasons.get(iid) or (i.get("notes") or "").strip()
+            if reason and reason != title:
+                blocked_lines.append(f"- `{iid}`: {title} — {reason}")
+            else:
+                blocked_lines.append(f"- `{iid}`: {title}")
+        blocked_lines.extend(kept_blocked)
+    else:
+        blocked_lines = (["- none"] if not kept_blocked else ["- none"] + kept_blocked)
+    text = _replace_md_section(text, "## Blocked", blocked_lines)
+
+    if "<Next concrete step>" in text:
+        if not_started:
+            next_lines = [
+                f"- [ ] `{i['id']}`: {i.get('title', '')}"
+                for i in not_started[:3]
+            ]
+        else:
+            next_lines = [
+                "- [ ] Run `python3 gate/pass-gate.py check-clean` before handoff"
+            ]
+        text = _replace_md_section(text, "## Next", next_lines)
+
+    existing_lv = [
+        ln
+        for ln in _extract_md_section_lines(text, "## Last verification")
+        if "<Last command run and its result" not in ln and ln.strip() != "- none yet"
+    ]
+    notes = []
+    if isinstance(last_verification_note, str) and last_verification_note:
+        notes = [last_verification_note]
+    elif isinstance(last_verification_note, (list, tuple)):
+        notes = [n for n in last_verification_note if n]
+    for note in reversed(notes):
+        new_entry = f"- {today}: {note}"
+        existing_lv = [ln for ln in existing_lv if ln != new_entry]
+        existing_lv.insert(0, new_entry)
+    if not existing_lv:
+        existing_lv = ["- none yet"]
+    text = _replace_md_section(text, "## Last verification", existing_lv[:6])
+
+    tmp = f"{target}.{os.getpid()}.tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(text.rstrip() + "\n")
+    os.replace(tmp, target)
+    return True
+
+
+def _safe_sync_session_state(root, data=None, last_verification_note=None):
+    """Best-effort wrapper so a SESSION_STATE I/O issue never crashes a
+    completed gate state transition."""
+    try:
+        _sync_session_state(root, data=data,
+                            last_verification_note=last_verification_note)
+    except Exception as exc:  # noqa: BLE001
+        print(f"warning: SESSION_STATE sync skipped ({exc})", file=sys.stderr)
+
+
+def cmd_sync_state(args):
+    """Synchronize <root>/SESSION_STATE.md from gate/feature_list.json."""
+    data, err = _load(args.root)
+    if err:
+        print(err)
+        return 1
+    ok = _sync_session_state(
+        args.root,
+        data,
+        create_if_missing=bool(getattr(args, "create", False)),
+    )
+    if not ok:
+        print("no SESSION_STATE.md at project root (pass --create to create one)")
+        return 1
+    print(f"synced: {os.path.join(args.root, 'SESSION_STATE.md')}")
+    return 0
 
 
 def _is_int(v):
@@ -341,7 +572,7 @@ def _write_events_head(root, record):
     cannot notice its own missing tail, so verification compares the
     file's last chained event against this separately stored head."""
     path = _events_head_path(root)
-    tmp = path + ".tmp"
+    tmp = f"{path}.{os.getpid()}.tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump({"seq": record["seq"], "hash": record["hash"]}, f)
         f.write("\n")
@@ -627,6 +858,7 @@ def cmd_start(args):
     item["status"] = "in_progress"
     _save(args.root, data)
     _append_event(args.root, "started", args.id, item["title"])
+    _safe_sync_session_state(args.root, data)
     print(f"started: {args.id} — {item['title']}")
     return 0
 
@@ -679,18 +911,25 @@ def cmd_verify(args):
             return 1
         targets = [item]
     failed = []
+    verification_notes = []
     for item in targets:
         ok, exit_code, tail = _verify_one(args.root, item)
         if ok:
             _append_event(args.root, "verified", item["id"],
                           f"verification passed (exit 0): "
                           f"{item['verification']['command']}")
+            verification_notes.append(
+                f"`{item['id']}` PASS (exit 0): `{item['verification']['command']}`"
+            )
             print(f"PASS {item['id']}: {item['title']}")
         else:
             layer = _diagnose_layer(exit_code, tail)
             _append_event(args.root, "verify_failed", item["id"],
                           f"exit {exit_code}; {layer}; "
                           f"command: {item['verification']['command']}")
+            verification_notes.append(
+                f"`{item['id']}` FAIL (exit {exit_code}): `{item['verification']['command']}`"
+            )
             max_failures = getattr(args, "max_failures", None)
             if max_failures is None:
                 env_mf = os.environ.get("PASS_GATE_MAX_FAILURES", "").strip()
@@ -727,6 +966,7 @@ def cmd_verify(args):
                     print(f"    {line}")
             failed.append(item["id"])
     _save(args.root, data)
+    _safe_sync_session_state(args.root, data, last_verification_note=verification_notes)
     if failed:
         return 1
     return 0
@@ -763,6 +1003,7 @@ def _transition(args, new_status, event_name, allowed_from):
     _save(args.root, data)
     _append_event(args.root, event_name, args.id,
                   getattr(args, "reason", "") or item["title"])
+    _safe_sync_session_state(args.root, data)
     print(f"{args.id}: {item['status']}")
     return 0
 
@@ -788,6 +1029,7 @@ def cmd_reopen(args):
     _clear_termination(args.root, args.id)
     _append_event(args.root, "reopened", args.id,
                   f"reason: {args.reason}")
+    _safe_sync_session_state(args.root, data)
     print(f"reopened: {args.id} (evidence cleared; verify again to pass)")
     return 0
 
@@ -818,6 +1060,11 @@ def cmd_override(args):
     _save(args.root, data)
     _append_event(args.root, "override", args.id,
                   f"by {args.by}: {args.reason}")
+    _safe_sync_session_state(
+        args.root,
+        data,
+        last_verification_note=f"`{args.id}` OVERRIDE by {args.by}: {args.reason}",
+    )
     print(f"OVERRIDE {args.id}: marked passing by {args.by} — "
           f"{args.reason}")
     print("  (recorded in evidence.override and gate/events.jsonl; "
@@ -919,7 +1166,7 @@ def _load_termination(root):
 def _save_termination(root, state):
     """Atomic write (tmp + replace), unlike yunyi's direct write_text."""
     path = _termination_path(root)
-    tmp = path + ".tmp"
+    tmp = f"{path}.{os.getpid()}.tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(state, f, indent=2, ensure_ascii=False)
         f.write("\n")
@@ -1067,6 +1314,14 @@ def cmd_terminate(args):
                       "passing via three-layer termination "
                       "(static+runtime+system): "
                       f"{item['verification']['command']}")
+        _safe_sync_session_state(
+            args.root,
+            data,
+            last_verification_note=(
+                f"`{args.id}` PASS via three-layer termination: "
+                f"`{item['verification']['command']}`"
+            ),
+        )
     state[args.id] = done
     _save_termination(args.root, state)
     print(f"TERMINATE {stage}: {args.id} OK (stages done: "
@@ -1466,6 +1721,12 @@ def main(argv=None):
 
     p = sub.add_parser("check-clean", help="five-dimension clean-state check")
     p.set_defaults(func=cmd_check_clean)
+
+    p = sub.add_parser("sync-state",
+                       help="sync <root>/SESSION_STATE.md from feature_list.json")
+    p.add_argument("--create", action="store_true",
+                   help="create SESSION_STATE.md if missing")
+    p.set_defaults(func=cmd_sync_state)
 
     p = sub.add_parser("events", help="show the append-only event log")
     p.add_argument("--last", type=int, default=20)
