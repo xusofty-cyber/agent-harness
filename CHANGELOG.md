@@ -8,6 +8,8 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ### Fixed
 
+- **Deploy wizard menus smeared across the screen on arrow keys — rendering rewritten.** Both `Prompt-SingleSelect` and `Prompt-MultiSelect` in `deploy-agents.ps1` redrew by reprinting the whole list and moving the cursor up by the item count; any label that wraps (CJK labels are double-width, and the multi-select rows are padded) breaks that arithmetic, so each redraw started lower than the last and the first row repeated over the whole list (user screenshot, Windows, 2026-10-31). Rows are now rendered at absolute buffer positions, only changed rows are redrawn, and row padding is measured in display columns (CJK = 2). This supersedes the marker/colour-only fix merged hours earlier in PR #93, which treated the feedback symptom but not the redraw defect.
+
 - **Deploy wizard multi-select feedback was nearly invisible — fixed.** `Prompt-MultiSelect` in `deploy-agents.ps1` rendered checked/unchecked as hollow vs filled circles (nearly indistinguishable at console font sizes) and kept the row under the cursor Cyan whether checked or not, so spacebar toggles looked like no-ops (user-reported on Windows, 2026-10-31). Checked rows now render an ASCII `[X]` / `[ ]` marker and turn Green even under the cursor, and each redrawn row is padded to the buffer width so stale glyphs from wrapped lines are cleared.
 
 ## [0.6.0] - 2026-10-31

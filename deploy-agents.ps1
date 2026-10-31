@@ -98,6 +98,41 @@ if ($Pipeline) {
     exit 0
 }
 
+function Get-ConsoleDisplayWidth([string]$s) {
+    # Console columns occupied by $s: CJK/fullwidth chars take 2 columns.
+    $w = 0
+    foreach ($ch in $s.ToCharArray()) {
+        if ([int]$ch -gt 0xFF) { $w += 2 } else { $w += 1 }
+    }
+    return $w
+}
+
+function Set-ConsoleRowText([int]$RowY, [string]$Line, [string]$Fg) {
+    # Write $Line at absolute buffer row $RowY, padded with spaces to the
+    # buffer width (measured in display columns) so no stale glyphs survive.
+    try {
+        $host.UI.RawUI.CursorPosition =
+            New-Object System.Management.Automation.Host.Coordinates(0, $RowY)
+        $avail = $host.UI.RawUI.BufferSize.Width - 1 - (Get-ConsoleDisplayWidth $Line)
+        if ($avail -gt 0) { $Line = $Line + (' ' * $avail) }
+    } catch {}
+    Write-Host $Line -ForegroundColor $Fg
+}
+
+function Render-SingleRow([int]$Index, [int]$Current, [array]$Rows, [int]$OriginY) {
+    $pointer = if ($Index -eq $Current) { "> " } else { "  " }
+    $sym = if ($Index -eq $Current) { "● " } else { "○ " }
+    $fg = if ($Index -eq $Current) { "Cyan" } else { "Gray" }
+    Set-ConsoleRowText ($OriginY + $Index) "$pointer$sym$($Rows[$Index].Label)" $fg
+}
+
+function Render-MultiRow([int]$Index, [int]$Current, [array]$Rows, [int]$OriginY) {
+    $pointer = if ($Index -eq $Current) { "> " } else { "  " }
+    $box = if ($Rows[$Index].Checked) { "[X] " } else { "[ ] " }
+    $fg = if ($Rows[$Index].Checked) { "Green" } elseif ($Index -eq $Current) { "Cyan" } else { "Gray" }
+    Set-ConsoleRowText ($OriginY + $Index) "$pointer$box$($Rows[$Index].Label)" $fg
+}
+
 function Prompt-SingleSelect([string]$Title, [array]$Options) {
     if ([Console]::IsInputRedirected) {
         Write-Host "`n$Title"
@@ -117,33 +152,41 @@ function Prompt-SingleSelect([string]$Title, [array]$Options) {
     Write-Host "`n$Title" -ForegroundColor Cyan
     Write-Host "↑↓ move, enter confirm" -ForegroundColor DarkGray
 
-    while ($true) {
-        for ($i = 0; $i -lt $count; $i++) {
-            $pointer = if ($i -eq $cur) { "> " } else { "  " }
-            $sym = if ($i -eq $cur) { "● " } else { "○ " }
-            $fg = if ($i -eq $cur) { "Cyan" } else { "Gray" }
-            Write-Host "$pointer$sym$($Options[$i].Label)" -ForegroundColor $fg
-        }
+    # Rows are rendered at absolute buffer positions and only the rows
+    # that changed are redrawn. The previous approach (reprint the whole
+    # list, then move the cursor up by the item count) drifts whenever a
+    # label wraps - CJK labels are double-width - and smears the menu
+    # across the screen (user-reported on Windows, 2026-10-31).
+    $originY = 0
+    try { $originY = $host.UI.RawUI.CursorPosition.Y } catch {}
+    for ($i = 0; $i -lt $count; $i++) { Write-Host "" }
+    for ($i = 0; $i -lt $count; $i++) { Render-SingleRow $i $cur $Options $originY }
 
+    while ($true) {
         $key = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         if ($key.VirtualKeyCode -eq 38) { # Up
+            $prev = $cur
             $cur = ($cur - 1 + $count) % $count
+            Render-SingleRow $prev $cur $Options $originY
+            Render-SingleRow $cur $cur $Options $originY
         } elseif ($key.VirtualKeyCode -eq 40) { # Down
+            $prev = $cur
             $cur = ($cur + 1) % $count
+            Render-SingleRow $prev $cur $Options $originY
+            Render-SingleRow $cur $cur $Options $originY
         } elseif ($key.VirtualKeyCode -eq 13) { # Enter
             break
         } elseif ($key.Character -eq 'q') {
             Write-Host "已取消 (Aborted)."
             exit 1
         }
-
-        try {
-            $pos = $host.UI.RawUI.CursorPosition
-            $pos.Y = [Math]::Max(0, $pos.Y - $count)
-            $pos.X = 0
-            $host.UI.RawUI.CursorPosition = $pos
-        } catch {}
     }
+    try {
+        $host.UI.RawUI.CursorPosition =
+            New-Object System.Management.Automation.Host.Coordinates(0, $originY + $count)
+    } catch {}
+    Write-Host ""
+
     return $Options[$cur].Value
 }
 
@@ -176,45 +219,40 @@ function Prompt-MultiSelect([string]$Title, [array]$Items) {
     Write-Host "`n$Title" -ForegroundColor Cyan
     Write-Host "↑↓ move, space select, enter confirm" -ForegroundColor DarkGray
 
-    while ($true) {
-        for ($i = 0; $i -lt $count; $i++) {
-            $pointer = if ($i -eq $cur) { "> " } else { "  " }
-            # ASCII markers on purpose: unambiguous in every console
-            # codepage/font (the old hollow/filled circles were nearly
-            # indistinguishable, so spacebar toggles looked like no-ops).
-            $box = if ($Items[$i].Checked) { "[X] " } else { "[ ] " }
-            # A checked row turns Green even under the cursor, so the
-            # spacebar toggle has visible feedback the moment it lands.
-            $fg = if ($Items[$i].Checked) { "Green" } elseif ($i -eq $cur) { "Cyan" } else { "Gray" }
-            $line = "$pointer$box$($Items[$i].Label)"
-            try {
-                $width = $host.UI.RawUI.BufferSize.Width
-                if ($line.Length -lt $width) { $line = $line.PadRight($width - 1) }
-            } catch {}
-            Write-Host $line -ForegroundColor $fg
-        }
+    # Absolute-position rendering, same rationale as Prompt-SingleSelect.
+    $originY = 0
+    try { $originY = $host.UI.RawUI.CursorPosition.Y } catch {}
+    for ($i = 0; $i -lt $count; $i++) { Write-Host "" }
+    for ($i = 0; $i -lt $count; $i++) { Render-MultiRow $i $cur $Items $originY }
 
+    while ($true) {
         $key = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         if ($key.VirtualKeyCode -eq 38) { # Up
+            $prev = $cur
             $cur = ($cur - 1 + $count) % $count
+            Render-MultiRow $prev $cur $Items $originY
+            Render-MultiRow $cur $cur $Items $originY
         } elseif ($key.VirtualKeyCode -eq 40) { # Down
+            $prev = $cur
             $cur = ($cur + 1) % $count
+            Render-MultiRow $prev $cur $Items $originY
+            Render-MultiRow $cur $cur $Items $originY
         } elseif ($key.VirtualKeyCode -eq 32) { # Space
             $Items[$cur].Checked = -not $Items[$cur].Checked
+            Render-MultiRow $cur $cur $Items $originY
         } elseif ($key.VirtualKeyCode -eq 13) { # Enter
             break
         } elseif ($key.Character -eq 'q') {
             Write-Host "已取消 (Aborted)."
             exit 1
         }
-
-        try {
-            $pos = $host.UI.RawUI.CursorPosition
-            $pos.Y = [Math]::Max(0, $pos.Y - $count)
-            $pos.X = 0
-            $host.UI.RawUI.CursorPosition = $pos
-        } catch {}
     }
+    try {
+        $host.UI.RawUI.CursorPosition =
+            New-Object System.Management.Automation.Host.Coordinates(0, $originY + $count)
+    } catch {}
+    Write-Host ""
+
     return ($Items | Where-Object { $_.Checked } | ForEach-Object { $_.Value })
 }
 
