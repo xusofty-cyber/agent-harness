@@ -102,15 +102,26 @@ def cmd_import(args) -> int:
     tmp = list_path.with_suffix(list_path.suffix + ".tmp")
     tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     tmp.replace(list_path)
-    with (list_path.parent / "events.jsonl").open("a", encoding="utf-8") as f:
-        f.write(json.dumps({"seq": seq, "ts": now(),
-                            "actor": "comet_adapter",
-                            "event": "external_evidence_imported",
-                            "item_id": args.feature,
-                            "detail": f"imported {len(imported)} comet "
-                                      f"artifact(s) as external evidence: "
-                                      f"{[i['path'] for i in imported]}"},
-                           ensure_ascii=False) + "\n")
+    detail_str = (f"imported {len(imported)} comet "
+                  f"artifact(s) as external evidence: "
+                  f"{[i['path'] for i in imported]}")
+    pg_script = Path(__file__).resolve().parent / "pass-gate.py"
+    if pg_script.is_file() and (list_path.parent / "events.jsonl") == (list_path.parent.parent / "gate" / "events.jsonl"):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("pass_gate", pg_script)
+        pg_mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(pg_mod)
+        pg_mod._append_event(str(list_path.parent.parent),
+                             "external_evidence_imported", args.feature,
+                             detail_str, actor="comet_adapter")
+    else:
+        with (list_path.parent / "events.jsonl").open("a", encoding="utf-8") as f:
+            f.write(json.dumps({"seq": seq, "ts": now(),
+                                "actor": "comet_adapter",
+                                "event": "external_evidence_imported",
+                                "item_id": args.feature,
+                                "detail": detail_str},
+                               ensure_ascii=False) + "\n")
     print(f"imported {len(imported)} comet artifact(s) into feature '{args.feature}' as external evidence.")
     print("note: status unchanged — passing still requires `pass-gate.py verify`.")
     return 0

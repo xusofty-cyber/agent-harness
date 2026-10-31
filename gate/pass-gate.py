@@ -348,7 +348,7 @@ def _write_events_head(root, record):
     os.replace(tmp, path)
 
 
-def _append_event(root, event, item_id, detail):
+def _append_event(root, event, item_id, detail, actor=None):
     """Append one event to gate/events.jsonl (append-only by convention).
 
     The log is committed to git, so rewriting history is visible in the
@@ -380,7 +380,7 @@ def _append_event(root, event, item_id, detail):
     record = {
         "seq": seq,
         "ts": _utcnow(),
-        "actor": _actor(),
+        "actor": actor if actor is not None else _actor(),
         "event": event,
         "item_id": item_id,
         "detail": detail,
@@ -483,11 +483,32 @@ def _find(data, item_id):
     return None
 
 
+def _run_env(root):
+    """Build environment for verification commands (honors PASS_GATE_PYTHON
+    and auto-prepends local .venv/bin or venv/bin when present)."""
+    env = dict(os.environ)
+    path_dirs = []
+    custom_py = env.get("PASS_GATE_PYTHON", "").strip()
+    if custom_py:
+        py_dir = os.path.dirname(os.path.abspath(custom_py))
+        if os.path.isdir(py_dir):
+            path_dirs.append(py_dir)
+    for venv_name in (".venv", "venv"):
+        for sub in ("bin", "Scripts"):
+            cand = os.path.join(root, venv_name, sub)
+            if os.path.isdir(cand):
+                path_dirs.append(cand)
+    if path_dirs:
+        cur_path = env.get("PATH", "")
+        env["PATH"] = os.pathsep.join(path_dirs + ([cur_path] if cur_path else []))
+    return env
+
+
 def _run(cmd, root, timeout):
     """Run a verification command. Returns (exit_code, output_tail)."""
     try:
         proc = subprocess.run(
-            cmd, shell=True, cwd=root, timeout=timeout,
+            cmd, shell=True, cwd=root, env=_run_env(root), timeout=timeout,
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             text=True, errors="replace")
         out = proc.stdout or ""
@@ -670,12 +691,36 @@ def cmd_verify(args):
             _append_event(args.root, "verify_failed", item["id"],
                           f"exit {exit_code}; {layer}; "
                           f"command: {item['verification']['command']}")
-            print(f"FAIL {item['id']}: verification exited {exit_code}")
-            print(f"  where: {item['verification']['command']}")
-            print(f"  why: {layer}")
-            print(f"  fix: address the failure, then run "
-                  f"`pass-gate.py verify --id {item['id']}` again; "
-                  "status stays in_progress")
+            max_failures = getattr(args, "max_failures", None)
+            if max_failures is None:
+                env_mf = os.environ.get("PASS_GATE_MAX_FAILURES", "").strip()
+                max_failures = int(env_mf) if env_mf.isdigit() else 5
+            consec = 0
+            if max_failures > 0:
+                for ev in reversed(_read_events(args.root)):
+                    if ev.get("item_id") != item["id"]:
+                        continue
+                    if ev.get("event") in ("verify_failed", "verification_failed"):
+                        consec += 1
+                    else:
+                        break
+            if max_failures > 0 and consec >= max_failures:
+                reason = (f"auto-blocked after {consec} consecutive "
+                          f"verification failures (last exit {exit_code})")
+                item["status"] = "blocked"
+                _append_event(args.root, "blocked", item["id"], reason)
+                print(f"FAIL {item['id']}: verification exited {exit_code}")
+                print(f"  where: {item['verification']['command']}")
+                print(f"  why: {layer}")
+                print(f"  CIRCUIT BREAKER: {reason} — pause and revise "
+                      f"hypothesis, then `pass-gate.py unblock --id {item['id']}`")
+            else:
+                print(f"FAIL {item['id']}: verification exited {exit_code}")
+                print(f"  where: {item['verification']['command']}")
+                print(f"  why: {layer}")
+                print(f"  fix: address the failure, then run "
+                      f"`pass-gate.py verify --id {item['id']}` again; "
+                      "status stays in_progress")
             if tail.strip():
                 print("  output (tail):")
                 for line in tail.strip().splitlines()[-10:]:
@@ -808,6 +853,17 @@ def cmd_status(args):
         for e in errors:
             print(f"  - {e}")
         return 1
+    return 0
+
+
+def cmd_log_event(args):
+    """Append a hash-chained event from an external hook or adapter (D67)."""
+    gate_dir = os.path.join(args.root, "gate")
+    os.makedirs(gate_dir, exist_ok=True)
+    rec = _append_event(args.root, args.event, args.id, args.detail,
+                        actor=args.actor)
+    if getattr(args, "json", False):
+        print(json.dumps(rec, ensure_ascii=False))
     return 0
 
 
@@ -996,7 +1052,8 @@ def cmd_terminate(args):
                   f"vs verification: {current_cmd!r}); run the runtime "
                   f"stage first", file=sys.stderr)
             return 1
-        clean = cmd_check_clean(argparse.Namespace(root=args.root))
+        clean = cmd_check_clean(argparse.Namespace(
+            root=args.root, terminating_id=args.id))
         if clean != 0:
             _append_event(args.root, "termination_failed", args.id,
                           "system failed: check-clean did not pass")
@@ -1006,9 +1063,10 @@ def cmd_terminate(args):
         item["status"] = "passing"
         _save(args.root, data)
         done["system"] = True
-        _append_event(args.root, "status_transition", args.id,
+        _append_event(args.root, "verified", args.id,
                       "passing via three-layer termination "
-                      "(static+runtime+system)")
+                      "(static+runtime+system): "
+                      f"{item['verification']['command']}")
     state[args.id] = done
     _save_termination(args.root, state)
     print(f"TERMINATE {stage}: {args.id} OK (stages done: "
@@ -1207,8 +1265,10 @@ def cmd_check_clean(args):
     _run_dim("2 tests", config.get("test"))
 
     # 3a. narrative progress recorded
+    terminating_id = getattr(args, "terminating_id", None)
     in_progress = [i for i in data["items"]
-                   if i["status"] == "in_progress"]
+                   if i["status"] == "in_progress"
+                   and i["id"] != terminating_id]
     state_path = _session_state_path(args.root)
     if not in_progress:
         results.append(("3a progress/narrative", "PASS",
@@ -1374,6 +1434,9 @@ def main(argv=None):
     p = sub.add_parser("verify", help="run verification for an item")
     p.add_argument("--id")
     p.add_argument("--all", action="store_true")
+    p.add_argument("--max-failures", type=int, default=None,
+                   help="auto-block after N consecutive verification "
+                        "failures (default: 5, 0 disables)")
     p.set_defaults(func=cmd_verify)
 
     p = sub.add_parser("block", help="mark an in_progress item blocked")
@@ -1412,6 +1475,15 @@ def main(argv=None):
                         "exit 1 if the chain is broken")
     p.set_defaults(func=cmd_events)
 
+    p = sub.add_parser("log-event",
+                       help="append a hash-chained event from a hook/adapter")
+    p.add_argument("--actor", required=True)
+    p.add_argument("--event", required=True)
+    p.add_argument("--id", default=None)
+    p.add_argument("--detail", required=True)
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(func=cmd_log_event)
+
     p = sub.add_parser("terminate",
                        help="three-layer termination: static -> runtime "
                             "-> system, no skipping")
@@ -1447,7 +1519,8 @@ def main(argv=None):
     # handoff) keep working so the operator can still inspect state
     # while repairing the log.
     if args.cmd in ("init", "add", "start", "verify", "block",
-                    "unblock", "reopen", "override", "terminate"):
+                    "unblock", "reopen", "override", "terminate",
+                    "log-event"):
         try:
             _read_events(args.root)
         except EventsLogError as e:

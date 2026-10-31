@@ -360,7 +360,7 @@ function decideExecution(projectRoot: string, exec: UnknownValue): string | null
     if (res && res.status === 2) return extractDenyReason(res.stdout);
     return null;
   }
-  if (WRITE_TOOLS.has(toolName)) {
+  if (WRITE_TOOLS.has(toolName) || /feature_list\.json(?:\.tmp)?$/i.test(filePath)) {
     const writeRes = runClaudeHook(projectRoot, "guard-write.mjs", {
       tool_name: "Write",
       tool_input: { file_path: filePath },
@@ -497,26 +497,35 @@ export function apply(ctx: CordisContext, config: PluginConfig = {}): void {
     log("ctx.tools.guard registration failed; pre-execute gate still applies");
   }
 
-  // --- tools/result: cost-ledger observation only. Never blocks. ---
+  // --- tools/result: cost-ledger + skill-usage observation only. Never blocks. ---
   ctx.on("tools/result", (...args: UnknownValue[]) => {
     try {
       let toolName = "unknown";
+      let toolInput: UnknownRecord = {};
       for (const arg of args) {
         if (!arg || typeof arg !== "object") continue;
-        const { toolName: parsed } = translateExecution(arg);
+        const rec = asRecord(arg);
+        const { toolName: parsed, command, filePath } = translateExecution(arg);
         if (parsed) {
           toolName = parsed;
+          const rawIn = asRecord(rec?.["input"] ?? rec?.["args"] ?? rec?.["arguments"] ?? rec?.["toolInput"]);
+          toolInput = rawIn ? { ...rawIn } : {};
+          if (filePath && !toolInput["file_path"]) toolInput["file_path"] = filePath;
+          if (command && !toolInput["command"]) toolInput["command"] = command;
           break;
         }
-        const toolNameField = strField(asRecord(arg), "toolName");
+        const toolNameField = strField(rec, "toolName");
         if (toolNameField) {
           toolName = normalizeToolName(toolNameField);
+          const rawIn = asRecord(rec?.["input"] ?? rec?.["args"]);
+          if (rawIn) toolInput = { ...rawIn };
           break;
         }
       }
       const projectRoot = resolveProjectRoot(args[0], config);
       const res = runClaudeHook(projectRoot, "post-tool-use.mjs", {
         tool_name: toolName,
+        tool_input: toolInput,
         cwd: projectRoot,
       });
       forwardStderr(res);

@@ -107,6 +107,24 @@ if (WRITE_TOOLS.has(toolName)) {
   process.exit(0);
 }
 
+// Heuristic fallback: if an unknown/new write tool carries a path argument
+// pointing at feature_list.json, run guard-feature-list.mjs so a renamed
+// host write tool cannot silently bypass the gate.
+const fallbackPath =
+  args.Path || args.path || args.TargetFile || args.file_path || args.filePath || args.filename || "";
+if (typeof fallbackPath === "string" && /feature_list\.json(?:\.tmp)?$/i.test(fallbackPath)) {
+  const listRes = runClaudeHook(
+    projectRoot,
+    "guard-feature-list.mjs",
+    { tool_name: toolName || "Write", tool_input: { file_path: fallbackPath }, cwd: projectRoot },
+  );
+  forwardStderr(listRes);
+  if (listRes && listRes.status === 2) {
+    printDeny(extractDenyReason(listRes.stdout));
+    process.exit(0);
+  }
+}
+
 // No gate hook covers this tool — allow, and let Antigravity's own
 // permission prompts apply.
 printAllow();

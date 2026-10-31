@@ -573,8 +573,9 @@ else:
                         _events_bad.append(
                             f"events.jsonl:{_lineno}: seq not increasing")
                     _prev_seq = _rec["seq"]
-                if _rec.get("event") in ("verified", "override"):
-                    _seen_events.add((_rec["event"], _rec.get("item_id") or ""))
+                if _rec.get("event") in ("verified", "override", "status_transition"):
+                    _ev_kind = "verified" if _rec.get("event") == "status_transition" else _rec.get("event")
+                    _seen_events.add((_ev_kind, _rec.get("item_id") or ""))
             for _item in _fl.get("items", []):
                 if _item.get("status") == "passing" and \
                         not (_item.get("evidence") or {}).get("override"):
@@ -1529,13 +1530,16 @@ try:
                         capture_output=True, text=True, cwd=ROOT, check=True).stdout
     modes = {line.split("\t", 1)[1]: line.split()[0]
              for line in ls.splitlines() if line.strip()}
-except Exception as e:  # not a git checkout (e.g. sdist)
-    modes = {}
-    check("exec-bit:git-available", False, f"cannot query git index: {e}")
-for script in EXEC_SCRIPTS:
-    check(f"exec-bit:{script}", modes.get(script) == "100755",
-          f"mode is {modes.get(script)}, expected 100755 — run: "
-          f"git update-index --chmod=+x {script}")
+    for script in EXEC_SCRIPTS:
+        check(f"exec-bit:{script}", modes.get(script) == "100755",
+              f"mode is {modes.get(script)}, expected 100755 — run: "
+              f"git update-index --chmod=+x {script}")
+except Exception as e:  # not a git checkout (e.g. zip/tarball export)
+    env_skip("exec-bit:git-index", f"not a git checkout ({e}); checking filesystem stat instead")
+    for script in EXEC_SCRIPTS:
+        st_mode = (ROOT / script).stat().st_mode if (ROOT / script).exists() else 0
+        check(f"exec-bit:{script}", bool(st_mode & 0o111),
+              f"{script} is not executable (mode {oct(st_mode)}) — run: chmod +x {script}")
 
 # --- 8. Markdown internal link check ---
 # Verify relative links in docs resolve to existing files.

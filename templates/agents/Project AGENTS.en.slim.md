@@ -82,9 +82,9 @@
 
 ## Definition of Done Checklist
 
-1. [ ] **Tests**: run the relevant tests, confirm all pass, provide
-   real run evidence
-2. [ ] **Update SESSION_STATE.md**: record completed work and
-   verification evidence
+When `gate/feature_list.json` is present, drive task state exclusively via `python3 gate/pass-gate.py` (`pass-gate.py status` -> `pass-gate.py start` [WIP=1] -> `pass-gate.py verify` -> `pass-gate.py check-clean`; never hand-edit `gate/feature_list.json`):
+
+1. [ ] **Tests & gate verify**: run relevant tests and `python3 gate/pass-gate.py verify --id <id>`, confirming exit 0 with recorded run evidence
+2. [ ] **Update SESSION_STATE.md & check-clean**: record completed work and verification evidence, then run `python3 gate/pass-gate.py check-clean`
 3. [ ] **Code review**: perform a code review before merging;
    Critical / High findings must be zero

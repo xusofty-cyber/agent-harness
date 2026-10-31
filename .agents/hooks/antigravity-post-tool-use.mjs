@@ -29,10 +29,15 @@ try {
 }
 
 const projectRoot = resolveProjectRoot(input);
-const toolName = (input.toolCall && input.toolCall.name) || "unknown";
-const res = runClaudeHook(projectRoot, "post-tool-use.mjs", {
+const toolCall = input.toolCall || {};
+const toolName = toolCall.name || "unknown";
+const sessionId = input.sessionId || input.session_id || undefined;
+const payload = {
   tool_name: toolName,
+  tool_input: toolCall.args || {},
   cwd: projectRoot,
-});
+};
+if (typeof sessionId === "string" && sessionId) payload.session_id = sessionId;
+const res = runClaudeHook(projectRoot, "post-tool-use.mjs", payload);
 if (res && res.stderr) process.stderr.write(res.stderr);
 printJson({});

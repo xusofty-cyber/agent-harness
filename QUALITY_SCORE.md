@@ -1,6 +1,6 @@
-# Quality Score — v0.4.0 edition (2026-10-30, v0.4.1 convergence round)
+# Quality Score — v0.5.1 edition (2026-10-30)
 
-Re-issued for v0.4.0 plus the v0.4.1 convergence changes. Scores are
+Re-issued for v0.5.1 (including D67 event hash chain, D68 skill-usage telemetry, D69 B1–B4 conclusion, and the v0.5.2 audit fixes). Scores are
 0–10, deliberately un-generous: a score claims only what the cited
 evidence shows. The 2026-10-28 merged edition is kept verbatim below
 as history.
@@ -11,11 +11,11 @@ as history.
 | Host bridges (Antigravity / WorkBuddy / dsh) | 4 | New module, scored by `docs/internal/host-verification-matrix.md` tiers: Antigravity CLI `partial-live` (one live agy 1.4.10 run found and fixed a real cwd bug), Antigravity IDE / WorkBuddy / dsh `protocol-only` (payloads assumed, no live run). Protocol suites pass (20 + 16 + 19 tests). v0.4.1 discharges one owed check: `tsc --noEmit` on the dsh plugin passes (TypeScript 5.9.3, exit 0). Not higher: no bridge has run a full gate flow on its live host. |
 | Pipeline & deploy | 7 | As the merged edition, plus: v0.4.1 adds a Windows CI execution smoke for `deploy-agents.ps1` (the ps-analyzer job now also runs the deploy and asserts the core file set). Not higher until that job has actually run green in CI — at re-issue time it is committed, not yet observed. |
 | Hooks & guard | 7 | Claude suites unchanged and green (90 + 12 + 11 + 12); total hook-related tests including bridges: 168, all passing locally 2026-10-30. Guard is still a guardrail, not a sandbox (documented); Stop hook soak time still short. |
-| Distribution (templates + 39 skills) | 5 | Unchanged problem, unchanged score: ~99K tokens of SKILL.md, zero per-skill usage evidence, known overlaps. Skill-usage telemetry and the second monthly ablation remain unmeasured/undone; they are v0.5.x work, and this score does not move until they land. |
+| Distribution (templates + 39 skills) | 6 | v0.5.1 lands D68 skill-usage telemetry (`.claude/skill-usage.jsonl` + `tools/skill-usage-report.py`, extended in v0.5.2 to capture on-demand `SKILL.md` reads and bridge payloads), and wires `gate/pass-gate.py` directly into `Project AGENTS.md`. Score moves further when the 2026-11 monthly ablation trims zero-load skills. |
 | Numbers & claims hygiene | 7 | Up from 6: README's enforcement wording now matches the host-verification matrix in EN and ZH (nothing below `live-verified` is worded as enforced); this scorecard is re-issued on evidence change as promised; repo_checks now classifies missing-environment failures (e.g. no pytest) as `[ENV-SKIP]`, distinct from repository failures. Not higher: the ZH-TW Multi-Tool guide remains knowingly stale (explicitly recorded in `docs/internal/i18n-status.md`), and upstream comet-skill figures still ship un-annotated. |
 | Evaluation | 4 | Still 4, deliberately — and the open question this row waited on is now answered as far as the current bench design can answer it. B3 (real project, 2026-10-30) found nonzero but arm-identical false completions (no arm-level discrimination); B3.1 confirmed the pattern after process fixes (SEGMENTED); B4 (real host, enforcement dimensions) returned NULL under its pre-registered verdict lines. The claim that the gate reduces false completions is recorded as **not established by B1–B4 measurement** (D69), and the benchmark series is sealed (re-test only the affected dimension after a material host/mechanism change). Token cost remains unmeasured (no host exposes a token API — proxy metrics only). |
 
-Overall posture (v0.4.0): the gate and its evidence spine are real;
+Overall posture (v0.5.1): the gate and its evidence spine are real;
 the bridge layer is broad but shallow (deployed, not live-verified);
 the evaluation still cannot say whether any of it improves outcomes
 on real work. The next score movement is expected from subtraction

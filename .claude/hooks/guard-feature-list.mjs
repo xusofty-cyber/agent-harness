@@ -15,7 +15,8 @@
 //   - stdin parse failure is fail-open (exit 0), matching guard.mjs.
 // Exit code 2 + JSON decision "deny" blocks the tool call in Claude Code.
 // ==============================================================================
-import { appendFileSync, existsSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { appendFileSync, existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 let input = "";
@@ -72,25 +73,40 @@ try {
   const cwd = data.cwd || process.cwd();
   const eventsPath = join(cwd, "gate", "events.jsonl");
   let seq = 1;
+  let lastLine = null;
   if (existsSync(eventsPath)) {
     const lines = readFileSync(eventsPath, "utf-8")
       .split("\n")
-      .filter(Boolean);
-    if (lines.length > 0) {
-      seq = (JSON.parse(lines[lines.length - 1]).seq || 0) + 1;
+      .map((l) => l.replace(/\r$/, ""))
+      .filter((l) => l.trim().length > 0);
+    for (const l of lines) {
+      lastLine = l;
+      try {
+        const s = JSON.parse(l).seq;
+        if (Number.isInteger(s) && s >= seq) seq = s + 1;
+      } catch {
+        // skip
+      }
     }
   }
-  appendFileSync(
-    eventsPath,
-    JSON.stringify({
-      seq,
-      ts: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
-      actor: "guard-feature-list",
-      event: "direct_write_blocked",
-      item_id: null,
-      detail: `${data.tool_name || "Write/Edit"} to ${toolInput.file_path || toolInput.path || "?"} denied`,
-    }) + "\n"
-  );
+  const prev = lastLine !== null ? createHash("sha256").update(lastLine, "utf8").digest("hex") : "";
+  const rec = {
+    seq,
+    ts: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+    actor: "guard-feature-list",
+    event: "direct_write_blocked",
+    item_id: null,
+    detail: `${data.tool_name || "Write/Edit"} to ${toolInput.file_path || toolInput.path || "?"} denied`,
+    prev,
+  };
+  const sortedKeys = Object.keys(rec).sort();
+  const canonical = "{" + sortedKeys.map((k) => `${JSON.stringify(k)}:${JSON.stringify(rec[k])}`).join(",") + "}";
+  rec.hash = createHash("sha256").update(prev + canonical, "utf8").digest("hex");
+  appendFileSync(eventsPath, JSON.stringify(rec) + "\n");
+  const headPath = join(cwd, "gate", "events-head.json");
+  const headTmp = headPath + ".tmp";
+  writeFileSync(headTmp, JSON.stringify({ seq: rec.seq, hash: rec.hash }) + "\n", "utf-8");
+  renameSync(headTmp, headPath);
 } catch {
   // The events file may not exist (gate not initialised) — not an error.
 }

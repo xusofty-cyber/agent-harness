@@ -1,9 +1,11 @@
-#!/bin/bash
-# install-pre-push-gate.sh — explicit opt-in installer for the
+#!/usr/bin/env bash
+# install-pre-push-gate.sh — standalone installer for the
 # agent-harness pre-push gate template.
 #
-# This script is the ONLY supported way to install the hook. It never
-# runs as part of deploy-agents.sh / deploy-agents.ps1, and it never
+# Note: deploy-agents.sh / deploy-agents.ps1 also install the template
+# gate by default (opt-out via --no-prepush-gate / -NoPrepushGate). Use
+# this standalone installer when adding or refreshing the hook in an
+# already-deployed repo without re-running deploy-agents. It never
 # silently overwrites an existing hook.
 #
 # Usage (from anywhere):

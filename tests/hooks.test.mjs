@@ -552,3 +552,31 @@ for (const cmd of [
     assert.equal(r.exitCode, 0, `expected allow for: ${cmd}\n${r.stdout}\n${r.stderr}`);
   });
 }
+
+// --- v0.5.2 audit fix: Bash direct tamper of gate state files ---
+for (const cmd of [
+  "python3 -c \"import json; open('gate/feature_list.json','w').write('{}')\"",
+  "sed -i 's/in_progress/passing/' gate/feature_list.json",
+  "echo '{}' > gate/feature_list.json",
+  "cat /tmp/fake.json >> gate/events.jsonl",
+  "rm -f gate/events-head.json",
+  "git checkout -- gate/feature_list.json",
+]) {
+  test(`denies Bash gate-state tamper: ${cmd}`, () => {
+    const r = runHook(cmd);
+    assert.equal(r.exitCode, 2, `expected deny for: ${cmd}\n${r.stdout}\n${r.stderr}`);
+  });
+}
+
+for (const cmd of [
+  "python3 gate/pass-gate.py verify --id demo",
+  "python3 gate/pass-gate.py status",
+  "cat gate/feature_list.json",
+  "git diff gate/feature_list.json",
+  "git status gate/feature_list.json",
+]) {
+  test(`allows lawful gate CLI or read-only inspection: ${cmd}`, () => {
+    const r = runHook(cmd);
+    assert.equal(r.exitCode, 0, `expected allow for: ${cmd}\n${r.stdout}\n${r.stderr}`);
+  });
+}

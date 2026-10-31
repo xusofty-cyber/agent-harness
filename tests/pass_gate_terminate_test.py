@@ -258,5 +258,22 @@ class RunTest(unittest.TestCase):
             self.assertEqual(proc.returncode, 2)
 
 
+    def test_system_stage_passes_even_when_session_state_already_cleared_item(self):
+        # ISS-01 fix: system stage exempts the terminating item_id in 3a
+        # and emits a "verified" event so repo_checks §3k passes.
+        with tempfile.TemporaryDirectory() as d:
+            tmpdir = _project(Path(d))
+            _gate("terminate", "--id", "demo-item", "--stage", "static", cwd=tmpdir)
+            _gate("terminate", "--id", "demo-item", "--stage", "runtime", cwd=tmpdir)
+            # Operator updates SESSION_STATE before running system stage
+            (tmpdir / "SESSION_STATE.md").write_text(
+                "# SESSION_STATE\n\n- In progress: none\n- Next step: handoff\n")
+            proc = _gate("terminate", "--id", "demo-item", "--stage", "system", cwd=tmpdir)
+            self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+            self.assertEqual(_item(tmpdir)["status"], "passing")
+            events = [json.loads(line) for line in _events(tmpdir).splitlines() if line.strip()]
+            self.assertTrue(any(e["event"] == "verified" and e["item_id"] == "demo-item" for e in events))
+
+
 if __name__ == "__main__":
     unittest.main()

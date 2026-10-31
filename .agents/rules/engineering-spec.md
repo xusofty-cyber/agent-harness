@@ -13,7 +13,8 @@
   - 自动化测试运行通过的真实终端输出（测试用例名称、通过数）；
   - 针对 Bug 编写的最小复现测试（先证明红，修复后变绿）；
   - 手动验证的执行命令、预期与实际响应。
-- **不可验证时明确说明**：若因环境限制（如缺少硬件、外部网络阻断、缺少私有数据库）无法运行验证，必须显式列出未验证项及建议的人工验证步骤。
+- **自有门禁状态机（`gate/pass-gate.py`）**：当项目存在 `gate/feature_list.json` 时，必须遵守 `WIP=1`（同时仅 1 项 `in_progress`），通过 `python3 gate/pass-gate.py start --id <id>` 认领任务，完成后运行 `python3 gate/pass-gate.py verify --id <id>` 自动执行验证命令并写入带 SHA-256 摘要的证据与哈希链事件（`gate/events.jsonl`），交接前运行 `python3 gate/pass-gate.py check-clean`。严禁手改或通过脚本直接覆写 `feature_list.json`。
+- **不可验证时明确说明**：若因环境限制（如缺少硬件、外部网络阻断、缺少私有数据库）无法运行验证，必须使用 `pass-gate.py block --id <id> --reason "..."` 如实标记阻塞，并显式列出未验证项及建议的人工验证步骤。
 
 ## 3. 代码熵减与懒人阶梯（Ponytail 极简准则）
 写代码前必须走一遍极简决策阶梯：

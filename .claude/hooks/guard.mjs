@@ -992,6 +992,58 @@ for (const inv of gitInvocations) {
   }
 }
 
+// 4b. Direct Bash mutation of gate state files (feature_list.json,
+// events.jsonl, events-head.json, termination.json).
+// Closes the Bash bypass around guard-feature-list.mjs: any command
+// segment referencing a protected gate state file that is NOT invoking
+// an official gate/ledger CLI (pass-gate.py, comet_adapter.py,
+// cost-ledger.py, gate-prepush-check.py, repo_checks.py) and is either
+// redirecting into it (> / >> / tee) or invoking a mutating interpreter/
+// editor/file utility (python, node, sed -i, perl -i, jq, cp, mv, rm,
+// dd, truncate, awk) is denied with exit 2.
+const GATE_STATE_FILE_RE = /(?:^|[\\/\s"'=])(?:gate[\\/])?(feature_list\.json(?:\.tmp)?|events\.jsonl|events-head\.json|termination\.json)(?=$|[\s"';|&><)])/;
+const OFFICIAL_GATE_CLI_RE = /(?:pass-gate\.py|comet_adapter\.py|cost-ledger\.py|gate-prepush-check\.py|repo_checks\.py)\b/;
+const READ_ONLY_PROGS = new Set([
+  "cat", "head", "tail", "less", "more", "grep", "egrep", "fgrep", "rg",
+  "wc", "stat", "file", "ls", "find", "diff", "cmp", "sha256sum", "shasum",
+  "md5sum", "jq", "git", "test", "[", "echo", "printf",
+]);
+function hasDirectGateStateTamper(cmd) {
+  for (const seg of rawSegments(cmd)) {
+    const stripped = stripSingleQuoted(seg);
+    // Check both raw seg and single-quote stripped seg for gate state filenames
+    if (!GATE_STATE_FILE_RE.test(seg) && !GATE_STATE_FILE_RE.test(stripped)) continue;
+    if (OFFICIAL_GATE_CLI_RE.test(seg)) continue;
+    // Output redirection (> or >>) or pipe to tee/dd/cp/mv/rm targeting the state file
+    if (/(?:>>?|\btee\b)\s*[^|;&]*?(?:feature_list\.json|events\.jsonl|events-head\.json|termination\.json)/.test(seg)) {
+      return true;
+    }
+    const tokens = shellSplit(seg);
+    const resolved = resolveProg(tokens);
+    if (!resolved) continue;
+    const { prog } = resolved;
+    // Allow read-only inspection (e.g. cat gate/feature_list.json, git diff gate/feature_list.json)
+    // unless git checkout/restore/reset/clean is used to overwrite/discard gate state
+    if (prog === "git") {
+      const inv = parseGitInvocation(tokens);
+      if (inv && ["checkout", "restore", "clean", "rm"].includes(inv.subcommand)) {
+        return true;
+      }
+      continue;
+    }
+    if (READ_ONLY_PROGS.has(prog)) continue;
+    // Any other program (python3 -c, node -e, sed -i, perl, cp, mv, rm, etc.)
+    // touching a gate state file without going through pass-gate.py is denied.
+    return true;
+  }
+  return false;
+}
+if (hasDirectGateStateTamper(command)) {
+  deny(
+    `[SECURITY-HOOK] ❌ Direct Bash modification of gate state files (feature_list.json / events.jsonl / events-head.json / termination.json) is prohibited! Use 'python3 gate/pass-gate.py' instead. / 严禁通过 Bash 直接篡改门禁状态文件！请使用 python3 gate/pass-gate.py。`
+  );
+}
+
 // ============================================================
 // WARNINGS (exit 0 — non-blocking, informational)
 // ============================================================

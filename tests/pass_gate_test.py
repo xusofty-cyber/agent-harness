@@ -495,3 +495,27 @@ class PassGateBehaviorTest(unittest.TestCase):
         self.assertEqual(r.returncode, 1)
         self.assertIn("non-empty string", r.stdout + r.stderr)
 
+
+    def test_verify_circuit_breaker_auto_blocks_after_max_failures(self):
+        root = _project_with([_behavior_item("flaky", BAD_CMD)])
+        self.assertEqual(_run_gate(root, "start", "--id", "flaky").returncode, 0)
+        for i in range(2):
+            r = _run_gate(root, "verify", "--id", "flaky", "--max-failures", "3")
+            self.assertEqual(r.returncode, 1)
+            self.assertEqual(_load_items(root)[0]["status"], "in_progress")
+        # 3rd consecutive failure triggers the circuit breaker -> status becomes blocked
+        r3 = _run_gate(root, "verify", "--id", "flaky", "--max-failures", "3")
+        self.assertEqual(r3.returncode, 1)
+        self.assertIn("CIRCUIT BREAKER", r3.stdout)
+        self.assertEqual(_load_items(root)[0]["status"], "blocked")
+
+    def test_log_event_cli_appends_chained_event(self):
+        root = _project_with([])
+        r = _run_gate(root, "log-event", "--actor", "custom-hook",
+                      "--event", "custom_check", "--detail", "ok", "--json")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        rec = json.loads(r.stdout)
+        self.assertEqual(rec["actor"], "custom-hook")
+        self.assertIn("hash", rec)
+        vc = _run_gate(root, "events", "--verify-chain")
+        self.assertEqual(vc.returncode, 0, vc.stdout + vc.stderr)

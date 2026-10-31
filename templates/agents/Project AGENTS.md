@@ -106,15 +106,15 @@
 - **活体文档与代码追溯**：项目长期技术文档统一维护于 `docs/` 下（需求 `docs/specs/`、架构 `docs/architecture/`、接口与配置参考 `docs/reference/`、用户操作指南 `docs/guides/`）。各文档头部 Frontmatter 声明 `modules`（关联代码路径）与 `depends_on`。在开发或使用 `/comet` 流程时，按启发式阈值（新增模块、改动 2+ 接口或关键配置）同步更新对应文档，保证代码与文档双向追溯；详见 `.agents/skills/living-documentation/SKILL.md`。
 ## 功能完成检查清单（Definition of Done）
 
-完成功能开发或需求实现后，必须按顺序执行以下步骤，缺一不可：
+若项目启用门禁（存在 `gate/feature_list.json`），所有任务状态必须经由 `python3 gate/pass-gate.py` 流转（`WIP=1`，严禁直接手改或通过脚本改写 `gate/feature_list.json`）：开工前运行 `pass-gate.py status` 与 `start --id <id>`（新任务先用 `add --level <unit|integration|e2e>` 注册并先写验证命令）。完成功能开发或需求实现后，必须按顺序执行以下步骤，缺一不可：
 
-1. [ ] **测试验证**：运行相关测试（单元/集成），确认全部通过，提供真实运行证据
-2. [ ] **更新 SESSION_STATE.md**：记录已完成事项、实际验证证据、未完成步骤和仍有效的风险
-3. [ ] **更新 PROJECT_CONTEXT.md**：如有架构变更、技术决策或长期约束变化，同步更新；仅断点变化时跳过
+1. [ ] **测试与门禁验证**：运行相关测试（单元/集成）及 `python3 gate/pass-gate.py verify --id <id>`（或三层终止 `pass-gate.py terminate`），确认 exit 0 并写入真实运行证据
+2. [ ] **更新 SESSION_STATE.md**：记录已完成事项、实际验证证据、未完成步骤和仍有效的风险，并运行 `python3 gate/pass-gate.py check-clean` 确认交接五维全绿
+3. [ ] **更新 PROJECT_CONTEXT.md / DECISIONS.md**：如有架构变更、技术决策或长期约束变化，同步更新；仅断点变化时跳过
 4. [ ] **执行代码审查**：你必须自己调用 `open-code-review` 技能（或 `ocr` CLI）执行审查，行号锚定、全量覆盖。严禁询问用户是否要审查，直接执行
 5. [ ] **清零缺陷**：根据审查意见修复，Critical / High 缺陷清零后方可合并
 
-> 严禁跳过第 4 步直接合并。未出示审查证据前，不得声称任务完成。
+> 严禁跳过第 4 步直接合并。未出示审查与门禁验证证据前，不得声称任务完成。
 
 ## 目录级规则索引
 

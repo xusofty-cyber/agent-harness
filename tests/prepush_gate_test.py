@@ -31,7 +31,7 @@ HOOK = TEMPLATES / "pre-push"
 INSTALLER = TEMPLATES / "install-pre-push-gate.sh"
 
 GIT_ENV = {
-    **os.environ,
+    **{k: v for k, v in os.environ.items() if k not in ("BASH_ENV", "ENV")},
     "GIT_AUTHOR_NAME": "prepush test",
     "GIT_AUTHOR_EMAIL": "test@agent-harness.local",
     "GIT_COMMITTER_NAME": "prepush test",
@@ -148,7 +148,10 @@ class InstallerTest(unittest.TestCase):
             backups = list(hooks.glob("pre-push.bak-*"))
             self.assertEqual(len(backups), 1)
             self.assertIn("existing", backups[0].read_text(encoding="utf-8"))
-            self.assertTrue(os.access(hooks / "pre-push", os.X_OK))
+            self.assertTrue(
+                os.access(hooks / "pre-push", os.X_OK)
+                or bool((hooks / "pre-push").stat().st_mode & 0o111)
+            )
             self.assertTrue((hooks / "gate-prepush-check.py").exists())
 
 
@@ -169,6 +172,20 @@ class HookEndToEndTest(unittest.TestCase):
             run(["git", "add", "-A"], cwd=project, check=True)
             run(["git", "commit", "-qm", "add gate"], cwd=project, check=True)
             run(["bash", str(INSTALLER), str(project)], cwd=project, check=True)
+            hook_file = project / ".git" / "hooks" / "pre-push"
+            if not os.access(hook_file, os.X_OK):
+                # Container/sandbox mounts /tmp with noexec, so git push
+                # ignores .git/hooks/pre-push. Verify the installed hook
+                # directly via bash in that environment.
+                clean_hook = run(["bash", str(hook_file)], cwd=project, input_text="")
+                self.assertEqual(clean_hook.returncode, 0, clean_hook.stderr)
+                write_gate(project, [passing_item("ok-item", "false")])
+                run(["git", "add", "-A"], cwd=project, check=True)
+                run(["git", "commit", "-qm", "break gate"], cwd=project, check=True)
+                blocked = run(["bash", str(hook_file)], cwd=project, input_text="")
+                self.assertNotEqual(blocked.returncode, 0)
+                self.assertIn("BLOCKED", blocked.stderr)
+                return
             pushed = run(["git", "push", "origin", "main"], cwd=project)
             self.assertEqual(pushed.returncode, 0, pushed.stderr)
             # Break the gate: the passing item's verification now fails.

@@ -38,3 +38,9 @@ gate/cost-ledger.jsonl
 __pycache__/
 *.pyc
 eval/cost-ledger.jsonl
+# Gate & loop local runtime state (never committed)
+gate/*-stop-state.json
+gate/termination.json
+loop-state.json
+loop-events.jsonl
+graph-state.jsonl
