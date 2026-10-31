@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -33,7 +34,8 @@ def make_repo(tmp):
 
 
 def run_graph(tmp, repo, spec, result="result", approval=None,
-              state_name="state.jsonl", timeout=None, force=False):
+              state_name="state.jsonl", timeout=None, force=False,
+              max_workers=None, abort_on_conflict=False):
     spec_path = tmp / "spec.json"
     spec_path.write_text(json.dumps(spec), encoding="utf-8")
     approval_path = tmp / "approval.json"
@@ -44,6 +46,10 @@ def run_graph(tmp, repo, spec, result="result", approval=None,
            "--approval", str(approval_path), "--state", str(tmp / state_name)]
     if timeout is not None:
         cmd += ["--timeout", str(timeout)]
+    if max_workers is not None:
+        cmd += ["--max-workers", str(max_workers)]
+    if abort_on_conflict:
+        cmd += ["--abort-on-conflict"]
     if force:
         cmd += ["--force"]
     proc = subprocess.run(cmd, capture_output=True, text=True, cwd=ROOT)
@@ -146,6 +152,45 @@ def test_fanin_merge_conflict_blocks_never_reports_merged():
         assert "UU shared.txt" in out.stdout, out.stdout
 
 
+def test_fanin_merge_conflict_abort_on_conflict():
+    with tempfile.TemporaryDirectory() as d:
+        tmp = Path(d)
+        repo = make_repo(tmp)
+        (repo / "shared.txt").write_text("line1\n")
+        subprocess.run(["git", "add", "-A"], cwd=repo, capture_output=True)
+        subprocess.run(["git", "commit", "-qm", "shared"], cwd=repo,
+                       capture_output=True)
+        spec = {"tasks": [task("a", "shared.txt", "A"),
+                          task("b", "shared.txt", "B")],
+                "approval_timeout_s": 30}
+        proc, states = run_graph(tmp, repo, spec, approval={"decision": "approve"},
+                                 abort_on_conflict=True)
+        assert proc.returncode == 1
+        assert any(s["node"] == "fan-in" and s.get("stop_reason") == "merge_conflict"
+                   for s in states)
+        assert not (repo / ".git" / "MERGE_HEAD").exists()
+
+
+def test_parallel_fanout_opt_in():
+    with tempfile.TemporaryDirectory() as d:
+        tmp = Path(d)
+        repo = make_repo(tmp)
+        tasks_list = [
+            {"id": f"t{i}", "command": f"sleep 0.6 && printf '%s' '{i}' > t{i}.txt",
+             "verification": f"test -f t{i}.txt", "failure_layer": "implementation"}
+            for i in (1, 2, 3)
+        ]
+        spec = {"tasks": tasks_list, "approval_timeout_s": 30}
+        t0 = time.monotonic()
+        proc, states = run_graph(tmp, repo, spec, approval={"decision": "approve"},
+                                 max_workers=3)
+        elapsed = time.monotonic() - t0
+        assert proc.returncode == 0, proc.stdout + proc.stderr
+        assert elapsed < 1.7, f"expected parallel execution < 1.7s, took {elapsed:.2f}s"
+        fanout_ids = [s["task_id"] for s in states if s["node"] == "fan-out"]
+        assert fanout_ids == ["t1", "t2", "t3"]
+
+
 def test_result_branch_protection():
     # P1-6: --result main merges into main (forbidden); an existing
     # result branch is refused without --force and rebuilt with it.
@@ -199,9 +244,17 @@ def test_command_timeout_fails_fast():
                        for s in states)
 
 
+class GraphUnittestSuite(unittest.TestCase):
+    def test_all_graph_cases(self):
+        for name, fn in sorted(globals().items()):
+            if name.startswith("test_") and callable(fn):
+                with self.subTest(name=name):
+                    fn()
+
+
 def main():
     for name, fn in sorted(globals().items()):
-        if name.startswith("test_"):
+        if name.startswith("test_") and callable(fn):
             fn()
             print(f"PASS {name}")
     print("all graph tests passed")
