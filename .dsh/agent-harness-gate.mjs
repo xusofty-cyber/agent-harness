@@ -126,10 +126,12 @@
 // ==============================================================================
 
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
   appendFileSync,
   existsSync,
   readFileSync,
+  renameSync,
   unlinkSync,
   writeFileSync,
 } from "node:fs";
@@ -600,13 +602,19 @@ export function apply(ctx               , config               = {})       {
               "the turn may still end — live dsh verification is required before treating dsh stop enforcement as a hard gate",
           );
         }
-        // Best-effort event line, mirroring the Antigravity stop adapter's
-        // logging (never throws, never changes the outcome).
+        // Best-effort hash-chained event line + events-head.json checkpoint (D67),
+        // mirroring the Antigravity/WorkBuddy stop adapters (never throws).
         try {
           const eventsPath = join(projectRoot, "gate", "events.jsonl");
           let seq = 1;
+          let lastLine                = null;
           if (existsSync(eventsPath)) {
-            for (const line of readFileSync(eventsPath, "utf-8").split("\n").filter(Boolean)) {
+            const lines = readFileSync(eventsPath, "utf-8")
+              .split("\n")
+              .map((l) => l.replace(/\r$/, ""))
+              .filter((l) => l.trim().length > 0);
+            for (const line of lines) {
+              lastLine = line;
               try {
                 const s = asRecord(JSON.parse(line)                )?.["seq"];
                 if (typeof s === "number" && Number.isInteger(s) && s >= seq) seq = s + 1;
@@ -615,17 +623,38 @@ export function apply(ctx               , config               = {})       {
               }
             }
           }
-          appendFileSync(
-            eventsPath,
-            JSON.stringify({
-              seq,
-              ts: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
-              actor: "dsh-turn-stopping",
-              event: "stop_blocked",
-              item_id: ids || null,
-              detail: "stop-gate blocked; steering attempted (provisional, see plugin header)",
-            }) + "\n",
+          const prev =
+            lastLine !== null
+              ? createHash("sha256").update(lastLine, "utf8").digest("hex")
+              : "";
+          const rec                = {
+            seq,
+            ts: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+            actor: "dsh-turn-stopping",
+            event: "stop_blocked",
+            item_id: ids || null,
+            detail: "stop-gate blocked; steering attempted (provisional, see plugin header)",
+            prev,
+          };
+          const sortedKeys = Object.keys(rec).sort();
+          const canonical =
+            "{" +
+            sortedKeys
+              .map((k) => `${JSON.stringify(k)}:${JSON.stringify(rec[k])}`)
+              .join(",") +
+            "}";
+          rec["hash"] = createHash("sha256")
+            .update(prev + canonical, "utf8")
+            .digest("hex");
+          appendFileSync(eventsPath, JSON.stringify(rec) + "\n");
+          const headPath = join(projectRoot, "gate", "events-head.json");
+          const headTmp = `${headPath}.${process.pid}.tmp`;
+          writeFileSync(
+            headTmp,
+            JSON.stringify({ seq: rec["seq"], hash: rec["hash"] }) + "\n",
+            "utf-8",
           );
+          renameSync(headTmp, headPath);
         } catch {
           // Logging failure must not change the outcome.
         }

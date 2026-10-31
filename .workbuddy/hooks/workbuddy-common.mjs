@@ -54,10 +54,12 @@
 // ==============================================================================
 
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
   appendFileSync,
   existsSync,
   readFileSync,
+  renameSync,
   unlinkSync,
   writeFileSync,
 } from "node:fs";
@@ -168,10 +170,14 @@ export function appendGateEvent(projectRoot, actor, event, itemId, detail) {
   try {
     const eventsPath = join(projectRoot, "gate", "events.jsonl");
     let seq = 1;
+    let lastLine = null;
     if (existsSync(eventsPath)) {
-      for (const line of readFileSync(eventsPath, "utf-8")
+      const lines = readFileSync(eventsPath, "utf-8")
         .split("\n")
-        .filter(Boolean)) {
+        .map((l) => l.replace(/\r$/, ""))
+        .filter((l) => l.trim().length > 0);
+      for (const line of lines) {
+        lastLine = line;
         try {
           const s = JSON.parse(line).seq;
           if (Number.isInteger(s) && s >= seq) seq = s + 1;
@@ -180,17 +186,38 @@ export function appendGateEvent(projectRoot, actor, event, itemId, detail) {
         }
       }
     }
-    appendFileSync(
-      eventsPath,
-      JSON.stringify({
-        seq,
-        ts: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
-        actor,
-        event,
-        item_id: itemId,
-        detail,
-      }) + "\n",
+    const prev =
+      lastLine !== null
+        ? createHash("sha256").update(lastLine, "utf8").digest("hex")
+        : "";
+    const rec = {
+      seq,
+      ts: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+      actor,
+      event,
+      item_id: itemId,
+      detail,
+      prev,
+    };
+    const sortedKeys = Object.keys(rec).sort();
+    const canonical =
+      "{" +
+      sortedKeys
+        .map((k) => `${JSON.stringify(k)}:${JSON.stringify(rec[k])}`)
+        .join(",") +
+      "}";
+    rec.hash = createHash("sha256")
+      .update(prev + canonical, "utf8")
+      .digest("hex");
+    appendFileSync(eventsPath, JSON.stringify(rec) + "\n");
+    const headPath = join(projectRoot, "gate", "events-head.json");
+    const headTmp = `${headPath}.${process.pid}.tmp`;
+    writeFileSync(
+      headTmp,
+      JSON.stringify({ seq: rec.seq, hash: rec.hash }) + "\n",
+      "utf-8",
     );
+    renameSync(headTmp, headPath);
   } catch {
     // Logging failure must not change the decision.
   }

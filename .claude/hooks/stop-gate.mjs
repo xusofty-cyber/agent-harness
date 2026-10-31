@@ -60,7 +60,7 @@ function appendChainedEvent(cwd, event, itemId, detail) {
   rec.hash = createHash("sha256").update(prev + canonical, "utf8").digest("hex");
   appendFileSync(eventsPath, JSON.stringify(rec) + "\n");
   const headPath = join(cwd, "gate", "events-head.json");
-  const headTmp = headPath + ".tmp";
+  const headTmp = `${headPath}.${process.pid}.tmp`;
   writeFileSync(headTmp, JSON.stringify({ seq: rec.seq, hash: rec.hash }) + "\n", "utf-8");
   renameSync(headTmp, headPath);
 }

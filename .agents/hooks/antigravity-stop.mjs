@@ -105,6 +105,13 @@ if (res && res.status === 2) {
   } catch {
     // Reason without IDs is still actionable.
   }
+  appendGateEvent(
+    projectRoot,
+    "antigravity-stop",
+    "stop_blocked",
+    ids || null,
+    "stop-gate blocked; decision=continue returned",
+  );
   printJson({
     decision: "continue",
     reason:

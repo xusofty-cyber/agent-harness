@@ -410,3 +410,19 @@ test("PostToolUse forwards toolCall.args so reading SKILL.md records skill telem
   assert.equal(rec.skill, "test-driven-development");
   assert.equal(rec.session, "agy-sess-1");
 });
+
+test("Stop blocked event writes hash-chained record and events-head.json that pass verify-chain", () => {
+  const dir = makeProject({
+    items: [{ id: "f1", title: "Do the thing", status: "in_progress" }],
+  });
+  const first = stop(dir);
+  assert.equal(first.json.decision, "continue");
+  assert.equal(existsSync(join(dir, "gate", "events-head.json")), true);
+  const verify = spawnSync(
+    "python3",
+    [join(REPO_ROOT, "gate", "pass-gate.py"), "--root", dir, "events", "--verify-chain"],
+    { encoding: "utf-8" },
+  );
+  assert.equal(verify.status, 0, verify.stdout + verify.stderr);
+  assert.match(verify.stdout, /event chain OK/);
+});
