@@ -6,7 +6,8 @@ Stdlib only (unittest + subprocess + tempfile). Covers, with real git
 pushes to a local bare remote (no network):
 
   - gate-prepush-check.py: no-gate pass, passing-item pass, failing
-    verification blocks, stale evidence blocks, human override skips.
+    verification blocks, stale evidence blocks, human override skips,
+    uncommitted gate-file warning and --strict block.
   - install-pre-push-gate.sh: refuses to overwrite an existing hook
     without --force, backs it up with --force.
   - pre-push hook end to end: a clean gate pushes, a broken gate
@@ -126,6 +127,21 @@ class CheckerTest(unittest.TestCase):
             self.assertEqual(proc.returncode, 0, proc.stdout)
             self.assertIn("SKIP", proc.stdout)
 
+    def test_dirty_gate_file_warns_by_default_and_blocks_under_strict(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp)
+            init_repo(project)
+            write_gate(project, [passing_item("ok-item", "true")])
+            run(["git", "add", "-A"], cwd=project, check=True)
+            run(["git", "commit", "-qm", "commit gate"], cwd=project, check=True)
+            write_gate(project, [passing_item("ok-item", "true"), passing_item("ok-2", "true")])
+            warn_proc = run([sys.executable, str(CHECK), "--root", tmp], cwd=tmp)
+            self.assertEqual(warn_proc.returncode, 0, warn_proc.stdout)
+            self.assertIn("[WARN] uncommitted changes in gate/feature_list.json", warn_proc.stdout)
+            strict_proc = run([sys.executable, str(CHECK), "--root", tmp, "--strict"], cwd=tmp)
+            self.assertEqual(strict_proc.returncode, 1, strict_proc.stdout)
+            self.assertIn("FAIL (--strict)", strict_proc.stdout)
+
 
 class InstallerTest(unittest.TestCase):
     def test_refuses_overwrite_without_force(self):
@@ -174,9 +190,6 @@ class HookEndToEndTest(unittest.TestCase):
             run(["bash", str(INSTALLER), str(project)], cwd=project, check=True)
             hook_file = project / ".git" / "hooks" / "pre-push"
             if not os.access(hook_file, os.X_OK):
-                # Container/sandbox mounts /tmp with noexec, so git push
-                # ignores .git/hooks/pre-push. Verify the installed hook
-                # directly via bash in that environment.
                 clean_hook = run(["bash", str(hook_file)], cwd=project, input_text="")
                 self.assertEqual(clean_hook.returncode, 0, clean_hook.stderr)
                 write_gate(project, [passing_item("ok-item", "false")])
@@ -188,14 +201,12 @@ class HookEndToEndTest(unittest.TestCase):
                 return
             pushed = run(["git", "push", "origin", "main"], cwd=project)
             self.assertEqual(pushed.returncode, 0, pushed.stderr)
-            # Break the gate: the passing item's verification now fails.
             write_gate(project, [passing_item("ok-item", "false")])
             run(["git", "add", "-A"], cwd=project, check=True)
             run(["git", "commit", "-qm", "break gate"], cwd=project, check=True)
             blocked = run(["git", "push", "origin", "main"], cwd=project)
             self.assertNotEqual(blocked.returncode, 0)
             self.assertIn("BLOCKED", blocked.stderr)
-            # The remote never received the breaking commit.
             head = run(["git", "rev-parse", "main"], cwd=remote, check=True)
             local = run(["git", "rev-parse", "main"], cwd=project, check=True)
             self.assertNotEqual(head.stdout.strip(), local.stdout.strip())

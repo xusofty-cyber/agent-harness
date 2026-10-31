@@ -19,6 +19,10 @@ re-verification, tests/repo_checks.py section 3k):
      evidence carries an `override` flag are skipped here, exactly
      as in section 3k: a human override is truthful by declaration
      and visible in the event log, not re-provable by re-running.
+  3. Uncommitted working-tree edits to `gate/feature_list.json`,
+     `gate/events.jsonl`, or `gate/events-head.json` emit a `[WARN]`
+     reminder (or fail when `--strict` is passed), because `git push`
+     sends committed state rather than unstaged working-tree edits.
 
 What it deliberately does NOT check:
 
@@ -34,10 +38,10 @@ Exit codes: 0 = gate passes (or no gate/ directory is in use, in
 which case the script says so and passes — it must not block
 projects that never adopted the gate); 1 = a passing item's
 evidence is stale or its verification now fails, or the feature
-list itself is invalid.
+list itself is invalid (or `--strict` with dirty gate files).
 
 Usage:
-    python3 gate-prepush-check.py [--root PROJECT_ROOT]
+    python3 gate-prepush-check.py [--root PROJECT_ROOT] [--strict]
 """
 
 import importlib.util
@@ -95,13 +99,46 @@ def _basic_validate(data):
     return errors
 
 
+def _dirty_gate_files(root):
+    """Return list of uncommitted gate files in working tree if inside a git repo."""
+    try:
+        proc = subprocess.run(
+            [
+                "git",
+                "status",
+                "--porcelain",
+                "--",
+                "gate/feature_list.json",
+                "gate/events.jsonl",
+                "gate/events-head.json",
+            ],
+            cwd=root,
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        if proc.returncode != 0:
+            return []
+        dirty = []
+        for line in proc.stdout.splitlines():
+            if len(line) > 3 and line[:2].strip():
+                dirty.append(line[3:].strip())
+        return dirty
+    except Exception:  # noqa: BLE001
+        return []
+
+
 def main(argv):
     root = Path(".")
+    strict = False
     args = list(argv)
     while args:
         if args[0] == "--root" and len(args) >= 2:
             root = Path(args[1])
             args = args[2:]
+        elif args[0] == "--strict":
+            strict = True
+            args = args[1:]
         else:
             print(f"gate-prepush-check: unknown argument {args[0]!r}", file=sys.stderr)
             return 2
@@ -126,6 +163,16 @@ def main(argv):
         for error in errors[:10]:
             print(f"  - {error}")
         return 1
+
+    dirty = _dirty_gate_files(root)
+    if dirty:
+        print(
+            f"  [WARN] uncommitted changes in {', '.join(dirty)} — "
+            "git push sends committed state, not working-tree edits"
+        )
+        if strict:
+            print("gate-prepush-check: FAIL (--strict) — commit or stash gate changes before pushing")
+            return 1
 
     failures = []
     checked = 0

@@ -610,3 +610,35 @@ class PassGateBehaviorTest(unittest.TestCase):
         r = _run_gate(root, "sync-state", "--create")
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertTrue((root / "SESSION_STATE.md").is_file())
+
+    def test_loop_passes_failure_tail_and_clears_stale_file_after_pass(self):
+        with tempfile.TemporaryDirectory() as td:
+            loop_root = Path(td) / "loop-run"
+            goal_md = Path(td) / "goal.md"
+            goal_md.write_text("# Goal\n", encoding="utf-8")
+            init_r = subprocess.run(
+                [sys.executable, str(ROOT / "tools" / "loop.py"), "init",
+                 "--root", str(loop_root), "--goal-file", str(goal_md),
+                 "--kind", "goal", "--max-rounds", "4",
+                 "--consecutive-passes", "2", "--timeout", "10"],
+                capture_output=True, text=True)
+            self.assertEqual(init_r.returncode, 0, init_r.stderr)
+            # Round 1: verify fails with NEED_MAGIC_TOKEN.
+            # Round 2: maker receives LOOP_LAST_FAILURE_TAIL, creates fixed.txt; verify passes (1st pass) and deletes last-failure.log.
+            # Round 3: maker must NOT receive a stale LOOP_LAST_FAILURE_FILE or LOOP_LAST_FAILURE_TAIL; verify passes (2nd consecutive pass -> complete).
+            maker_cmd = (
+                'if [ "$LOOP_ROUND" = "3" ] && [ -n "$LOOP_LAST_FAILURE_FILE" ]; then exit 99; fi; '
+                'if echo "$LOOP_LAST_FAILURE_TAIL" | grep -q "NEED_MAGIC_TOKEN"; '
+                'then echo ok > fixed.txt; fi'
+            )
+            verify_cmd = 'test -f fixed.txt || (echo "NEED_MAGIC_TOKEN" >&2; exit 1)'
+            run_r = subprocess.run(
+                [sys.executable, str(ROOT / "tools" / "loop.py"), "goal-loop",
+                 "--root", str(loop_root), "--maker", maker_cmd,
+                 "--verify", verify_cmd],
+                capture_output=True, text=True)
+            self.assertEqual(run_r.returncode, 0, run_r.stdout + run_r.stderr)
+            state = json.loads((loop_root / "loop-state.json").read_text(encoding="utf-8"))
+            self.assertEqual(state["status"], "complete")
+            self.assertEqual(state["round"], 3)
+            self.assertFalse((loop_root / "last-failure.log").exists())
