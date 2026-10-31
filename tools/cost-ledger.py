@@ -263,15 +263,28 @@ def cmd_check_budget(args):
         for ev in existing
     )
     if not already:
-        seq = max((ev.get("seq", 0) for ev in existing), default=0) + 1
-        _append_line(events_path, {
-            "seq": seq,
-            "ts": _utcnow(),
-            "actor": "cost-ledger",
-            "event": "budget_exceeded",
-            "item_id": None,
-            "detail": detail,
-        })
+        pg_script = gate_dir / "pass-gate.py"
+        if not pg_script.is_file():
+            pg_script = Path(__file__).resolve().parent.parent / "gate" / "pass-gate.py"
+        if pg_script.is_file() and gate_dir.name == "gate":
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("pass_gate", pg_script)
+            pg_mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(pg_mod)
+            rec = pg_mod._append_event(str(gate_dir.parent),
+                                       "budget_exceeded", None, detail,
+                                       actor="cost-ledger")
+            seq = rec["seq"]
+        else:
+            seq = max((ev.get("seq", 0) for ev in existing), default=0) + 1
+            _append_line(events_path, {
+                "seq": seq,
+                "ts": _utcnow(),
+                "actor": "cost-ledger",
+                "event": "budget_exceeded",
+                "item_id": None,
+                "detail": detail,
+            })
         print(f"recorded budget_exceeded event (seq {seq}) in {events_path}")
     else:
         print("budget_exceeded event already recorded today; not duplicated")

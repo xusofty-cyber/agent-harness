@@ -59,6 +59,8 @@
 
 ## 功能完成检查清单（Definition of Done）
 
-1. [ ] **测试验证**：运行相关测试，确认全部通过，提供真实运行证据
-2. [ ] **更新 SESSION_STATE.md**：记录已完成事项与验证证据
+若存在 `gate/feature_list.json`，全程用 `python3 gate/pass-gate.py` 驱动（`pass-gate.py status` ➔ `pass-gate.py start` [WIP=1] ➔ `pass-gate.py verify` ➔ `pass-gate.py check-clean`），严禁直接手改 `feature_list.json`：
+
+1. [ ] **测试与门禁验证**：运行相关测试及 `python3 gate/pass-gate.py verify --id <id>`，确认 exit 0 并留存真实运行证据
+2. [ ] **更新 SESSION_STATE.md 并交接检查**：记录已完成事项与验证证据，运行 `python3 gate/pass-gate.py check-clean` 确认五维干净
 3. [ ] **代码审查**：完成功能或合并前执行代码审查，Critical / High 缺陷清零

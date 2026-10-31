@@ -1944,6 +1944,13 @@ if [ ! -f "${TARGET_GITIGNORE}" ]; then
 /.ai-memory.toml
 scratch/
 gate/cost-ledger.jsonl
+.claude/skill-usage.jsonl
+.claude/hooks/guard-alerts.jsonl
+gate/*-stop-state.json
+gate/termination.json
+loop-state.json
+loop-events.jsonl
+graph-state.jsonl
 EOF
     fi
     echo -e "  ${GREEN}[√] 已初始化目标项目 .gitignore (写入 Agent Harness 忽略规则)${NC}"

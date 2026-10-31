@@ -107,15 +107,15 @@ To avoid context explosion, fine-grained rules and skills reside in `.agents/rul
 
 ## Definition of Done Checklist
 
-After completing feature development or requirement implementation, execute these steps in order — none may be skipped:
+When the verification gate is active (`gate/feature_list.json` exists), drive all task transitions through `python3 gate/pass-gate.py` (`WIP=1`; never hand-edit or script-edit `gate/feature_list.json`): check `pass-gate.py status` and claim work with `start --id <id>` before coding (register new items first via `add --level <unit|integration|e2e>` with the verification command written upfront). After completing feature development or requirement implementation, execute these steps in order — none may be skipped:
 
-1. [ ] **Test verification**: Run relevant tests (unit/integration), confirm all pass, provide real execution evidence
-2. [ ] **Update SESSION_STATE.md**: Record completed items, actual verification evidence, remaining steps, and still-valid risks
-3. [ ] **Update PROJECT_CONTEXT.md**: If architecture, technical decisions, or long-term constraints changed, sync updates; skip if only breakpoints changed
+1. [ ] **Test & gate verification**: Run relevant tests (unit/integration) and `python3 gate/pass-gate.py verify --id <id>` (or three-layer `pass-gate.py terminate`), confirming exit 0 with recorded execution evidence
+2. [ ] **Update SESSION_STATE.md & check-clean**: Record completed items, verification evidence, remaining steps, and active risks, then run `python3 gate/pass-gate.py check-clean` to confirm a clean handover
+3. [ ] **Update PROJECT_CONTEXT.md / DECISIONS.md**: If architecture, technical decisions, or long-term constraints changed, sync updates; skip if only breakpoints changed
 4. [ ] **Execute code review**: You MUST invoke the `open-code-review` skill (or `ocr` CLI) yourself — line-anchored, full coverage. NEVER ask the user whether to review; just do it
 5. [ ] **Zero defects**: Fix per review feedback; Critical / High defects must be zero before merge
 
-> Never skip step 4 to merge directly. Do not claim task completion without review evidence.
+> Never skip step 4 to merge directly. Do not claim task completion without gate verification and review evidence.
 
 ## Directory-Level Rule Index
 

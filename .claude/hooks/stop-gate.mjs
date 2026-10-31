@@ -23,7 +23,47 @@
 // matching guard.mjs.
 // Exit code 2 blocks the stop in Claude Code.
 // ==============================================================================
-import { appendFileSync, existsSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { appendFileSync, existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+
+function appendChainedEvent(cwd, event, itemId, detail) {
+  const eventsPath = join(cwd, "gate", "events.jsonl");
+  let seq = 1;
+  let lastLine = null;
+  if (existsSync(eventsPath)) {
+    const lines = readFileSync(eventsPath, "utf-8")
+      .split("\n")
+      .map((l) => l.replace(/\r$/, ""))
+      .filter((l) => l.trim().length > 0);
+    for (const line of lines) {
+      lastLine = line;
+      try {
+        const s = JSON.parse(line).seq;
+        if (Number.isInteger(s) && s >= seq) seq = s + 1;
+      } catch {
+        // skip; flagged by §3k, not by this hook
+      }
+    }
+  }
+  const prev = lastLine !== null ? createHash("sha256").update(lastLine, "utf8").digest("hex") : "";
+  const rec = {
+    seq,
+    ts: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+    actor: "stop-gate",
+    event,
+    item_id: itemId,
+    detail,
+    prev,
+  };
+  const sortedKeys = Object.keys(rec).sort();
+  const canonical = "{" + sortedKeys.map((k) => `${JSON.stringify(k)}:${JSON.stringify(rec[k])}`).join(",") + "}";
+  rec.hash = createHash("sha256").update(prev + canonical, "utf8").digest("hex");
+  appendFileSync(eventsPath, JSON.stringify(rec) + "\n");
+  const headPath = join(cwd, "gate", "events-head.json");
+  const headTmp = headPath + ".tmp";
+  writeFileSync(headTmp, JSON.stringify({ seq: rec.seq, hash: rec.hash }) + "\n", "utf-8");
+  renameSync(headTmp, headPath);
+}
 import { join } from "node:path";
 
 let input = "";
@@ -70,37 +110,11 @@ if (inProgress.length === 0) {
 // allowance so the unfinished items stay visible.
 if (data.stop_hook_active === true) {
   try {
-    const eventsPath = join(cwd, "gate", "events.jsonl");
-    // Max integer seq across the whole log + 1 (not the last line's):
-    // a foreign writer may append a seq-less event, and reusing the
-    // last line's seq would duplicate an earlier seq (§3k flags that).
-    // Unparseable lines are skipped here — the hook must never block
-    // the stop; §3k flags the bad line separately.
-    let seq = 1;
-    if (existsSync(eventsPath)) {
-      const lines = readFileSync(eventsPath, "utf-8")
-        .split("\n")
-        .filter(Boolean);
-      for (const line of lines) {
-        try {
-          const s = JSON.parse(line).seq;
-          if (Number.isInteger(s) && s >= seq) seq = s + 1;
-        } catch {
-          // skip; flagged by §3k, not by this hook
-        }
-      }
-    }
-    appendFileSync(
-      eventsPath,
-      JSON.stringify({
-        seq,
-        ts: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
-        actor: "stop-gate",
-        event: "stop_allowed_hook_active",
-        item_id: inProgress.map((i) => i.id).join(","),
-        detail:
-          "stop allowed on second attempt (stop_hook_active); items still in_progress",
-      }) + "\n"
+    appendChainedEvent(
+      cwd,
+      "stop_allowed_hook_active",
+      inProgress.map((i) => i.id).join(","),
+      "stop allowed on second attempt (stop_hook_active); items still in_progress"
     );
   } catch {
     // Logging must never block the stop itself.
@@ -117,36 +131,11 @@ const override = process.env.GATE_ALLOW_STOP === "1";
 const reason = (process.env.GATE_STOP_REASON || "").trim();
 if (override && reason) {
   try {
-    const eventsPath = join(cwd, "gate", "events.jsonl");
-    // Max integer seq across the whole log + 1 (not the last line's):
-    // a foreign writer may append a seq-less event, and reusing the
-    // last line's seq would duplicate an earlier seq (§3k flags that).
-    // Unparseable lines are skipped here — the hook must never block
-    // the stop; §3k flags the bad line separately.
-    let seq = 1;
-    if (existsSync(eventsPath)) {
-      const lines = readFileSync(eventsPath, "utf-8")
-        .split("\n")
-        .filter(Boolean);
-      for (const line of lines) {
-        try {
-          const s = JSON.parse(line).seq;
-          if (Number.isInteger(s) && s >= seq) seq = s + 1;
-        } catch {
-          // skip; flagged by §3k, not by this hook
-        }
-      }
-    }
-    appendFileSync(
-      eventsPath,
-      JSON.stringify({
-        seq,
-        ts: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
-        actor: "stop-gate",
-        event: "stop_override",
-        item_id: inProgress.map((i) => i.id).join(","),
-        detail: `human override, reason: ${reason}`,
-      }) + "\n"
+    appendChainedEvent(
+      cwd,
+      "stop_override",
+      inProgress.map((i) => i.id).join(","),
+      `human override, reason: ${reason}`
     );
   } catch {
     // Logging must never block the override itself.

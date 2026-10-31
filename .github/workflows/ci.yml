@@ -65,15 +65,13 @@ jobs:
           node tests/hooks-gate.test.mjs
           node tests/hooks-write.test.mjs
           node tests/hooks-lifecycle.test.mjs
+          node tests/antigravity-hooks.test.mjs
+          node tests/workbuddy-hooks.test.mjs
           node tests/dsh-gate.test.mjs
+          node tests/server.test.mjs
 
       - name: Python unit tests
-        run: |
-          python3 tests/sync_skills_test.py
-          python3 tests/doc_impact_test.py
-          python3 tests/cost_ledger_test.py
-          python3 tests/skill_usage_report_test.py
-          python3 tests/pass_gate_test.py
+        run: python3 -m unittest discover -s tests -p "*_test.py"
 
       - name: Repository static checks
         run: python3 tests/repo_checks.py

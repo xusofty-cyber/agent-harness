@@ -270,3 +270,23 @@ test("settings.json registers PreToolUse, Stop, SessionStart, PostToolUse, UserP
   assert.match(commands, /stop-gate\.mjs/);
   assert.match(commands, /guard\.mjs/);
 });
+
+test("post-tool-use records skill-usage when Read loads .agents/skills/<name>/SKILL.md", () => {
+  const dir = makeGateDir([inProgressItem]);
+  const r = runHook(
+    POST_TOOL_USE,
+    {
+      tool_name: "Read",
+      tool_input: { file_path: join(dir, ".agents", "skills", "systematic-debugging", "SKILL.md") },
+      session_id: "sess-read-1",
+      cwd: dir,
+    },
+    dir
+  );
+  assert.equal(r.exitCode, 0);
+  const usageFile = join(dir, ".claude", "skill-usage.jsonl");
+  assert.ok(existsSync(usageFile));
+  const rec = JSON.parse(readFileSync(usageFile, "utf-8").trim());
+  assert.equal(rec.skill, "systematic-debugging");
+  assert.equal(rec.session, "sess-read-1");
+});

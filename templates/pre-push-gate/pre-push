@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # pre-push gate hook (agent-harness template gate).
 #
-# Install with templates/pre-push-gate/install-pre-push-gate.sh — do NOT
-# copy this file into .git/hooks/ by hand without its companion
-# gate-prepush-check.py (the installer copies both). This hook is
-# explicit opt-in: nothing in the agent-harness deploy scripts installs
-# it for you, and it never rewrites any other hook.
+# Installed by deploy-agents.sh / deploy-agents.ps1 (on by default;
+# opt-out via --no-prepush-gate / -NoPrepushGate) or standalone via
+# templates/pre-push-gate/install-pre-push-gate.sh — do NOT copy this
+# file into .git/hooks/ by hand without its companion
+# gate-prepush-check.py.
 #
 # What it does on every `git push` (before anything is sent):
 #   1. Runs gate-prepush-check.py against the working tree: every
@@ -35,12 +35,11 @@
 # check is about gate state, not about which refs are pushed).
 set -u
 
-ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || {
+HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT="$(git -C "$HOOK_DIR/../.." rev-parse --show-toplevel 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null)" || {
     echo "pre-push gate: not inside a git work tree; cannot check gate state (allowing push, fail-open)" >&2
     exit 0
 }
-
-HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
 CHECK=""
 for candidate in \
     "$HOOK_DIR/gate-prepush-check.py" \

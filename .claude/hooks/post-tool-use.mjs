@@ -66,13 +66,28 @@ try {
 }
 
 // Skill-usage telemetry (D68): name only, never args or content.
-if (tool === "Skill" && process.env.SKILL_LEDGER !== "0") {
-  const skill = data.tool_input && data.tool_input.skill;
-  if (typeof skill === "string" && skill) {
+// Captures both explicit Skill tool invocations and on-demand SKILL.md
+// reads (Read / view_file / read_file / Bash reading */skills/<name>/SKILL.md).
+if (process.env.SKILL_LEDGER !== "0") {
+  const ti = data.tool_input && typeof data.tool_input === "object" ? data.tool_input : {};
+  let detectedSkill = "";
+  if (tool.toLowerCase() === "skill" && typeof ti.skill === "string" && ti.skill) {
+    detectedSkill = ti.skill.trim();
+  } else {
+    const pathCand =
+      ti.file_path || ti.Path || ti.path || ti.TargetFile || ti.AbsolutePath || ti.command || ti.CommandLine || "";
+    if (typeof pathCand === "string" && pathCand) {
+      const m = /(?:^|[\\/\s"'])skills[\\/]([a-z0-9][a-z0-9-]*)[\\/]SKILL\.md\b/i.exec(pathCand);
+      if (m && m[1]) {
+        detectedSkill = m[1].toLowerCase();
+      }
+    }
+  }
+  if (detectedSkill) {
     try {
       const claudeDir = join(cwd, ".claude");
       mkdirSync(claudeDir, { recursive: true });
-      const rec = { ts, skill };
+      const rec = { ts, skill: detectedSkill };
       if (typeof data.session_id === "string" && data.session_id) {
         rec.session = data.session_id;
       }

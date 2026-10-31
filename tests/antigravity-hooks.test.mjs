@@ -371,3 +371,42 @@ test("edit_file on an ordinary file is allowed", () => {
   });
   assert.equal(r.json.decision, "allow");
 });
+
+test("unknown write tool carrying Path=gate/feature_list.json is denied by heuristic fallback", () => {
+  const dir = makeProject({ items: [] });
+  const r = preTool(dir, "create_or_overwrite_file", {
+    Path: join(dir, "gate", "feature_list.json"),
+  });
+  assert.equal(r.json.decision, "deny");
+  assert.match(r.json.reason, /pass-gate\.py/);
+});
+
+test("PostToolUse forwards toolCall.args so reading SKILL.md records skill telemetry", () => {
+  const dir = makeProject({
+    items: [
+      {
+        id: "t1",
+        priority: "p0",
+        area: "gate",
+        title: "t1",
+        user_visible_behavior: "b",
+        status: "in_progress",
+        verification: { command: "true", timeout_seconds: 10 },
+        evidence: null,
+      },
+    ],
+  });
+  const res = runAdapter(dir, "antigravity-post-tool-use.mjs", {
+    toolCall: {
+      name: "view_file",
+      args: { AbsolutePath: join(dir, ".agents", "skills", "test-driven-development", "SKILL.md") },
+    },
+    sessionId: "agy-sess-1",
+  });
+  assert.equal(res.exitCode, 0);
+  const usagePath = join(dir, ".claude", "skill-usage.jsonl");
+  assert.equal(existsSync(usagePath), true);
+  const rec = JSON.parse(readFileSync(usagePath, "utf-8").trim());
+  assert.equal(rec.skill, "test-driven-development");
+  assert.equal(rec.session, "agy-sess-1");
+});
