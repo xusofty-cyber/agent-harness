@@ -9,7 +9,7 @@
 
 本倉庫提供全域、專案與目錄級規則範本、Claude Code PreToolUse 鉤子、技能檔案，以及 Windows/Linux/macOS 部署指令碼。各工具的規則載入方式與鉤子行為各不相同。鉤子屬於用戶端機制，不是作業系統或伺服器端的安全邊界。
 
-> **定位（v0.5.1）**：本倉庫是一個設有閘門的 harness，而不只是一組設定＋技能散佈包。核心是一個自有的、僅用標準函式庫的驗證閘門（`gate/pass-gate.py`）：機器可讀的功能清單、WIP=1、需附證據的 `passing`、三層終止檢查，以及五維度的乾淨狀態檢查。它不包含任何 agent 執行期：Comet 只是可選的轉接器，不是 harness 本身。迴圈／圖譜編排僅隨 `standard`／`full` 設定檔提供（D58）；`minimal` 設定檔僅提供閘門本身。
+> **定位（v0.6.0）**：本倉庫是一個設有閘門的 harness，而不只是一組設定＋技能散佈包。核心是一個自有的、僅用標準函式庫的驗證閘門（`gate/pass-gate.py`）：機器可讀的功能清單、WIP=1、需附證據的 `passing`、三層終止檢查，以及五維度的乾淨狀態檢查。它不包含任何 agent 執行期：Comet 只是可選的轉接器，不是 harness 本身。迴圈／圖譜編排僅隨 `standard`／`full` 設定檔提供（D58）；`minimal` 設定檔僅提供閘門本身。
 
 ## 前置要求
 
@@ -85,7 +85,7 @@ graph TD
 
 使用部署期間的 `-Initialize` / `--initialize`，以本地可驗證的專案事實建立指引，以及一份未知事項檢查清單。加上 `-DirectoryPath` / `--directory` 並指定現有模組路徑，也可以產生該模組的目錄級指引。指令碼僅推斷本地 Git 中繼資料、manifest、lockfile 與 CI 檔案所支援的事實。對於 `package.json`，偵測到的指令碼與常見的框架／儲存依賴會標註為待審查的建議，而非已驗證的事實。使用者或作用中的程式設計 agent 必須確認用途、所有權、模組責任與邊界。現有的 `AGENTS.md` 檔案會被保留；審查副本會寫為 `AGENTS.generated.md`。執行 `-Check` / `--check` 來找出未解決的項目。
 
-### 目前狀態（v0.5.1）——在依賴閘門之前請先閱讀
+### 目前狀態（v0.6.0）——在依賴閘門之前請先閱讀
 
 - **強制執行取決於宿主。** Claude Code 鉤子會在用戶端中強制執行閘門（見上表）。Antigravity 鉤子、WorkBuddy 閘門鉤子與 dsh 閘門外掛雖已部署，但其真機強制執行均未驗證（見上表）。在其他所有宿主上，閘門是一套紀律外加一道人工命令：請自行執行 `python3 gate/pass-gate.py verify` 與 `python3 gate/pass-gate.py check-clean`。與宿主無關的後備措施是 CI，它會重新執行每個 `passing` 項目的驗證命令（`tests/repo_checks.py` §3k）。已知繞過方式詳見 [`gate/README.md`](gate/README.md)，包括透過 Bash 直接編輯，以及純文字的成本帳本。
 - **基準聲明，如實陳述。** 預先註冊的 B1 回合（t1–t8 × bare/pack/gate × 3 回合＝72 次執行）72/72 通過，每個組別皆為 0 次錯誤完成，因此依其預先註冊的規則，結果為 NO DISCRIMINATION。本版本不聲稱閘門能減少錯誤完成；唯一的攔截證據是 Phase 1 的 dogfood（一個被鉤子與 CI 攔下的植入式假通過）。

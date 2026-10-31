@@ -1,6 +1,6 @@
-# Quality Score — v0.5.1 edition (2026-10-30)
+# Quality Score — v0.6.0 edition (2026-10-31)
 
-Re-issued for v0.5.1 (including D67 event hash chain, D68 skill-usage telemetry, D69 B1–B4 conclusion, and the v0.5.2 audit fixes). Scores are
+Re-issued for v0.6.0 (v0.5.1 contents, the v0.5.2 audit fixes ISS-01..ISS-11, and D70/D71). Scores unchanged from the v0.5.1 edition — this is a version sync, not a re-scoring. Scores are
 0–10, deliberately un-generous: a score claims only what the cited
 evidence shows. The 2026-10-28 merged edition is kept verbatim below
 as history.
