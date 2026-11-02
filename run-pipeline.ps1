@@ -246,7 +246,7 @@ $stageMemory = $Memory.IsPresent
 $stageSkills = $Skills.IsPresent
 $stageDocs   = $Docs.IsPresent
 
-$explicit = $All.IsPresent -or $Deploy.IsPresent -or $Memory.IsPresent -or $Skills.IsPresent -or $Docs.IsPresent -or ($Stages -and $Stages.Count -gt 0) -or $Global.IsPresent -or $Update.IsPresent -or $ApplySkills.IsPresent -or $CheckOnly.IsPresent
+$explicit = $All.IsPresent -or $Deploy.IsPresent -or $Memory.IsPresent -or $Skills.IsPresent -or $Docs.IsPresent -or ($Stages -and $Stages.Count -gt 0) -or $Global.IsPresent -or $Update.IsPresent -or $ApplySkills.IsPresent -or $CheckOnly.IsPresent -or $PSBoundParameters.ContainsKey('Project') -or $PSBoundParameters.ContainsKey('Lang')
 
 if ($All.IsPresent) {
     $stageDeploy = $true
@@ -425,6 +425,15 @@ function Deploy-SelectedGlobalAgents([string]$langOption, [string[]]$selectedToo
                 $contFile = Join-Path $HOME ".continue\rules\agent-harness.md"
                 Deploy-GlobalAgentFile "Continue.dev" $contFile $globalTmpl
             }
+            "workbuddy" {
+                $wbFile = Join-Path $HOME ".workbuddy\rules\agent-harness.md"
+                Deploy-GlobalAgentFile "WorkBuddy" $wbFile $globalTmpl
+            }
+            "dsh" {
+                $dshDir = if ($env:DSH_HOME) { $env:DSH_HOME } else { Join-Path $HOME ".dsh" }
+                $dshFile = Join-Path $dshDir "AGENTS.md"
+                Deploy-GlobalAgentFile "DeepSeek Harness (dsh)" $dshFile $globalTmpl
+            }
             "opencode" {
                 $ocFile = Join-Path $HOME ".config\opencode\AGENTS.md"
                 Deploy-GlobalAgentFile "OpenCode" $ocFile $globalTmpl
@@ -456,6 +465,7 @@ if (-not $explicit -and -not $Yes.IsPresent -and (-not [Console]::IsInputRedirec
             @{ Label = "Claude Code (~/.claude/CLAUDE.md)"; Value = "claude"; Checked = $true },
             @{ Label = "Antigravity 2.0 / CLI / IDE (~/.gemini/AGENTS.md, GEMINI.md)"; Value = "antigravity"; Checked = $true },
             @{ Label = "Codex CLI / app (~/.codex/AGENTS.md)"; Value = "codex"; Checked = $true },
+            @{ Label = "DeepSeek Harness / dsh (~/.dsh/AGENTS.md)"; Value = "dsh"; Checked = $true },
             @{ Label = "Cursor (~/.cursorrules)"; Value = "cursor"; Checked = $true },
             @{ Label = "Zed (~/.config/zed/AGENTS.md)"; Value = "zed"; Checked = $true },
             @{ Label = "Pi (~/.pi/agent/AGENTS.md)"; Value = "pi"; Checked = $true },
@@ -469,6 +479,7 @@ if (-not $explicit -and -not $Yes.IsPresent -and (-not [Console]::IsInputRedirec
             @{ Label = "Qwen Code (~/.qwen/QWEN.md)"; Value = "qwen"; Checked = $false },
             @{ Label = "Kiro (~/.kiro/steering/agent-harness.md)"; Value = "kiro"; Checked = $false },
             @{ Label = "Continue.dev (~/.continue/rules/agent-harness.md)"; Value = "continue"; Checked = $false },
+            @{ Label = "WorkBuddy (~/.workbuddy/rules/agent-harness.md)"; Value = "workbuddy"; Checked = $false },
             @{ Label = "OpenCode (~/.config/opencode/AGENTS.md)"; Value = "opencode"; Checked = $false }
         )
 
@@ -505,7 +516,7 @@ if (-not $explicit -and -not $Yes.IsPresent -and (-not [Console]::IsInputRedirec
     }
 
     Write-Host "`n[4/6] 目标工程根目录 (Target Project Path):" -ForegroundColor Cyan
-    $inputProj = Read-Host "请输入工程路径 [默认: 当前目录 .]"
+    $inputProj = Read-Host "请输入工程路径 [默认: $Project]"
     if (-not [string]::IsNullOrWhiteSpace($inputProj)) { $Project = $inputProj }
 
     $pipeMode = Prompt-Select "[5/6] 选择流水线执行流程与阶段组合 (Select Pipeline Flow & Stages):" @(
@@ -957,7 +968,7 @@ if ($stageDocs) {
             # strict mode, WARN in advisory default.
             $LASTEXITCODE = 0
             if ($runDetailMode -eq "detailed" -and -not [Console]::IsInputRedirected) {
-                & $pythonCmd $docScript --interactive --strict
+                & $pythonCmd $docScript --root $targetAbs --interactive --strict
             } else {
                 & $pythonCmd $docScript --root $targetAbs --strict
             }

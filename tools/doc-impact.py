@@ -237,7 +237,7 @@ def render_text(report: dict) -> str:
     return "\n".join(lines)
 
 
-def prompt_interactive_wizard() -> tuple[str | None, str | None, list[str] | None, bool]:
+def prompt_interactive_wizard(default_root: str | None = None) -> tuple[str | None, str | None, list[str] | None, bool]:
     """Returns (root, since, changed_files, is_json)."""
     print("\n\033[36m==================================================")
     print(" 📑 doc-impact: 活体文档影响分析向导 (Living Doc Impact)")
@@ -258,8 +258,12 @@ def prompt_interactive_wizard() -> tuple[str | None, str | None, list[str] | Non
         if raw:
             changed_files_list = raw.split()
 
-    print("\n[2/3] 目标项目根目录 (Target Project Root):")
-    root_input = input("项目根目录路径 (默认自动识别当前项目 [.]) [Root DIR]: ").strip() or None
+    if default_root:
+        print(f"\n  \033[32m✔ [2/3] 目标项目根目录: {default_root} (已继承，无需重复输入)\033[0m")
+        root_input = default_root
+    else:
+        print("\n[2/3] 目标项目根目录 (Target Project Root):")
+        root_input = input("项目根目录路径 (默认自动识别当前项目 [.]) [Root DIR]: ").strip() or None
 
     fmt = tui_select("[3/3] 选择输出格式 (Select Output Format):", [
         ("人类可读控制台报告 (Human-readable text report)", "text"),
@@ -292,7 +296,7 @@ def main() -> int:
     args = ap.parse_args()
 
     if args.interactive or (len(sys.argv) == 1 and sys.stdin.isatty()):
-        root_opt, since_opt, files_opt, json_opt = prompt_interactive_wizard()
+        root_opt, since_opt, files_opt, json_opt = prompt_interactive_wizard(default_root=args.root)
         if root_opt:
             args.root = root_opt
         if since_opt:

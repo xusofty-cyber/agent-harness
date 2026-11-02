@@ -261,29 +261,50 @@ function Prompt-InteractiveWizard {
     Write-Host " 🤖 AI Agent Harness 交互式部署向导 (Deployment Wizard)" -ForegroundColor Cyan
     Write-Host "==================================================" -ForegroundColor Cyan
 
-    $langOptions = @(
-        @{ Label = "English (en)"; Value = "en" },
-        @{ Label = "简体中文 (Simplified Chinese, zh)"; Value = "zh" },
-        @{ Label = "繁體中文 (Traditional Chinese, zh-tw)"; Value = "zh-tw" }
-    )
-    $script:Language = Prompt-SingleSelect "[1/5] 选择规则模板语言 (Select Template Language):" $langOptions
+    $langExplicit = $PSBoundParameters.ContainsKey('Language') -or (-not [string]::IsNullOrWhiteSpace($script:Language) -and $script:Language -ne "en")
+    if ($langExplicit) {
+        Write-Host "`n  [√] [1/5] 规则模板语言: $script:Language (已继承，跳过选择)" -ForegroundColor Green
+    } else {
+        $langOptions = @(
+            @{ Label = "English (en)"; Value = "en" },
+            @{ Label = "简体中文 (Simplified Chinese, zh)"; Value = "zh" },
+            @{ Label = "繁體中文 (Traditional Chinese, zh-tw)"; Value = "zh-tw" }
+        )
+        $script:Language = Prompt-SingleSelect "[1/5] 选择规则模板语言 (Select Template Language):" $langOptions
+    }
 
-    $scopeOptions = @(
-        @{ Label = "目标项目部署 (Target Project only)"; Value = "project" },
-        @{ Label = "仅本机全局规则 (Global Rules only: Claude/Antigravity/Codex)"; Value = "global" },
-        @{ Label = "完整部署 (Both Project & Global Rules)"; Value = "both" }
-    )
-    $scope = Prompt-SingleSelect "[2/5] 选择部署范围 (Select Deployment Scope):" $scopeOptions
+    $scope = ""
+    if (-not [string]::IsNullOrWhiteSpace($script:ProjectPath) -and $script:Global) {
+        $scope = "both"
+        Write-Host "  [√] [2/5] 部署范围: 完整部署 (同时更新项目与本机全局规则) (已继承)" -ForegroundColor Green
+    } elseif (-not [string]::IsNullOrWhiteSpace($script:ProjectPath) -and -not $script:Global) {
+        $scope = "project"
+        Write-Host "  [√] [2/5] 部署范围: 目标项目部署 (已继承)" -ForegroundColor Green
+    } elseif ([string]::IsNullOrWhiteSpace($script:ProjectPath) -and $script:Global) {
+        $scope = "global"
+        Write-Host "  [√] [2/5] 部署范围: 仅本机全局规则 (已继承)" -ForegroundColor Green
+    } else {
+        $scopeOptions = @(
+            @{ Label = "目标项目部署 (Target Project only)"; Value = "project" },
+            @{ Label = "仅本机全局规则 (Global Rules only: Claude/Antigravity/Codex)"; Value = "global" },
+            @{ Label = "完整部署 (Both Project & Global Rules)"; Value = "both" }
+        )
+        $scope = Prompt-SingleSelect "[2/5] 选择部署范围 (Select Deployment Scope):" $scopeOptions
 
-    if ($scope -eq "global" -or $scope -eq "both") {
-        $script:Global = $true
+        if ($scope -eq "global" -or $scope -eq "both") {
+            $script:Global = $true
+        }
     }
 
     if ($scope -eq "project" -or $scope -eq "both") {
-        Write-Host "`n[3/5] 输入目标项目目录路径 (Enter Project Path):" -ForegroundColor Cyan
-        $inPath = Read-Host "项目路径 (默认当前目录 [.]) [Project Path]"
-        if ([string]::IsNullOrWhiteSpace($inPath)) { $inPath = "." }
-        $script:ProjectPath = $inPath
+        if (-not [string]::IsNullOrWhiteSpace($script:ProjectPath)) {
+            Write-Host "  [√] [3/5] 目标项目路径: $script:ProjectPath (已继承，无需重复输入)" -ForegroundColor Green
+        } else {
+            Write-Host "`n[3/5] 输入目标项目目录路径 (Enter Project Path):" -ForegroundColor Cyan
+            $inPath = Read-Host "项目路径 (默认当前目录 [.]) [Project Path]"
+            if ([string]::IsNullOrWhiteSpace($inPath)) { $inPath = "." }
+            $script:ProjectPath = $inPath
+        }
 
         Write-Host ""
         Write-Host "以下工具原生读取 AGENTS.md，无需桥接文件（自动支持）:" -ForegroundColor Cyan
@@ -302,10 +323,10 @@ function Prompt-InteractiveWizard {
             @{ Label = "Kiro (.kiro/steering/)"; Value = "kiro"; Checked = $false },
             @{ Label = "Continue.dev (.continue/rules/)"; Value = "continue"; Checked = $false },
             @{ Label = "Trae (.trae/rules/)"; Value = "trae"; Checked = $false },
-            @{ Label = "CodeBuddy (CODEBUDDY.md)"; Value = "codebuddy"; Checked = $false }
+            @{ Label = "CodeBuddy (CODEBUDDY.md)"; Value = "codebuddy"; Checked = $false },
             @{ Label = "WorkBuddy (.workbuddy/rules/)"; Value = "workbuddy"; Checked = $false }
         )
-        $selectedTools = Prompt-MultiSelect "[4/5] 选择要创建桥接文件的 Agent 工具 (Select tools for bridge files):" $toolOptions
+        $selectedTools = Prompt-MultiSelect "[4/5] 选择要在目标工程中创建桥接配置的 Agent 工具 (Select project-level bridge tools):" $toolOptions
 
         $script:ToolClaude = $selectedTools -contains "claude"
         $script:ToolCopilot = $selectedTools -contains "copilot"
@@ -322,11 +343,16 @@ function Prompt-InteractiveWizard {
         $script:ToolWorkbuddy = $selectedTools -contains "workbuddy"
     }
 
+    $chkUpdate = if ($script:Update) { $true } else { $false }
+    $chkInit = if ($script:Initialize) { $true } else { $false }
+    $chkAimem = if ($script:AiMemoryInit) { $true } else { $false }
+    $chkComet = if ($script:CometInit) { $true } else { $false }
+
     $optOptions = @(
-        @{ Label = "更新模式 (Update mode: 备份并更新已有规则与外部技能库)"; Value = "update"; Checked = $false },
-        @{ Label = "项目事实初始化 (Initialize: 自动扫描技术栈并生成 AGENTS.md)"; Value = "init"; Checked = $false },
-        @{ Label = "启用跨工具长期记忆 (AI Memory: 初始化 .ai-memory.toml)"; Value = "aimem"; Checked = $false },
-        @{ Label = "启用 Comet CLI 工作流 (Comet: 初始化 comet 状态机)"; Value = "comet"; Checked = $false }
+        @{ Label = "更新模式 (Update mode: 备份并更新已有规则与外部技能库)"; Value = "update"; Checked = $chkUpdate },
+        @{ Label = "项目事实初始化 (Initialize: 自动扫描技术栈并生成 AGENTS.md)"; Value = "init"; Checked = $chkInit },
+        @{ Label = "启用跨工具长期记忆 (AI Memory: 初始化 .ai-memory.toml)"; Value = "aimem"; Checked = $chkAimem },
+        @{ Label = "启用 Comet CLI 工作流 (Comet: 初始化 comet 状态机)"; Value = "comet"; Checked = $chkComet }
     )
     $selectedOpts = Prompt-MultiSelect "[5/5] 可选功能与执行模式 (Optional workflows & execution mode):" $optOptions
 

@@ -445,6 +445,13 @@ deploy_selected_global_agents() {
             continue)
                 deploy_global_agent_file "Continue.dev" "${HOME}/.continue/rules/agent-harness.md" "$global_tmpl"
                 ;;
+            workbuddy)
+                deploy_global_agent_file "WorkBuddy" "${HOME}/.workbuddy/rules/agent-harness.md" "$global_tmpl"
+                ;;
+            dsh)
+                local dsh_dir="${DSH_HOME:-${HOME}/.dsh}"
+                deploy_global_agent_file "DeepSeek Harness (dsh)" "${dsh_dir}/AGENTS.md" "$global_tmpl"
+                ;;
             opencode)
                 deploy_global_agent_file "OpenCode" "${HOME}/.config/opencode/AGENTS.md" "$global_tmpl"
                 ;;
@@ -482,8 +489,8 @@ while [[ $# -gt 0 ]]; do
         --memory) STAGE_MEMORY=true; EXPLICIT_CONFIG=true; shift ;;
         --skills) STAGE_SKILLS=true; EXPLICIT_CONFIG=true; shift ;;
         --docs) STAGE_DOCS=true; EXPLICIT_CONFIG=true; shift ;;
-        -p|--project) PROJECT_DIR="$2"; shift 2 ;;
-        -l|--lang) LANG_OPTION="$2"; shift 2 ;;
+        -p|--project) PROJECT_DIR="$2"; EXPLICIT_CONFIG=true; shift 2 ;;
+        -l|--lang) LANG_OPTION="$2"; EXPLICIT_CONFIG=true; shift 2 ;;
         -g|--global) RUN_GLOBAL=true; EXPLICIT_CONFIG=true; shift ;;
         -u|--update) RUN_UPDATE=true; EXPLICIT_CONFIG=true; shift ;;
         -k|--check-only) CHECK_ONLY=true; EXPLICIT_CONFIG=true; shift ;;
@@ -535,6 +542,7 @@ if [ "$NON_INTERACTIVE" = false ] && { [ "$EXPLICIT_CONFIG" = false ] || [ "$FOR
             "Claude Code (~/.claude/CLAUDE.md)" "claude" 1 \
             "Antigravity 2.0 / CLI / IDE (~/.gemini/AGENTS.md, GEMINI.md)" "antigravity" 1 \
             "Codex CLI / app (~/.codex/AGENTS.md)" "codex" 1 \
+            "DeepSeek Harness / dsh (~/.dsh/AGENTS.md)" "dsh" 1 \
             "Cursor (~/.cursorrules)" "cursor" 1 \
             "Zed (~/.config/zed/AGENTS.md)" "zed" 1 \
             "Pi (~/.pi/agent/AGENTS.md)" "pi" 1 \
@@ -548,6 +556,7 @@ if [ "$NON_INTERACTIVE" = false ] && { [ "$EXPLICIT_CONFIG" = false ] || [ "$FOR
             "Qwen Code (~/.qwen/QWEN.md)" "qwen" 0 \
             "Kiro (~/.kiro/steering/agent-harness.md)" "kiro" 0 \
             "Continue.dev (~/.continue/rules/agent-harness.md)" "continue" 0 \
+            "WorkBuddy (~/.workbuddy/rules/agent-harness.md)" "workbuddy" 0 \
             "OpenCode (~/.config/opencode/AGENTS.md)" "opencode" 0
 
         if [ ${#SELECTED_VALUES[@]} -gt 0 ]; then
@@ -582,8 +591,8 @@ if [ "$NON_INTERACTIVE" = false ] && { [ "$EXPLICIT_CONFIG" = false ] || [ "$FOR
     esac
 
     echo -e "\n${CYAN}[4/6] 目标工程根目录 (Target Project Path):${NC}"
-    read -r -p "请输入工程路径 [默认: 当前目录 .]: " input_proj
-    PROJECT_DIR="${input_proj:-.}"
+    read -r -p "请输入工程路径 [默认: $PROJECT_DIR]: " input_proj
+    PROJECT_DIR="${input_proj:-$PROJECT_DIR}"
 
     prompt_select "[5/6] 选择流水线执行流程与阶段组合 (Select Pipeline Flow & Stages):" \
         "一键全量流水线 (Run Full Pipeline: 规则部署 -> AI记忆 -> 技能同步 -> 文档质检)" "all" \

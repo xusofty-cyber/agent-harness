@@ -78,6 +78,7 @@ INCLUDE_HEAVY_SKILLS=false
 PROFILE="minimal"
 DIRECTORY_PATH=""
 LANG_OPTION="en"
+LANG_EXPLICIT=false
 FORCE_INTERACTIVE=false
 
 # Bridge-file tools (user-selectable in TUI; all default on for non-interactive runs)
@@ -148,6 +149,7 @@ while [ "$arg_index" -lt "$#" ]; do
             arg_index=$((arg_index + 1))
             if [ "$arg_index" -ge "$#" ]; then echo "[!] --lang requires a language code (e.g. en, zh, zh-tw)" >&2; exit 2; fi
             LANG_OPTION="${args[$arg_index]}"
+            LANG_EXPLICIT=true
             ;;
         --directory)
             arg_index=$((arg_index + 1))
@@ -369,31 +371,51 @@ prompt_interactive_wizard() {
     echo -e "${CYAN} 🤖 AI Agent Harness 交互式部署向导 (Deployment Wizard)${NC}"
     echo -e "${CYAN}==================================================${NC}"
 
-    prompt_select "[1/5] 选择规则模板语言 (Select Template Language):" \
-        "English (en)" "en" \
-        "简体中文 (Simplified Chinese, zh)" "zh" \
-        "繁體中文 (Traditional Chinese, zh-tw)" "zh-tw"
-    LANG_OPTION="$SELECTED_VALUE"
+    if [ "$LANG_EXPLICIT" = true ]; then
+        echo -e "\n  ${GREEN}[√] [1/5] 规则模板语言: ${LANG_OPTION} (已继承，跳过选择)${NC}"
+    else
+        prompt_select "[1/5] 选择规则模板语言 (Select Template Language):" \
+            "English (en)" "en" \
+            "简体中文 (Simplified Chinese, zh)" "zh" \
+            "繁體中文 (Traditional Chinese, zh-tw)" "zh-tw"
+        LANG_OPTION="$SELECTED_VALUE"
+    fi
 
-    prompt_select "[2/5] 选择部署范围 (Select Deployment Scope):" \
-        "目标项目部署 (Target Project only)" "project" \
-        "仅本机全局规则 (Global Rules only: Claude/Antigravity/Codex)" "global" \
-        "完整部署 (Both Project & Global Rules)" "both"
-    local scope="$SELECTED_VALUE"
+    local scope=""
+    if [ -n "$TARGET_PROJECT_ARG" ] && [ "$DEPLOY_GLOBAL" = true ]; then
+        scope="both"
+        echo -e "  ${GREEN}[√] [2/5] 部署范围: 完整部署 (同时更新项目与本机全局规则) (已继承)${NC}"
+    elif [ -n "$TARGET_PROJECT_ARG" ] && [ "$DEPLOY_GLOBAL" = false ]; then
+        scope="project"
+        echo -e "  ${GREEN}[√] [2/5] 部署范围: 目标项目部署 (已继承)${NC}"
+    elif [ -z "$TARGET_PROJECT_ARG" ] && [ "$DEPLOY_GLOBAL" = true ]; then
+        scope="global"
+        echo -e "  ${GREEN}[√] [2/5] 部署范围: 仅本机全局规则 (已继承)${NC}"
+    else
+        prompt_select "[2/5] 选择部署范围 (Select Deployment Scope):" \
+            "目标项目部署 (Target Project only)" "project" \
+            "仅本机全局规则 (Global Rules only: Claude/Antigravity/Codex)" "global" \
+            "完整部署 (Both Project & Global Rules)" "both"
+        scope="$SELECTED_VALUE"
 
-    if [ "$scope" = "global" ] || [ "$scope" = "both" ]; then
-        DEPLOY_GLOBAL=true
+        if [ "$scope" = "global" ] || [ "$scope" = "both" ]; then
+            DEPLOY_GLOBAL=true
+        fi
     fi
 
     if [ "$scope" = "project" ] || [ "$scope" = "both" ]; then
-        echo -e "\n${CYAN}[3/5] 输入目标项目目录路径 (Enter Project Path):${NC}"
-        read -r -p "项目路径 (默认当前目录 [.]) [Project Path]: " input_path
-        TARGET_PROJECT_ARG="${input_path:-.}"
+        if [ -n "$TARGET_PROJECT_ARG" ]; then
+            echo -e "  ${GREEN}[√] [3/5] 目标项目路径: ${TARGET_PROJECT_ARG} (已继承，无需重复输入)${NC}"
+        else
+            echo -e "\n${CYAN}[3/5] 输入目标项目目录路径 (Enter Project Path):${NC}"
+            read -r -p "项目路径 (默认当前目录 [.]) [Project Path]: " input_path
+            TARGET_PROJECT_ARG="${input_path:-.}"
+        fi
 
         echo -e "\n${CYAN}以下工具原生读取 AGENTS.md，无需桥接文件（自动支持）:${NC}"
         echo -e "  ${GREEN}✓${NC} Codex · Antigravity · Zed · OpenCode · Aider · Qoder · Pi · DeepSeek Harness (dsh)"
 
-        prompt_multiselect "[4/5] 选择要创建桥接文件的 Agent 工具 (Select tools for bridge files):" \
+        prompt_multiselect "[4/5] 选择要在目标工程中创建桥接配置的 Agent 工具 (Select project-level bridge tools):" \
             "Claude Code (CLAUDE.md 桥接 + 安全钩子)" "claude" 1 \
             "GitHub Copilot (.github/copilot-instructions.md)" "copilot" 1 \
             "Cursor (.cursorrules)" "cursor" 1 \
@@ -441,11 +463,20 @@ prompt_interactive_wizard() {
         done
     fi
 
+    local chk_update=0
+    local chk_init=0
+    local chk_aimem=0
+    local chk_comet=0
+    if [ "$DO_UPDATE" = true ]; then chk_update=1; fi
+    if [ "$DO_INITIALIZE" = true ]; then chk_init=1; fi
+    if [ "$DO_AI_MEMORY_INIT" = true ]; then chk_aimem=1; fi
+    if [ "$DO_COMET_INIT" = true ]; then chk_comet=1; fi
+
     prompt_multiselect "[5/5] 可选功能与执行模式 (Optional workflows & execution mode):" \
-        "更新模式 (Update mode: 备份并更新已有规则与外部技能库)" "update" 0 \
-        "项目事实初始化 (Initialize: 自动扫描技术栈并生成 AGENTS.md)" "init" 0 \
-        "启用跨工具长期记忆 (AI Memory: 初始化 .ai-memory.toml)" "aimem" 0 \
-        "启用 Comet CLI 工作流 (Comet: 初始化 comet 状态机)" "comet" 0
+        "更新模式 (Update mode: 备份并更新已有规则与外部技能库)" "update" "$chk_update" \
+        "项目事实初始化 (Initialize: 自动扫描技术栈并生成 AGENTS.md)" "init" "$chk_init" \
+        "启用跨工具长期记忆 (AI Memory: 初始化 .ai-memory.toml)" "aimem" "$chk_aimem" \
+        "启用 Comet CLI 工作流 (Comet: 初始化 comet 状态机)" "comet" "$chk_comet"
 
     for opt in "${SELECTED_VALUES[@]}"; do
         case "$opt" in
