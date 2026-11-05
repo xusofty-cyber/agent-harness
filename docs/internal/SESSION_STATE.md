@@ -16,17 +16,14 @@
 
 ## In progress
 
-- 2026-11-06 working-tree batch (uncommitted, awaiting owner
-  review): repo-map repairs, repo-template structure adoption
-  (`ARCHITECTURE.md`, `docs/exec-plans/`, `docs/design-docs/`,
-  governance summaries) and migration of the historical
-  records to `docs/exec-plans/completed/` (two gate-evidence
-  exceptions stay). Full record: CHANGELOG `[Unreleased]`.
+- none. The 2026-11-06 batch (repo-map repairs, repo-template
+  structure adoption, historical-records migration to
+  `docs/exec-plans/completed/`) landed on main as merge
+  `ed9bb0c` and was pushed. Full record: CHANGELOG
+  `[Unreleased]`.
 
 ## Next
 
-- [ ] Owner review of the 2026-11-06 batch, then commit on a
-  temporary branch per repo convention
 - [ ] Still owed repo-wide: Antigravity IDE / WorkBuddy / dsh live
   runs, ps1 live Windows run, CI template run in real GitHub
   Actions (tracked in `docs/exec-plans/tech-debt-tracker.md`)
@@ -39,7 +36,7 @@
 
 ## Last verification
 
-- 2026-11-06 (map-repair batch): unit tests 118/118 OK;
+- 2026-11-06 (map-repair batch, merged `ed9bb0c`, pushed): unit tests 118/118 OK;
   `tests/repo_checks.py` all passed (1 ENV-SKIP:
   `eval:bench-smoke-passes`, missing pytest in this sandbox);
   node hook suites 7/7 exit 0; gate status 6/6 passing;
