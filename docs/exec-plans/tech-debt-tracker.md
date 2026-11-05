@@ -1,0 +1,17 @@
+# Tech debt tracker
+
+Deferred work, recorded with its reason and the condition that
+re-triggers it. Reviewed whenever a release is planned. Format per
+the OpenAI repo-template's tracker (date / area / debt / why
+deferred / risk / next trigger). Seeded 2026-11-06 from DECISIONS.md,
+QUALITY_SCORE.md and docs/internal/SESSION_STATE.md.
+
+| Date | Area | Debt | Why deferred | Risk | Next trigger |
+|---|---|---|---|---|---|
+| 2026-10-29 | Evaluation | Live second-person rubric calibration not run; rubric stays advisory-only (D28) | User final ruling: runs only on a real project the user knows well, when conditions mature | Rubric can never be promoted to `stable`; evaluation claims stay capped | A suitable real project round + user availability for the human pass |
+| 2026-10-31 | Host bridges | Antigravity IDE, WorkBuddy and dsh bridges are `protocol-only`; Antigravity CLI is `partial-live` (tiers in `docs/internal/host-verification-matrix.md`) | No live host runs yet for those hosts | Bridge defects surface only in real use; wording must not outrun the tier | A live run of the full gate flow on each host |
+| 2026-10-29 | Pipeline & deploy | CI template not yet run in a real GitHub Actions environment; `deploy-agents.ps1` not yet execution-verified on a live Windows host | Owed since the 2026-10-29 dogfood round (SESSION_STATE) | CI/Windows-only defects stay invisible to local checks | Next release cycle |
+| 2026-10-31 | Evaluation | Whether the gate reduces false completions is **not established** by B1–B4 measurement (D69); benchmark series sealed | Bench design hit its discrimination limit | The central value claim stays unproven | Re-test only the affected dimension after a material host/mechanism change |
+| 2026-10-31 | Skills distribution | Token cost of the harness unmeasured (no host exposes a token API; proxy metrics only) | Blocked on host capability | Cost side of the value equation unknown | A host exposing a programmatic token API (see `docs/internal/token-adapters.md`) |
+| 2026-10-31 | Docs i18n | ZH-TW Multi-Tool Deployment guide knowingly stale (ledger: `docs/internal/i18n-status.md`) | ZH-TW is frozen by policy; EN/ZH are the sources of truth | ZH-TW readers follow outdated deploy steps | ZH-TW maintenance resumes, or the guide is formally retired |
+| 2026-10-31 | Skills distribution | 2026-11 monthly ablation run + skill-usage telemetry review pending | Scheduled cadence (D68 telemetry) | Zero-load skills keep shipping by default | Telemetry review due 2026-11-28 |

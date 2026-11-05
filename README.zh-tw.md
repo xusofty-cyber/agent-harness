@@ -104,9 +104,11 @@ agent-harness/
 ├── .agents/
 │   ├── rules/                       # 模組化子規則（按需載入）
 │   │   ├── engineering-spec.md      # SDD 規格先行、TDD 驗證閘門
+│   │   ├── engineering.md           # 工程方法論與品質閘門
 │   │   ├── git-workflow.md          # Git 授權模型、受保護分支隔離
 │   │   ├── security-boundary.md     # 8 項高風險操作保護矩陣
 │   │   └── token-discipline.md      # 讀取／取得／表述閘門、日誌截斷
+│   ├── hooks/                           # Antigravity 橋接鉤子（Node.js）
 │   └── skills/                      # 39 個原生工程技能（Comet、OpenSpec、Superpowers…）
 ├── .claude/
 │   ├── settings.json                # Claude Code 鉤子設定（五類鉤子事件全接線）
@@ -117,6 +119,8 @@ agent-harness/
 │       ├── stop-gate.mjs            # 有 in_progress 項目時阻擋停止
 │       ├── session-start.mjs        # 依閘門狀態印出工作階段恢復資訊
 │       └── post-tool-use.mjs        # 附加成本帳本遙測
+├── .workbuddy/                      # WorkBuddy 橋接（設定 + 鉤子）
+├── .dsh/                            # DeepSeek Harness（dsh）橋接插件（TypeScript）
 ├── gate/                            # 自有驗證閘門
 │   ├── pass-gate.py                 # 功能清單狀態機＋驗證＋ clean-state 檢查
 │   ├── graph.py                     # 圖執行器（僅 standard/full 設定檔）
@@ -125,21 +129,34 @@ agent-harness/
 ├── tools/
 │   ├── loop.py                      # Goal Loop／Maker-Checker 執行器（僅 standard/full 設定檔）
 │   ├── sync-skills.py               # 外部技能同步與上游更新檢查
-│   └── doc-impact.py                # 活文件影響分析與品質閘門
+│   ├── doc-impact.py                # 活文件影響分析與品質閘門
+│   └── tui.py                           # 終端互動式單選/多選元件庫
 ├── eval/                            # 自建基準（t1–t12）＋評分表（僅供建議）
+├── docs/                            # 文件
+│   ├── guides/                          # 使用者指南（中/英；繁中凍結）
+│   ├── internal/                        # 本倉庫自身的開發記錄（不隨範本分發）
+│   ├── exec-plans/                      # 執行計畫（active/ + completed/）+ 技術債台帳
+│   ├── design-docs/                     # 設計決策索引 + 核心信念
+│   ├── glossary.md                      # 術語表
+│   └── PLANS.md / RELIABILITY.md / SECURITY.md# 計畫生命週期 + 治理文件
 ├── templates/
 │   └── agents/                      # 標準規則範本（Global／Project／Directory × en／zh／zh-tw）
+├── tests/                           # 單元測試 + repo_checks.py 守衛套件
 ├── run-pipeline.ps1                 # Windows PowerShell 統一流水線執行器
 ├── run-pipeline.sh                  # Linux／macOS Bash 統一流水線執行器
 ├── deploy-agents.ps1                # Windows PowerShell 一鍵部署與更新指令碼
 ├── deploy-agents.sh                 # Linux／macOS Bash 一鍵部署與更新指令碼
 ├── setup-ai-memory.ps1              # 單一選擇加入專案／客戶端的 ai-memory 顯式設定
 ├── setup-ai-memory.sh               # Linux／macOS／WSL 設定輔助工具
-├── tools/tui.py                     # 終端 UI 單選／多選元件庫
 ├── .ai-memory.toml.example          # 可安全複製的本地選擇加入標記範例
 ├── skills-lock.json                 # 技能來源與部分完整性中繼資料
+├── AGENTS.md                        # 本倉庫自身的根指令（非範本）
+├── DECISIONS.md                     # 決策記錄（D1–D71）
+├── QUALITY_SCORE.md                 # 各模組品質評分 + 基準快照
+├── CHANGELOG.md                     # 版本變更記錄
 ├── README.md                        # 專案總覽（English 預設）
-└── README.zh.md                     # 專案中文概覽
+├── README.zh.md                     # 專案中文概覽
+└── README.zh-tw.md                  # 專案總覽（繁體中文）
 ```
 
 ---

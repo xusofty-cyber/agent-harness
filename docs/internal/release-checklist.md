@@ -23,7 +23,7 @@
       without opening a PR into main). The run must include the Windows
       `ps-analyzer` job — ps1 changes are otherwise only statically
       verified. A local run mirroring CI steps is not a substitute.
-- [ ] `docs/internal/release-v0.3.0.md` draft updated with the final
+- [ ] `docs/exec-plans/completed/release-v0.3.0.md` draft updated with the final
       measured numbers (re-verify, do not copy old numbers).
 - [ ] CHANGELOG `[Unreleased]` entries are complete and honest (what was
       done / not done / measured numbers); no `**Breaking**` entry without
@@ -39,7 +39,7 @@
 4. After merge, locally: `git tag vx.y.z && git push origin vx.y.z`
    (tags can't be created through the GitHub App API).
 5. Publish the GitHub Release from the tag, using
-   `docs/internal/release-v0.3.0.md` as the notes (final version).
+   `docs/exec-plans/completed/release-v0.3.0.md` as the notes (final version).
 
 ## Post-release
 

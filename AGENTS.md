@@ -49,6 +49,7 @@ destructive parameters). Yunkai's guard work is cited as "云开 Guard
 - `.agents/skills/` — 39 skill directories
 - `.claude/hooks/guard.mjs` — Claude Code PreToolUse Bash guard
 - `docs/internal/` — this repo's own dev notes (not deployed)
+- `ARCHITECTURE.md` — top-level component map; `docs/exec-plans/` — plans & tech-debt tracker (rules: `docs/PLANS.md`)
 
 <!-- CODEGRAPH_START -->
 ## CodeGraph

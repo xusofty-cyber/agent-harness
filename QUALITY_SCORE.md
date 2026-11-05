@@ -21,6 +21,23 @@ the evaluation still cannot say whether any of it improves outcomes
 on real work. The next score movement is expected from subtraction
 and B3 evidence, not from new surface.
 
+## Benchmark snapshots (v0.6.0 edition)
+
+| Date | Harness variant | Result | Notes |
+|---|---|---|---|
+| 2026-10 | Gate arms B1–B2 (t1–t4, 36 runs) | 36/36 pass, 0 false completions | Ceiling effect: tasks too trivial to discriminate arms |
+| 2026-10-30 | B3 (real project) | False completions nonzero but arm-identical | No arm-level discrimination |
+| 2026-10 | B3.1 (after process fixes) | Pattern confirmed (SEGMENTED) | Same conclusion as B3 |
+| 2026-10 | B4 (real host, enforcement dimensions) | NULL under its pre-registered verdict lines | Series sealed per D69: re-test only the affected dimension after a material host/mechanism change |
+
+## Simplification experiment log
+
+| Date | Component removed / candidate | Result | Decision |
+|---|---|---|---|
+| 2026-10-29 | `writing-skills` skill | Removed by owner decision (D65) | Keep removed |
+| 2026-11 | Monthly ablation run over skill-usage telemetry (D68) | Scheduled; telemetry review due 2026-11-28 | Pending |
+
+
 ---
 
 ## Quality Score — merged edition (2026-10-28, feat/merge-v3) [history]
@@ -49,7 +66,7 @@ distribution score is supposed to move — by shrinking, not growing.
 ## What changes next
 
 1. ~~Complete the t5–t8 one-round matrix (4 tasks × 3 arms + dist-slim
-   arm) and record it in `docs/internal/merge-verification.md`; if the
+   arm) and record it in `docs/exec-plans/completed/merge-verification.md`; if the
    hard tasks separate the arms, the Evaluation score moves.~~ Done
    2026-10-28 in this merge: 13/13 accepted, 0 false completions —
    but one implementation per task was reused across arms, so no arm

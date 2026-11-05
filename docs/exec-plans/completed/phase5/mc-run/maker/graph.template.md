@@ -1,6 +1,6 @@
 # Graph — Maker-Checker demo (graph template under construction)
 
-> **Loop**: maker-checker | **Goal**: `docs/internal/phase5/goal-mc.md`
+> **Loop**: maker-checker | **Goal**: `docs/exec-plans/completed/phase5/goal-mc.md`
 
 ## Nodes
 

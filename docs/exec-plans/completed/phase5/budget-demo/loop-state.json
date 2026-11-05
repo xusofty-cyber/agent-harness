@@ -2,7 +2,7 @@
   "version": 1,
   "kind": "goal",
   "goal_id": "budget-demo",
-  "goal_file": "/home/hatch/workspace/agent-harness-phase0/docs/internal/phase5/goal-budget.md",
+  "goal_file": "/home/hatch/workspace/agent-harness-phase0/docs/exec-plans/completed/phase5/goal-budget.md",
   "status": "budget-exceeded",
   "round": 1,
   "consecutive_passes": 1,

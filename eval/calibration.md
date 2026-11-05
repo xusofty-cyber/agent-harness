@@ -34,7 +34,7 @@ caught it.
 
 ## Round 2 — Phase 2 comet interruption recovery
 
-Source: `docs/internal/phase2-verification.md` (real run, 2026-10-28).
+Source: `docs/exec-plans/completed/phase2-verification.md` (real run, 2026-10-28).
 
 | Dimension | Score | Reasoning |
 |---|---|---|

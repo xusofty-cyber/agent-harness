@@ -19,7 +19,7 @@ Usage:
      source-repo meta entries (openspec, superpowers).
   3. No live doc states a stale skill count (42/43/44 in a skill context)
      or an openspec suite size other than 12. CHANGELOG.md and the dated
-     docs/internal/SESSION_RESUME*.md snapshots are history, not live
+     docs/exec-plans/completed/SESSION_RESUME*.md snapshots are history, not live
      claims, and are excluded from check 3 on purpose.
 
 CI enforcement lives in tests/repo_checks.py section 3i, which runs this
@@ -52,7 +52,7 @@ EXPECTED_LOCK_ENTRIES = 41
 EXPECTED_META_ENTRIES = {"openspec", "superpowers"}
 
 # Live docs whose skill-count claims must agree with disk. History files
-# (CHANGELOG.md, docs/internal/SESSION_RESUME*.md) are excluded on purpose.
+# (CHANGELOG.md, docs/exec-plans/completed/SESSION_RESUME*.md) are excluded on purpose.
 LIVE_DOCS = [
     "README.md",
     "README.zh.md",

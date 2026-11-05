@@ -2,7 +2,7 @@
 
 > **Language / 语言**: [English](README.md) | **简体中文** | [繁體中文](README.zh-tw.md)
 
-> **可复用的 AI 编程规范模板、Claude Code 安全钩子与多工具部署脚本**
+> **可复用的 AI 编程规则模板、自有验证门禁、Claude Code 钩子、循环/图编排与多工具部署脚本**
 
 > **⚡ 30 秒上手**：`git clone https://github.com/xusofty-cyber/agent-harness.git && cd agent-harness && ./run-pipeline.sh`
 > 详情见 [快速开始](#快速开始)。术语不懂？查 [术语表](docs/glossary.md)。
@@ -94,9 +94,11 @@ agent-harness/
 ├── .agents/
 │   ├── rules/                       # 细粒度工程子规则库（按需渐进式加载）
 │   │   ├── engineering-spec.md      # SDD 规范先行、TDD 验证证据门
+│   │   ├── engineering.md           # 工程方法论与质量门禁
 │   │   ├── git-workflow.md          # Git 授权模型、受保护分支强隔离、提交规范
 │   │   ├── security-boundary.md     # 八大高风险操作防呆矩阵、凭证零泄露
 │   │   └── token-discipline.md      # 读拿说三道闸门、上下文防漏与日志截断
+│   ├── hooks/                           # Antigravity 桥接钩子（Node.js）
 │   └── skills/                      # 39 个原生工程技能库（Comet, OpenSpec, Superpowers...）
 ├── .claude/
 │   ├── settings.json                # Claude Code 钩子配置（五类钩子事件全接线）
@@ -107,6 +109,8 @@ agent-harness/
 │       ├── stop-gate.mjs            # 有 in_progress 项时拦截停止
 │       ├── session-start.mjs        # 从门禁状态打印会话恢复信息
 │       └── post-tool-use.mjs        # 追加成本账本遥测
+├── .workbuddy/                      # WorkBuddy 桥接（配置 + 钩子）
+├── .dsh/                            # DeepSeek Harness（dsh）桥接插件（TypeScript）
 ├── gate/                            # 自有验证门禁
 │   ├── pass-gate.py                 # 功能清单状态机 + 验证 + clean-state 检查
 │   ├── graph.py                     # 图执行器（仅 standard/full 档）
@@ -115,21 +119,34 @@ agent-harness/
 ├── tools/
 │   ├── loop.py                      # Goal Loop / Maker-Checker 运行器（仅 standard/full 档）
 │   ├── sync-skills.py               # 外部依赖技能库同步与上游差异比对工具
-│   └── doc-impact.py                # 活体文档影响分析与质检门禁工具
+│   ├── doc-impact.py                # 活体文档影响分析与质检门禁工具
+│   └── tui.py                           # 终端交互式单选/多选组件库
 ├── eval/                            # 自建基准（t1–t12）+ 评分表（仅咨询级）
+├── docs/                            # 文档
+│   ├── guides/                          # 用户指南（中/英；繁中冻结）
+│   ├── internal/                        # 本仓库自身的开发记录（不随模板分发）
+│   ├── exec-plans/                      # 执行计划（active/ + completed/）+ 技术债台账
+│   ├── design-docs/                     # 设计决策索引 + 核心信念
+│   ├── glossary.md                      # 术语表
+│   └── PLANS.md / RELIABILITY.md / SECURITY.md# 计划生命周期 + 治理文档
 ├── templates/
 │   └── agents/                      # 规范规则模板（全局/项目级/目录级 × en/zh/zh-tw）
+├── tests/                           # 单元测试 + repo_checks.py 守卫套件
 ├── run-pipeline.ps1                 # Windows PowerShell 统一流水线执行脚本
 ├── run-pipeline.sh                  # Linux / macOS Bash 统一流水线执行脚本
 ├── deploy-agents.ps1                # Windows 一键部署与在线更新自动化脚本
 ├── deploy-agents.sh                 # Linux / macOS 一键部署与在线更新自动化脚本
 ├── setup-ai-memory.ps1              # 单项目/单客户端显式安装辅助脚本
 ├── setup-ai-memory.sh               # Linux / macOS / WSL 显式安装辅助脚本
-├── tools/tui.py                     # 终端交互式单选/多选组件库
 ├── .ai-memory.toml.example          # 本地显式加入标记示例
 ├── skills-lock.json                 # 技能来源及部分文件完整性元数据
+├── AGENTS.md                        # 本仓库自身的根指令（非模板）
+├── DECISIONS.md                     # 决策记录（D1–D71）
+├── QUALITY_SCORE.md                 # 各模块质量评分 + 基准快照
+├── CHANGELOG.md                     # 版本变更记录
 ├── README.md                        # 项目总览（English）
-└── README.zh.md                     # 项目总览（中文）
+├── README.zh.md                     # 项目总览（中文）
+└── README.zh-tw.md                  # 项目总览（繁體中文）
 ```
 
 首次部署时可用 `-Initialize` / `--initialize` 生成带项目事实和待确认清单的规则；使用 `-DirectoryPath` / `--directory` 指定一个已存在的模块目录，同时生成目录级规则。脚本只自动填写可从本地 Git、清单/锁文件和 CI 配置核实的信息；检测到 `package.json` 时还会把存在的 scripts 命令、常见框架/存储依赖列为“建议确认”，不会当成已验证的事实。业务定位、维护者、模块职责和边界交由用户或当前编码 Agent 确认。已有 `AGENTS.md` 不会被覆盖，改为生成 `AGENTS.generated.md` 供审阅。完成后使用 `-Check` / `--check` 检查待确认项。

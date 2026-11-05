@@ -105,9 +105,11 @@ agent-harness/
 ├── .agents/
 │   ├── rules/                       # Modular sub-rules (loaded on-demand)
 │   │   ├── engineering-spec.md      # SDD specification-first, TDD verification gate
+│   │   ├── engineering.md           # Engineering methodology & quality gates
 │   │   ├── git-workflow.md          # Git authorization model, protected branch isolation
 │   │   ├── security-boundary.md     # 8 High-risk operations protection matrix
 │   │   └── token-discipline.md      # Read/fetch/speak gates, log truncation
+│   ├── hooks/                           # Antigravity bridge hooks (Node.js)
 │   └── skills/                      # 39 Native engineering skills (Comet, OpenSpec, Superpowers...)
 ├── .claude/
 │   ├── settings.json                # Claude Code hook config (all five hook events)
@@ -118,6 +120,8 @@ agent-harness/
 │       ├── stop-gate.mjs            # Blocks stopping with an in_progress item
 │       ├── session-start.mjs        # Prints a session resume from gate state
 │       └── post-tool-use.mjs        # Appends cost-ledger telemetry
+├── .workbuddy/                      # WorkBuddy bridge (settings + hooks)
+├── .dsh/                            # DeepSeek Harness (dsh) bridge plugin (TypeScript)
 ├── gate/                            # Self-owned verification gate
 │   ├── pass-gate.py                 # Feature-list state machine + verify + check-clean
 │   ├── graph.py                     # Graph executor (standard/full only)
@@ -126,21 +130,34 @@ agent-harness/
 ├── tools/
 │   ├── loop.py                      # Goal Loop / Maker-Checker runner (standard/full only)
 │   ├── sync-skills.py               # External skill synchronization & upstream update checker
-│   └── doc-impact.py                # Living documentation impact analysis & quality gate
+│   ├── doc-impact.py                # Living documentation impact analysis & quality gate
+│   └── tui.py                           # Terminal UI single/multi select library
 ├── eval/                            # Self-built benchmark (t1–t12) + rubric (advisory-only)
+├── docs/                            # Documentation
+│   ├── guides/                          # User guides (EN/ZH; ZH-TW frozen)
+│   ├── internal/                        # This repo's own dev notes (not deployed)
+│   ├── exec-plans/                      # Execution plans (active/ + completed/) + tech-debt tracker
+│   ├── design-docs/                     # Design-decision index + core beliefs
+│   ├── glossary.md                      # Terminology glossary
+│   └── PLANS.md / RELIABILITY.md / SECURITY.md# Plan lifecycle + governance docs
 ├── templates/
 │   └── agents/                      # Canonical rule templates (Global/Project/Directory x en/zh/zh-tw)
+├── tests/                           # Unit tests + repo_checks.py guard suite
 ├── run-pipeline.ps1                 # Windows PowerShell unified pipeline runner
 ├── run-pipeline.sh                  # Linux / macOS Bash unified pipeline runner
 ├── deploy-agents.ps1                # Windows PowerShell one-click deploy & update script
 ├── deploy-agents.sh                 # Linux / macOS Bash one-click deploy & update script
 ├── setup-ai-memory.ps1              # Explicit ai-memory setup for one opted-in project/client
 ├── setup-ai-memory.sh               # Linux / macOS / WSL setup helper
-├── tools/tui.py                     # Terminal UI single/multi select library
 ├── .ai-memory.toml.example          # Safe-to-copy local opt-in marker example
 ├── skills-lock.json                 # Skill source and partial integrity metadata
+├── AGENTS.md                        # This repo's own root instructions (not a template)
+├── DECISIONS.md                     # Decision records (D1-D71)
+├── QUALITY_SCORE.md                 # Per-module quality scores + benchmark snapshots
+├── CHANGELOG.md                     # Release history
 ├── README.md                        # Repository overview (English default)
-└── README.zh.md                     # 项目中文概览
+├── README.zh.md                     # 项目中文概览
+└── README.zh-tw.md                  # 项目总览（繁體中文）
 ```
 
 ---

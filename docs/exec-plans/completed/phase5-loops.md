@@ -4,7 +4,7 @@ Date: 2026-10-28. Branch: `feat/phase0-v3`. Runner: `tools/loop.py`
 (stdlib only). Both demo loops ran in separate git worktrees (detached
 HEAD `7661bb5`), fanned in under merge rule "all must pass" — both final
 verifies passed before any result was committed. Raw state + events are
-kept under `docs/internal/phase5/goal-run/` and `docs/internal/phase5/mc-run/`.
+kept under `docs/exec-plans/completed/phase5/goal-run/` and `docs/exec-plans/completed/phase5/mc-run/`.
 
 Entry-gate honesty up front: the Phase 5 entry assessment
 (`agent-harness-phase5-entry-assessment-2026-10-28.md`, in the author's
@@ -17,7 +17,7 @@ on measured effect, not on the fact that they exist.
 
 Goal: `gate/pass-gate.py status` prints "1 item" (not "1 items") and a
 regression test covers 0/1/2 items. Goal file:
-`docs/internal/phase5/goal-goal.md`. Runner: max rounds 5, consecutive
+`docs/exec-plans/completed/phase5/goal-goal.md`. Runner: max rounds 5, consecutive
 passes 2, timeout 60 s, budget 600 s, no approval required.
 
 ### Manual baseline (worktree `/tmp/phase5-wt-goal`)
@@ -41,7 +41,7 @@ verification harness — the verify did its job. Comparable baseline:
 | 3 | No-op | PASS again | pass → 2 consecutive, complete |
 
 Total: **2052 ms, 3 rounds, 3 verify attempts (1 fail, 2 pass)**.
-State + events: `docs/internal/phase5/goal-run/` (init, round ×3, complete).
+State + events: `docs/exec-plans/completed/phase5/goal-run/` (init, round ×3, complete).
 
 ### Verdict
 
@@ -58,7 +58,7 @@ was needed.
 
 Goal: `templates/loop/graph.template.md` passes every checker item
 (graph-validate OK, ≥6 node rows, timeout ≤ 300 s, merge rule
-"all must pass"). Goal file: `docs/internal/phase5/goal-mc.md`.
+"all must pass"). Goal file: `docs/exec-plans/completed/phase5/goal-mc.md`.
 Runner: max rounds 5, consecutive passes 2, timeout 60 s, budget 600 s,
 **human approval required**. Worktree `/tmp/phase5-wt-mc`.
 
@@ -107,14 +107,14 @@ and noted here, not silently rewritten in the run record.
 
 - Verify `sleep 30`, timeout 2 s: killed at **2.005 s**, rc=124,
   `timed_out=True`, round outcome `timeout`, loop failed (max rounds 1).
-  State + events: `docs/internal/phase5/timeout-demo/`.
+  State + events: `docs/exec-plans/completed/phase5/timeout-demo/`.
 - Budget: maker `sleep 5` with wall-clock budget 1 s → status
   `budget-exceeded`, `budget_exceeded` event, exit 1 — **even though the
   round's verify passed**. Found during this demo: the first version of
   `_check_stop` checked the pass condition before the budget, so the
   loop completed despite exceeding budget; the order was fixed
   (budget → pass → max rounds) and the demo re-run to confirm.
-  State + events: `docs/internal/phase5/budget-demo/`.
+  State + events: `docs/exec-plans/completed/phase5/budget-demo/`.
 
 ## Fan-out / fan-in
 

@@ -13,7 +13,7 @@
 
 ## Verification
 
-- Command: `bash docs/internal/phase5/verify-goal.sh`
+- Command: `bash docs/exec-plans/completed/phase5/verify-goal.sh`
 - What counts as pass: status on a 1-item gate prints "(1 item)" and never
   "(1 items)"; `tests/pass_gate_test.py` exists and passes.
 - What counts as fail: exit non-zero, timeout, or output mismatch.
@@ -50,7 +50,7 @@
 - v2 (round 2): regression test written; verify PASS.
 - v3 (round 3): maker no-op; verify PASS again — 2 consecutive passes,
   loop complete. Total: 2052 ms, 3 rounds, 3 verify attempts (1 fail,
-  2 pass). State + events in `docs/internal/phase5/goal-run/`.
+  2 pass). State + events in `docs/exec-plans/completed/phase5/goal-run/`.
 
 ## Verdict
 

@@ -133,7 +133,7 @@
   not owed; runs only when conditions mature, on a real project the
   user knows well). D15 text otherwise unchanged.
 - **P1-11 — release draft hard stop** — `e2dd194`.
-  `docs/internal/release-v0.3.0.md`: the Phase 2 bullet now names the
+  `docs/exec-plans/completed/release-v0.3.0.md`: the Phase 2 bullet now names the
   proxy ledger (warn-only per D12) as such, and a new D57 bullet states
   the accurate position — ceilings, exit-2 refusal of new verification
   runs, never killing in-flight runs, the run-bench.sh setup enforcement
@@ -182,7 +182,7 @@
 - **lint-and-test (Ubuntu): FAILURE at the Markdown-lint step.**
   Cause (verified, not assumed): 45× MD004 list-style errors in TWO
   files, none of them from this round —
-  `docs/internal/merge-review-optimization-2026-10-29.md` (44×, dash
+  `docs/exec-plans/completed/merge-review-optimization-2026-10-29.md` (44×, dash
   where plus expected; last touched `a76430b`, prior round) and
   `DECISIONS.md:927` (1×, plus where dash expected; the D62 `+`
   continuation line from commit `b5c0c4a`, prior round). This round's
