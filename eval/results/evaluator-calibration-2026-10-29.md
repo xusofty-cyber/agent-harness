@@ -20,7 +20,7 @@ Searched 2026-10-29 night, in this clone of main `5fd31c7`:
   reps), 12 ablation records, 13 t5–t8 merge-round records, plus
   `eval/results/b1-2026-10-29.md` and `eval/results/b2-2026-10-29.md`.
 - `eval/calibration.md` — the 5 existing calibration rounds.
-- `docs/internal/phase1-dogfood.md`, `docs/internal/phase2-verification.md`,
+- `docs/internal/phase1-dogfood.md`, `docs/exec-plans/completed/phase2-verification.md`,
   `DECISIONS.md` (D15, D28), `eval/rubric-status.json`.
 - Repository-wide search for scorecard JSONs, second-reviewer records,
   manual per-dimension scores: **none found** (no `*scorecard*` file

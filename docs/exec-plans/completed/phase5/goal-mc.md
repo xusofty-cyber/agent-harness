@@ -16,7 +16,7 @@
 
 ## Verification
 
-- Command: `python3 docs/internal/phase5/checker-graph.py`
+- Command: `python3 docs/exec-plans/completed/phase5/checker-graph.py`
   (run by the runner in the isolated checker directory)
 - What counts as pass: all four checker items print PASS.
 - What counts as fail: any item FAIL, timeout, or missing artifact.
@@ -41,4 +41,4 @@
 ## Rounds
 
 - (filled in from `loop-state.json` after the run — see
-  `docs/internal/phase5-loops.md`)
+  `docs/exec-plans/completed/phase5-loops.md`)

@@ -16,7 +16,7 @@ loop root; the repo root is derived from this file's own location.
 import os
 import sys
 
-_HERE = os.path.abspath(__file__)  # <root>/docs/internal/phase5/maker-goal.py
+_HERE = os.path.abspath(__file__)  # <root>/docs/exec-plans/completed/phase5/maker-goal.py
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(_HERE))))
 # dirname x4: phase5 -> internal -> docs -> repo root
 

@@ -7,6 +7,17 @@ decided 2026-10-28 during the v3 consensus review. Unresolved items
 (N1–N5) are recommendations, not decisions — they are settled at the
 Phase 0 decision meeting.
 
+## How to read this log
+
+Append-only. A superseded decision keeps its original text and
+gains an inline supersession note naming its replacement — e.g.
+the D3/D19 freeze on FR/DE docs, superseded by D27 (the 18 FR/DE
+files were deleted and references cleaned), and the donor-table
+rulings D47→D59, D48→D60, D54→D62. One standing DEFERRED item:
+D28 (the live second-person rubric review), tracked with its
+re-trigger condition in `docs/exec-plans/tech-debt-tracker.md`.
+Index of record documents: `docs/design-docs/index.md`.
+
 ## D1 — Core gate is self-owned and host-agnostic; Comet is an adapter
 
 - **Decision:** the verification gate built from Phase 1 on is owned by
@@ -168,7 +179,7 @@ Phase 0 decision meeting.
   was never measured (U2) — the Phase 1 dogfood did not run Comet, so
   this stays open for Phase 1 dogfooding on a Comet-using project.
 - **Update (Phase 2, measured 2026-10-28):** U2 is now settled — see
-  `docs/internal/phase2-verification.md` (comet interrupt-recovery
+  `docs/exec-plans/completed/phase2-verification.md` (comet interrupt-recovery
   test). The Native change state
   (`docs/comet/changes/<name>/comet-state.yaml`) uses relative refs
   only; `.comet/current-change.json` carries no machine paths; the
@@ -422,7 +433,7 @@ Phase 0 decision meeting.
   runner: Goal Loop + Maker-Checker, enforced stop conditions,
   per-command timeout, wall-clock budget, human approval) with
   `templates/loop/` (goal / loop-state / graph, EN+ZH) and a worked
-  example graph (`docs/internal/phase5-graph.md`). Loop templates are
+  example graph (`docs/exec-plans/completed/phase5-graph.md`). Loop templates are
   NOT wired into `deploy-agents.sh` / `.ps1` yet — they ship with the
   repo; deploy integration is deferred to Phase 6 (release), with the
   rationale that the runner is repo tooling and the templates are
@@ -531,7 +542,7 @@ Phase 0 decision meeting.
   removal is itself a `**Breaking**` entry with a `Migration:` note and
   needs owner sign-off.
 - **Release notes:** v0.3.0 draft prepared in
-  `docs/internal/release-v0.3.0.md` (what was done / not done / measured
+  `docs/exec-plans/completed/release-v0.3.0.md` (what was done / not done / measured
   numbers); procedure in `docs/internal/release-checklist.md`. VERSION
   stays 0.2.1 and no tag is created in Phase 6 — tagging needs separate
   user approval.
@@ -896,7 +907,7 @@ still pending.
   deploy scripts first). To keep them, re-deploy with `--profile standard`
   (`-SkillProfile standard`). This sentence is also in
   `docs/internal/skill-tiers.md`, the README profile paragraph (EN+ZH),
-  and `docs/internal/release-v0.3.0.md` upgrade notes.
+  and `docs/exec-plans/completed/release-v0.3.0.md` upgrade notes.
 - **Scope:** distribution only. The loop/graph implementations are
   untouched; only the deploy scripts' tier gating changed.
 - **Guard:** repo_checks §3t asserts the per-tier file sets (minimal
@@ -927,7 +938,7 @@ still pending.
   gitignored file — the only gitignore-related checks assert the
   scaffold itself (patterns present), never the presence of an ignored
   artifact. To be confirmed by the fresh-clone run in the review
-  verification round (docs/internal/merge-review-optimization-2026-10-29.md).
+  verification round (docs/exec-plans/completed/merge-review-optimization-2026-10-29.md).
 
 ## D61 — SESSION_STATE template format: skeleton 31-line format is final (review ruling, 2026-10-29)
 
@@ -946,7 +957,7 @@ still pending.
 - **Decision:** yunyi's 6 lint rules are ported to `tools/lint-rules.py`
   - repo_checks `lint-rules:exit-0` (CI runs repo_checks, so CI is
   covered). Rule-by-rule reconciliation (full table in
-  docs/internal/merge-review-optimization-2026-10-29.md):
+  docs/exec-plans/completed/merge-review-optimization-2026-10-29.md):
   LINT-001 entry presence — NEW coverage, ENTRY_FILES adapted to
   skeleton reality (yunyi's `gate/harness.py` and
   `templates/feature_list.template.json` do not exist here and are

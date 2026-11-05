@@ -1133,7 +1133,7 @@ check("loop:stdlib-only", _loop_imports <= _LOOP_ALLOWED_IMPORTS,
 _loop_help = subprocess.run([sys.executable, str(ROOT / "tools" / "loop.py"), "--help"],
                             capture_output=True, text=True)
 check("loop:help-exits-0", _loop_help.returncode == 0, "loop.py --help failed")
-for _g in ("templates/loop/graph.template.md", "docs/internal/phase5-graph.md"):
+for _g in ("templates/loop/graph.template.md", "docs/exec-plans/completed/phase5-graph.md"):
     _gv = subprocess.run([sys.executable, str(ROOT / "tools" / "loop.py"),
                           "graph-validate", "--graph", str(ROOT / _g)],
                          capture_output=True, text=True)
@@ -1174,11 +1174,11 @@ check("loop:smoke-timeout-enforced",
 _decisions = (ROOT / "DECISIONS.md").read_text(encoding="utf-8")
 check("loop:d21-present", "## D21" in _decisions,
       "DECISIONS.md lacks D21 (Phase 5 L14 + four questions)")
-_record = (ROOT / "docs" / "internal" / "phase5-loops.md").read_text(encoding="utf-8")
+_record = (ROOT / "docs" / "exec-plans" / "completed" / "phase5-loops.md").read_text(encoding="utf-8")
 check("loop:record-sections",
       all(s in _record for s in ("## Goal Loop", "## Maker-Checker Loop",
                                  "## Timeout rule", "## Verdict")),
-      "docs/internal/phase5-loops.md lacks a required section")
+      "docs/exec-plans/completed/phase5-loops.md lacks a required section")
 _pass_gate_test = subprocess.run(
     [sys.executable, str(ROOT / "tests" / "pass_gate_test.py")],
     capture_output=True, text=True)

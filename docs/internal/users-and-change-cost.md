@@ -63,7 +63,7 @@ EXPECTED table plus the doc sweep, and CI will catch a missed copy.
 | `docs/guides/` | 10 |
 | `README*.md` | 5 |
 | `.agents/skills/` (the skill that documents it) | 1 |
-| Dated snapshots (`docs/internal/SESSION_RESUME*.md`, history) | 2 |
+| Dated snapshots (`docs/exec-plans/completed/SESSION_RESUME*.md`, history) | 2 |
 | **Total** | **23** |
 
 No references in `deploy-agents.*`, `run-pipeline.*`, `tests/`, the root

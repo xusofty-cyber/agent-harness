@@ -4,17 +4,17 @@
 
 ## 项目定位
 
-本仓库（`agent-harness`）维护面向多种主流 AI 编码工具的通用规则模板、40 项跨工具原生技能、安全防护钩子与自动化部署流水线脚本，目标是在保持跨项目规范高度一致的同时，保留各宿主工具的独特能力与加载差异。它不是特定业务产品仓库，不包含未经当前源码证实的旧版架构或硬件封签流水线。
+本仓库（`agent-harness`）维护面向多种主流 AI 编码工具的通用规则模板、39 项跨工具原生技能、安全防护钩子与自动化部署流水线脚本，目标是在保持跨项目规范高度一致的同时，保留各宿主工具的独特能力与加载差异。它不是特定业务产品仓库，不包含未经当前源码证实的旧版架构或硬件封签流水线。
 
 ## 主要内容与核心模块
 
-- **三层规则模板体系**：`Global AGENTS.md`、`Project AGENTS.md`、`Directory AGENTS.md`，支持多语言（EN, ZH, ZH-TW, FR, DE）及动态事实提取（`-Initialize` / `--initialize` 生成项目和指定目录的规则草稿）。
-- **脚手架与双轨记忆模板**：`templates/PROJECT_CONTEXT.template.*.md` 与 `templates/SESSION_STATE.template.*.md`，覆盖 5 种语言，供流水线自动初始化下游项目记忆。
+- **三层规则模板体系**：`Global AGENTS.md`、`Project AGENTS.md`、`Directory AGENTS.md`，支持多语言（EN, ZH, ZH-TW）及动态事实提取（`-Initialize` / `--initialize` 生成项目和指定目录的规则草稿）。
+- **脚手架与双轨记忆模板**：`templates/PROJECT_CONTEXT.template.*.md` 与 `templates/SESSION_STATE.template.*.md`，覆盖 3 种语言，供流水线自动初始化下游项目记忆。
 - **自动化工程流水线**：`run-pipeline.sh` / `.ps1`，串联规则部署、AI-Memory 记忆服务、外部技能同步锁定与活体文档质检。
 - **多平台部署脚本**：`deploy-agents.sh` / `deploy-agents.ps1`，具备双脚本 100% 特性对齐（Parity）、交互式 TUI 步骤向导、安全备份与多工具桥接部署能力。
 - **Agent 工具支持（三档）**：强制档——Claude Code（PreToolUse/Write 钩子在客户端执行）；配置档——Antigravity 2.0/CLI/IDE、Codex、Copilot、Cursor、Gemini CLI、Qwen Code、CodeBuddy、Windsurf、Cline、Roo Code、Kiro、Continue.dev、Trae（脚本只写桥接配置，不强制执行）；仅文件档——Zed、OpenCode、Aider、Qoder、Pi 等（只提供 AGENTS.md 文件，未适配，不保证自动加载）。
-- **40 项原生技能与安全钩子**：`.agents/skills/` 存放按需加载技能，`.claude/hooks/guard.mjs` 提供客户端安全操作防护（拦截危险强制推送、分支误删等）。
-- **多语言文档矩阵**：4 份核心指南（README、多工具部署配置指南、实战使用与技能全景指南、技能使用指南）全部提供中/英/繁/法/德 5 语种对齐。
+- **39 项原生技能与安全钩子**：`.agents/skills/` 存放按需加载技能，`.claude/hooks/guard.mjs` 提供客户端安全操作防护（拦截危险强制推送、分支误删等）。
+- **多语言文档矩阵**：4 份核心指南（README、多工具部署配置指南、实战使用与技能全景指南、技能使用指南）全部提供中/英/繁 3 语种对齐。
 
 ## 规则与记忆治理规范
 

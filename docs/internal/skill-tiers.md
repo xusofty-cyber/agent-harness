@@ -135,7 +135,7 @@ sources only), the FAQ guide (EN+ZH), the Multi-Tool guide (EN+ZH), and
 the Skills Usage Guide (EN+ZH). Result: 16 skills are referenced by a rule
 template (Project AGENTS), 24 appear only as guide listings. The full table
 is in the Phase 4 verification record
-(`docs/internal/phase4-verification.md`).
+(`docs/exec-plans/completed/phase4-verification.md`).
 
 ## Re-selection method (after the bench matrix completes)
 

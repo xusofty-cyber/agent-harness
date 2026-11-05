@@ -2,7 +2,7 @@
   "version": 1,
   "kind": "goal",
   "goal_id": "timeout-demo",
-  "goal_file": "/home/hatch/workspace/agent-harness-phase0/docs/internal/phase5/goal-timeout.md",
+  "goal_file": "/home/hatch/workspace/agent-harness-phase0/docs/exec-plans/completed/phase5/goal-timeout.md",
   "status": "failed",
   "round": 1,
   "consecutive_passes": 0,

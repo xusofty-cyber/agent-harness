@@ -17,7 +17,7 @@ import re
 import subprocess
 import sys
 
-_HERE = os.path.abspath(__file__)  # <root>/docs/internal/phase5/checker-graph.py
+_HERE = os.path.abspath(__file__)  # <root>/docs/exec-plans/completed/phase5/checker-graph.py
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(_HERE))))
 # dirname x4: phase5 -> internal -> docs -> repo root
 

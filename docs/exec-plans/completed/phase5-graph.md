@@ -1,9 +1,9 @@
 # Graph — Maker-Checker demo, graph template (Phase 5)
 
-> **Loop**: maker-checker | **Goal**: `docs/internal/phase5/goal-mc.md`
+> **Loop**: maker-checker | **Goal**: `docs/exec-plans/completed/phase5/goal-mc.md`
 > **Run**: 2026-10-28, worktree `/tmp/phase5-wt-mc` (detached HEAD `7661bb5`)
 > **Result**: complete at round 5/5, 2 consecutive passes, human approval
-> recorded. State + events: `docs/internal/phase5/mc-run/`.
+> recorded. State + events: `docs/exec-plans/completed/phase5/mc-run/`.
 > This is the worked example of `templates/loop/graph.template.md` — the
 > template with this run's real values filled in.
 
@@ -55,7 +55,7 @@
 - What happened: the loop reached its pass condition at round 5
   (rounds 4 and 5 both passed the checker)
 - What changed: `templates/loop/graph.template.md` (content refined over
-  5 rounds) and the loop record in `docs/internal/phase5/mc-run/`
+  5 rounds) and the loop record in `docs/exec-plans/completed/phase5/mc-run/`
 - Why human: adopting a new template into the repo needs a person — the
   runner can verify shape, not whether the graph is the right contract
 - Approve: the graph template is adopted; fan-in proceeds (recorded as
@@ -67,7 +67,7 @@
 - Per-command timeout: 60 seconds (runner-enforced; a timeout kills the
   command and records a `timeout` event). Verified separately: a verify
   command of `sleep 30` with timeout 2 was killed at 2.005 s, rc=124,
-  `timed_out=True`, round outcome `timeout` — see `docs/internal/phase5-loops.md`.
+  `timed_out=True`, round outcome `timeout` — see `docs/exec-plans/completed/phase5-loops.md`.
 - Wall-clock budget: 600 seconds; exceeding it records a
   `budget_exceeded` event and fails the loop even if the round just
   passed (verified: maker `sleep 5` with budget 1 s → `budget-exceeded`,

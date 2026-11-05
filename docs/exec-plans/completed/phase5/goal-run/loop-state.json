@@ -2,7 +2,7 @@
   "version": 1,
   "kind": "goal",
   "goal_id": "goal-status-plural",
-  "goal_file": "/tmp/phase5-wt-goal/docs/internal/phase5/goal-goal.md",
+  "goal_file": "/tmp/phase5-wt-goal/docs/exec-plans/completed/phase5/goal-goal.md",
   "status": "complete",
   "round": 3,
   "consecutive_passes": 2,
@@ -17,7 +17,7 @@
     {
       "round": 1,
       "phase": "maker",
-      "command": "python3 /tmp/phase5-wt-goal/docs/internal/phase5/maker-goal.py",
+      "command": "python3 /tmp/phase5-wt-goal/docs/exec-plans/completed/phase5/maker-goal.py",
       "returncode": 0,
       "timed_out": false,
       "duration_s": 0.054
@@ -25,7 +25,7 @@
     {
       "round": 1,
       "phase": "verify",
-      "command": "bash /tmp/phase5-wt-goal/docs/internal/phase5/verify-goal.sh",
+      "command": "bash /tmp/phase5-wt-goal/docs/exec-plans/completed/phase5/verify-goal.sh",
       "returncode": 1,
       "timed_out": false,
       "duration_s": 0.211,
@@ -34,7 +34,7 @@
     {
       "round": 2,
       "phase": "maker",
-      "command": "python3 /tmp/phase5-wt-goal/docs/internal/phase5/maker-goal.py",
+      "command": "python3 /tmp/phase5-wt-goal/docs/exec-plans/completed/phase5/maker-goal.py",
       "returncode": 0,
       "timed_out": false,
       "duration_s": 0.049
@@ -42,7 +42,7 @@
     {
       "round": 2,
       "phase": "verify",
-      "command": "bash /tmp/phase5-wt-goal/docs/internal/phase5/verify-goal.sh",
+      "command": "bash /tmp/phase5-wt-goal/docs/exec-plans/completed/phase5/verify-goal.sh",
       "returncode": 0,
       "timed_out": false,
       "duration_s": 0.713,
@@ -51,7 +51,7 @@
     {
       "round": 3,
       "phase": "maker",
-      "command": "python3 /tmp/phase5-wt-goal/docs/internal/phase5/maker-goal.py",
+      "command": "python3 /tmp/phase5-wt-goal/docs/exec-plans/completed/phase5/maker-goal.py",
       "returncode": 0,
       "timed_out": false,
       "duration_s": 0.048
@@ -59,7 +59,7 @@
     {
       "round": 3,
       "phase": "verify",
-      "command": "bash /tmp/phase5-wt-goal/docs/internal/phase5/verify-goal.sh",
+      "command": "bash /tmp/phase5-wt-goal/docs/exec-plans/completed/phase5/verify-goal.sh",
       "returncode": 0,
       "timed_out": false,
       "duration_s": 0.746,
