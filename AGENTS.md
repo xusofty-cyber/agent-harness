@@ -30,6 +30,23 @@ ZH-TW is stale/frozen per `docs/internal/i18n-status.md`.
 - **This repo's own notes** live in `docs/internal/` (not the distribution root).
 - Changelog entries go under `[Unreleased]` in `CHANGELOG.md`.
 
+## Session procedures
+
+- **Startup**: read `docs/internal/SESSION_STATE.md`, then run
+  `python3 gate/pass-gate.py status`; if the breakpoint names an
+  active plan under `docs/exec-plans/active/`, read it before
+  touching code.
+- **Definition of done**: an item is done only when
+  `pass-gate.py verify` re-runs its verification command green and
+  the evidence is recorded — never on the author's say-so. A work
+  round is done when `check-clean` passes all dimensions and
+  `tests/repo_checks.py` + the unit tests pass.
+- **End of session**: refresh `SESSION_STATE.md` (one page, five
+  sections; `repo_checks` fails the build if it lags HEAD by more
+  than 14 days), move unfinished work into the active plan or
+  `docs/exec-plans/tech-debt-tracker.md`, and leave the tree
+  check-clean.
+
 ## Source of truth
 
 Repository files are the source of truth; ai-memory is a recall adapter

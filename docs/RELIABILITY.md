@@ -17,6 +17,9 @@ states the standard paths and the rules that bind them.
 
 - The gate's hash-chained event log (every state transition is
   recorded and tamper-evident).
+- State freshness: `tests/repo_checks.py` fails when
+  `docs/internal/SESSION_STATE.md` lags the newest commit by more
+  than 14 days — a stale breakpoint is a defect, not a nuisance.
 - This repo dogfoods its own gate: `gate/feature_list.json` carries
   this repo's items with recorded evidence.
 - CI (`.github/workflows/ci.yml`) runs the checks above plus

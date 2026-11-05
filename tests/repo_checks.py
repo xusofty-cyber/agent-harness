@@ -490,6 +490,35 @@ for _p in sorted((ROOT / "docs" / "internal").rglob("*.md")):
 check("docs:no-unfilled-placeholders", not _placeholder_bad,
       "; ".join(_placeholder_bad[:5]))
 
+# --- 3j2. State freshness: the session breakpoint must not rot ---
+# SESSION_STATE.md has twice gone stale for weeks in this repo's
+# history (and the same failure was found in the MedOnTime repo on
+# 2026-11-06). Rule: its Updated date may lag the newest commit by
+# at most 14 days. Environment-skip when git or the date is absent
+# (e.g. an exported tree), never a silent pass.
+import datetime as _dt_fresh
+import subprocess as _sp_fresh
+_ss_path = ROOT / "docs" / "internal" / "SESSION_STATE.md"
+_ss_m = None
+if _ss_path.exists():
+    _ss_m = re.search(r"\*\*Updated\*\*:\s*(\d{4}-\d{2}-\d{2})",
+                      _ss_path.read_text(encoding="utf-8"))
+try:
+    _head_date = _sp_fresh.run(
+        ["git", "log", "-1", "--format=%cs"], cwd=ROOT,
+        capture_output=True, text=True, timeout=15).stdout.strip()
+except Exception:
+    _head_date = ""
+if _ss_m is None or not _head_date:
+    check_env("state:session-state-fresh",
+              "git HEAD date or SESSION_STATE Updated date unavailable")
+else:
+    _lag = (_dt_fresh.date.fromisoformat(_head_date)
+            - _dt_fresh.date.fromisoformat(_ss_m.group(1))).days
+    check("state:session-state-fresh", _lag <= 14,
+          f"SESSION_STATE updated {_ss_m.group(1)}, HEAD {_head_date}, "
+          f"lag {_lag}d (max 14)")
+
 # --- 3k. Gate layer: schema, evidence, events (Phase 1, 1-5b) ---
 # CI second check of the anti-tamper triple. The repo dogfoods the gate on
 # itself: gate/feature_list.json is this repo's own list.
