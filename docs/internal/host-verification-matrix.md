@@ -24,13 +24,14 @@ move up a tier on recorded evidence, never on protocol tests alone.
 > **Scope note — the Antigravity desktop app is not a separate tier.** The Electron desktop build (also present on the verification host) ships no hook/event surface of its own in the materials this repository consumes; its agent is the same agy 1.2.14 line, consuming the same `.agents/hooks.json` through the same adapter scripts the CLI and IDE runs above exercised. There is therefore no distinct contract for a desktop run to verify, and no matrix row for it. If a future desktop build ever exposes its own hook settings surface, re-open this note and add the row then.
 > **Smoke attempt 2026-11-06 (owner-requested):** the user ran the standard brief in the desktop app against the
 > verification project. The app was live in that window (its language server called Google endpoints at
-> 10:14–10:17 local), but **no gate events resulted**: the project's event log gained only the preparatory
-> `reopened` entry (#11, written via CLI before the run), the item stayed `in_progress` with no evidence, and
-> the desktop app's own logs contain no reference to the project or its hooks. Working conclusion: the desktop
-> agent did not consume `.agents/hooks.json` at all in this attempt — it neither ran the gate flow nor attempted
-> the forgery (which is why nothing was blocked). Consistent with "no distinct contract surface", but the
-> mechanism is unproven: agent not driven to tool use, and hooks silently ignored, are indistinguishable from
-> outside. If the desktop app is ever used for real gate work, this needs one instrumented re-check first.
+> 10:14–10:17 local), but **no gate events resulted** beyond the preparatory entry. The user's own transcript
+> afterwards settles the mechanism: the agent DID execute step 1 (it ran the brief's `reopen`, which is event
+> #11, and correctly reported `start` failing because reopen had already moved the item to `in_progress`) and
+> then attempted step 2's early finish. So the desktop agent drove the gate CLI fine — what never fired is the
+> hook plane: no SessionStart/Stop/PreToolUse effects are observable, and the run stopped at step 2 without
+> producing verify or deny events. Net: on the desktop app the pass-gate CLI works as plain shell commands
+> (the model can drive it), but `.agents/hooks.json` enforcement is NOT in evidence — treat the desktop app as
+> **ungated** unless a future instrumented re-check shows the hooks firing.
 | WorkBuddy | `protocol-only` | `tests/workbuddy-hooks.test.mjs` 16 pass against *assumed* Claude-shaped payloads. **Owner ruling 2026-11-06: live verification deferred — do not chase.** The 5.6.2 Linux build is installed on the Instabox test box (official .deb, hash-verified), so resuming needs only an account sign-in + the payload/settings check | One live run after an account sign-in on an installed build, whenever the owner re-opens it |
 | DeepSeek Harness (dsh) | `live-verified` | One full live run on the user's host, 2026-11-06 (**dsh 0.2.1-rc.5**, headless profile, model `IFM/K2-Horizon-375B-A23B` via a custom OpenAI-compatible provider; project deployed from main @ 1bf4c72 plus the contract fixes below): start/verify wrote real evidence (gate events #3/#4), the `feature_list.json` forgery was denied **twice** with both denies in the hash-chained log (#5/#6), `check-clean` passed, item ends `[passing]` with evidence, zero forged content. Three contract fixes the run forced are now in the plugin and pinned by its 20 unit tests: (1) waterfall handlers never propagate an `undefined` tail (dsh reads `.kind` on it and crashes); (2) `ctx.tools.guard` is absent in rc.5 — pre-execute is the only gate, as designed; (3) **creation-time resume injection is disabled on dsh**: a synchronous `agent.inject` inside the serial `agent/created` chain crashes the run inside dsh's admission path, so the resume is surfaced on stderr instead — a recorded limitation, not a silent gap. Stop enforcement remains provisional: the `agent/turn-stopping` handler ran in this session, but no in_progress stop was provoked, so the steering path is still unproven live | — |
 | Codex / Copilot / Zed / others reading `AGENTS.md` | `config-only` | Native `AGENTS.md` loading; no hooks | Nothing owed — the tier is the honest ceiling unless a host gains a hook surface |
