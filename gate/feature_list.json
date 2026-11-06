@@ -125,6 +125,27 @@
         "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
       },
       "notes": "This night run itself ran on Muse/agy without Claude hooks, so manual discipline was the only enforcement; the checklist captures that."
+    },
+    {
+      "id": "e2e-deploy-smoke",
+      "priority": "p1",
+      "area": "core",
+      "title": "End-to-end deploy smoke (integration)",
+      "user_visible_behavior": "deploy-agents.sh into a temp project, then the deployed gate runs one full item lifecycle with evidence",
+      "status": "passing",
+      "verification": {
+        "command": "python3 tests/e2e_deploy_smoke.py",
+        "timeout_seconds": 300,
+        "level": "integration"
+      },
+      "evidence": {
+        "command": "python3 tests/e2e_deploy_smoke.py",
+        "exit_code": 0,
+        "ran_at": "2026-11-06T03:07:56Z",
+        "output_tail": "E2E deploy smoke PASS: deploy -> init -> add -> start -> verify -> evidence -> check-clean\n",
+        "output_sha256": "71dd36560c05c0a4fe614babb7866a60485e24c959d4fc65a4832207ee2f05df"
+      },
+      "notes": ""
     }
   ],
   "project": "agent-harness",
