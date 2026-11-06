@@ -27,6 +27,16 @@
 
 ## Next
 
+- 2026-11-06 afternoon batch landed: QUALITY_SCORE re-issued
+  (bridges 4 → 7); D72 deps hard-block + out_of_scope; D73 two-track
+  state; integration-level `e2e-deploy-smoke` item (mix now
+  assert 5 / unit 1 / integration 1). Remaining before v0.7.0:
+  first real CI run (branch `ci/first-real-run`, workflow_dispatch
+  in flight), zh-TW regeneration (audit: FIVE stale rows, not one —
+  README.zh-tw + Multi-Tool guide x2 rows + both AGENTS templates),
+  bridge residuals session (F4 start event, dsh stop steering,
+  desktop PreToolUse deny).
+
 - [x] Antigravity CLI + IDE live runs — done 2026-11-06 on the
   user's host (both `live-verified`; matrix updated, merges
   `d6b1b20` + `c898cd5`, pushed via the host after this VM's SSH
