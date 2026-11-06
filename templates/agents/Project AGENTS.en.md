@@ -105,6 +105,23 @@ To avoid context explosion, fine-grained rules and skills reside in `.agents/rul
 - **Shared Memory Skill**: Use `.agents/skills/cross-tool-memory/SKILL.md` when continuing across sessions or making durable decisions; never persist full conversations or unverified conclusions.
 - **Living Documentation & Code Traceability**: Long-term documentation lives under `docs/` (`docs/specs/`, `docs/architecture/`, `docs/reference/`, `docs/guides/`). Declare `modules` and `depends_on` in Frontmatter. Keep code and docs synchronized; see `.agents/skills/living-documentation/SKILL.md`.
 
+## Scale Grading and Task Grading (set the intensity before you start)
+
+Harness intensity must follow "project scale × cost of being wrong"; running everything at full strength makes small projects slower than the work itself. Grade the project here once, then grade each task as it starts.
+
+**Project scale tier (decide at deployment, record it here)**:
+
+- **Lite (small project)**: roughly < 50 source files, single maintainer, no cross-week development — keep only this file (slim form) + targeted tests + (for cross-day work) a one-page SESSION_STATE. The gate item flow, check-clean and doc-impact are **off by default** and enabled ad hoc only for high-cost changes.
+- **Standard (medium and up)**: everything on — item flow, verify and check-clean as the rest of this file prescribes.
+- This project's current tier: `<record Lite or Standard here, with a one-line basis>`
+
+**Task grading (grade every task before starting)**:
+
+- **S — fast lane**: single-file, style/copy/parameter changes whose blast radius is visible at a glance and whose errors surface immediately. No gate item, no full-suite verification; read only the relevant files (locate first, then read closely — no aimless whole-repo sweeps), and afterwards run only that file's targeted test or an equivalent smoke check; report completion in-session.
+- **M — standard lane**: multi-file changes with clear boundaries. One gate item (batch similar small changes into a single item) whose verification command names a targeted test set; check-clean runs at wrap-up only.
+- **L — full lane**: anything touching a state machine, an external interface, data migration, a security boundary, or where one mistake is expensive. Full flow — item + complete verify + check-clean + review where called for; nothing may be skipped.
+- When in doubt, grade up, not down. If an S task's blast radius grows mid-flight, promote it to M and open the item then — never ride the fast lane past its limits.
+
 ## Definition of Done Checklist
 
 When the verification gate is active (`gate/feature_list.json` exists), drive all task transitions through `python3 gate/pass-gate.py` (`WIP=1`; never hand-edit or script-edit `gate/feature_list.json`): check `pass-gate.py status` and claim work with `start --id <id>` before coding (register new items first via `add --level <unit|integration|e2e>` with the verification command written upfront). After completing feature development or requirement implementation, execute these steps in order — none may be skipped:

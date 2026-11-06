@@ -172,6 +172,27 @@ shopapi/
 **Deployment is only half done at this point.** The next three
 sections are the other half.
 
+### 3.5 Grade before you deploy: scale decides the tier (never default to full)
+
+The full harness ceremony (multi-host bridges, gate items, doc
+impact) is a net burden on a small project: a single-maintainer
+tool with a dozen source files can end up with more management
+files than source files, and every small task pays the process tax
+first. Grade the project by "scale × cost of being wrong" before
+deploying, and record the tier in the project `AGENTS.md` section
+"Scale Grading and Task Grading" (the template ships that section):
+
+| Tier | Rough criteria | Deployment shape |
+|---|---|---|
+| Lite | ~< 50 source files, single maintainer, no cross-week work | Slim project AGENTS only (the `--profile minimal` slim template) + the project's own tests; gate item flow, check-clean and doc-impact off; bridges only for the one host actually used |
+| Standard | Medium or larger, multi-person or cross-week, or one mistake is expensive | The full flow in this guide |
+
+Mis-grading costs are asymmetric: Standard on a small project is a
+daily slowness tax; Lite on a large project is expensive exactly
+when something breaks. When unsure, start Lite and upgrade after
+the first "a mistake slipped through" incident — upgrading is just
+an additional deployment, no data is lost.
+
 ---
 
 ## 4. Essential configuration 1: fill in the three root documents
@@ -452,6 +473,33 @@ is dismantling the gate.
 - **Ending work**: refresh `SESSION_STATE.md` (one page), leave
   unfinished work in items or plans, and finish with a green
   `check-clean`.
+
+### 6.4 The fast lane: a quick path for small tasks (task grading)
+
+After the project's tier is set, grade each task once more before
+starting (the template's grading section ships the stock wording;
+adapt the thresholds to your project's risk profile):
+
+- **S — fast lane**: single-file, style/copy/parameter changes —
+  no gate item, no full-suite verification; read only the relevant
+  files (locate first, then read closely; no aimless whole-repo
+  sweeps), run that file's targeted test afterwards, and report
+  in-session. Layout tweaks, changing a default, fixing a typo
+  all live here.
+- **M — standard lane**: multi-file with clear boundaries — one
+  gate item (batch similar small changes into it), a targeted
+  test set as its verification command, check-clean at wrap-up.
+- **L — full lane**: state machines, external interfaces, data
+  migrations, security boundaries, or one mistake is expensive —
+  the complete flow, nothing skipped.
+
+Without a fast lane, a harness is systematically slow on small
+tasks: a dozen files read at start-up and an item ceremony for a
+one-line change, with all the time spent on ritual. Grading rule
+of thumb: blast radius visible at a glance and errors surface
+immediately → S; everything else starts at M; high-cost surfaces
+→ L. When in doubt grade up, and if an S task outgrows its blast
+radius mid-flight, promote it to M and open the item then.
 
 ---
 
