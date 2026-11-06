@@ -42,8 +42,16 @@ and CLI. So the desktop gap is most likely *wiring*, not a missing feature.
   desktop app as "CLI-driven, hook-less; audit before trusting status".
 - [ ] **F4 — IDE hardening (primary surface).** (Desktop half now closed by F1/F2; the IDE residuals below remain.) Two recorded residuals from
   the live run: (a) the IDE session's `start` produced no separate `started`
-  event — confirm whether that is the agent's flow or an adapter gap, and
-  pin it with a test either way; (b) re-run the four-event check after any
+  event — **RESOLVED 2026-11-06: neither an adapter gap nor an agent-flow
+  quirk.** No bridge adapter (Antigravity, dsh, Claude) ever synthesizes
+  gate events — `started` is written by `pass-gate.py start` itself, which
+  the IDE session never invoked as a discrete step (it entered via
+  `reopen`, whose `reopened` event #6 anchored the cycle; the Stop pair
+  #7/#10 bracketed it). Invariant pinned by
+  `tests/pass_gate_deps_test.py`-adjacent coverage in
+  `tests/antigravity-hooks.test.mjs` (no adapter emits gate events) plus
+  the CLI/desktop live runs, where discrete `start` invocations DID
+  produce `started` events through the same code path; (b) re-run the four-event check after any
   agy major upgrade (version-drift watch, same rule as other hosts).
 - [x] **F5 — Records (done 2026-11-06 for the desktop outcome; guide section lands with F4).** Matrix scope note rewritten with the full arc; tracker row updated. Matrix rows for IDE/desktop updated with F1's outcome;
   Multi-Tool Deployment guide gains a per-surface section (IDE: workspace

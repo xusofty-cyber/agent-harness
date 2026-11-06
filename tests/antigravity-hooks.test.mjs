@@ -426,3 +426,19 @@ test("Stop blocked event writes hash-chained record and events-head.json that pa
   assert.equal(verify.status, 0, verify.stdout + verify.stderr);
   assert.match(verify.stdout, /event chain OK/);
 });
+
+test("adapters never synthesize gate lifecycle events (F4a invariant)", () => {
+  // F4(a) resolution (2026-11-06): `started` (and every other lifecycle
+  // event) is written ONLY by pass-gate.py itself; adapters may append
+  // block/allow records (guard-*, stop_*) but must never mint a
+  // lifecycle event. The IDE live run's missing `started` was owed to
+  // the session entering via reopen, not to any adapter gap.
+  const dir = makeProject({
+    items: [{ id: "f1", title: "Do the thing", status: "not_started" }],
+  });
+  preTool(dir, "write_file", { Path: join(dir, "gate", "feature_list.json") });
+  preTool(dir, "run_command", { CommandLine: "npm test" });
+  runAdapter(dir, "antigravity-session-start.mjs", { cwd: dir });
+  const events = readFileSync(join(dir, "gate", "events.jsonl"), "utf-8");
+  assert.doesNotMatch(events, /"(started|verified|reopened|added)"/);
+});
