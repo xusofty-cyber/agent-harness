@@ -6,6 +6,10 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+### Changed
+
+- **WorkBuddy live verification deferred (owner ruling, 2026-11-06).** The matrix row now records the deferral explicitly instead of an open-ended "owed"; an official 5.6.2 Linux build stands installed on the test box, so resumption is a sign-in plus the payload/settings confirmation whenever the owner re-opens it.
+
 ### Added
 
 - **Antigravity IDE is now `live-verified` (2026-11-06).** All four hook events observed live in one IDE session on the user's host (agy 1.2.14, same deployed project as the CLI run): the Stop hook **blocked** an in_progress finish (gate event `stop_blocked`, decision=continue) and allowed it after verification (`stop_allowed_hook_active`); verify wrote real evidence; the `edit_file` forgery on `feature_list.json` was denied with the deny captured in the event log. Record: `docs/internal/host-verification-matrix.md`.
