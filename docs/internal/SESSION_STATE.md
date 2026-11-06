@@ -7,12 +7,12 @@
 
 ## Goal
 
-- Keep the gate workflow on main (now `20447cf`, v0.6.0) honest by
-  dogfooding it on this repo itself. The night-dogfood round is
-  closed: all 6 feature-list items passing (incl.
-  `night-dogfood-session-state`), and the `night/dogfood`
-  branch no longer exists (its two PR Next items from the
-  2026-10-29 breakpoint are dropped as moot).
+- Keep the gate workflow on main honest by dogfooding it on this
+  repo itself. The night-dogfood round is closed: all 6
+  feature-list items passing (incl. `p1-dogfood-session-state`
+  and `night-dogfood-session-state`). On 2026-11-06 the bridge
+  live-verification round closed Antigravity CLI + IDE at
+  `live-verified` (host runs, matrix updated).
 
 ## In progress
 
