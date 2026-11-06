@@ -6,6 +6,10 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+### Added
+
+- **Antigravity CLI is now `live-verified` (2026-11-06).** Full gate flow run live on the user's host with **agy 1.2.14** against a project deployed fresh from main: start → verify (PASS with real evidence) → check-clean all-pass, and the previously owed instrumented re-run discharged — an `edit_file` forgery attempt on `gate/feature_list.json` was denied by the PreToolUse hook **and the deny itself was captured in the gate event log** (`guard-feature-list direct_write_blocked`). Record: `docs/internal/host-verification-matrix.md`; README enforcement wording and the tech-debt bridge row updated to match (matrix rule 1).
+
 ### Fixed
 
 - **Deploy wizard menus smeared across the screen on arrow keys — rendering rewritten.** Both `Prompt-SingleSelect` and `Prompt-MultiSelect` in `deploy-agents.ps1` redrew by reprinting the whole list and moving the cursor up by the item count; any label that wraps (CJK labels are double-width, and the multi-select rows are padded) breaks that arithmetic, so each redraw started lower than the last and the first row repeated over the whole list (user screenshot, Windows, 2026-10-31). Rows are now rendered at absolute buffer positions, only changed rows are redrawn, and row padding is measured in display columns (CJK = 2). This supersedes the marker/colour-only fix merged hours earlier in PR #93, which treated the feedback symptom but not the redraw defect.
