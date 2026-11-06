@@ -67,10 +67,16 @@ is back in sync.
   the file stayed unmodified; the mechanism had additionally been
   proven the same day through the globally installed adapter
   (deny + `direct_write_blocked` event #16 on the host).
-- dsh Stop steering: the `agent/turn-stopping` handler ran live,
-  but no in-progress stop was provoked; steering remains unproven
-  live. The provocation experiment is blocked on the host-side
-  model key (not found where the script expected it).
+- dsh Stop steering: **proven live 2026-11-06** in a dedicated
+  provocation run (DeepSeek official API, `deepseek-flash`): the
+  stop was blocked, the steering text reached the model, the
+  model complied instead of ending, gate event #8
+  (`stop_blocked`) landed, and the item stayed `in_progress`.
+  Residual honesty note: after the steered turn, the run ends in
+  a host-side dsh error (`Cannot read properties of undefined
+  (reading 'kind')`, the known rc.5 waterfall fragility) — the
+  steering mechanism is proven, the host's post-steering turn
+  termination is not clean.
 - D28 evaluator rubric remains advisory-only; Round 6 adjudication
   by the owner is pending. No claim that the gate reduces false
   completions (D69 stands).
