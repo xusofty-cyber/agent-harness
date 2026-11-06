@@ -64,6 +64,8 @@
 - **M 级（常规）**：多文件边界清晰——立一个条目（同类小改合并），验收用定向测试集，check-clean 收工时跑。
 - **L 级（全通道）**：状态机/接口/迁移/安全边界或错一次代价大——条目＋完整 verify＋check-clean 全流程。有疑问就高不就低；S 级影响面超预期立即升 M。
 
+- **升档**：出现任意两条信号（通读不再现实、协作者/宿主变多、开发跨周靠猜断点、第一次改 A 坏 B 没被拦、长出高代价面）→ 按部署指南 §3.6 切标准档：补部署、立基线条目、纪律三步开，历史不回溯补账。
+
 ## 功能完成检查清单（Definition of Done）
 
 若存在 `gate/feature_list.json`，全程用 `python3 gate/pass-gate.py` 驱动（`pass-gate.py status` ➔ `pass-gate.py start` [WIP=1] ➔ `pass-gate.py verify` ➔ `pass-gate.py check-clean`），严禁直接手改 `feature_list.json`：

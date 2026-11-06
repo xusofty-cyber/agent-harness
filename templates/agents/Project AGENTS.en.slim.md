@@ -87,6 +87,8 @@
 - **M (standard)**: multi-file with clear boundaries — one gate item (batch similar small changes), targeted test set as verification, check-clean at wrap-up.
 - **L (full)**: state machines / interfaces / migrations / security boundaries, or one mistake is expensive — item + full verify + check-clean, nothing skipped. When in doubt grade up; if an S task outgrows its blast radius, promote it to M at once.
 
+- **Upgrading**: any two signals (outgrew read-through, more collaborators/hosts, cross-week work with guessed stopping points, first uncaught breakage, high-cost surfaces) → follow the walkthrough §3.6 to Standard: top-up deployment, baseline item, disciplines in three steps, no backfilled history.
+
 ## Definition of Done Checklist
 
 When `gate/feature_list.json` is present, drive task state exclusively via `python3 gate/pass-gate.py` (`pass-gate.py status` -> `pass-gate.py start` [WIP=1] -> `pass-gate.py verify` -> `pass-gate.py check-clean`; never hand-edit `gate/feature_list.json`):

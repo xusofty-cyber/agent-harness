@@ -193,6 +193,57 @@ when something breaks. When unsure, start Lite and upgrade after
 the first "a mistake slipped through" incident — upgrading is just
 an additional deployment, no data is lost.
 
+### 3.6 Upgrade checklist: growing from Lite to Standard
+
+Upgrading is not "retroactively paying the process you skipped";
+it is switching to a different way of working from one day
+forward. Check the signals first, then walk four steps — history
+is never backfilled.
+
+**Trigger signals (any two mean: upgrade)**:
+
+- The code has outgrown "read it all in one pass"; the Lite size
+  criteria are clearly behind you;
+- A second collaborator or a second host joins;
+- Development starts spanning weeks and "where did we stop" has
+  become guesswork;
+- The first "changed A, broke B, and the tests did not catch it"
+  incident happens;
+- High-cost surfaces appear: external interfaces, data formats,
+  anything where one mistake is expensive.
+
+**The four steps**:
+
+1. **Relabel**: change the tier in the project `AGENTS.md`
+   grading section from Lite to Standard, with a fresh one-line
+   basis.
+2. **Top-up deployment**: simply re-run the section 3 pipeline —
+   deployment only adds what is missing and never overwrites
+   existing files. Move the facts already filled into the slim
+   AGENTS into the matching sections of the full template by
+   hand; bridges still only for hosts actually in use — do not
+   carpet-deploy every host just because you upgraded.
+3. **Gate cold start**: run `gate/init` (section 6) to create the
+   feature list; make the first item a **baseline item** whose
+   verification command is the project's existing full test
+   suite, and verify it green — that proves the starting point
+   was green on upgrade day. Existing features are **never
+   backfilled** with items: whoever touches a module adds its
+   item then (incremental claiming), and the ledger fills in
+   naturally.
+4. **Open the disciplines in three steps**: state layer first
+   (SESSION_STATE becomes official, check-clean at wrap-up),
+   then the gate item flow (new features always get items, old
+   ones are claimed on touch), then doc-impact and CI tightening
+   — one step per iteration or two, never all on the same day.
+
+**The cut-over principle**: commits before upgrade day get no
+items and no documents backfilled; the git history is that
+period's record, and Standard bookkeeping starts on upgrade day.
+Downgrading is fully symmetric: if the project freezes or
+shrinks, delete the management files in reverse — nothing is
+locked in, which is exactly why starting Lite is safe.
+
 ---
 
 ## 4. Essential configuration 1: fill in the three root documents

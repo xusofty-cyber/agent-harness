@@ -12,6 +12,8 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 - **Scale grading + task fast lane (templates + walkthrough).** Field feedback (2026-11-06): on a small single-maintainer project (~9 source files) the full ceremony measurably slowed every task — management files rivalled the source tree, and a one-parameter change paid the whole item/verify process. The Project AGENTS templates (ZH / EN / ZH-TW + both slim variants) gain a **Scale Grading and Task Grading** section: projects record a **Lite** tier (slim AGENTS + targeted tests; gate flow, check-clean and doc-impact off by default) vs **Standard**, and every task is graded **S** (fast lane: no item, targeted reads and tests only), **M** (one item, targeted verification, check-clean at wrap-up) or **L** (full flow for state machines, interfaces, migrations, security boundaries). The deployment walkthrough gains §3.5 (grade before deploying) and §6.4 (the fast lane) in EN and ZH.
 
+- **Tier-upgrade checklist (§3.6 + template pointer).** Companion to the grading addition: the walkthrough (EN + ZH) gains **§3.6 Upgrade checklist** — five trigger signals (any two mean upgrade), four steps (relabel; top-up deployment, which never overwrites; gate cold start with a baseline item verified green and existing features claimed on touch, never backfilled; disciplines opened in three steps across iterations), and the cut-over principle (no backfilled history; downgrading is symmetric). The Project templates' grading section now carries the same trigger list and a pointer to §3.6.
+
 ## [0.7.0] - 2026-11-06
 
 ### Added
