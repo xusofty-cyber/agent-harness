@@ -442,3 +442,15 @@ test("adapters never synthesize gate lifecycle events (F4a invariant)", () => {
   const events = readFileSync(join(dir, "gate", "events.jsonl"), "utf-8");
   assert.doesNotMatch(events, /"(started|verified|reopened|added)"/);
 });
+
+test("flat Claude-style payload {tool_name, tool_input} is still denied (no silent allow)", () => {
+  const dir = makeProject({ items: [] });
+  const r = runAdapter(dir, "antigravity-pre-tool-use.mjs", {
+    tool_name: "edit_file",
+    tool_input: { Path: join(dir, "gate", "feature_list.json") },
+    cwd: dir,
+  });
+  assert.equal(r.json.decision, "deny");
+  const events = readFileSync(join(dir, "gate", "events.jsonl"), "utf-8");
+  assert.match(events, /direct_write_blocked/);
+});
