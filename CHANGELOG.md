@@ -8,6 +8,10 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ### Added
 
+- **Feature-list dependency modelling + item-level out-of-scope fence** (D72, 2026-11-06): items gain optional `depends_on` (ids must exist, no self-deps, acyclic — validated) and optional free-text `out_of_scope` (course L07 fence). `start` **hard-blocks** while any dependency is not `passing` — owner ruling; there is no override flag. `status` annotates `[blocked-by: <ids>]`. Covered by `tests/pass_gate_deps_test.py` (6 tests).
+
+### Added
+
 - **`deploy-agents.sh --global` now installs the Antigravity gate hooks globally** (step B2): adapter + guard scripts are copied to `~/.gemini/config/hooks/` and the `agent-harness-gate` group is merged into `~/.gemini/config/hooks.json` with **absolute** command paths (existing file backed up, other groups preserved). This is the route that makes the **Antigravity desktop app** enforce the gate — live-verified 2026-11-06 (Stop block + verified pass in a desktop session). Root cause it fixes: relative `node hooks/...` commands only resolve when the hook cwd is the workspace `.agents/`; under global registration they fail silently.
 
 ### Fixed
