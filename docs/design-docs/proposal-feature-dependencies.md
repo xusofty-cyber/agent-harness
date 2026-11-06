@@ -1,8 +1,11 @@
 # Proposal — Dependency modelling for feature-list items
 
 Status: **accepted and implemented** (2026-11-06). Owner ruling:
-start semantics = option (iii) hard-block — the recommended (ii)
-warn-first was NOT chosen; there is no override. Recorded as
+start semantics = **graded**: hard-block (iii) by default, with the
+(ii) audit trail as a logged exception path — `--override-deps
+"<reason>"` starts the item and records a `dependency_override`
+event. (Owner clarified his one-line ruling the same day; the first
+implementation's pure-(iii) reading was superseded.) Recorded as
 DECISIONS.md D72; implemented in gate/pass-gate.py + schema +
 tests/pass_gate_deps_test.py.
 Origin: cross-audit with the course validator (2026-11-06)

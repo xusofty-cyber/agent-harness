@@ -58,6 +58,17 @@ class DepsTest(unittest.TestCase):
         r = _run(self.root, "status")
         self.assertIn("cycle", r.stdout)
 
+    def test_start_override_logged(self):
+        _write(self.root, [_item("base"), _item("top", depends_on=["base"])])
+        r = _run(self.root, "start", "--id", "top", "--override-deps", "base is docs-only")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn("dependency override (logged)", r.stdout)
+        events = (Path(self.root) / "gate" / "events.jsonl").read_text()
+        self.assertIn("dependency_override", events)
+        self.assertIn("base is docs-only", events)
+        r2 = _run(self.root, "status")
+        self.assertIn("[dep-override: base]", r2.stdout)
+
     def test_start_hard_blocks_then_passes(self):
         _write(self.root, [_item("base"), _item("top", depends_on=["base"])])
         r = _run(self.root, "start", "--id", "top")

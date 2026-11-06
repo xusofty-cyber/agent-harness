@@ -8,7 +8,7 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ### Added
 
-- **Feature-list dependency modelling + item-level out-of-scope fence** (D72, 2026-11-06): items gain optional `depends_on` (ids must exist, no self-deps, acyclic — validated) and optional free-text `out_of_scope` (course L07 fence). `start` **hard-blocks** while any dependency is not `passing` — owner ruling; there is no override flag. `status` annotates `[blocked-by: <ids>]`. Covered by `tests/pass_gate_deps_test.py` (6 tests).
+- **Feature-list dependency modelling + item-level out-of-scope fence** (D72, 2026-11-06): items gain optional `depends_on` (ids must exist, no self-deps, acyclic — validated) and optional free-text `out_of_scope` (course L07 fence). `start` **hard-blocks by default** while any dependency is not `passing`; a genuine exception may pass `--override-deps "<reason>"`, logged as a `dependency_override` gate event (owner ruling: graded — block is the rule, override is the logged exception). `status` annotates `[blocked-by: <ids>]`. Covered by `tests/pass_gate_deps_test.py` (6 tests).
 
 ### Added
 

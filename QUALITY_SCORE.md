@@ -43,7 +43,7 @@ judging pass, and the 2026-11-28 ablation.
 
 ---
 
-# Quality Score — v0.6.0 edition (2026-10-31) [history]
+## Quality Score — v0.6.0 edition (2026-10-31) [history]
 
 Re-issued for v0.6.0 (v0.5.1 contents, the v0.5.2 audit fixes ISS-01..ISS-11, and D70/D71). Scores unchanged from the v0.5.1 edition — this is a version sync, not a re-scoring. Scores are
 0–10, deliberately un-generous: a score claims only what the cited

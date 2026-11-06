@@ -35,35 +35,35 @@ executable work.
 
 ## P1 — decided or designed, not yet built
 
-4. **Feature dependencies — proposal written, semantics unchosen
+1. **Feature dependencies — proposal written, semantics unchosen
    (OWNER).** `docs/design-docs/proposal-feature-dependencies.md`:
    `depends_on` + existence/cycle checks are uncontroversial; the
    `start` semantics (record-only / warn+`--override-deps` / hard
    block) need the owner's ruling, then a DECISIONS entry, then
    implementation. Pairs naturally with (5).
-5. **Item-level out-of-scope field (L07 residual).** Planning-level
+2. **Item-level out-of-scope field (L07 residual).** Planning-level
    out-of-scope exists (initializer-playbook); the gate item schema
    and `pass-gate.py add` have no `out_of_scope` field. Same schema
    evolution batch as (4) — do them together, once.
-6. **CI template + `deploy-agents.ps1` still never ran for real**
+3. **CI template + `deploy-agents.ps1` still never ran for real**
    (owed since 2026-10-29). `ci.yml` + `eval-regression.yml` exist;
    QUALITY_SCORE's pipeline row is explicit that the Windows job is
    "committed, not yet observed". Blocks an honest v0.7.0 (checklist
    requires the real CI record incl. the ps-analyzer job).
    **Action:** one `workflow_dispatch` run on a release branch; read
    the result; fix what it finds.
-7. **Two-track state layer — proposal written, unapproved (OWNER).**
+4. **Two-track state layer — proposal written, unapproved (OWNER).**
    `docs/design-docs/proposal-state-two-track.md` (authoritative layer
    + SESSION_NOTES). The freshness check shipped 2026-11-06 covers the
    authoritative half's decay; the notes layer is the remaining half.
-8. **Own feature list's verification strength.** This repo's 6 passing
+5. **Own feature list's verification strength.** This repo's 6 passing
    items are assert 5 + unit 1 — the exact mix the B3 design in the
    D28 plan criticizes (cross-component p0 items should carry at least
    integration-level verification). Dogfood gap: convert or add one
    integration-level item (e.g. an end-to-end deploy→gate→verify run
    in a temp project, like the Instabox clean-room run) and let it be
    the standing proof.
-9. **Bridge residuals (small, scheduled).** (a) IDE `start` produced
+6. **Bridge residuals (small, scheduled).** (a) IDE `start` produced
    no separate `started` event in the live run (F4 of the two-surface
    plan) — determine agent-flow vs adapter gap, pin with a test.
    (b) dsh stop steering ran but was never provoked with an in_progress
@@ -87,12 +87,12 @@ executable work.
 
 ## Explicitly NOT recommended
 
-- Re-opening the B1–B4 benchmark series without a material change
++ Re-opening the B1–B4 benchmark series without a material change
   (D69 stands; bridge live-verification arguably IS a material change
   for the *enforcement* dimension only — if anything is re-run, it is
   B4's enforcement slice under the D28 plan's B2 mutation design, not
   the whole series).
-- Chasing the two phase1/dogfood historical files' migration: their
++ Chasing the two phase1/dogfood historical files' migration: their
   paths are asserted by gate verification commands and the hash chain;
   retirement-by-new-item is a maintainer ruling (OWNER) with low value.
 
