@@ -60,11 +60,13 @@ is back in sync.
 
 ## Honest gaps (not done / not claimed)
 
-- Desktop-app PreToolUse deny: mechanism proven same-day through
-  the globally installed adapter (deny + `direct_write_blocked`
-  event #16 on the host); the model-issued end-to-end capture is
-  still open — the live session used its shell and never issued
-  the edit call.
+- Desktop-app PreToolUse deny: **captured end-to-end 2026-11-06**
+  — a live desktop session's `edit_file` call against
+  `gate/feature_list.json` was denied by the pre-tool hook (the
+  denial text is recorded verbatim in the session transcript) and
+  the file stayed unmodified; the mechanism had additionally been
+  proven the same day through the globally installed adapter
+  (deny + `direct_write_blocked` event #16 on the host).
 - dsh Stop steering: the `agent/turn-stopping` handler ran live,
   but no in-progress stop was provoked; steering remains unproven
   live. The provocation experiment is blocked on the host-side
