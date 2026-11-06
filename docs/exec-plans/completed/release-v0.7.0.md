@@ -1,9 +1,9 @@
-# Release v0.7.0 — release notes (draft, pre-cut)
+# Release v0.7.0 — release notes
 
-> Draft prepared 2026-11-06 on main `fd55de1`, ahead of the cut.
-> `VERSION` still reads 0.6.0; the cut renames CHANGELOG
-> `[Unreleased]` to `## [0.7.0] - <date>` and writes 0.7.0 into
-> `VERSION`, then re-runs `tools/check-release.py`.
+> Cut 2026-11-06 from main: CHANGELOG `[Unreleased]` renamed to
+> `## [0.7.0] - 2026-11-06`, `VERSION` written as 0.7.0,
+> `tools/check-release.py` re-run green, tag `v0.7.0` on the cut
+> commit; GitHub Release published from this note.
 >
 > Numbers below were re-verified on 2026-11-06 (not copied from
 > older records): repo_checks all pass (1 environment-gated skip:

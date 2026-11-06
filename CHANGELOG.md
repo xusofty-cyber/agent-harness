@@ -4,7 +4,7 @@ All notable changes to this project are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
-## [Unreleased]
+## [0.7.0] - 2026-11-06
 
 ### Added
 
