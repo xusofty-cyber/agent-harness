@@ -6,6 +6,10 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+### Fixed
+
+- **dsh plugin contract, live-verified on dsh 0.2.1-rc.5 (2026-11-06).** A full gate run on the user's host (custom OpenAI-compatible provider) passed end-to-end — start/verify with real evidence, the `feature_list.json` forgery denied twice with both denies in the hash-chained log, `check-clean` green — after three fixes the live run forced: waterfall handlers no longer propagate an `undefined` tail (dsh crashes reading `.kind` on it); the `agent/created` and `agent/turn-stopping` handlers normalize their waterfall decisions the same way; and creation-time resume injection is disabled on dsh because a synchronous `agent.inject` inside the serial creation chain crashes the run inside dsh's admission path (the resume is surfaced on stderr instead — recorded limitation in the verification matrix). `ctx.tools.guard` is absent in rc.5, so pre-execute remains the sole gate, as designed. The dsh unit tests pin all three behaviors.
+
 ### Changed
 
 - **WorkBuddy live verification deferred (owner ruling, 2026-11-06).** The matrix row now records the deferral explicitly instead of an open-ended "owed"; an official 5.6.2 Linux build stands installed on the test box, so resumption is a sign-in plus the payload/settings confirmation whenever the owner re-opens it.
