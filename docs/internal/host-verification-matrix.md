@@ -39,7 +39,16 @@ move up a tier on recorded evidence, never on protocol tests alone.
 > `gate/feature_list.json`, run through the globally installed adapter on the host, returned `deny`
 > and logged `direct_write_blocked` (gate event #16, global registration chain); the live re-run
 > session used its shell for the status step and never issued the edit call, so the model-issued
-> end-to-end capture is the one remaining gap — a session-behavior gap, not an adapter gap. `deploy-agents.sh
+> end-to-end capture was the one remaining gap — a session-behavior gap, not an adapter gap.
+> **Closed 2026-11-06 (midday):** a fresh desktop session issued a real `edit_file` call against
+> `gate/feature_list.json` and the transcript records the hook's verdict verbatim — "tool call
+> denied by pre-tool hook: Direct writes to feature_list.json are blocked…" — after which the
+> agent stopped and reported, and the file stayed unmodified (brain transcript
+> `eb097d43…`, steps 5–7, 2026-11-06T03:50Z). **The desktop PreToolUse deny is now captured
+> end-to-end; no bridge gap remains on this surface.** One recording nuance: the deny decided by
+> the session hook path does not itself append a `direct_write_blocked` row to the project event
+> log (the #16 row came from the direct adapter invocation) — the transcript is the evidence of
+> record for the session path. `deploy-agents.sh
 > --global` now performs this installation (step B2).
 | WorkBuddy | `protocol-only` | `tests/workbuddy-hooks.test.mjs` 16 pass against *assumed* Claude-shaped payloads. **Owner ruling 2026-11-06: live verification deferred — do not chase.** The 5.6.2 Linux build is installed on the Instabox test box (official .deb, hash-verified), so resuming needs only an account sign-in + the payload/settings check | One live run after an account sign-in on an installed build, whenever the owner re-opens it |
 | DeepSeek Harness (dsh) | `live-verified` | One full live run on the user's host, 2026-11-06 (**dsh 0.2.1-rc.5**, headless profile, model `IFM/K2-Horizon-375B-A23B` via a custom OpenAI-compatible provider; project deployed from main @ 1bf4c72 plus the contract fixes below): start/verify wrote real evidence (gate events #3/#4), the `feature_list.json` forgery was denied **twice** with both denies in the hash-chained log (#5/#6), `check-clean` passed, item ends `[passing]` with evidence, zero forged content. Three contract fixes the run forced are now in the plugin and pinned by its 20 unit tests: (1) waterfall handlers never propagate an `undefined` tail (dsh reads `.kind` on it and crashes); (2) `ctx.tools.guard` is absent in rc.5 — pre-execute is the only gate, as designed; (3) **creation-time resume injection is disabled on dsh**: a synchronous `agent.inject` inside the serial `agent/created` chain crashes the run inside dsh's admission path, so the resume is surfaced on stderr instead — a recorded limitation, not a silent gap. Stop enforcement remains provisional: the `agent/turn-stopping` handler ran in this session, but no in_progress stop was provoked, so the steering path is still unproven live | — |
