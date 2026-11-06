@@ -179,3 +179,26 @@ residuals, B3 D72+D73, B4 ZH-TW regeneration + v0.7.0 release.
 Evaluator scores sealed in
 `eval/calibration-round6b-evaluator-scores.md`; judge verdicts
 pending. Live N remains 0 until the judge rules on 6b.
+
+## Round 6 shelved (2026-11-06, judge ruling)
+
+After the sample swap, the judge still could not score
+confidently ("不知道如何评分") and ruled: **shelve Round 6**.
+Recorded status:
+
+- Live calibration N stays **0**; the rubric stays
+  `advisory-only`; D28 remains DEFERRED. Nothing about the
+  promotion criteria changes.
+- Both evaluator score files (Round 6 A1–A4 and 6b B1–B4) stay
+  sealed in the repo as the record of the attempts; the Chinese
+  judge brief stays alongside them.
+- Two protocol lessons are now on record: (1) samples must be
+  admissible to the judge (first-hand participation); (2)
+  admissibility is not enough — the scoring instrument itself
+  must be usable by the judge. A future revival should redesign
+  the judging task around the judge's actual decisions (the
+  rulings they already make: ship / redo / block) rather than
+  asking for per-dimension scores cold.
+- This plan returns to `active — Part B only` (evaluation
+  strengthening design); Part A is parked until the owner
+  re-opens it.
