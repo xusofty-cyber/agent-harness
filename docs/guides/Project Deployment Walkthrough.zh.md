@@ -228,6 +228,43 @@ ruff check . && ruff format --check .
 硬规矩：**最多一页**；状态以 `gate/feature_list.json` 为准，本文件与之冲突时以清单为准；
 已完成的历史移去 CHANGELOG，不要在这里堆流水账。首次部署时按当前真实状态填一遍即可。
 
+### 4.5 目录级 AGENTS.md：从不自动部署，只能逐个点名（可选）
+
+三级规则里的第三级——某个子目录自己的 `AGENTS.md`——**不会被
+任何一条自动路径生成**，这是有意的设计，不是遗漏：
+
+- `run-pipeline.sh` 没有目录参数，走流水线永远不会生成它；
+- `deploy-agents.sh` 常规部署（不带 `--initialize`）也不会；
+- 唯一生成路径是显式点名，一次一个目录：
+
+```bash
+cd agent-harness
+./deploy-agents.sh ~/projects/shopapi --initialize --lang zh --directory app/orders
+# Windows：.\deploy-agents.ps1 -ProjectPath "D:\Projects\shopapi" -Initialize -DirectoryPath "app/orders"
+```
+
+规则与边界：
+
+| 事项 | 口径 |
+|---|---|
+| 路径 | 必须是相对路径、目录**已经存在**、且位于项目内（绝对路径或跳出项目的路径会被拒绝） |
+| 搭配 | `--directory` 必须与 `--initialize` 或 `--check` 同用，单写会直接报错；配 `--check` 时只查该目录的占位符、不生成 |
+| 已有文件 | 该目录已有 `AGENTS.md` 时，新稿写成同目录的 `AGENTS.generated.md` 供对照合并，不覆盖 |
+| 内容来源 | 与项目级同一套 `init_guidance` 扫描（该目录的清单/脚本会被读作本地命令建议），边界部分仍须人工确认 |
+
+为什么不自动：目录级文件写的是单个模块的**微边界**——管辖范围
+（In Scope / Out of Scope）、对其他模块的依赖边界、该目录的本地
+快速测试命令、大文件注意事项。脚本既不知道哪些子目录值得单独立
+规矩，也扫不出这些边界；对每个子目录自动撒一份带占位符的文件，
+只会让 agent 被空指令误导。所以它被做成维护者逐个点名、逐个填
+实的 opt-in。
+
+什么时候值得立一份：monorepo 的独立包、技术栈或红线与项目主体
+明显不同的模块、高风险目录（如支付、迁移脚本）。填写要点：只写
+**相对项目级的增量**（本目录特有的范围、边界与命令），通用规则
+引用项目级 `AGENTS.md` 即可，不要整段复制——复制出来的副本会在
+项目级修订时悄悄过期。
+
 ---
 
 ## 5. 基本配置二：初始化门禁（最容易漏的一步）
@@ -471,6 +508,7 @@ cd agent-harness
 ./run-pipeline.sh                                  # 交互向导
 ./deploy-agents.sh <项目> --initialize --lang zh   # 扫描项目事实生成草稿
 ./deploy-agents.sh <项目> --check                  # 查未填占位符
+./deploy-agents.sh <项目> --initialize --directory <子目录>   # 为一个子目录生成目录级 AGENTS.md（逐个点名）
 ./deploy-agents.sh <项目> --update                 # 更新托管文件（自动备份）
 
 # 门禁（目标项目内执行）
