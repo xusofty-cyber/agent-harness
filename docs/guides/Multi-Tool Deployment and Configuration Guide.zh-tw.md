@@ -297,6 +297,21 @@ chmod +x ./deploy-agents.sh ./run-pipeline.sh
 
 ---
 
+### 4.5 各介面鉤子接線與隔離（2026-11-06 新增）
+
+閘門鉤子實際在哪個介面生效，取決於接線方式——本節是 2026-11-06 真機驗證輪次用三次走錯路換來的，按介面逐一寫清：
+
+| 介面 | 已驗證可行的鉤子接線 | 隔離指引 |
+|---|---|---|
+| Claude Code | 專案 `.claude/settings.json` + `.claude/hooks/`（原生） | 並行代理請用 git worktree；閘門狀態存於專案內，一個 worktree 就是一道閘門。 |
+| Antigravity CLI (agy) | 工作區 `.agents/hooks.json` 使用**相對路徑**命令——CLI 以工作區 `.agents/` 為鉤子執行目錄 | 同 worktree 規則；CLI 會話適合無頭腳本化驗證。 |
+| Antigravity IDE | 與 CLI 共用同一份工作區 `.agents/hooks.json`；會話在開始時快照鉤子——**改完鉤子檔請新開會話** | 每個 IDE 視窗只對應一個閘門專案；不要讓兩個視窗指向同一份檢出。 |
+| Antigravity 桌面版應用程式 | 工作區 hooks.json 在桌面會話中**不可靠載入**。請改用**全域註冊**：`deploy-agents.sh --global` 的 B2 步驟把腳本裝入 `~/.gemini/config/hooks/`，並把閘門組以**絕對路徑**合入 `~/.gemini/config/hooks.json`——相對路徑在該處會靜默失敗，因為鉤子執行目錄是配置目錄而非工作區 | 全域組對桌面版打開的所有專案生效；閘門腳本在非閘門專案（無 `gate/feature_list.json`）自動無作用，裝一份全域即可，安全。 |
+| DeepSeek Harness (dsh) | 專案 `.dsh/cordis.patch.yml` 掛載行指向已部署外掛（絕對路徑）；外掛呼叫同一組 `.claude/hooks/` 守衛腳本 | dsh 會話為單代理；會話內不做 worktree 扇出。Stop 轉向屬盡力而為（見驗證矩陣）。 |
+| WorkBuddy | `.workbuddy/settings.json` + `.workbuddy/hooks/`（酬載形狀假設為 Claude 形） | `protocol-only`：尚未真機驗證；在真機運行銷賬之前，按紀律＋人工閘門命令對待。 |
+
+本輪沉澱的兩條操作規則：(1) **先探針、後理論**——某介面看不到鉤子活動時，先放入一個只記日誌的無害探針鉤子，把「宿主根本不觸發鉤子」與「我們的命令靜默失敗」分開，再動接線；(2) Antigravity 各介面的鉤子檔在**會話開始時快照**——會話中改鉤子必須新開會話，這是「修了卻不生效」最常見的原因。
+
 ## 5. 四層規則深度解析
 
 ### 5.1 全域規則範本：`Global AGENTS.md`

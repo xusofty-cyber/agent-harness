@@ -107,13 +107,13 @@
 
 ## 功能完成檢查清單（Definition of Done）
 
-完成功能開發或需求實作後，必須按順序執行以下步驟，缺一不可：
+若專案啟用門禁（存在 `gate/feature_list.json`），所有任務狀態必須經由 `python3 gate/pass-gate.py` 流轉（`WIP=1`，嚴禁直接手改或透過腳本改寫 `gate/feature_list.json`）：開工前執行 `pass-gate.py status` 與 `start --id <id>`（新任務先用 `add --level <unit|integration|e2e>` 註冊並先寫驗證命令）。完成功能開發或需求實作後，必須按順序執行以下步驟，缺一不可：
 
-1. [ ] **測試驗證**：執行相關測試（單元/整合），確認全部通過，提供真實執行證據
-2. [ ] **更新 SESSION_STATE.md**：記錄已完成事項、實際驗證證據、未完成步驟和仍有效的風險
+1. [ ] **測試與門禁驗證**：執行相關測試（單元/整合）及 `python3 gate/pass-gate.py verify --id <id>`（或三層終止 `pass-gate.py terminate`），確認 exit 0 並寫入真實執行證據
+2. [ ] **更新 SESSION_STATE.md**：記錄已完成事項、實際驗證證據、未完成步驟和仍有效的風險，並執行 `python3 gate/pass-gate.py check-clean` 確認交接五維全綠
 3. [ ] **更新 PROJECT_CONTEXT.md**：如有架構變更、技術決策或長期約束變化，同步更新；僅斷點變化時跳過
 4. [ ] **執行程式碼審查**：你必須自己呼叫 `open-code-review` 技能（或 `ocr` CLI）執行審查，行號錨定、全量覆蓋。嚴禁詢問使用者是否要審查，直接執行
-5. [ ] **清零缺陷**：根據審查意見修復，Critical / High 缺陷清零後方可合併
+5. [ ] **清零缺陷**：根據審查意見修復，Critical / Important 缺陷清零後方可合併
 
 > 嚴禁跳過第 4 步直接合併。未出示審查證據前，不得聲稱任務完成。
 
