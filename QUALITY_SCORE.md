@@ -24,7 +24,7 @@ unchanged and still the honest weak point. The next movements are
 scheduled, not speculative: a real CI record + v0.7.0, the Round 6
 judging pass, and the 2026-11-28 ablation.
 
-## Benchmark snapshots (2026-11-06 edition)
+## Benchmark snapshots — 2026-11-06 edition
 
 | Date | Harness variant | Result | Notes |
 |---|---|---|---|
@@ -34,7 +34,7 @@ judging pass, and the 2026-11-28 ablation.
 | 2026-10 | B4 (real host, enforcement dimensions) | NULL under its pre-registered verdict lines | Series sealed per D69 |
 | 2026-11-06 | Bridge live-verification round (not a bench arm) | 4 hosts `live-verified`; 5 real defects found & fixed | Enforcement evidence, not outcome evidence — does not move the Evaluation score |
 
-## Simplification experiment log
+## Simplification experiment log — 2026-11-06 edition
 
 | Date | Component removed / candidate | Result | Decision |
 |---|---|---|---|
@@ -75,7 +75,7 @@ and B3 evidence, not from new surface.
 | 2026-10 | B3.1 (after process fixes) | Pattern confirmed (SEGMENTED) | Same conclusion as B3 |
 | 2026-10 | B4 (real host, enforcement dimensions) | NULL under its pre-registered verdict lines | Series sealed per D69: re-test only the affected dimension after a material host/mechanism change |
 
-## Simplification experiment log
+## Simplification experiment log — v0.6.0 history
 
 | Date | Component removed / candidate | Result | Decision |
 |---|---|---|---|
