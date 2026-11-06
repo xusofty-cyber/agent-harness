@@ -18,6 +18,10 @@ Rules:
 
 ## Notes
 
+- 2026-11-06 — CI first run lesson: an unpinned linter in CI is a
+  time bomb — markdownlint-cli >=0.33 changed MD024/MD004 semantics
+  and reddened a repo that was green under 0.32.2. Pin tool versions
+  in workflows; treat "CI was never run" debt as compounding.
 - 2026-11-06 — File created with the two-track adoption. First use:
   parking spot for observations during the v0.7.0 release round that
   do not yet deserve a plan entry.

@@ -10,33 +10,11 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 - **Feature-list dependency modelling + item-level out-of-scope fence** (D72, 2026-11-06): items gain optional `depends_on` (ids must exist, no self-deps, acyclic — validated) and optional free-text `out_of_scope` (course L07 fence). `start` **hard-blocks by default** while any dependency is not `passing`; a genuine exception may pass `--override-deps "<reason>"`, logged as a `dependency_override` gate event (owner ruling: graded — block is the rule, override is the logged exception). `status` annotates `[blocked-by: <ids>]`. Covered by `tests/pass_gate_deps_test.py` (6 tests).
 
-### Added
-
 - **`deploy-agents.sh --global` now installs the Antigravity gate hooks globally** (step B2): adapter + guard scripts are copied to `~/.gemini/config/hooks/` and the `agent-harness-gate` group is merged into `~/.gemini/config/hooks.json` with **absolute** command paths (existing file backed up, other groups preserved). This is the route that makes the **Antigravity desktop app** enforce the gate — live-verified 2026-11-06 (Stop block + verified pass in a desktop session). Root cause it fixes: relative `node hooks/...` commands only resolve when the hook cwd is the workspace `.agents/`; under global registration they fail silently.
-
-### Fixed
-
-- **dsh plugin contract, live-verified on dsh 0.2.1-rc.5 (2026-11-06).** A full gate run on the user's host (custom OpenAI-compatible provider) passed end-to-end — start/verify with real evidence, the `feature_list.json` forgery denied twice with both denies in the hash-chained log, `check-clean` green — after three fixes the live run forced: waterfall handlers no longer propagate an `undefined` tail (dsh crashes reading `.kind` on it); the `agent/created` and `agent/turn-stopping` handlers normalize their waterfall decisions the same way; and creation-time resume injection is disabled on dsh because a synchronous `agent.inject` inside the serial creation chain crashes the run inside dsh's admission path (the resume is surfaced on stderr instead — recorded limitation in the verification matrix). `ctx.tools.guard` is absent in rc.5, so pre-execute remains the sole gate, as designed. The dsh unit tests pin all three behaviors.
-
-### Changed
-
-- **WorkBuddy live verification deferred (owner ruling, 2026-11-06).** The matrix row now records the deferral explicitly instead of an open-ended "owed"; an official 5.6.2 Linux build stands installed on the test box, so resumption is a sign-in plus the payload/settings confirmation whenever the owner re-opens it.
-
-### Added
 
 - **Antigravity IDE is now `live-verified` (2026-11-06).** All four hook events observed live in one IDE session on the user's host (agy 1.2.14, same deployed project as the CLI run): the Stop hook **blocked** an in_progress finish (gate event `stop_blocked`, decision=continue) and allowed it after verification (`stop_allowed_hook_active`); verify wrote real evidence; the `edit_file` forgery on `feature_list.json` was denied with the deny captured in the event log. Record: `docs/internal/host-verification-matrix.md`.
 
-### Added
-
 - **Antigravity CLI is now `live-verified` (2026-11-06).** Full gate flow run live on the user's host with **agy 1.2.14** against a project deployed fresh from main: start → verify (PASS with real evidence) → check-clean all-pass, and the previously owed instrumented re-run discharged — an `edit_file` forgery attempt on `gate/feature_list.json` was denied by the PreToolUse hook **and the deny itself was captured in the gate event log** (`guard-feature-list direct_write_blocked`). Record: `docs/internal/host-verification-matrix.md`; README enforcement wording and the tech-debt bridge row updated to match (matrix rule 1).
-
-### Fixed
-
-- **Deploy wizard menus smeared across the screen on arrow keys — rendering rewritten.** Both `Prompt-SingleSelect` and `Prompt-MultiSelect` in `deploy-agents.ps1` redrew by reprinting the whole list and moving the cursor up by the item count; any label that wraps (CJK labels are double-width, and the multi-select rows are padded) breaks that arithmetic, so each redraw started lower than the last and the first row repeated over the whole list (user screenshot, Windows, 2026-10-31). Rows are now rendered at absolute buffer positions, only changed rows are redrawn, and row padding is measured in display columns (CJK = 2). This supersedes the marker/colour-only fix merged hours earlier in PR #93, which treated the feedback symptom but not the redraw defect.
-
-- **Deploy wizard multi-select feedback was nearly invisible — fixed.** `Prompt-MultiSelect` in `deploy-agents.ps1` rendered checked/unchecked as hollow vs filled circles (nearly indistinguishable at console font sizes) and kept the row under the cursor Cyan whether checked or not, so spacebar toggles looked like no-ops (user-reported on Windows, 2026-10-31). Checked rows now render an ASCII `[X]` / `[ ]` marker and turn Green even under the cursor, and each redrawn row is padded to the buffer width so stale glyphs from wrapped lines are cleared.
-
-### Added
 
 - **OpenAI repo-template structure, adopted incrementally (2026-11-06).** Root `ARCHITECTURE.md` (component map + hard dependency rules); `docs/PLANS.md` + `docs/exec-plans/` (`active/` / `completed/` lifecycle + a seeded `tech-debt-tracker.md` carrying D28, the owed bridge live verifications, the CI/Windows live runs, the sealed B1–B4 re-test condition, unmeasured token cost, the stale ZH-TW guide and the 2026-11 ablation); `docs/design-docs/` (index + `core-beliefs.md` distilled from D1, the gate schema and the claims-hygiene practice); governance summaries `docs/RELIABILITY.md` / `docs/SECURITY.md`; benchmark-snapshot and simplification-experiment tables in `QUALITY_SCORE.md`. The historical group in `docs/internal/` was subsequently migrated to `docs/exec-plans/completed/` the same day (owner decision), with every inbound reference — including the `tests/repo_checks.py` path assertions and the `tools/count-skills.py` snapshot glob — updated in the same change and the full suite re-verified; two gate-evidence records (`phase1-dogfood.md`, `dogfood-2026-10-29.md`) stay in place because live gate verification commands assert their paths.
 
@@ -44,7 +22,17 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 - **Two design proposals (2026-11-06, status `proposed`).** `docs/design-docs/proposal-state-two-track.md` (authoritative vs notes state tracks) and `docs/design-docs/proposal-feature-dependencies.md` (`depends_on` for feature-list items, with a record-only / warn-first / hard-block options table awaiting an owner ruling). Registered in the design-docs index.
 
+### Fixed
+
+- **dsh plugin contract, live-verified on dsh 0.2.1-rc.5 (2026-11-06).** A full gate run on the user's host (custom OpenAI-compatible provider) passed end-to-end — start/verify with real evidence, the `feature_list.json` forgery denied twice with both denies in the hash-chained log, `check-clean` green — after three fixes the live run forced: waterfall handlers no longer propagate an `undefined` tail (dsh crashes reading `.kind` on it); the `agent/created` and `agent/turn-stopping` handlers normalize their waterfall decisions the same way; and creation-time resume injection is disabled on dsh because a synchronous `agent.inject` inside the serial creation chain crashes the run inside dsh's admission path (the resume is surfaced on stderr instead — recorded limitation in the verification matrix). `ctx.tools.guard` is absent in rc.5, so pre-execute remains the sole gate, as designed. The dsh unit tests pin all three behaviors.
+
+- **Deploy wizard menus smeared across the screen on arrow keys — rendering rewritten.** Both `Prompt-SingleSelect` and `Prompt-MultiSelect` in `deploy-agents.ps1` redrew by reprinting the whole list and moving the cursor up by the item count; any label that wraps (CJK labels are double-width, and the multi-select rows are padded) breaks that arithmetic, so each redraw started lower than the last and the first row repeated over the whole list (user screenshot, Windows, 2026-10-31). Rows are now rendered at absolute buffer positions, only changed rows are redrawn, and row padding is measured in display columns (CJK = 2). This supersedes the marker/colour-only fix merged hours earlier in PR #93, which treated the feedback symptom but not the redraw defect.
+
+- **Deploy wizard multi-select feedback was nearly invisible — fixed.** `Prompt-MultiSelect` in `deploy-agents.ps1` rendered checked/unchecked as hollow vs filled circles (nearly indistinguishable at console font sizes) and kept the row under the cursor Cyan whether checked or not, so spacebar toggles looked like no-ops (user-reported on Windows, 2026-10-31). Checked rows now render an ASCII `[X]` / `[ ]` marker and turn Green even under the cursor, and each redrawn row is padded to the buffer width so stale glyphs from wrapped lines are cleared.
+
 ### Changed
+
+- **WorkBuddy live verification deferred (owner ruling, 2026-11-06).** The matrix row now records the deferral explicitly instead of an open-ended "owed"; an official 5.6.2 Linux build stands installed on the test box, so resumption is a sign-in plus the payload/settings confirmation whenever the owner re-opens it.
 
 - **Repo map repairs (2026-11-06, from the fresh-session audit).** `docs/internal/PROJECT_CONTEXT.md`: skill count corrected 40 → 39 (two places) and language claims corrected from 5 languages to the actual 3 (EN / ZH / ZH-TW; FR/DE were deleted under D27) in three places. `docs/exec-plans/completed/SESSION_RESUME.md` and its 2026-09-24 snapshot now carry a superseded banner pointing at `SESSION_STATE.md`. README directory trees (EN / ZH / ZH-TW) completed: `.agents/hooks/`, `.workbuddy/`, `.dsh/`, `docs/`, `tests/`, the fifth `.agents/rules/` file (`engineering.md`), `AGENTS.md`, `DECISIONS.md`, `QUALITY_SCORE.md`, `CHANGELOG.md` and `README.zh-tw.md` are now listed, and `tools/tui.py` sits inside the `tools/` block. `README.zh.md` tagline updated to the gated-harness positioning already used by the EN and ZH-TW editions. `docs/internal/SESSION_STATE.md` refreshed (see its 2026-11-06 verification entry).
 
