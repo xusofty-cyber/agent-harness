@@ -57,6 +57,13 @@
 - **会话断点**：在有意义的任务边界更新 `SESSION_STATE.md`（已完成事项、实际验证证据、未完成步骤、仍有效的风险）；只有长期事实变化时才改 `PROJECT_CONTEXT.md`。
 - **来源与安全**：推断标记为推断；不保存凭证、私钥或原始个人数据。
 
+## 规模分级与任务分级
+
+- **项目档位**：源文件约 < 50、单人维护、不跨周 → **Lite**：只留本文件＋定向测试，门禁流程默认不启用（高代价改动时临时启用）；其余情况用标准档全套。本项目档位：`<Lite 或 标准，一句话依据>`。
+- **S 级（轻通道）**：单文件/样式/参数小改——不立条目，只读相关文件（先定位后精读），改后只跑定向测试，会话内汇报。
+- **M 级（常规）**：多文件边界清晰——立一个条目（同类小改合并），验收用定向测试集，check-clean 收工时跑。
+- **L 级（全通道）**：状态机/接口/迁移/安全边界或错一次代价大——条目＋完整 verify＋check-clean 全流程。有疑问就高不就低；S 级影响面超预期立即升 M。
+
 ## 功能完成检查清单（Definition of Done）
 
 若存在 `gate/feature_list.json`，全程用 `python3 gate/pass-gate.py` 驱动（`pass-gate.py status` ➔ `pass-gate.py start` [WIP=1] ➔ `pass-gate.py verify` ➔ `pass-gate.py check-clean`），严禁直接手改 `feature_list.json`：

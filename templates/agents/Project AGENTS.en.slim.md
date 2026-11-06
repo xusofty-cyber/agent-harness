@@ -80,6 +80,13 @@
 - **Sources and safety**: mark inferences as inferences; never store
   credentials, private keys, or raw personal data.
 
+## Scale Grading and Task Grading
+
+- **Project tier**: roughly < 50 source files, single maintainer, no cross-week work → **Lite**: keep only this file + targeted tests, gate flow off by default (enabled ad hoc for high-cost changes); otherwise Standard, full flow. This project's tier: `<Lite or Standard, one-line basis>`.
+- **S (fast lane)**: single-file / style / parameter changes — no gate item, read only the relevant files (locate first, then read closely), run only targeted tests afterwards, report in-session.
+- **M (standard)**: multi-file with clear boundaries — one gate item (batch similar small changes), targeted test set as verification, check-clean at wrap-up.
+- **L (full)**: state machines / interfaces / migrations / security boundaries, or one mistake is expensive — item + full verify + check-clean, nothing skipped. When in doubt grade up; if an S task outgrows its blast radius, promote it to M at once.
+
 ## Definition of Done Checklist
 
 When `gate/feature_list.json` is present, drive task state exclusively via `python3 gate/pass-gate.py` (`pass-gate.py status` -> `pass-gate.py start` [WIP=1] -> `pass-gate.py verify` -> `pass-gate.py check-clean`; never hand-edit `gate/feature_list.json`):
