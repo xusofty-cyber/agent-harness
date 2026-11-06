@@ -1059,6 +1059,58 @@ if [ "$DEPLOY_GLOBAL" = true ]; then
             echo "  [!] Antigravity GEMINI.md compatibility template not found: ${ANTIGRAVITY_GEMINI_TEMPLATE}" >&2
         fi
 
+        # B2. Antigravity GLOBAL hooks (~/.gemini/config/hooks.json + hooks/).
+        # Live finding 2026-11-06: the desktop app loads hooks from the
+        # global file, but hook commands there do NOT run with cwd=.agents —
+        # the workspace template's relative `node hooks/...` commands fail
+        # silently under global registration. Global install therefore
+        # copies the adapter + guard scripts into ~/.gemini/config/hooks/
+        # and rewrites the agent-harness-gate group's commands to ABSOLUTE
+        # paths, merging into any existing hooks.json (other groups are
+        # preserved; the file is backed up first when it changes).
+        AGY_CFG_DIR="${HOME}/.gemini/config"
+        AGY_GLOBAL_HOOKS_JSON="${AGY_CFG_DIR}/hooks.json"
+        AGY_GLOBAL_HOOKS_DIR="${AGY_CFG_DIR}/hooks"
+        if [ -f "${ANTIGRAVITY_HOOKS_JSON}" ]; then
+            mkdir -p "${AGY_GLOBAL_HOOKS_DIR}"
+            for f in "${SCRIPT_DIR}/.agents/hooks/"*.mjs; do
+                [ -f "$f" ] && cp -f "$f" "${AGY_GLOBAL_HOOKS_DIR}/"
+            done
+            for g in guard.mjs guard-write.mjs guard-feature-list.mjs stop-gate.mjs session-start.mjs post-tool-use.mjs; do
+                [ -f "${SCRIPT_DIR}/.claude/hooks/${g}" ] && cp -f "${SCRIPT_DIR}/.claude/hooks/${g}" "${AGY_GLOBAL_HOOKS_DIR}/"
+            done
+            if [ -f "${AGY_GLOBAL_HOOKS_JSON}" ]; then backup_path "${AGY_GLOBAL_HOOKS_JSON}"; fi
+            AGY_HOOKS_DIR_ABS="${AGY_GLOBAL_HOOKS_DIR}" AGY_TMPL="${ANTIGRAVITY_HOOKS_JSON}" AGY_DST="${AGY_GLOBAL_HOOKS_JSON}" python3 - << 'PYEOF2'
+import json, os
+tmpl = json.load(open(os.environ["AGY_TMPL"], encoding="utf-8"))
+gate = tmpl["agent-harness-gate"]
+prefix = "node " + os.environ["AGY_HOOKS_DIR_ABS"] + "/"
+def rewrite(node):
+    if isinstance(node, dict):
+        for k, v in node.items():
+            if k == "command" and isinstance(v, str) and v.startswith("node hooks/"):
+                node[k] = prefix + v[len("node hooks/"):]
+            else:
+                rewrite(v)
+    elif isinstance(node, list):
+        for item in node:
+            rewrite(item)
+rewrite(gate)
+dst_path = os.environ["AGY_DST"]
+merged = {}
+if os.path.exists(dst_path):
+    try:
+        merged = json.load(open(dst_path, encoding="utf-8"))
+    except Exception:
+        merged = {}
+merged["agent-harness-gate"] = gate
+with open(dst_path, "w", encoding="utf-8") as f:
+    json.dump(merged, f, indent=2, ensure_ascii=False)
+    f.write("\n")
+print("  [ok] Antigravity global hooks merged into ~/.gemini/config/hooks.json (absolute paths)")
+PYEOF2
+        fi
+
         # C. Codex CLI / app (CODEX_HOME or ~/.codex); an active override wins.
         CODEX_HOME_DIR="${CODEX_HOME:-${HOME}/.codex}"
         if [ -s "${CODEX_HOME_DIR}/AGENTS.override.md" ]; then
