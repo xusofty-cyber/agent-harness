@@ -6,6 +6,10 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ## [Unreleased]
 
+### Added
+
+- **Project Deployment Walkthrough guide (EN + ZH, `docs/guides/`).** A step-by-step, example-driven companion to the Multi-Tool Deployment guide: one fictional project (shopapi, Python/FastAPI, with JS and C++ command equivalents) is carried from cloning the template repo through the pipeline run, filling the three root documents, gate initialization (`init.template.sh`), the first `add → start → verify → check-clean` round, host-surface notes, an acceptance checklist and an FAQ. Written against v0.7.0 behaviour; every command was checked against the shipped scripts.
+
 ## [0.7.0] - 2026-11-06
 
 ### Added

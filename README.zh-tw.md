@@ -304,6 +304,8 @@ ai-memory 強制執行安全的預設拒絕政策，在擷取任何倉庫之前�
 
 - 📖 **部署與配置**：
   - [繁體中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md) | [English](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [簡體中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md)
+- 📖 **專案部署實戰指南（附完整範例）**：
+  - [English](docs/guides/Project%20Deployment%20Walkthrough.md) | [簡體中文](docs/guides/Project%20Deployment%20Walkthrough.zh.md)
 - 📖 **實戰用法與技能全景**：
   - [繁體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md) | [English](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [簡體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md)
 - 📜 **三層規則架構**：
