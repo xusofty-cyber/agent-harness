@@ -24,9 +24,13 @@
 
 ## Next
 
-- [ ] Still owed repo-wide: Antigravity IDE / WorkBuddy / dsh live
-  runs, ps1 live Windows run, CI template run in real GitHub
-  Actions (tracked in `docs/exec-plans/tech-debt-tracker.md`)
+- [x] Antigravity CLI + IDE live runs — done 2026-11-06 on the
+  user's host (both `live-verified`; matrix updated, merges
+  `d6b1b20` + `c898cd5`, pushed via the host after this VM's SSH
+  tunnel to GitHub degraded mid-day)
+- [ ] Still owed repo-wide: WorkBuddy / dsh live runs, ps1 live
+  Windows run, CI template run in real GitHub Actions (tracked
+  in `docs/exec-plans/tech-debt-tracker.md`)
 - [ ] Skill-usage telemetry review + monthly ablation
   (due 2026-11-28)
 
@@ -36,21 +40,9 @@
 
 ## Last verification
 
-- 2026-11-06 (map-repair batch, merged `ed9bb0c`, pushed): unit tests 118/118 OK;
-  `tests/repo_checks.py` all passed (1 ENV-SKIP:
-  `eval:bench-smoke-passes`, missing pytest in this sandbox);
-  node hook suites 7/7 exit 0; gate status 6/6 passing;
-  `check-clean` **all dimensions PASS** — follow-up to the
-  2026-10-29 entries below: the dimension-2 red was the
-  sandbox-missing-pytest baseline; repo_checks now classifies
-  that case ENV-SKIP and dimension 2 passes.
-- 2026-10-29 night dogfood session 2: all 3 night items passing;
-  final `check-clean` failed only on dimension 2 (see report).
-- 2026-10-29 night dogfood: baseline `check-clean` failed only on
-  dimension 2 (repo_checks `eval:bench-smoke-passes`, missing
-  pytest in this sandbox — known baseline, not a dogfood
-  regression); other dimensions PASS.
-- 2026-10-28: prior dogfood items still passing
-  (`p1-dogfood-session-state`, `p1-dogfood-gate-readme`,
-  `p1-dogfood-hooks-tests`); the stale feat-branch Next step from
-  the old breakpoint is dropped by this refresh.
+- 2026-11-06 (bridge live-verification round): Antigravity CLI and
+  IDE both reached `live-verified` on the user's host (agy 1.2.14)
+  — full gate flow, `edit_file` forgery denied with the deny in the
+  event log, IDE Stop block observed. Unit tests + repo_checks +
+  check-clean all green on the merged main `c898cd5` (pushed and
+  remote-verified).
