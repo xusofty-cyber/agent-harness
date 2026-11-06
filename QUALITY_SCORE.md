@@ -1,4 +1,49 @@
-# Quality Score — v0.6.0 edition (2026-10-31)
+# Quality Score — post-bridge-round edition (2026-11-06, pre-v0.7.0)
+
+Re-issued because the evidence changed materially — this file's own rule.
+The bridge live-verification round of 2026-11-06 ran full gate flows on
+four of five hosts and landed two real bug-fix batches in the process;
+the v0.6.0 edition below is kept verbatim as history. Scores are 0–10,
+deliberately un-generous: a score claims only what the cited evidence
+shows.
+
+| Module | Score | Evidence |
+|---|---|---|
+| Gate layer (`gate/`) | 8 | Unchanged core, still the strongest module: 6/6 items passing with evidence on this repo; the gate was exercised end-to-end today on four foreign hosts (CLI/IDE/desktop/dsh) without a gate-side failure — every defect found was in bridge wiring, not gate rules. Passing mix still assert 5 + unit 1 (a standing warning; an integration-level dogfood item is scheduled in the 2026-11-06 audit). Not higher: real-world soak time is still short and every passing item here is docs-scale. |
+| Host bridges (Antigravity / WorkBuddy / dsh) | 7 | Up from 4. Matrix tiers now: Claude Code, Antigravity CLI, Antigravity IDE, Antigravity desktop app (global-registration route) and dsh all `live-verified` (2026-11-06) — full gate flows, Stop blocks observed on IDE and desktop, `feature_list.json` forgery denies captured in the hash-chained log on CLI/IDE/dsh, and three real contract bugs found and fixed live (dsh waterfall tails + creation-injection; Antigravity global relative paths). WorkBuddy remains `protocol-only` (owner-deferred). Residuals, recorded in the matrix and the two-surface plan: dsh stop steering unprovoked, desktop PreToolUse deny not captured standalone, IDE `start` event nuance. Not higher until those three close and WorkBuddy either verifies or is formally retired. |
+| Pipeline & deploy | 7 | As before, plus `deploy-agents.sh --global` step B2 (global Antigravity hooks, absolute paths) shipped and host-verified today. Still not higher: the CI template and `deploy-agents.ps1` have never run in a real GitHub Actions environment (owed since 2026-10-29; scheduled before the v0.7.0 release, whose checklist requires the record). |
+| Hooks & guard | 7 | Claude suites unchanged and green; bridge suites grew (dsh 20 tests pinning the live-found contract). Guard is still a guardrail, not a sandbox (documented). Stop hooks now have same-day live blocks on two surfaces (IDE + desktop), which is real soak signal but still one day of it. |
+| Distribution (templates + 39 skills) | 6 | Unchanged. Moves when the 2026-11 monthly ablation (due 2026-11-28) trims zero-load skills on D68 telemetry. |
+| Numbers & claims hygiene | 7 | The stale-figure discipline held through a fast-moving day: every tier change was written to the matrix the same hour it was earned, two over-strong claims (desktop "ungated", then "no contract surface") were corrected in-repo with the correction visible, and this scorecard is re-issued on the evidence change as promised. Not higher: the ZH-TW Multi-Tool guide remains knowingly stale (decision scheduled with the v0.7.0 release), and upstream comet-skill figures still ship un-annotated. |
+| Evaluation | 4 | Still 4, deliberately. The D28 live-calibration plan is now ACTIVE (2026-11-06): MedOnTime samples chosen, evaluator scores for Round 6 sealed in-repo, awaiting the owner's judging pass. Until a live second review actually runs, the central claim (the gate reduces false completions) remains **not established** (D69) and the B1–B4 series stays sealed. Token cost still unmeasured (no host exposes a token API). |
+
+Overall posture (2026-11-06): the bridge layer went from broad-but-
+shallow to verified on every surface the owner actually uses; the gate
+and its evidence spine remain the strongest module; evaluation is
+unchanged and still the honest weak point. The next movements are
+scheduled, not speculative: a real CI record + v0.7.0, the Round 6
+judging pass, and the 2026-11-28 ablation.
+
+## Benchmark snapshots (2026-11-06 edition)
+
+| Date | Harness variant | Result | Notes |
+|---|---|---|---|
+| 2026-10 | Gate arms B1–B2 (t1–t4, 36 runs) | 36/36 pass, 0 false completions | Ceiling effect: tasks too trivial to discriminate arms |
+| 2026-10-30 | B3 (real project) | False completions nonzero but arm-identical | No arm-level discrimination |
+| 2026-10 | B3.1 (after process fixes) | Pattern confirmed (SEGMENTED) | Same conclusion as B3 |
+| 2026-10 | B4 (real host, enforcement dimensions) | NULL under its pre-registered verdict lines | Series sealed per D69 |
+| 2026-11-06 | Bridge live-verification round (not a bench arm) | 4 hosts `live-verified`; 5 real defects found & fixed | Enforcement evidence, not outcome evidence — does not move the Evaluation score |
+
+## Simplification experiment log
+
+| Date | Component removed / candidate | Result | Decision |
+|---|---|---|---|
+| 2026-10-29 | `writing-skills` skill | Removed by owner decision (D65) | Keep removed |
+| 2026-11 | Monthly ablation run over skill-usage telemetry (D68) | Scheduled; telemetry review due 2026-11-28 | Pending |
+
+---
+
+# Quality Score — v0.6.0 edition (2026-10-31) [history]
 
 Re-issued for v0.6.0 (v0.5.1 contents, the v0.5.2 audit fixes ISS-01..ISS-11, and D70/D71). Scores unchanged from the v0.5.1 edition — this is a version sync, not a re-scoring. Scores are
 0–10, deliberately un-generous: a score claims only what the cited
