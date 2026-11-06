@@ -1,7 +1,10 @@
 # Proposal — Dependency modelling for feature-list items
 
-Status: **proposed** (2026-11-06; awaiting an owner ruling on the
-start semantics below before any schema change).
+Status: **accepted and implemented** (2026-11-06). Owner ruling:
+start semantics = option (iii) hard-block — the recommended (ii)
+warn-first was NOT chosen; there is no override. Recorded as
+DECISIONS.md D72; implemented in gate/pass-gate.py + schema +
+tests/pass_gate_deps_test.py.
 Origin: cross-audit with the course validator (2026-11-06)
 confirmed `gate/feature_list.schema.json` has no dependency field;
 items that secretly depend on each other are today coordinated

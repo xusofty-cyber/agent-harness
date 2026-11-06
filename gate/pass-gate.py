@@ -59,7 +59,8 @@ ITEM_REQUIRED = ("id", "priority", "area", "title",
 # cmd_block, cmd_reopen, cmd_verify, cmd_override and cmd_terminate
 # (e.g. start only from not_started/blocked, override only from
 # in_progress). A single-snapshot validator cannot check transitions.
-ITEM_KEYS = set(ITEM_REQUIRED) | {"evidence", "notes", "external_evidence"}
+ITEM_KEYS = set(ITEM_REQUIRED) | {"evidence", "notes", "external_evidence",
+                                  "depends_on", "out_of_scope"}
 TOP_KEYS = {"version", "project", "items"}
 VERIFICATION_KEYS = {"command", "timeout_seconds", "level"}
 # Verification strength, weakest to strongest (v0.4.1, D66). Optional:
@@ -503,6 +504,37 @@ def validate(data):
     if len(in_progress) > 1:
         errors.append(f"WIP=1 violated: more than one in_progress item: "
                       f"{', '.join(in_progress)}")
+    # depends_on (D72): referenced ids must exist, no self-deps, acyclic.
+    # out_of_scope (L07) is free text; type-checked only.
+    _ids = {i.get("id") for i in items}
+    for _it in items:
+        _deps = _it.get("depends_on")
+        if _deps is not None:
+            if not isinstance(_deps, list) or not all(isinstance(d, str) for d in _deps):
+                errors.append(f"item {_it.get('id')}: depends_on must be a list of item ids")
+            else:
+                for _d in _deps:
+                    if _d == _it.get("id"):
+                        errors.append(f"item {_it.get('id')}: an item cannot depend on itself")
+                    elif _d not in _ids:
+                        errors.append(f"item {_it.get('id')}: depends_on references unknown id {_d!r}")
+        _oos = _it.get("out_of_scope")
+        if _oos is not None and not isinstance(_oos, str):
+            errors.append(f"item {_it.get('id')}: out_of_scope must be a string")
+    _graph = {i.get("id"): [d for d in (i.get("depends_on") or []) if d in _ids]
+              for i in items}
+    _state = {}
+    def _visit(_n, _path):
+        _state[_n] = 1
+        for _m in _graph.get(_n, []):
+            if _state.get(_m) == 1:
+                errors.append(f"dependency cycle detected: {' -> '.join(_path + [_n, _m])}")
+            elif _state.get(_m, 0) == 0:
+                _visit(_m, _path + [_n])
+        _state[_n] = 2
+    for _n in list(_graph):
+        if _state.get(_n, 0) == 0:
+            _visit(_n, [])
     return errors
 
 
@@ -792,6 +824,8 @@ def cmd_add(args):
                          **({"level": args.level} if args.level else {})},
         "evidence": None,
         "notes": args.notes or "",
+        **({"depends_on": args.depends_on} if args.depends_on else {}),
+        **({"out_of_scope": args.out_of_scope} if args.out_of_scope else {}),
     }
     data["items"].append(item)
     errors = validate(data)
@@ -854,6 +888,13 @@ def cmd_start(args):
     if any(i["status"] == "in_progress" for i in data["items"]):
         print("WIP=1: another item is already in_progress; "
               "finish or block it first")
+        return 1
+    _unmet = [d for d in (item.get("depends_on") or [])
+              if (_find(data, d) or {}).get("status") != "passing"]
+    if _unmet:
+        print(f"cannot start {args.id}: dependencies not passing: "
+              f"{', '.join(_unmet)} (dependency hard-block, D72; "
+              "finish the dependencies first — there is no override)")
         return 1
     item["status"] = "in_progress"
     _save(args.root, data)
@@ -1093,8 +1134,12 @@ def cmd_status(args):
             "evidence" if ev else "no evidence")
         _lvl = (item.get("verification") or {}).get("level")
         _lvl_s = f" <{_lvl}>" if _lvl else ""
+        _byid = {i["id"]: i for i in data.get("items", [])}
+        _unmet = [d for d in (item.get("depends_on") or [])
+                  if (_byid.get(d) or {}).get("status") != "passing"]
+        _dep_s = f" [blocked-by: {', '.join(_unmet)}]" if _unmet else ""
         print(f"  [{item['status']:12}] {item['id']} ({item['priority']}) "
-              f"— {item['title']} [{mark}]{_lvl_s}")
+              f"— {item['title']} [{mark}]{_lvl_s}{_dep_s}")
     if errors:
         print("validation errors:")
         for e in errors:
@@ -1676,6 +1721,10 @@ def main(argv=None):
     p.add_argument("--command", required=True,
                    help="verification command (exit 0 = pass)")
     p.add_argument("--timeout", type=int, default=300)
+    p.add_argument("--depends-on", action="append", default=None,
+                   help="item id this item depends on (repeatable)")
+    p.add_argument("--out-of-scope", default=None,
+                   help="explicit out-of-scope fence for this item (L07)")
     p.add_argument("--level", choices=LEVELS, default=None,
                    help="verification strength: assert < unit < "
                         "integration < e2e (descriptive, see D66)")
