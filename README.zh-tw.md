@@ -74,7 +74,7 @@ graph TD
 | 工具 | 本倉庫提供的配置 | 強制執行 | 狀態 |
 |---|---|---|---|
 | Claude Code | `CLAUDE.md` 橋接、`.claude/skills/` 連結、`.claude/settings.json` 鉤子 | 強制執行（鉤子） | 由指令碼設定；鉤子僅在 Claude Code 用戶端中執行 |
-| Antigravity 2.0 / CLI / IDE 與擴充套件 | 專案規則／技能；`--global` 寫入 `~/.gemini/AGENTS.md` 外加 `GEMINI.md` 相容性指針 | 強制執行（鉤子） | 目前的介面會同時載入兩個全域名稱；較舊的 IDE 版本可以跟隨指針。CLI 專用規則仍維持獨立。專案會部署 Antigravity 規則轉接器（`.agents/rules/agent-harness.md`，觸發條件：always_on），指向 `AGENTS.md`，以及一組閘門鉤子（`.agents/hooks.json`：PreToolUse/Stop/SessionStart/PostToolUse），將 Antigravity 酬載轉譯為 Claude 閘門鉤子。建置環境中未驗證過實際的 Antigravity CLI/IDE 執行（沒有 `agy` 二進位檔）；協定層級測試通過（`tests/antigravity-hooks.test.mjs`） |
+| Antigravity 2.0 / CLI / IDE 與擴充套件 | 專案規則／技能；`--global` 寫入 `~/.gemini/AGENTS.md` 外加 `GEMINI.md` 相容性指針；全域註冊另把閘門鉤子裝入 `~/.gemini/config/hooks/`（絕對路徑），桌面版應用程式亦經此強制執行 | 強制執行（鉤子，已真機驗證） | 目前的介面會同時載入兩個全域名稱；較舊的 IDE 版本可以跟隨指針。CLI 專用規則仍維持獨立。專案會部署 Antigravity 規則轉接器（`.agents/rules/agent-harness.md`，觸發條件：always_on），指向 `AGENTS.md`，以及一組閘門鉤子（`.agents/hooks.json`：PreToolUse/Stop/SessionStart/PostToolUse），將 Antigravity 酬載轉譯為 Claude 閘門鉤子。CLI、IDE 與桌面版均已於 2026-11-06 真機驗證 `live-verified`（agy 1.2.14）；協定層級測試見 `tests/antigravity-hooks.test.mjs`，分級記錄見驗證矩陣 |
 | Codex | 全域 `$CODEX_HOME/AGENTS.md`（預設 `~/.codex/AGENTS.md`）、專案 `AGENTS.md` 與 `.agents/skills/` | 僅配置 | `-Global` 會初始化 Codex 全域檔案；`-Global -Update` 會備份並取代作用中的全域指示 |
 | WorkBuddy | `.workbuddy/rules/agent-harness.md` 規則橋接 + `.workbuddy/settings.json` 閘門鉤子 | 閘門鉤子 | 鉤子把假定的 Claude 形酬載原樣交給 Claude 閘門指令碼（PreToolUse/Stop/SessionStart/PostToolUse）；鉤子格式與設定檔位置均未對照官方文件（本輪未抓取）或真機核實，協定層級測試通過；本倉庫發到 `.workbuddy/settings.json`，請在已安裝版本上確認 |
 | DeepSeek Harness (dsh) | 透過 `--global` 設定全域 `${DSH_HOME:-~/.dsh}/AGENTS.md`；專案 `AGENTS.md` 原生讀取；技能透過 `.agents/skills/` | 閘門外掛（需手動啟用，dsh 真機未驗證） | 沒有專案橋接檔案（`AGENTS.md` 會被原生讀取）；部署指令碼另裝 Cordis 閘門外掛（`.dsh/agent-harness-gate.mjs`，TypeScript 原始碼為 `.dsh/agent-harness-gate.ts`）與 `.dsh/cordis.patch.yml` 掛載行——啟用需手動，且 dsh 外掛 API 未在官方文件／真機上核實，不要把它當作已驗證的強制執行 |
@@ -87,13 +87,13 @@ graph TD
 
 ### 目前狀態（v0.6.0）——在依賴閘門之前請先閱讀
 
-- **強制執行取決於宿主。** Claude Code 鉤子會在用戶端中強制執行閘門（見上表）。Antigravity 鉤子、WorkBuddy 閘門鉤子與 dsh 閘門外掛雖已部署，但其真機強制執行均未驗證（見上表）。在其他所有宿主上，閘門是一套紀律外加一道人工命令：請自行執行 `python3 gate/pass-gate.py verify` 與 `python3 gate/pass-gate.py check-clean`。與宿主無關的後備措施是 CI，它會重新執行每個 `passing` 項目的驗證命令（`tests/repo_checks.py` §3k）。已知繞過方式詳見 [`gate/README.md`](gate/README.md)，包括透過 Bash 直接編輯，以及純文字的成本帳本。
+- **強制執行取決於宿主。** 各宿主驗證分級見 [`docs/internal/host-verification-matrix.md`](docs/internal/host-verification-matrix.md)：Claude Code、Antigravity CLI（2026-11-06 於 agy 1.2.14 真機驗證）、Antigravity IDE、Antigravity 桌面版（全域註冊路線）與 dsh 均為 `live-verified`（2026-11-06）；與宿主無關的 CI/pre-push 檢查器同為 `live-verified`；WorkBuddy 為 `protocol-only`（負責人裁定暫緩）。Claude Code 鉤子在用戶端強制執行閘門（見上表）；Antigravity CLI/IDE/桌面版鉤子與 dsh 外掛均已真機驗證；WorkBuddy 閘門鉤子雖已部署，其真機強制執行未驗證（見上表）。在其他所有宿主上，閘門是一套紀律外加一道人工命令：請自行執行 `python3 gate/pass-gate.py verify` 與 `python3 gate/pass-gate.py check-clean`。與宿主無關的後備措施是 CI，它會重新執行每個 `passing` 項目的驗證命令（`tests/repo_checks.py` §3k）。已知繞過方式詳見 [`gate/README.md`](gate/README.md)，包括透過 Bash 直接編輯，以及純文字的成本帳本。
 - **基準聲明，如實陳述。** 預先註冊的 B1 回合（t1–t8 × bare/pack/gate × 3 回合＝72 次執行）72/72 通過，每個組別皆為 0 次錯誤完成，因此依其預先註冊的規則，結果為 NO DISCRIMINATION。本版本不聲稱閘門能減少錯誤完成；唯一的攔截證據是 Phase 1 的 dogfood（一個被鉤子與 CI 攔下的植入式假通過）。
 - **B2 更難的基準，已執行並記錄。** `eval/results/b2-2026-10-29.md` 記錄了預先註冊的 t9–t12 回合（多檔案＋文件同步、隱藏邊界案例、斷點續跑、含決策記錄優先的模糊需求）× bare/pack/gate × 3 回合＝36 次執行，沿用 B1 的決策規則：36/36 通過、每個組別皆為 0 次錯誤完成（bare 12/12、pack 12/12、gate 12/12），因此依預先註冊的規則，結果為 NO DISCRIMINATION，與 B1 結論相同，而非成功。本版本不聲稱閘門能減少錯誤完成。
 - **與宿主無關的第二道閘門（pre-push＋CI 範本）。** `templates/pre-push-gate/`（鉤子範本、檢查器、可選安裝器）與 `templates/ci-gate-check.yml` 為沒有執行期鉤子的專案提供一道不依賴任何宿主的閘門：檢查器會重新執行每個 `passing` 項目的驗證，並拒絕過時的證據，呼應 §3k。安裝方式有兩種：執行安裝器（明確選擇加入），或使用部署指令碼，部署指令碼目前預設會安裝這三個檔案（以 `--no-prepush-gate` / `-NoPrepushGate` 停用；保留 `--prepush-gate` / `-PrepushGate` 以相容），並遵循慣常的「已存在則跳過／更新時備份」規則。指南中所述的限制：pre-push 鉤子檢查的是工作樹，而不是被推送的提交，而 `git push --no-verify` 可以繞過它——請搭配 CI 範本與伺服器端分支保護。
 - **評估器僅供建議（D28）。** `eval/rubric.md` 評分六個維度，但 `evaluate.py --gate` 永遠拒絕，最終由人類決定。評分表的五輪校準使用的是記錄下來的階段結果，而非即時的第二位評判。
 - **翻譯。** EN 與 ZH 是事實來源。ZH-TW 各列依 `docs/internal/i18n-status.md` 為 stale/frozen；在下一次發行前請從 EN 重新生成，不要逐句手工同步。
-- **Windows。** CI 會對 PowerShell 指令碼執行 PSScriptAnalyzer；CI 中的部署冒煙測試執行的是 Bash 指令碼。PowerShell 部署路徑是經審查驗證的，未在 CI 的 Windows 上實際執行驗證。
+- **Windows。** CI 會對 PowerShell 指令碼執行 PSScriptAnalyzer，並在 Windows 執行元上實際執行 `deploy-agents.ps1` 部署冒煙（2026-11-06 首次真實 CI 運行 #299 全綠）；互動式與完整部署路徑仍僅經審查驗證，未在真機 Windows 全量實跑。
 
 ---
 

@@ -331,6 +331,29 @@ chmod +x ./deploy-agents.sh ./run-pipeline.sh
 
 ---
 
+### 4.5 Per-Surface Hook Wiring & Isolation (added 2026-11-06)
+
+Where the gate hooks actually take effect depends on the surface —
+this is the section the 2026-11-06 live-verification round bought
+with three wrong turns, so it is written down per surface:
+
+| Surface | Hook wiring that works | Isolation guidance |
+|---|---|---|
+| Claude Code | Project `.claude/settings.json` + `.claude/hooks/` (native) | Use git worktrees for parallel agents; the gate state lives in the project, so one worktree = one gate. |
+| Antigravity CLI (agy) | Workspace `.agents/hooks.json` with **relative** commands — the CLI runs hooks with cwd = the workspace `.agents/` | Same worktree rule; CLI sessions are headless-friendly for scripted verification runs. |
+| Antigravity IDE | Same workspace `.agents/hooks.json` as the CLI; a session snapshots its hooks at start — **open a new session** after changing hook files | Keep one gate project per IDE workspace window; do not point two windows at the same checkout. |
+| Antigravity desktop app | Workspace hooks.json is **not** reliably loaded by desktop sessions. Use the **global** registration instead: `deploy-agents.sh --global` step B2 installs the scripts into `~/.gemini/config/hooks/` and merges the gate group into `~/.gemini/config/hooks.json` with **absolute** command paths — relative commands silently fail there because the hook cwd is the config directory, not the workspace | The global group applies to every project the desktop app opens; the gate scripts no-op outside gate projects (no `gate/feature_list.json`, no effect), so a single global install is safe. |
+| DeepSeek Harness (dsh) | Project `.dsh/cordis.patch.yml` mount row pointing at the deployed plugin (absolute path); the plugin shells out to the same `.claude/hooks/` guard scripts | dsh sessions are single-agent; no worktree fan-out inside a session. Stop steering is best-effort (see the verification matrix). |
+| WorkBuddy | `.workbuddy/settings.json` + `.workbuddy/hooks/` (payload shape assumed Claude-like) | `protocol-only`: not live-verified; treat as discipline + manual gate commands until a live run discharges it. |
+
+Two operational rules fall out of the round: (1) **probe before you
+theorize** — when a surface shows no hook activity, drop in a
+no-op logging hook first and separate "host never fires hooks" from
+"our commands fail silently" before changing any wiring; (2) hook
+files are **snapshotted at session start** on the Antigravity
+surfaces — mid-session edits need a new session, which is the
+single most common cause of "the fix doesn't work".
+
 ## 五、规则模板与项目规范
 
 ### 5.1 全局规则模板：`Global AGENTS.md`
