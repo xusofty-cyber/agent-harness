@@ -244,18 +244,23 @@ test("tools/result: records nothing when gate/ is absent", () => {
 
 // --- Session resume (agent/created) ---
 
-test("agent/created: injects the gate resume when a gate is in use", () => {
+test("agent/created: does NOT inject (dsh 0.2.1-rc.5 creation-chain crash), returns a decision", async () => {
+  // Live finding 2026-11-06: agent.inject called synchronously
+  // inside the serial agent/created chain crashes the whole dsh
+  // run. The handler must therefore never inject at creation time;
+  // it surfaces the resume on stderr and returns an explicit
+  // pass-through decision instead.
   const dir = makeProject({
     items: [{ id: "t1", status: "in_progress" }],
   });
   const ctx = applyTo(dir);
   const injected = [];
-  ctx.listeners["agent/created"]({
+  const res = await ctx.listeners["agent/created"]({
     id: "agent-1",
     inject: (text) => injected.push(text),
-  });
-  assert.equal(injected.length, 1);
-  assert.match(injected[0], /t1/);
+  }, async () => undefined);
+  assert.equal(injected.length, 0);
+  assert.equal(res.kind, "continue");
 });
 
 test("agent/created: injects nothing when no gate is in use", () => {

@@ -41,7 +41,10 @@
 // ${DSH_HOME:-~/.dsh}/AGENTS.md, with cordis.patch.yml mentioned only
 // as out-of-scope MCP surface). The event names, payload shapes, and
 // steering surfaces used below (tools/pre-execute with a
-// { kind: "deny", reason } return, ctx.tools.guard(), agent/created
+// { kind: "deny", reason } / { kind: "allow" } returns (waterfall
+// contract confirmed live on dsh 0.2.1-rc.5, 2026-11-06: next()'s tail
+// value is undefined and must not be propagated), ctx.tools.guard(),
+// agent/created
 // with agent.inject(), tools/result, agent/turn-stopping with
 // agent.steer()/followup()/inject(), and the `- insert:` patch row)
 // come from earlier work's reading of dsh documentation, which was NOT
@@ -190,6 +193,19 @@ const WRITE_TOOLS = new Set([
 
 function log(message: string): void {
   process.stderr.write(`[DSH-GATE] ${message}\n`);
+}
+
+// Debug-only event trace (DSH_GATE_TRACE=<path>): records every
+// plugin event entry/decision so a live crash can be attributed to
+// the exact handler. Off unless the env var is set.
+function trace(entry: string): void {
+  const path = process.env["DSH_GATE_TRACE"];
+  if (!path) return;
+  try {
+    appendFileSync(path, entry + "\n", "utf-8");
+  } catch {
+    // Tracing must never change behavior.
+  }
 }
 
 function asRecord(value: UnknownValue): UnknownRecord | null {
@@ -462,15 +478,34 @@ function callAgentMethod(agent: UnknownValue, method: string, arg: string): bool
   if (!obj) return false;
   const fn = obj[method];
   if (typeof fn === "function") {
-    (fn as (msg: string) => void).call(agent, arg);
+    try {
+      (fn as (msg: string) => void).call(agent, arg);
+    } catch {
+      // A steering surface that throws when called synchronously
+      // (observed live on dsh 0.2.1-rc.5, 2026-11-06: agent.inject
+      // exists but its admission path is asynchronous; the sync
+      // throw propagated out of the serial agent/created chain and
+      // crashed the run) counts as "not delivered", never as fatal.
+      trace(`agent-method-threw:${method}`);
+      return false;
+    }
     return true;
   }
   return false;
 }
 
 export function apply(ctx: CordisContext, config: PluginConfig = {}): void {
-  // --- tools/pre-execute: the blocking gate (contract unverified). ---
+  // --- tools/pre-execute: the blocking gate. ---
+  // WATERFALL DISCIPLINE (live-confirmed on dsh 0.2.1-rc.5,
+  // 2026-11-06): a handler that finishes without returning a value
+  // resolves its waterfall to `undefined`, and an inert downstream
+  // listener returning nothing does the same to ours — dsh then
+  // crashes the run reading `.kind` of undefined. An inert listener
+  // in the default bundle does exactly that, so EVERY handler in
+  // this plugin returns an explicit value: decisions here, and
+  // `undefined`-typed explicit returns on serial events.
   ctx.on("tools/pre-execute", async (exec: UnknownValue, next: UnknownValue) => {
+    trace("pre-execute:enter");
     let projectRoot: string;
     try {
       projectRoot = resolveProjectRoot(exec, config);
@@ -479,7 +514,16 @@ export function apply(ctx: CordisContext, config: PluginConfig = {}): void {
     } catch {
       log("pre-execute translation failed; allowing (fail-open by design)");
     }
-    return (next as NextFn)();
+    // Contract confirmed live on dsh 0.2.1-rc.5 (2026-11-06): the
+    // waterfall's tail can return `undefined` (an inert downstream
+    // listener short-circuits the chain), and dsh reads `.kind` on
+    // whatever the chain resolves to — propagating an undefined
+    // tail therefore crashed gate-mounted runs ("Cannot read
+    // properties of undefined (reading 'kind')"). Propagate a real
+    // decision verbatim (downstream vetoes included); only an
+    // undefined tail is replaced with an explicit allow.
+    const tail = (await (next as NextFn)()) as UnknownValue;
+    return tail ?? { kind: "allow" };
   });
 
   // --- ctx.tools.guard(): monotonic final denial (same translation). ---
@@ -501,6 +545,7 @@ export function apply(ctx: CordisContext, config: PluginConfig = {}): void {
 
   // --- tools/result: cost-ledger + skill-usage observation only. Never blocks. ---
   ctx.on("tools/result", (...args: UnknownValue[]) => {
+    trace("result:enter");
     try {
       let toolName = "unknown";
       let toolInput: UnknownRecord = {};
@@ -537,23 +582,53 @@ export function apply(ctx: CordisContext, config: PluginConfig = {}): void {
   });
 
   // --- agent/created: gate resume injection (dsh has no SessionStart). ---
-  ctx.on("agent/created", (value: UnknownValue) => {
+  ctx.on("agent/created", async (value: UnknownValue, next: UnknownValue) => {
+    trace("agent-created:enter");
+    // dsh-agent registers an `agent/created` waterfall whose own
+    // listener short-circuits the chain with `undefined`; the loop
+    // then reads `.kind` on the result (observed live on dsh
+    // 0.2.1-rc.5, 2026-11-06 — the run died before any tool call).
+    // Keep the chain's decision when it is a real one; an undefined
+    // tail becomes an explicit pass-through.
+    let tail: UnknownValue;
+    try {
+      tail = await (next as NextFn)();
+    } catch {
+      tail = undefined;
+    }
     try {
       const agent = unwrapAgent(value);
       const projectRoot = resolveProjectRoot(agent, config);
-      if (!existsSync(join(projectRoot, "gate", "feature_list.json"))) return;
+      if (!existsSync(join(projectRoot, "gate", "feature_list.json"))) {
+        trace("created:no-gate-file");
+        return tail ?? { kind: "continue" };
+      }
       const res = runClaudeHook(projectRoot, "session-start.mjs", {
         cwd: projectRoot,
       });
       forwardStderr(res);
       const text = res ? res.stdout.trim() : "";
-      if (!text) return;
-      if (!callAgentMethod(agent, "inject", text)) {
-        log("gate resume available but agent.inject is absent; resume not injected");
+      if (!text) {
+        trace("created:no-resume-text");
+        return tail ?? { kind: "continue" };
       }
+      trace("created:inject-attempt");
+      // Resume injection into agent/created is NOT safe on dsh
+      // 0.2.1-rc.5 (live-verified failure, 2026-11-06): calling
+      // agent.inject synchronously inside the serial creation chain
+      // crashes the whole run ("reading 'kind'") even when the call
+      // itself is wrapped — the fault is in the admission path the
+      // call triggers, not the call site. Deferring injection to
+      // the first pre-execute would still leave a creation-time
+      // crash risk un-isolated, so the resume text is surfaced on
+      // stderr only and the limitation is recorded in the matrix:
+      // on dsh, the gate resume is advisory output, not an injected
+      // context block.
+      log(`gate resume (not injected on dsh; see matrix): ${text.split("\n")[0] ?? ""}`);
     } catch {
       log("agent/created resume failed; session continues (fail-open)");
     }
+    return tail ?? { kind: "continue" };
   });
 
   // --- agent/turn-stopping: stop gate (PROVISIONAL — see header). ---
@@ -561,11 +636,22 @@ export function apply(ctx: CordisContext, config: PluginConfig = {}): void {
   // allowed (state cleared, stop-gate itself logs the allowance when
   // passed stop_hook_active), mirroring the Antigravity deadlock guard,
   // so a session can never be trapped in a continue-loop by this hook.
-  ctx.on("agent/turn-stopping", (value: UnknownValue) => {
+  ctx.on("agent/turn-stopping", async (value: UnknownValue, next: UnknownValue) => {
+    trace("turn-stopping:enter");
+    // Same waterfall-tail hazard as agent/created (see above): this
+    // event is also a decision waterfall in dsh-agent. Steering here
+    // is a side effect; the returned decision is normalized so an
+    // undefined tail can never crash the loop.
+    let tail: UnknownValue;
+    try {
+      tail = await (next as NextFn)();
+    } catch {
+      tail = undefined;
+    }
     try {
       const agent = unwrapAgent(value);
       const projectRoot = resolveProjectRoot(agent, config);
-      if (!existsSync(join(projectRoot, "gate", "feature_list.json"))) return;
+      if (!existsSync(join(projectRoot, "gate", "feature_list.json"))) return undefined;
       const key = agentKey(agent);
       const prior = readStopState(projectRoot);
       if (prior && prior.blocked && prior.agentKey === key) {
@@ -576,7 +662,7 @@ export function apply(ctx: CordisContext, config: PluginConfig = {}): void {
         });
         forwardStderr(res);
         log("stop allowed on second attempt for this agent; items still in_progress");
-        return;
+        return undefined;
       }
       const res = runClaudeHook(projectRoot, "stop-gate.mjs", {
         cwd: projectRoot,
@@ -663,5 +749,6 @@ export function apply(ctx: CordisContext, config: PluginConfig = {}): void {
     } catch {
       log("agent/turn-stopping handling failed; stop proceeds (fail-open)");
     }
+    return tail ?? { kind: "continue" };
   });
 }
