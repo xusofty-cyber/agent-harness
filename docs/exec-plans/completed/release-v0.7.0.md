@@ -3,7 +3,9 @@
 > Cut 2026-11-06 from main: CHANGELOG `[Unreleased]` renamed to
 > `## [0.7.0] - 2026-11-06`, `VERSION` written as 0.7.0,
 > `tools/check-release.py` re-run green, tag `v0.7.0` on the cut
-> commit; GitHub Release published from this note.
+> commit `0ea0c65`; GitHub Release published from this note
+> (https://github.com/xusofty-cyber/agent-harness/releases/tag/v0.7.0,
+> marked Latest).
 >
 > Numbers below were re-verified on 2026-11-06 (not copied from
 > older records): repo_checks all pass (1 environment-gated skip:
