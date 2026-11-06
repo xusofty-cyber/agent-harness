@@ -891,14 +891,22 @@ def cmd_start(args):
         return 1
     _unmet = [d for d in (item.get("depends_on") or [])
               if (_find(data, d) or {}).get("status") != "passing"]
-    if _unmet:
+    if _unmet and not args.override_deps:
         print(f"cannot start {args.id}: dependencies not passing: "
-              f"{', '.join(_unmet)} (dependency hard-block, D72; "
-              "finish the dependencies first — there is no override)")
+              f"{', '.join(_unmet)} (dependency hard-block, D72). "
+              "Finish the dependencies first — or, if the situation "
+              "genuinely warrants it, re-run with --override-deps "
+              '"<reason>" (the override is logged as a gate event).')
         return 1
     item["status"] = "in_progress"
     _save(args.root, data)
     _append_event(args.root, "started", args.id, item["title"])
+    if _unmet:
+        _append_event(args.root, "dependency_override", args.id,
+                      f"started with unmet dependencies "
+                      f"[{', '.join(_unmet)}]: {args.override_deps}")
+        print(f"started with dependency override (logged): "
+              f"unmet = {', '.join(_unmet)}; reason = {args.override_deps}")
     _safe_sync_session_state(args.root, data)
     print(f"started: {args.id} — {item['title']}")
     return 0
@@ -1137,7 +1145,9 @@ def cmd_status(args):
         _byid = {i["id"]: i for i in data.get("items", [])}
         _unmet = [d for d in (item.get("depends_on") or [])
                   if (_byid.get(d) or {}).get("status") != "passing"]
-        _dep_s = f" [blocked-by: {', '.join(_unmet)}]" if _unmet else ""
+        _ovr = item["status"] == "in_progress" and bool(_unmet)
+        _dep_s = (f" [dep-override: {', '.join(_unmet)}]" if _ovr else
+                  f" [blocked-by: {', '.join(_unmet)}]" if _unmet else "")
         print(f"  [{item['status']:12}] {item['id']} ({item['priority']}) "
               f"— {item['title']} [{mark}]{_lvl_s}{_dep_s}")
     if errors:
@@ -1733,6 +1743,9 @@ def main(argv=None):
 
     p = sub.add_parser("start", help="move an item to in_progress (WIP=1)")
     p.add_argument("--id", required=True)
+    p.add_argument("--override-deps", default=None, metavar="REASON",
+                   help="start despite unmet dependencies (D72 graded "
+                        "rule); the reason is logged as a gate event")
     p.set_defaults(func=cmd_start)
 
     p = sub.add_parser("verify", help="run verification for an item")
