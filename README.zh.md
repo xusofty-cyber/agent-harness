@@ -307,6 +307,8 @@ ai-memory 采用安全优先的 Fail-closed 门禁，必须显式声明才激活
 
 - 📖 **部署与配置指南**：
   - [简体中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [English](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [繁體中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md)
+- 📖 **项目部署实战指南（带完整示例）**：
+  - [简体中文](docs/guides/Project%20Deployment%20Walkthrough.zh.md) | [English](docs/guides/Project%20Deployment%20Walkthrough.md)
 - 📖 **实战使用与技能全景**：
   - [简体中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [English](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [繁體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md)
 - 📜 **三级规则架构**：

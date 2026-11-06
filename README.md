@@ -305,6 +305,8 @@ When upstream rules or skills are updated, run directly in the repository:
 
 - 📖 **Deployment & Configuration**:
   - [English](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.md) | [简体中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh.md) | [繁體中文](docs/guides/Multi-Tool%20Deployment%20and%20Configuration%20Guide.zh-tw.md)
+- 📖 **Project Deployment Walkthrough (worked example)**:
+  - [English](docs/guides/Project%20Deployment%20Walkthrough.md) | [简体中文](docs/guides/Project%20Deployment%20Walkthrough.zh.md)
 - 📖 **Practical Usage & Skills Panorama**:
   - [English](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.md) | [简体中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh.md) | [繁體中文](docs/guides/Tools%20Practical%20Usage%20and%20Skills%20Panorama%20Guide.zh-tw.md)
 - 📜 **Three-Tier Rules Architecture**:

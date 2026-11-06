@@ -31,7 +31,7 @@ behind is tracked debt, not a CI failure.
 
 | Target | Source | Status | Source SHA (last synced) | Note |
 |---|---|---|---|---|
-| README.zh-tw.md | README.md | in-sync | e0af20d8d2e3 | Regenerated 2026-11-06 (v0.7.0 round): support-matrix Antigravity row + host-dependence and Windows bullets synced to the EN source (live-verified tier wording incl. desktop global registration; CI ps1 smoke discharged) |
+| README.zh-tw.md | README.md | in-sync | da63a5b0dc18 | Regenerated 2026-11-06 (v0.7.0 round): support-matrix Antigravity row + host-dependence and Windows bullets synced to the EN source (live-verified tier wording incl. desktop global registration; CI ps1 smoke discharged); 2026-11-06 index addition for the Project Deployment Walkthrough guide synced the same day (EN/ZH links only — the new guide has no ZH-TW edition) |
 | docs/guides/Multi-Tool Deployment and Configuration Guide.zh-tw.md | docs/guides/Multi-Tool Deployment and Configuration Guide.md | in-sync | 12a5878b8099 | Regenerated 2026-11-06: new §4.5 per-surface hook wiring & isolation section (from the 2026-11-06 live-verification round) added in EN/ZH/ZH-TW together; the rest of the guide was verified current against the EN source (title/Q3 counts already matched) |
 | docs/guides/Tools Practical Usage and Skills Panorama Guide.zh-tw.md | docs/guides/Tools Practical Usage and Skills Panorama Guide.md | in-sync | 4f56582587b8 | EN TOC §2.4 aligned to body heading (Skill Loading and Optional CLI Setup); ZH-TW TOC already matched its body, no text change needed |
 | docs/guides/Skills Usage Guide.zh-tw.md | docs/guides/Skills Usage Guide.md | in-sync | d1297c2d3797 | Regenerated from EN (base main e9b32ab) |
