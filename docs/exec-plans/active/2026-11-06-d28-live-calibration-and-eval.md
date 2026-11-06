@@ -160,3 +160,22 @@ results; an unrun plan is not.
 
 - Final sample set confirmation by the owner at Round 6 start
   (swap any sample; A5 is first reserve).
+
+## Round 6 amendment (2026-11-06, judge-directed)
+
+The MedOnTime samples (A1–A4) are **withdrawn by the judge**: the
+judge did not participate in that work (agents ran it end-to-end),
+so no independent first-hand verdict exists and any agreement
+would be circular. The A1–A4 evaluator file stays sealed as the
+record of the attempt and does **not** count toward live N.
+
+New sample-admission criterion (from this lesson): **a live-round
+sample is admissible only if the judge can rule from first-hand
+participation, without re-studying the evaluator's materials.**
+
+Replacement round **6b** uses the 2026-11-06 agent-harness batch
+(judge directed it throughout): B1 CI to green, B2 bridge
+residuals, B3 D72+D73, B4 ZH-TW regeneration + v0.7.0 release.
+Evaluator scores sealed in
+`eval/calibration-round6b-evaluator-scores.md`; judge verdicts
+pending. Live N remains 0 until the judge rules on 6b.
