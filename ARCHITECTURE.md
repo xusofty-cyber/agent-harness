@@ -38,4 +38,5 @@ top-level map.)
 - Quality posture: `QUALITY_SCORE.md`
 - Execution plans & debt: `docs/exec-plans/` (rules: `docs/PLANS.md`)
 - This repo's own session breakpoint: `docs/internal/SESSION_STATE.md`
+- Working notes (non-authoritative, Track B of the two-track state design): `docs/internal/SESSION_NOTES.md` — never a source of truth; see `docs/design-docs/proposal-state-two-track.md`.
 - Governance summaries: `docs/RELIABILITY.md`, `docs/SECURITY.md`
