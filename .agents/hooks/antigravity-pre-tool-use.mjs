@@ -60,9 +60,15 @@ try {
   process.exit(0);
 }
 
+// Payload shapes: the documented Antigravity shape nests the call
+// under toolCall{name,args}; the flat Claude-style shape
+// {tool_name, tool_input} is also accepted — a hook fed the flat
+// shape must not silently degrade to "unknown tool -> allow"
+// (found 2026-11-06: a flat-payload probe against the globally
+// installed adapter returned allow on a feature_list.json write).
 const toolCall = input.toolCall || {};
-const toolName = toolCall.name || "";
-const args = toolCall.args || {};
+const toolName = toolCall.name || input.tool_name || "";
+const args = toolCall.args || input.tool_input || {};
 const projectRoot = resolveProjectRoot(input);
 
 if (toolName === "run_command") {

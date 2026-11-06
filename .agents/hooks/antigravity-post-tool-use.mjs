@@ -30,11 +30,11 @@ try {
 
 const projectRoot = resolveProjectRoot(input);
 const toolCall = input.toolCall || {};
-const toolName = toolCall.name || "unknown";
+const toolName = toolCall.name || input.tool_name || "unknown";
 const sessionId = input.sessionId || input.session_id || undefined;
 const payload = {
   tool_name: toolName,
-  tool_input: toolCall.args || {},
+  tool_input: toolCall.args || input.tool_input || {},
   cwd: projectRoot,
 };
 if (typeof sessionId === "string" && sessionId) payload.session_id = sessionId;
