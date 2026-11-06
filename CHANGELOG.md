@@ -8,6 +8,10 @@ Releases are tagged `vX.Y.Z` from `main` by the maintainer.
 
 ### Added
 
+- **Antigravity IDE is now `live-verified` (2026-11-06).** All four hook events observed live in one IDE session on the user's host (agy 1.2.14, same deployed project as the CLI run): the Stop hook **blocked** an in_progress finish (gate event `stop_blocked`, decision=continue) and allowed it after verification (`stop_allowed_hook_active`); verify wrote real evidence; the `edit_file` forgery on `feature_list.json` was denied with the deny captured in the event log. Record: `docs/internal/host-verification-matrix.md`.
+
+### Added
+
 - **Antigravity CLI is now `live-verified` (2026-11-06).** Full gate flow run live on the user's host with **agy 1.2.14** against a project deployed fresh from main: start → verify (PASS with real evidence) → check-clean all-pass, and the previously owed instrumented re-run discharged — an `edit_file` forgery attempt on `gate/feature_list.json` was denied by the PreToolUse hook **and the deny itself was captured in the gate event log** (`guard-feature-list direct_write_blocked`). Record: `docs/internal/host-verification-matrix.md`; README enforcement wording and the tech-debt bridge row updated to match (matrix rule 1).
 
 ### Fixed
