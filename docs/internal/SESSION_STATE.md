@@ -2,7 +2,10 @@
 
 > **Updated**: 2026-11-06 | **Project**: agent-harness
 > **Feature list**: `gate/feature_list.json` (status via `python3 gate/pass-gate.py status`)
-> **Rule**: one page max. Finished work goes to `CHANGELOG.md`; the old
+> **Rule**: one page max, **Track-A content only** (breakpoint facts:
+> goal / in-progress / next / blocked / last verification — working
+> notes belong in `SESSION_NOTES.md`, the non-authoritative Track B).
+> Finished work goes to `CHANGELOG.md`; the old
 > achievement log lives in git history (pre-2026-10-28 content).
 
 ## Goal

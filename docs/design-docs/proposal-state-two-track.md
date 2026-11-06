@@ -1,6 +1,10 @@
 # Proposal — Two-track state (authoritative layer + notes layer)
 
-Status: **proposed** (2026-11-06; design only, no implementation).
+Status: **accepted and implemented** (2026-11-06, DECISIONS D73):
+`docs/internal/SESSION_NOTES.md` created with the header + 100-line
+quote cap; SESSION_STATE header now restricts it to Track-A content;
+ARCHITECTURE.md notes the split. No auto-summarisation (non-goal
+stands).
 Origin: D02 (Claude Code's CLAUDE.md vs auto-memory split) and D01
 (summary chains), against this repo's recurring state problem:
 SESSION_STATE carries both authoritative breakpoints and working

@@ -1215,3 +1215,9 @@ still pending.
 - **Decision (out-of-scope fence, course L07):** items gain an optional free-text `out_of_scope` — what must NOT be changed while working on the item. Planning aid only; not machine-enforced, mirroring the initializer-playbook's planning-level fence at item level.
 - Existing items migrate untouched (absent fields = no dependencies, no fence); schema version stays 1 (additive optional fields).
 - **Origin:** the 2026-11-06 cross-audit with the course validator found no dependency modelling in the schema (the audit's real gap (a)); the proposal in `docs/design-docs/proposal-feature-dependencies.md` carried the schema design, and the owner chose the start semantics the same day.
+
+## D73 — Two-track state adopted: authoritative layer + notes layer (2026-11-06)
+
+- **Decision (owner approved 2026-11-06):** adopt the two-track state design of `docs/design-docs/proposal-state-two-track.md`. Track A (authoritative): `gate/feature_list.json` + `docs/internal/SESSION_STATE.md`, restricted to breakpoint facts; the 14-day freshness rule (repo_checks, 2026-11-06) applies to this track only. Track B (working notes): new `docs/internal/SESSION_NOTES.md` — append-friendly, explicitly non-authoritative, session-start surfaces may quote at most its most recent 100 lines; promotion from B to A is a deliberate act, never automatic.
+- **Non-goals (as proposed):** no gate-mechanics change; no auto-summarisation pipeline in v1.
+- **Origin:** D02/D01 course decomposition against this repo's recurring SESSION_STATE rot (stale twice here; 324 lines in MedOnTime).
