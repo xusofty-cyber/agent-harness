@@ -45,7 +45,7 @@ executable work.
    out-of-scope exists (initializer-playbook); the gate item schema
    and `pass-gate.py add` have no `out_of_scope` field. Same schema
    evolution batch as (4) — do them together, once.
-3. **CI template + `deploy-agents.ps1` still never ran for real**
+3. **CI template — **DONE 2026-11-06**: first real runs #291/#296/#299; #299 fully green (both jobs, all steps). The unpinned-linter defect the first run exposed is fixed (0.32.2 pin). + `deploy-agents.ps1` still never ran for real**
    (owed since 2026-10-29). `ci.yml` + `eval-regression.yml` exist;
    QUALITY_SCORE's pipeline row is explicit that the Windows job is
    "committed, not yet observed". Blocks an honest v0.7.0 (checklist

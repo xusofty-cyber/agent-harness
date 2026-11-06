@@ -24,8 +24,8 @@
   (bridges 4 → 7); D72 deps (graded: hard-block default +
   logged `--override-deps`) + out_of_scope; D73 two-track state;
   integration-level `e2e-deploy-smoke` (mix: assert 5 / unit 1 /
-  integration 1). Before v0.7.0: CI first real run done (lint
-  failures to fix), zh-TW regeneration (FIVE stale rows),
+  integration 1). Before v0.7.0: CI first real run GREEN (#299,
+  both jobs all steps), zh-TW regeneration (FIVE stale rows),
   bridge residuals session.
 - [x] Antigravity CLI + IDE live runs — done 2026-11-06 on the
   user's host (both `live-verified`; matrix updated, merges
