@@ -44,7 +44,13 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq shellcheck
-          npm install -g markdownlint-cli
+          # Pinned: markdownlint-cli >= 0.33 (markdownlint 0.27+) made
+          # MD024 siblings_only compare full heading paths and MD004
+          # "consistent" resolve per-file by first list; this repo's
+          # changelog/ledger style predates that and is intentional
+          # (see .markdownlint.json philosophy). Revisit the pin when
+          # the config is next deliberately revised.
+          npm install -g markdownlint-cli@0.32.2
           # pytest: the bench smoke inside repo_checks runs the fixture
           # acceptance command (python3 -m pytest ...); setup-python
           # does not ship it.
