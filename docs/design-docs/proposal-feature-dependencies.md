@@ -4,7 +4,9 @@ Status: **accepted and implemented** (2026-11-06). Owner ruling:
 start semantics = **graded**: hard-block (iii) by default, with the
 (ii) audit trail as a logged exception path — `--override-deps
 "<reason>"` starts the item and records a `dependency_override`
-event. (Owner clarified his one-line ruling the same day; the first
+event. (Owner's criterion, clarified the same day: flexibility — he
+delegated the mechanism choice; the graded form is the
+maintainer's pick under that criterion. The first
 implementation's pure-(iii) reading was superseded.) Recorded as
 DECISIONS.md D72; implemented in gate/pass-gate.py + schema +
 tests/pass_gate_deps_test.py.
